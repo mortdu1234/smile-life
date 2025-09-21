@@ -45,14 +45,22 @@ def create_client_file():
         # Le code HTML serait écrit ici, mais comme il est déjà dans l'artifact ci-dessus,
         # nous supposons qu'il existe
 
+def run_http_server():
+    """Lancer le serveur HTTP pour les images"""
+    try:
+        import http_server
+        http_server.main()
+    except Exception as e:
+        print(f"❌ Erreur serveur HTTP: {e}")
+
 def run_server():
-    """Lancer le serveur dans un thread séparé"""
+    """Lancer le serveur WebSocket dans un thread séparé"""
     try:
         # Importer et lancer le serveur
         import server
         asyncio.run(server.main())
     except Exception as e:
-        print(f"❌ Erreur serveur: {e}")
+        print(f"❌ Erreur serveur WebSocket: {e}")
 
 def main():
     print("🃏 Lancement du jeu de cartes multijoueur")
@@ -69,13 +77,20 @@ def main():
     create_server_file()
     create_client_file()
     
-    print("\n🚀 Lancement du serveur...")
+    print("\n🚀 Démarrage des serveurs...")
     
-    # Lancer le serveur dans un thread séparé
-    server_thread = threading.Thread(target=run_server, daemon=True)
-    server_thread.start()
+    # Lancer le serveur HTTP pour les images dans un thread séparé
+    http_thread = threading.Thread(target=run_http_server, daemon=True)
+    http_thread.start()
     
-    # Attendre un peu que le serveur se lance
+    # Attendre un peu que le serveur HTTP se lance
+    time.sleep(1)
+    
+    # Lancer le serveur WebSocket dans un thread séparé
+    websocket_thread = threading.Thread(target=run_server, daemon=True)
+    websocket_thread.start()
+    
+    # Attendre un peu que les serveurs se lancent
     time.sleep(2)
     
     # Ouvrir le client dans le navigateur
@@ -90,11 +105,13 @@ def main():
     print("\n" + "=" * 50)
     print("🎮 Jeu lancé avec succès!")
     print("📝 Instructions:")
-    print("   1. Le serveur tourne sur ws://localhost:8765")
-    print("   2. Le client web s'est ouvert dans votre navigateur")
-    print("   3. Créez une partie ou rejoignez avec un ID")
-    print("   4. Ouvrez d'autres onglets pour plus de joueurs")
-    print("   5. Appuyez sur Ctrl+C pour arrêter")
+    print("   1. Serveur WebSocket: ws://localhost:8765")
+    print("   2. Serveur HTTP (images): http://localhost:8080") 
+    print("   3. Le client web s'est ouvert dans votre navigateur")
+    print("   4. Créez une partie ou rejoignez avec un ID")
+    print("   5. Ouvrez d'autres onglets pour plus de joueurs")
+    print("   6. Ajoutez vos images dans le dossier 'ressources'")
+    print("   7. Appuyez sur Ctrl+C pour arrêter")
     print("=" * 50)
     
     try:

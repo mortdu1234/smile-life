@@ -158,8 +158,8 @@
         }
 
         .card {
-            width: 80px;
-            height: 120px;
+            width: 100px;
+            height: 140px;
             background: linear-gradient(45deg, #fff, #f8f8f8);
             border: 2px solid #ddd;
             border-radius: 10px;
@@ -172,6 +172,8 @@
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
         }
 
         .card:hover {
@@ -179,9 +181,108 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .card.flirt {
+        .card-image {
+            width: 90%;
+            height: 70%;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+
+        .card-image-placeholder {
+            width: 90%;
+            height: 70%;
+            background: linear-gradient(45deg, #e0e0e0, #f5f5f5);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 5px;
+            color: #999;
+        }
+
+        .card-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 30%;
+            justify-content: center;
+        }
+
+        .card-smile {
+            font-size: 14px;
+            margin-bottom: 2px;
+            color: #ff6b9d;
+        }
+
+        .card-type {
+            font-size: 8px;
+            color: #666;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .card-details {
+            font-size: 7px;
+            color: #888;
+            margin-top: 1px;
+        }
+
+        /* Styles spécifiques par type de carte */
+        .card.FlirtCards {
             background: linear-gradient(45deg, #ff9a9e, #fecfef);
             border-color: #ff6b9d;
+        }
+
+        .card.StudyCards {
+            background: linear-gradient(45deg, #a8edea, #fed6e3);
+            border-color: #4ecdc4;
+        }
+
+        .card.JobCards {
+            background: linear-gradient(45deg, #ffecd2, #fcb69f);
+            border-color: #ff8a65;
+        }
+
+        .card.SalaryCards {
+            background: linear-gradient(45deg, #c3f0ca, #b8e6c1);
+            border-color: #4caf50;
+        }
+
+        .card.TripCards {
+            background: linear-gradient(45deg, #ffd3a5, #fd9853);
+            border-color: #ff9800;
+        }
+
+        .card.HouseCards {
+            background: linear-gradient(45deg, #e0c3fc, #9bb5ff);
+            border-color: #673ab7;
+        }
+
+        .card.MariageCard {
+            background: linear-gradient(45deg, #ffc3d8, #ff9ec7);
+            border-color: #e91e63;
+        }
+
+        .card.ChildCard {
+            background: linear-gradient(45deg, #fff5b7, #ffec8b);
+            border-color: #ffc107;
+        }
+
+        .card.AquisitionCards {
+            background: linear-gradient(45deg, #d4fc79, #96e6a1);
+            border-color: #4caf50;
+        }
+
+        .card.SpecialCards {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-color: #3f51b5;
+        }
+
+        .card.AttackCards {
+            background: linear-gradient(45deg, #ff5252, #ff1744);
+            border-color: #f44336;
         }
 
         .player-hand {
@@ -380,6 +481,50 @@
         let currentPlayerName = null;
         let playerHand = [];
 
+        function getCardDisplayName(cardType) {
+            const displayNames = {
+                'FlirtCards': 'Flirt',
+                'StudyCards': 'Études',
+                'JobCards': 'Métier',
+                'SalaryCards': 'Salaire',
+                'TripCards': 'Voyage',
+                'HouseCards': 'Maison',
+                'MariageCard': 'Mariage',
+                'ChildCard': 'Enfant',
+                'Animal': 'Animal',
+                'AdultaryCard': 'Adultère',
+                'SpecialCards': 'Spéciale',
+                'AttackCards': 'Attaque',
+                'AquisitionCards': 'Acquisition'
+            };
+            return displayNames[cardType] || cardType;
+        }
+
+        function getCardDetails(card) {
+            let details = [];
+            
+            if (card.price) {
+                details.push(`Prix: ${card.price}`);
+            }
+            if (card.number) {
+                details.push(`Niveau: ${card.number}`);
+            }
+            if (card.have_child !== undefined) {
+                details.push(card.have_child ? '👶 Enfant possible' : 'Pas d\'enfant');
+            }
+            if (card.salary_max) {
+                details.push(`Salaire max: ${card.salary_max}`);
+            }
+            if (card.study_min) {
+                details.push(`Études min: ${card.study_min}`);
+            }
+            if (card.official !== undefined) {
+                details.push(card.official ? 'Fonctionnaire' : 'Privé');
+            }
+            
+            return details.slice(0, 2).join(' • '); // Limiter à 2 détails pour l'espace
+        }
+
         function connect() {
             socket = new WebSocket('ws://localhost:8765');
             
@@ -528,8 +673,16 @@
 
                 const boardCards = player.board.map(card => 
                     `<div class="card ${card.type}">
-                        <div class="card-smile">${'😊'.repeat(card.smile)}</div>
-                        <div class="card-place">${card.place || card.type}</div>
+                        ${card.picture ? 
+                            `<img src="${card.picture}" alt="${card.type}" class="card-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                             <div class="card-image-placeholder" style="display:none;">🃏</div>` :
+                            `<div class="card-image-placeholder">🃏</div>`
+                        }
+                        <div class="card-info">
+                            <div class="card-smile">${'😊'.repeat(card.smile)}</div>
+                            <div class="card-type">${getCardDisplayName(card.type)}</div>
+                            <div class="card-details">${getCardDetails(card)}</div>
+                        </div>
                     </div>`
                 ).join('');
 
@@ -558,8 +711,16 @@
                 cardDiv.onclick = () => playCard(index);
                 
                 cardDiv.innerHTML = `
-                    <div class="card-smile">${'😊'.repeat(card.smile)}</div>
-                    <div class="card-place">${card.place || card.type}</div>
+                    ${card.picture ? 
+                        `<img src="${card.picture}" alt="${card.type}" class="card-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                         <div class="card-image-placeholder" style="display:none;">🃏</div>` :
+                        `<div class="card-image-placeholder">🃏</div>`
+                    }
+                    <div class="card-info">
+                        <div class="card-smile">${'😊'.repeat(card.smile)}</div>
+                        <div class="card-type">${getCardDisplayName(card.type)}</div>
+                        <div class="card-details">${getCardDetails(card)}</div>
+                    </div>
                 `;
 
                 handElement.appendChild(cardDiv);

@@ -118,12 +118,29 @@ class GameServer:
 
     def serialize_card(self, card: Cards) -> dict:
         """Sérialiser une carte pour l'envoi JSON"""
-        return {
+        card_data = {
             "picture": card.picture,
             "smile": card.smile,
             "type": card.__class__.__name__,
-            "place": getattr(card, 'place', None)  # Pour les cartes flirt
         }
+        
+        # Ajouter les attributs spécifiques selon le type de carte
+        if hasattr(card, 'price'):
+            card_data['price'] = card.price
+        if hasattr(card, 'have_child'):
+            card_data['have_child'] = card.have_child
+        if hasattr(card, 'number'):
+            card_data['number'] = card.number
+        if hasattr(card, 'official'):
+            card_data['official'] = card.official
+        if hasattr(card, 'interrimere'):
+            card_data['interrimere'] = card.interrimere
+        if hasattr(card, 'study_min'):
+            card_data['study_min'] = card.study_min
+        if hasattr(card, 'salary_max'):
+            card_data['salary_max'] = card.salary_max
+            
+        return card_data
 
     def serialize_player(self, player: players) -> dict:
         """Sérialiser un joueur pour l'envoi JSON"""
