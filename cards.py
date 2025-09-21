@@ -97,7 +97,7 @@ class JobCards(ProfessionnalLifeCards):
         super().__init__(smile, f"JobCards/{picture}")
         self.official: bool= official
         self.interrimere: bool= interrimere
-        if study_min not in [1, 2, 3, 4, 5, 6]:
+        if study_min not in [0, 1, 2, 3, 4, 5, 6]:
             print("ERROR | JobCards | trop d'etude minimum ")
         else:
             self.study_min: int= study_min

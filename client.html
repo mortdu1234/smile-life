@@ -476,287 +476,451 @@
     </div>
 
     <script>
-        let socket = null;
-        let currentGameId = null;
-        let currentPlayerName = null;
-        let playerHand = [];
+// ==========================================
+// VARIABLES GLOBALES
+// ==========================================
 
-        function getCardDisplayName(cardType) {
-            const displayNames = {
-                'FlirtCards': 'Flirt',
-                'StudyCards': 'Études',
-                'JobCards': 'Métier',
-                'SalaryCards': 'Salaire',
-                'TripCards': 'Voyage',
-                'HouseCards': 'Maison',
-                'MariageCard': 'Mariage',
-                'ChildCard': 'Enfant',
-                'Animal': 'Animal',
-                'AdultaryCard': 'Adultère',
-                'SpecialCards': 'Spéciale',
-                'AttackCards': 'Attaque',
-                'AquisitionCards': 'Acquisition'
-            };
-            return displayNames[cardType] || cardType;
-        }
+let socket = null;              // Connexion WebSocket vers le serveur
+let currentGameId = null;       // ID de la partie actuelle
+let currentPlayerName = null;   // Nom du joueur actuel
+let playerHand = [];           // Main du joueur (cartes en possession)
 
-        function getCardDetails(card) {
-            let details = [];
-            
-            if (card.price) {
-                details.push(`Prix: ${card.price}`);
-            }
-            if (card.number) {
-                details.push(`Niveau: ${card.number}`);
-            }
-            if (card.have_child !== undefined) {
-                details.push(card.have_child ? '👶 Enfant possible' : 'Pas d\'enfant');
-            }
-            if (card.salary_max) {
-                details.push(`Salaire max: ${card.salary_max}`);
-            }
-            if (card.study_min) {
-                details.push(`Études min: ${card.study_min}`);
-            }
-            if (card.official !== undefined) {
-                details.push(card.official ? 'Fonctionnaire' : 'Privé');
-            }
-            
-            return details.slice(0, 2).join(' • '); // Limiter à 2 détails pour l'espace
-        }
+// ==========================================
+// FONCTIONS UTILITAIRES POUR LES CARTES
+// ==========================================
 
-        function connect() {
-            socket = new WebSocket('ws://localhost:8765');
-            
-            socket.onopen = function(event) {
-                updateConnectionStatus(true);
-            };
+/**
+ * Convertit le nom de classe d'une carte en nom d'affichage français
+ * @param {string} cardType - Le nom de la classe de carte (ex: "FlirtCards")
+ * @returns {string} - Le nom français à afficher (ex: "Flirt")
+ */
+function getCardDisplayName(cardType) {
+    const displayNames = {
+        'FlirtCards': 'Flirt',
+        'StudyCards': 'Études',
+        'JobCards': 'Métier',
+        'SalaryCards': 'Salaire',
+        'TripCards': 'Voyage',
+        'HouseCards': 'Maison',
+        'MariageCard': 'Mariage',
+        'ChildCard': 'Enfant',
+        'Animal': 'Animal',
+        'AdultaryCard': 'Adultère',
+        'SpecialCards': 'Spéciale',
+        'AttackCards': 'Attaque',
+        'AquisitionCards': 'Acquisition'
+    };
+    // Si le type n'est pas trouvé, retourne le type original
+    return displayNames[cardType] || cardType;
+}
 
-            socket.onmessage = function(event) {
-                const message = JSON.parse(event.data);
-                handleMessage(message);
-            };
+/**
+ * Génère une chaîne de détails pour une carte (prix, niveau, etc.)
+ * @param {Object} card - L'objet carte avec ses propriétés
+ * @returns {string} - Une chaîne formatée avec les détails importants
+ */
+function getCardDetails(card) {
+    let details = [];
+    
+    // Vérifier chaque propriété possible et l'ajouter si elle existe
+    if (card.price) {
+        details.push(`Prix: ${card.price}`);
+    }
+    if (card.number) {
+        details.push(`Niveau: ${card.number}`);
+    }
+    if (card.have_child !== undefined) {
+        details.push(card.have_child ? '👶 Enfant possible' : 'Pas d\'enfant');
+    }
+    if (card.salary_max) {
+        details.push(`Salaire max: ${card.salary_max}`);
+    }
+    if (card.study_min) {
+        details.push(`Études min: ${card.study_min}`);
+    }
+    if (card.official !== undefined) {
+        details.push(card.official ? 'Fonctionnaire' : 'Privé');
+    }
+    
+    // Limiter à 2 détails maximum pour ne pas surcharger l'affichage
+    // Les joindre avec un point médian (•)
+    return details.slice(0, 2).join(' • ');
+}
 
-            socket.onclose = function(event) {
-                updateConnectionStatus(false);
-                setTimeout(connect, 3000); // Reconnexion automatique
-            };
+// ==========================================
+// FONCTIONS DE CONNEXION WEBSOCKET
+// ==========================================
 
-            socket.onerror = function(error) {
-                console.error('Erreur WebSocket:', error);
-                showMessage('Erreur de connexion au serveur', 'error');
-            };
-        }
+/**
+ * Établit la connexion WebSocket avec le serveur
+ * Configure tous les gestionnaires d'événements
+ */
+function connect() {
+    // Créer une nouvelle connexion WebSocket
+    socket = new WebSocket('ws://localhost:8765');
+    
+    // Gestionnaire : connexion établie avec succès
+    socket.onopen = function(event) {
+        updateConnectionStatus(true);
+    };
 
-        function updateConnectionStatus(connected) {
-            const statusElement = document.getElementById('connectionStatus');
-            if (connected) {
-                statusElement.textContent = '🟢 Connecté';
-                statusElement.className = 'connection-status connected';
-            } else {
-                statusElement.textContent = '🔴 Déconnecté';
-                statusElement.className = 'connection-status disconnected';
-            }
-        }
+    // Gestionnaire : message reçu du serveur
+    socket.onmessage = function(event) {
+        const message = JSON.parse(event.data);
+        handleMessage(message);
+    };
 
-        function sendMessage(message) {
-            if (socket && socket.readyState === WebSocket.OPEN) {
-                socket.send(JSON.stringify(message));
-            } else {
-                showMessage('Non connecté au serveur', 'error');
-            }
-        }
+    // Gestionnaire : connexion fermée (par le serveur ou erreur réseau)
+    socket.onclose = function(event) {
+        updateConnectionStatus(false);
+        // Tentative de reconnexion automatique après 3 secondes
+        setTimeout(connect, 3000);
+    };
 
-        function createGame() {
-            const playerName = document.getElementById('playerNameInput').value.trim();
-            if (!playerName) {
-                showMessage('Veuillez entrer votre nom', 'error');
-                return;
-            }
-            
-            currentPlayerName = playerName;
-            sendMessage({ type: 'create_game' });
-        }
+    // Gestionnaire : erreur de connexion
+    socket.onerror = function(error) {
+        console.error('Erreur WebSocket:', error);
+        showMessage('Erreur de connexion au serveur', 'error');
+    };
+}
 
-        function joinGame() {
-            const gameId = document.getElementById('gameIdInput').value.trim();
-            const playerName = document.getElementById('playerNameInput').value.trim();
-            
-            if (!playerName) {
-                showMessage('Veuillez entrer votre nom', 'error');
-                return;
-            }
-            
-            if (!gameId) {
-                showMessage('Veuillez entrer l\'ID de la partie', 'error');
-                return;
-            }
-            
-            currentPlayerName = playerName;
+/**
+ * Met à jour l'indicateur visuel de l'état de connexion
+ * @param {boolean} connected - true si connecté, false sinon
+ */
+function updateConnectionStatus(connected) {
+    const statusElement = document.getElementById('connectionStatus');
+    if (connected) {
+        statusElement.textContent = '🟢 Connecté';
+        statusElement.className = 'connection-status connected';
+    } else {
+        statusElement.textContent = '🔴 Déconnecté';
+        statusElement.className = 'connection-status disconnected';
+    }
+}
+
+/**
+ * Envoie un message JSON au serveur via WebSocket
+ * @param {Object} message - L'objet à envoyer (sera converti en JSON)
+ */
+function sendMessage(message) {
+    // Vérifier que la connexion est ouverte avant d'envoyer
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(message));
+    } else {
+        showMessage('Non connecté au serveur', 'error');
+    }
+}
+
+// ==========================================
+// FONCTIONS DE GESTION DU JEU
+// ==========================================
+
+/**
+ * Crée une nouvelle partie de jeu
+ * Récupère le nom du joueur et envoie une demande de création
+ */
+function createGame() {
+    const playerName = document.getElementById('playerNameInput').value.trim();
+    
+    // Validation : nom obligatoire
+    if (!playerName) {
+        showMessage('Veuillez entrer votre nom', 'error');
+        return;
+    }
+    
+    // Sauvegarder le nom pour usage ultérieur
+    currentPlayerName = playerName;
+    // Envoyer la demande de création au serveur
+    sendMessage({ type: 'create_game' });
+}
+
+/**
+ * Rejoint une partie existante
+ * Récupère l'ID de partie et le nom du joueur
+ */
+function joinGame() {
+    const gameId = document.getElementById('gameIdInput').value.trim();
+    const playerName = document.getElementById('playerNameInput').value.trim();
+    
+    // Validation : nom obligatoire
+    if (!playerName) {
+        showMessage('Veuillez entrer votre nom', 'error');
+        return;
+    }
+    
+    // Validation : ID de partie obligatoire pour rejoindre
+    if (!gameId) {
+        showMessage('Veuillez entrer l\'ID de la partie', 'error');
+        return;
+    }
+    
+    currentPlayerName = playerName;
+    // Envoyer la demande de participation au serveur
+    sendMessage({ 
+        type: 'join_game', 
+        game_id: gameId, 
+        player_name: playerName 
+    });
+}
+
+/**
+ * Pioche une carte du deck principal
+ * Envoie une demande de pioche au serveur
+ */
+function takeCard() {
+    sendMessage({ type: 'take_card' });
+}
+
+/**
+ * Joue une carte de la main vers le plateau
+ * @param {number} cardIndex - L'index de la carte dans la main du joueur
+ */
+function playCard(cardIndex) {
+    sendMessage({ type: 'play_card', card_index: cardIndex });
+}
+
+// ==========================================
+// FONCTIONS DE TRAITEMENT DES MESSAGES
+// ==========================================
+
+/**
+ * Traite les messages reçus du serveur
+ * @param {Object} message - Le message décodé du serveur
+ */
+function handleMessage(message) {
+    // Switch sur le type de message pour traiter différemment
+    switch (message.type) {
+        case 'connection_confirmed':
+            showMessage('Connexion établie avec succès', 'success');
+            break;
+
+        case 'game_created':
+            // Partie créée avec succès
+            currentGameId = message.game_id;
+            showMessage(`Partie créée avec l'ID: ${message.game_id}`, 'success');
+            // Auto-rejoindre la partie qu'on vient de créer
             sendMessage({ 
                 type: 'join_game', 
-                game_id: gameId, 
-                player_name: playerName 
+                game_id: message.game_id, 
+                player_name: currentPlayerName 
             });
+            break;
+
+        case 'joined_game':
+            // Rejoint une partie avec succès
+            currentGameId = message.game_id;
+            currentPlayerName = message.player_name;
+            showGameArea(); // Afficher l'interface de jeu
+            showMessage(`Rejoint la partie ${message.game_id}`, 'success');
+            break;
+
+        case 'game_state':
+            // État complet du jeu (joueurs, cartes sur plateau, etc.)
+            updateGameState(message);
+            break;
+
+        case 'player_hand':
+            // Main privée du joueur
+            updatePlayerHand(message.hand);
+            break;
+
+        case 'error':
+            // Erreur du serveur (partie pleine, nom pris, etc.)
+            showMessage(message.message, 'error');
+            break;
+
+        default:
+            // Message non reconnu (pour debug)
+            console.log('Message non géré:', message);
+    }
+}
+
+// ==========================================
+// FONCTIONS D'AFFICHAGE DE L'INTERFACE
+// ==========================================
+
+/**
+ * Affiche la zone de jeu (masquée par défaut)
+ * Met à jour les informations de partie et joueur
+ */
+function showGameArea() {
+    document.getElementById('gameArea').style.display = 'block';
+    document.getElementById('currentGameId').textContent = currentGameId;
+    document.getElementById('currentPlayerName').textContent = currentPlayerName;
+}
+
+/**
+ * Met à jour l'affichage de l'état complet du jeu
+ * @param {Object} gameState - L'état du jeu reçu du serveur
+ */
+function updateGameState(gameState) {
+    // Mettre à jour les compteurs de cartes
+    document.getElementById('deckCount').textContent = gameState.deck_count;
+    document.getElementById('discardCount').textContent = gameState.discard_count;
+
+    // Vider et reconstruire la liste des joueurs
+    const playersListElement = document.getElementById('playersList');
+    playersListElement.innerHTML = '';
+
+    // Parcourir chaque joueur
+    gameState.players.forEach((player, index) => {
+        const playerDiv = document.createElement('div');
+        playerDiv.className = 'player-card';
+        
+        // Marquer le joueur actuel (tour de jeu)
+        if (index === gameState.current_player_idx) {
+            playerDiv.classList.add('current-player');
         }
 
-        function takeCard() {
-            sendMessage({ type: 'take_card' });
-        }
+        // Générer le HTML des cartes sur le plateau du joueur
+        const boardCards = player.board.map(card => 
+            `<div class="card ${card.type}">
+                ${card.picture ? 
+                    // Si une image est définie, l'afficher avec fallback
+                    `<img src="${card.picture}" alt="${card.type}" class="card-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                     <div class="card-image-placeholder" style="display:none;">🃏</div>` :
+                    // Sinon afficher directement le placeholder
+                    `<div class="card-image-placeholder">🃏</div>`
+                }
+                <div class="card-info">
+                    <div class="card-smile">${'😊'.repeat(card.smile)}</div>
+                    <div class="card-type">${getCardDisplayName(card.type)}</div>
+                    <div class="card-details">${getCardDetails(card)}</div>
+                </div>
+            </div>`
+        ).join('');
 
-        function playCard(cardIndex) {
-            sendMessage({ type: 'play_card', card_index: cardIndex });
-        }
+        // Construire le HTML du joueur
+        playerDiv.innerHTML = `
+            <div>
+                <strong>${player.name}</strong> 
+                ${index === gameState.current_player_idx ? '👑' : ''}
+                <br>
+                <small>Cartes en main: ${player.hand_count}</small>
+                <div class="player-board">${boardCards}</div>
+            </div>
+        `;
 
-        function handleMessage(message) {
-            switch (message.type) {
-                case 'connection_confirmed':
-                    showMessage('Connexion établie avec succès', 'success');
-                    break;
+        playersListElement.appendChild(playerDiv);
+    });
+}
 
-                case 'game_created':
-                    currentGameId = message.game_id;
-                    showMessage(`Partie créée avec l'ID: ${message.game_id}`, 'success');
-                    // Auto-rejoindre la partie créée
-                    sendMessage({ 
-                        type: 'join_game', 
-                        game_id: message.game_id, 
-                        player_name: currentPlayerName 
-                    });
-                    break;
+/**
+ * Met à jour l'affichage de la main du joueur
+ * @param {Array} hand - Tableau des cartes en main
+ */
+function updatePlayerHand(hand) {
+    playerHand = hand; // Sauvegarder pour usage local
+    const handElement = document.getElementById('playerHand');
+    handElement.innerHTML = ''; // Vider la main actuelle
 
-                case 'joined_game':
-                    currentGameId = message.game_id;
-                    currentPlayerName = message.player_name;
-                    showGameArea();
-                    showMessage(`Rejoint la partie ${message.game_id}`, 'success');
-                    break;
-
-                case 'game_state':
-                    updateGameState(message);
-                    break;
-
-                case 'player_hand':
-                    updatePlayerHand(message.hand);
-                    break;
-
-                case 'error':
-                    showMessage(message.message, 'error');
-                    break;
-
-                default:
-                    console.log('Message non géré:', message);
+    // Créer un élément DOM pour chaque carte
+    hand.forEach((card, index) => {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = `card ${card.type}`;
+        
+        // Gestionnaire de clic : jouer la carte
+        cardDiv.onclick = () => playCard(index);
+        
+        // Même structure HTML que pour les cartes du plateau
+        cardDiv.innerHTML = `
+            ${card.picture ? 
+                `<img src="${card.picture}" alt="${card.type}" class="card-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                 <div class="card-image-placeholder" style="display:none;">🃏</div>` :
+                `<div class="card-image-placeholder">🃏</div>`
             }
+            <div class="card-info">
+                <div class="card-smile">${'😊'.repeat(card.smile)}</div>
+                <div class="card-type">${getCardDisplayName(card.type)}</div>
+                <div class="card-details">${getCardDetails(card)}</div>
+            </div>
+        `;
+
+        handElement.appendChild(cardDiv);
+    });
+}
+
+/**
+ * Affiche un message temporaire à l'utilisateur
+ * @param {string} text - Le texte à afficher
+ * @param {string} type - Le type de message ('info', 'success', 'error')
+ */
+function showMessage(text, type = 'info') {
+    const messagesElement = document.getElementById('messages');
+    const messageDiv = document.createElement('div');
+    
+    // Appliquer les classes CSS selon le type
+    messageDiv.className = `message ${type}`;
+    messageDiv.textContent = text;
+    
+    messagesElement.appendChild(messageDiv);
+    
+    // Supprimer automatiquement le message après 5 secondes
+    setTimeout(() => {
+        if (messageDiv.parentNode) {
+            messageDiv.parentNode.removeChild(messageDiv);
         }
+    }, 5000);
+}
 
-        function showGameArea() {
-            document.getElementById('gameArea').style.display = 'block';
-            document.getElementById('currentGameId').textContent = currentGameId;
-            document.getElementById('currentPlayerName').textContent = currentPlayerName;
+// ==========================================
+// GESTIONNAIRES D'ÉVÉNEMENTS GLOBAUX
+// ==========================================
+
+// Connexion automatique au chargement de la page
+window.addEventListener('load', connect);
+
+// Permettre de créer/rejoindre une partie avec la touche Entrée
+document.addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        const gameId = document.getElementById('gameIdInput').value.trim();
+        if (gameId) {
+            // Si un ID est saisi, rejoindre la partie
+            joinGame();
+        } else {
+            // Sinon créer une nouvelle partie
+            createGame();
         }
+    }
+});
 
-        function updateGameState(gameState) {
-            // Mettre à jour les compteurs
-            document.getElementById('deckCount').textContent = gameState.deck_count;
-            document.getElementById('discardCount').textContent = gameState.discard_count;
+// ==========================================
+// RÉSUMÉ DU FLUX DE DONNÉES
+// ==========================================
 
-            // Mettre à jour la liste des joueurs
-            const playersListElement = document.getElementById('playersList');
-            playersListElement.innerHTML = '';
+/*
+FLUX TYPIQUE D'UTILISATION :
 
-            gameState.players.forEach((player, index) => {
-                const playerDiv = document.createElement('div');
-                playerDiv.className = 'player-card';
-                if (index === gameState.current_player_idx) {
-                    playerDiv.classList.add('current-player');
-                }
+1. PAGE CHARGÉE
+   → connect() est appelé automatiquement
+   → WebSocket se connecte au serveur
+   → updateConnectionStatus(true) met l'indicateur en vert
 
-                const boardCards = player.board.map(card => 
-                    `<div class="card ${card.type}">
-                        ${card.picture ? 
-                            `<img src="${card.picture}" alt="${card.type}" class="card-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                             <div class="card-image-placeholder" style="display:none;">🃏</div>` :
-                            `<div class="card-image-placeholder">🃏</div>`
-                        }
-                        <div class="card-info">
-                            <div class="card-smile">${'😊'.repeat(card.smile)}</div>
-                            <div class="card-type">${getCardDisplayName(card.type)}</div>
-                            <div class="card-details">${getCardDetails(card)}</div>
-                        </div>
-                    </div>`
-                ).join('');
+2. CRÉER UNE PARTIE
+   → L'utilisateur clique "Créer une partie"
+   → createGame() envoie { type: 'create_game' }
+   → Le serveur répond avec { type: 'game_created', game_id: '...' }
+   → Rejoint automatiquement la partie créée
 
-                playerDiv.innerHTML = `
-                    <div>
-                        <strong>${player.name}</strong> 
-                        ${index === gameState.current_player_idx ? '👑' : ''}
-                        <br>
-                        <small>Cartes en main: ${player.hand_count}</small>
-                        <div class="player-board">${boardCards}</div>
-                    </div>
-                `;
+3. REJOINDRE/ÊTRE DANS UNE PARTIE
+   → sendMessage({ type: 'join_game', ... })
+   → Serveur répond { type: 'joined_game' }
+   → showGameArea() affiche l'interface de jeu
+   → Serveur envoie régulièrement :
+     * { type: 'game_state' } → updateGameState()
+     * { type: 'player_hand' } → updatePlayerHand()
 
-                playersListElement.appendChild(playerDiv);
-            });
-        }
+4. JOUER
+   → Clic sur une carte → playCard(index)
+   → Clic sur le deck → takeCard()
+   → Le serveur met à jour l'état pour tous les joueurs
 
-        function updatePlayerHand(hand) {
-            playerHand = hand;
-            const handElement = document.getElementById('playerHand');
-            handElement.innerHTML = '';
-
-            hand.forEach((card, index) => {
-                const cardDiv = document.createElement('div');
-                cardDiv.className = `card ${card.type}`;
-                cardDiv.onclick = () => playCard(index);
-                
-                cardDiv.innerHTML = `
-                    ${card.picture ? 
-                        `<img src="${card.picture}" alt="${card.type}" class="card-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                         <div class="card-image-placeholder" style="display:none;">🃏</div>` :
-                        `<div class="card-image-placeholder">🃏</div>`
-                    }
-                    <div class="card-info">
-                        <div class="card-smile">${'😊'.repeat(card.smile)}</div>
-                        <div class="card-type">${getCardDisplayName(card.type)}</div>
-                        <div class="card-details">${getCardDetails(card)}</div>
-                    </div>
-                `;
-
-                handElement.appendChild(cardDiv);
-            });
-        }
-
-        function showMessage(text, type = 'info') {
-            const messagesElement = document.getElementById('messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type}`;
-            messageDiv.textContent = text;
-            
-            messagesElement.appendChild(messageDiv);
-            
-            // Supprimer le message après 5 secondes
-            setTimeout(() => {
-                if (messageDiv.parentNode) {
-                    messageDiv.parentNode.removeChild(messageDiv);
-                }
-            }, 5000);
-        }
-
-        // Connexion automatique au chargement de la page
-        window.addEventListener('load', connect);
-
-        // Permettre de rejoindre avec Enter
-        document.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                const gameId = document.getElementById('gameIdInput').value.trim();
-                if (gameId) {
-                    joinGame();
-                } else {
-                    createGame();
-                }
-            }
-        });
+5. DÉCONNEXION
+   → socket.onclose déclenché
+   → updateConnectionStatus(false)
+   → Reconnexion automatique après 3s
+*/
     </script>
 </body>
 </html>
