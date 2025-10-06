@@ -1,0 +1,183 @@
+🎯 Objectif du jeu
+
+Le jeu est un jeu de cartes pour 2 à 5 joueurs.
+Le but est d’avoir le plus de “smiles” (points) à la fin de la partie, lorsque la pioche est vide.
+Seules les cartes posées sur la table comptent pour le score final.
+
+⚙️ Règles de jeu générales
+
+- Chaque joueur commence avec 5 cartes en main.
+- À chaque tour, un joueur peut :
+  1. Piocher dans la défausse et poser directement la carte (si possible).
+  2. Piocher dans la pioche, puis poser une carte de sa main.
+  3. Défausser une carte posée.
+- Quand la pioche est vide, on compte le nombre total de smiles posés.
+- Le joueur avec le plus de smiles gagne.
+- Les smiles dans la main ne comptent pas.
+
+
+🃏 Types de cartes
+
+1. Cartes Familiales
+Thème : vie personnelle, relations, enfants, animaux.
+
+Type / Conditions / Smiles :
+- Enfant (nommé) : Nécessite d’être marié pour être posé / +2 smiles
+- Mariage (dans un lieu) : Nécessite d’avoir au moins un flirt avant / +3 smiles
+- Adultère : Permet de continuer à flirter malgré le mariage. Si divorce, les enfants sont perdus. Peut être annulée à tout moment. / +1 smile
+- Flirt (dans un lieu) : Peut en poser jusqu’à 6. Nécessaire avant mariage. Certains flirts (camping, hôtel) permettent d’avoir un enfant. / +1 smile
+- Animal de compagnie : Donne entre 1 et 3 smiles selon l’animal.
+
+🐾 Détail des animaux :
+- Chat : 1 smile
+- Chien : 1 smile
+- Lapin : 1 smile
+- Poussin : 1 smile
+- Licorne : 3 smiles (ou 6 si le joueur possède aussi “Arc-en-ciel” et “Étoile filante”)
+
+🏡 Lieux de flirt :
+bar, boite de nuit, camping, cinema, hotel, internet, parc, restaurant, theatre, zoo
+
+💍 Lieux de mariage :
+corps-nuds, montcuq, monteton, Sainte-Vierge, Fourqueux (x3)
+
+
+2. Cartes Travail
+Thème : études, emploi, salaire, acquisitions.
+
+- Étude (simple ou double) : Permet d’accéder à un métier. Jusqu’à 6 études posées max. / +1 smile par carte
+- Métier : Nécessite un niveau d’étude minimum. Donne 2 smiles. Certains métiers ont des pouvoirs spéciaux. / +2 smiles
+- Salaire (niveau 1 à 4) : Permet d’investir dans des acquisitions. / +1 smile par niveau
+- Acquisition (maison ou voyage) : Nécessite des salaires pour être achetée. Les salaires investis sont bloqués.
+
+🏠 Acquisitions :
+- Voyage : coût 3 salaires / +1 smile
+- Maisons (prix divisé par 2 si marié) :
+  - Petite maison : 6 / +1 smile
+  - Moyenne maison : 8 / +2 smiles
+  - Grande maison : 10 / +3 smiles
+
+
+3. Cartes Malus
+Cartes à jouer sur les adversaires.
+
+- Accident : L’adversaire passe 1 tour
+- Impôt sur le revenu : Perd le dernier revenu (si a un métier)
+- Burn out : Passe 1 tour (si a un métier)
+- Attentat : Tue tous les enfants posés
+- Divorce : Retire le mariage (si marié)
+- Licenciement : Retire le métier (si a un métier)
+- Prison : Passe 3 tours (si le métier = Bandit)
+- Redoublement : Retire la dernière étude (si pas de métier)
+- Maladie : Passe 1 tour
+
+
+4. Cartes Autres
+- Légion d’honneur : Si jamais été bandit / +3 smiles
+- Grand prix d’excellence : Pour certains métiers (journaliste, écrivain, chercheur) / +4 smiles
+
+
+5. Cartes Spéciales
+
+- Anniversaire : Tous les adversaires donnent un salaire posé de leur choix.
+- Arc-en-ciel : Permet de poser jusqu’à 3 cartes ce tour et repiocher pour avoir 5 cartes.
+- Casino : Ouvre le casino (mini-jeu de mise de salaires).
+- Chance : Pioche 3 cartes, garde 1 et défausse 2, puis joue.
+- Étoile filante : Prend une carte de la défausse et la joue.
+- Héritage : Donne une réserve de 3 salaires non imposables pour de futurs achats.
+- Piston : Permet de poser n’importe quel métier et repiocher jusqu’à 5 cartes.
+- Troc : Échange une carte au hasard avec un adversaire.
+- Tsunami : Toutes les mains sont mélangées et redistribuées.
+- Vengeance : Renvoie un malus reçu à un autre joueur (sauf “Attentat”).
+
+
+🎰 Règles du Casino
+
+- Le joueur qui joue la carte “Casino” peut miser dessus immédiatement et repiocher ensuite.
+- Le Casino est ouvert tant qu’il est vide (tout joueur peut miser).
+- Déroulement :
+  - Joueur 1 pose un salaire face cachée.
+  - Joueur 2 pose un salaire face cachée.
+  - Si salaires identiques : joueur 2 gagne et garde les deux.
+  - Si salaires différents : joueur 1 gagne et garde les deux.
+- Si un joueur a misé sans adversaire, il garde simplement son salaire.
+
+
+🧑‍💼 Statuts professionnels
+
+- Rien : Aucun effet.
+- Fonctionnaire : Ne peut pas être licencié.
+- Intérimaire : Peut démissionner sans passer de tour.
+
+
+💼 Pouvoirs spéciaux des métiers
+
+- Architecte : Peut poser une maison sans la payer (au tour suivant).
+- Astronaute : Peut jouer une carte de la défausse immédiatement.
+- Avocat : Immunisé au divorce (sauf volontaire).
+- Bandit : Ne peut pas être licencié ni imposé.
+- Barman : Peut avoir un nombre illimité de flirts tant qu’il n’est pas marié.
+- Chef des achats : Récupère et paye immédiatement une acquisition de la défausse.
+- Chef des ventes : Récupère et pose un salaire de la défausse.
+- Chercheur : Joue avec 6 cartes en main (au lieu de 5).
+- Chirurgien / Médecin : Immunisé contre la maladie et peut continuer ses études.
+- Garagiste : Immunisé contre les accidents.
+- Journaliste : Peut voir les cartes en main des autres joueurs.
+- Médium : Peut voir les 13 prochaines cartes de la pioche.
+- Militaire : Protège contre la carte “Attentat”.
+- Pharmacien : Immunisé contre la maladie.
+- Pilote de ligne : Peut poser des voyages sans les payer.
+- Policier : Empêche la présence du Bandit et du Gourou.
+- Grand Prof : Évolution du Prof ; remplace la carte Prof existante.
+
+
+📚 Tableau des métiers
+
+Métier | Salaire max | Niveau d’étude minimum | Statut
+Architecte | 3 | 4 | Rien
+Astronaute | 4 | 6 | Rien
+Avocat | 3 | 4 | Rien
+Bandit | 4 | 0 | Rien
+Barman | 1 | 0 | Intérimaire
+Chef des ventes | 3 | 3 | Rien
+Chef des achats | 3 | 3 | Rien
+Chercheur | 2 | 6 | Rien
+Chirurgien | 4 | 6 | Rien
+Designer | 3 | 4 | Rien
+Écrivain | 1 | 0 | Rien
+Garagiste | 2 | 1 | Rien
+Gourou | 3 | 0 | Rien
+Jardinier | 1 | 1 | Rien
+Journaliste | 2 | 3 | Rien
+Médecin | 4 | 6 | Rien
+Médium | 1 | 0 | Rien
+Militaire | 1 | 0 | Fonctionnaire
+Pharmacien | 3 | 5 | Rien
+Pilote de ligne | 4 | 5 | Rien
+Pizzaiolo | 2 | 0 | Rien
+Plombier | 1 | 1 | Intérimaire
+Policier | 1 | 1 | Fonctionnaire
+Prof (anglais, français, histoire, maths) | 2 | 2 | Fonctionnaire
+Serveur | 1 | 0 | Intérimaire
+Stripteaser | 1 | 0 | Intérimaire
+Grand Prof | 3 | — | Fonctionnaire
+
+
+🧩 Composition du jeu
+
+- Enfants uniques : diana, harry, hermione, lara, leia, luigi, luke, mario, rocky, zelda (10)
+- Études simples : 22
+- Études doubles : 3
+- Salaires : 10 par niveau (40 total)
+- Flirts : 20 (dans 10 lieux)
+- Mariages : 7
+- Adultères : 3
+- Animaux : 5 (uniques)
+- Cartes spéciales : 1 de chaque
+- Maisons : 2 petites, 2 moyennes, 1 grande
+- Voyages : 5
+- Grands prix d’excellence : 2
+- Légion d’honneur : 1
+- Malus : accident / burnout / divorce / impôt / licenciement / maladie / redoublement (5 de chaque)
+- Prison : 1
+- Attentat : 1
