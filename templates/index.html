@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de Cartes Smile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .card-playable {
+            border: 3px solid #10b981;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { border-color: #10b981; }
+            50% { border-color: #34d399; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-400 to-pink-500 min-h-screen">
+    
+    <!-- Écran de démarrage -->
+    <div id="start-screen" class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full">
+            <div class="flex justify-center mb-6">
+                <span class="text-6xl">😊</span>
+            </div>
+            <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">Jeu de Cartes Smile</h1>
+            
+            <div class="mb-6">
+                <label class="block text-gray-700 font-semibold mb-2">Nombre de joueurs:</label>
+                <select id="num-players" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none">
+                    <option value="2">2 joueurs</option>
+                    <option value="3">3 joueurs</option>
+                    <option value="4">4 joueurs</option>
+                    <option value="5">5 joueurs</option>
+                </select>
+            </div>
+            
+            <div id="player-names" class="space-y-3 mb-6"></div>
+            
+            <button onclick="startGame()" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 px-6 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 font-semibold text-lg shadow-lg">
+                Commencer la partie
+            </button>
+        </div>
+    </div>
+
+    <!-- Écran de jeu -->
+    <div id="game-screen" class="hidden p-4 max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-lg p-4 mb-4">
+            <div class="flex justify-between items-center">
+                <h2 id="current-player-name" class="text-2xl font-bold text-gray-800"></h2>
+                <div class="flex gap-4 items-center">
+                    <button onclick="toggleHelp()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                        Aide
+                    </button>
+                    <div class="bg-blue-500 text-white px-4 py-2 rounded">
+                        Pioche: <span id="deck-count">0</span>
+                    </div>
+                    <div class="bg-gray-500 text-white px-4 py-2 rounded">
+                        Défausse: <span id="discard-count">0</span>
+                    </div>
+                </div>
+            </div>
+            <div id="message" class="mt-2 bg-yellow-100 border-l-4 border-yellow-500 p-2 text-sm hidden"></div>
+        </div>
+
+        <!-- Panneau d'aide -->
+        <div id="help-panel" class="hidden bg-white rounded-lg shadow-lg p-6 mb-4 max-h-96 overflow-y-auto">
+            <h3 class="text-xl font-bold mb-4">📖 Règles du jeu</h3>
+            <div class="space-y-4 text-sm">
+                <div>
+                    <h4 class="font-bold">🎯 Objectif</h4>
+                    <p>Avoir le plus de smiles posés à la fin de la pioche</p>
+                </div>
+                <div>
+                    <h4 class="font-bold">🎮 Actions par tour</h4>
+                    <ul class="list-disc ml-5">
+                        <li>Piocher dans la pioche ET poser une carte</li>
+                        <li>Piocher dans la défausse ET poser cette carte immédiatement</li>
+                        <li>Défausser une carte posée</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scores des joueurs -->
+        <div id="players-scores" class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-4"></div>
+
+        <!-- Actions disponibles -->
+        <div id="actions-panel" class="bg-white rounded-lg shadow-lg p-4 mb-4">
+            <h3 class="font-bold mb-3">🎯 Actions disponibles</h3>
+            <div class="flex gap-3">
+                <button onclick="drawCard('deck')" class="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 font-semibold">
+                    📚 Piocher dans la pioche
+                </button>
+                <button onclick="drawCard('discard')" class="flex-1 bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 font-semibold">
+                    🗑️ Piocher dans la défausse
+                </button>
+            </div>
+        </div>
+
+        <!-- Main du joueur -->
+        <div class="bg-white rounded-lg shadow-lg p-4 mb-4">
+            <h3 class="font-bold mb-3">Votre main</h3>
+            <div id="player-hand" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <!-- Cartes posées -->
+        <div class="bg-white rounded-lg shadow-lg p-4 mb-4">
+            <h3 class="font-bold mb-3">Vos cartes posées</h3>
+            <div id="player-played" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <!-- Autres joueurs -->
+        <div id="other-players" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </div>
+
+    <!-- Écran de fin -->
+    <div id="end-screen" class="hidden flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-center mb-6">
+                <span class="text-8xl">🎉</span>
+            </div>
+            <h1 class="text-4xl font-bold text-center mb-2 text-gray-800">Partie Terminée !</h1>
+            <h2 id="winner-name" class="text-2xl font-bold text-center mb-8 text-purple-600"></h2>
+            <div id="final-scores" class="space-y-4"></div>
+            <button onclick="location.reload()" class="mt-8 w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 px-6 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 font-semibold text-lg shadow-lg">
+                Nouvelle Partie
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let gameId = null;
+        let currentGame = null;
+        let currentPlayerId = 0;
+
+        // Initialiser les champs de noms de joueurs
+        document.getElementById('num-players').addEventListener('change', function() {
+            const num = parseInt(this.value);
+            const container = document.getElementById('player-names');
+            container.innerHTML = '';
+            for (let i = 0; i < num; i++) {
+                container.innerHTML += `
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-1">Joueur ${i + 1}:</label>
+                        <input type="text" id="player-${i}" value="Joueur ${i + 1}" 
+                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none">
+                    </div>
+                `;
+            }
+        });
+        document.getElementById('num-players').dispatchEvent(new Event('change'));
+
+        async function startGame() {
+            const numPlayers = parseInt(document.getElementById('num-players').value);
+            const playerNames = [];
+            for (let i = 0; i < numPlayers; i++) {
+                playerNames.push(document.getElementById(`player-${i}`).value);
+            }
+
+            const response = await fetch('/api/new_game', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({num_players: numPlayers, player_names: playerNames})
+            });
+
+            const data = await response.json();
+            gameId = data.game_id;
+            currentGame = data.game;
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+
+            updateGameDisplay();
+        }
+
+        async function drawCard(source) {
+            const response = await fetch(`/api/game/${gameId}/draw`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({source: source})
+            });
+
+            const data = await response.json();
+            
+            if (data.game_over) {
+                showEndScreen(data.scores);
+                return;
+            }
+
+            currentGame = data.game;
+            updateGameDisplay();
+        }
+
+        async function playCard(cardId) {
+            const response = await fetch(`/api/game/${gameId}/play`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    card_id: cardId,
+                    player_id: currentGame.current_player
+                })
+            });
+
+            const data = await response.json();
+            currentGame = data.game;
+            updateGameDisplay();
+        }
+
+        function updateGameDisplay() {
+            const currentPlayer = currentGame.players[currentGame.current_player];
+            
+            // Mettre à jour le header
+            document.getElementById('current-player-name').textContent = `Tour de ${currentPlayer.name}`;
+            document.getElementById('deck-count').textContent = currentGame.deck.length;
+            document.getElementById('discard-count').textContent = currentGame.discard.length;
+
+            // Mettre à jour les scores
+            const scoresContainer = document.getElementById('players-scores');
+            scoresContainer.innerHTML = currentGame.players.map((player, i) => {
+                const smiles = calculateSmiles(player);
+                const isCurrent = i === currentGame.current_player;
+                return `
+                    <div class="p-3 rounded-lg ${isCurrent ? 'bg-yellow-400 shadow-lg transform scale-105' : 'bg-white'}">
+                        <div class="font-bold text-sm">${player.name}</div>
+                        <div class="flex items-center gap-1 text-lg">
+                            <span>😊</span>
+                            <span>${smiles}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Mettre à jour la main du joueur
+            const handContainer = document.getElementById('player-hand');
+            handContainer.innerHTML = currentPlayer.hand.map(card => {
+                return createCardHTML(card, true);
+            }).join('');
+
+            // Mettre à jour les cartes posées
+            const playedContainer = document.getElementById('player-played');
+            playedContainer.innerHTML = currentPlayer.played.map(card => {
+                return createCardHTML(card, false);
+            }).join('');
+
+            // Mettre à jour les autres joueurs
+            const othersContainer = document.getElementById('other-players');
+            othersContainer.innerHTML = currentGame.players
+                .filter((_, i) => i !== currentGame.current_player)
+                .map(player => {
+                    return `
+                        <div class="bg-white rounded-lg shadow-lg p-4">
+                            <h3 class="font-bold mb-3">${player.name} - Cartes posées</h3>
+                            <div class="flex flex-wrap gap-2">
+                                ${player.played.map(card => createCardHTML(card, false)).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+        }
+
+        function createCardHTML(card, isInHand) {
+            const colors = {
+                'job': 'bg-blue-100 border-blue-300',
+                'study': 'bg-blue-100 border-blue-300',
+                'salary': 'bg-blue-100 border-blue-300',
+                'flirt': 'bg-pink-100 border-pink-300',
+                'marriage': 'bg-pink-100 border-pink-300',
+                'child': 'bg-pink-100 border-pink-300',
+                'animal': 'bg-pink-100 border-pink-300',
+                'adultere': 'bg-pink-100 border-pink-300',
+                'house': 'bg-green-100 border-green-300',
+                'travel': 'bg-green-100 border-green-300',
+                'hardship': 'bg-red-100 border-red-300',
+                'special': 'bg-yellow-100 border-yellow-300',
+                'other': 'bg-purple-100 border-purple-300'
+            };
+
+            const icons = {
+                'job': '💼',
+                'study': '📚',
+                'salary': '💰',
+                'flirt': '💕',
+                'marriage': '💑',
+                'child': '👶',
+                'animal': '🐾',
+                'adultere': '💔',
+                'house': '🏠',
+                'travel': '✈️',
+                'hardship': '⚠️',
+                'special': '⭐',
+                'other': '🎁'
+            };
+
+            const label = getCardLabel(card);
+            const color = colors[card.type] || 'bg-gray-100 border-gray-300';
+            const icon = icons[card.type] || '🎴';
+            
+            const onclick = isInHand && currentGame.phase === 'play' ? `onclick="playCard('${card.id}')"` : '';
+            const cursor = isInHand && currentGame.phase === 'play' ? 'cursor-pointer hover:scale-105' : '';
+
+            return `
+                <div class="card ${color} border-2 rounded-lg p-3 min-w-[120px] ${cursor}" ${onclick}>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span>${icon}</span>
+                        <span class="font-semibold text-sm">${label}</span>
+                    </div>
+                    ${card.smiles > 0 ? `
+                        <div class="flex items-center gap-1 text-yellow-600">
+                            <span>😊</span>
+                            <span>${card.smiles}</span>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function getCardLabel(card) {
+            if (card.type === 'job') return card.subtype;
+            if (card.type === 'study') return card.subtype === 'double' ? 'Études x2' : 'Études';
+            if (card.type === 'salary') return `Salaire ${card.subtype}`;
+            if (card.type === 'flirt') return `Flirt (${card.subtype})`;
+            if (card.type === 'marriage') return `Mariage (${card.subtype})`;
+            if (card.type === 'child') return card.subtype;
+            if (card.type === 'animal') return card.subtype;
+            if (card.type === 'house') return `Maison ${card.subtype}`;
+            if (card.type === 'travel') return 'Voyage';
+            if (card.type === 'hardship') return card.subtype;
+            if (card.type === 'special') return card.subtype;
+            if (card.type === 'adultere') return 'Adultère';
+            if (card.type === 'other') {
+                if (card.subtype === 'legion') return "Légion d'honneur";
+                if (card.subtype === 'prix') return 'Grand Prix';
+            }
+            return 'Carte';
+        }
+
+        function calculateSmiles(player) {
+            let total = player.played.reduce((sum, card) => sum + (card.smiles || 0), 0);
+            
+            // Bonus licorne
+            const hasLicorne = player.played.some(c => c.type === 'animal' && c.subtype === 'licorne');
+            const hasArc = player.played.some(c => c.type === 'special' && c.subtype === 'arc en ciel');
+            const hasEtoile = player.played.some(c => c.type === 'special' && c.subtype === 'etoile filante');
+            
+            if (hasLicorne && hasArc && hasEtoile) {
+                total += 3;
+            }
+            
+            return total;
+        }
+
+        function toggleHelp() {
+            const panel = document.getElementById('help-panel');
+            panel.classList.toggle('hidden');
+        }
+
+        function showEndScreen(scores) {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('end-screen').classList.remove('hidden');
+            
+            document.getElementById('winner-name').textContent = `Gagnant : ${scores[0][0]}`;
+            
+            const scoresHTML = scores.map((score, i) => {
+                const medals = ['🥇', '🥈', '🥉'];
+                const medal = medals[i] || `#${i + 1}`;
+                const bgColor = i === 0 ? 'bg-gradient-to-r from-yellow-200 to-yellow-300 border-4 border-yellow-500' :
+                                i === 1 ? 'bg-gray-200 border-2 border-gray-400' :
+                                i === 2 ? 'bg-orange-200 border-2 border-orange-400' :
+                                'bg-white border-2 border-gray-300';
+                
+                return `
+                    <div class="p-6 rounded-lg ${bgColor}">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-4">
+                                <div class="text-3xl font-bold">${medal}</div>
+                                <div>
+                                    <div class="text-2xl font-bold">${score[0]}</div>
+                                    <div class="flex items-center gap-2 text-xl">
+                                        <span>😊</span>
+                                        <span class="font-bold text-yellow-600">${score[1]} smiles</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('final-scores').innerHTML = scoresHTML;
+        }
+    </script>
+</body>
+</html>
