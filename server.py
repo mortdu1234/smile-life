@@ -7,7 +7,7 @@ from dataclasses import dataclass, asdict
 import time
 
 # Import des classes du jeu
-from code import Jeu, Joueur, Carte, Plateau, FabriqueCartes, Pioche
+from all_code import Jeu, Joueur, Carte, Plateau, FabriqueCartes, Pioche
 
 @dataclass
 class Message:

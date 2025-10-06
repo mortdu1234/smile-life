@@ -107,7 +107,7 @@ class GestionnaireRessources:
             filename = "grand_prix_excellence.png"
         
         elif carte.type_carte == TypeCarte.SPECIALE:
-            filename = f"{carte.nom.lower().replace(' ', '_').replace("'", '')}.png"
+            filename = f"{carte.nom.lower()}.png"
         
         else:
             return None
