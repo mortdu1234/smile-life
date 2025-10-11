@@ -89,7 +89,7 @@ class SalaryCard(Card):
     def __init__(self, level: int):
         super().__init__()
         self.level = level
-        self.smiles = level
+        self.smiles = 1
     
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
@@ -105,7 +105,7 @@ class SalaryCard(Card):
             return False, "Vous devez avoir un métier pour recevoir un salaire"
         
         if self.level > job.salary:
-            return False, f"Votre salaire maximum est de {job.level}"
+            return False, f"Votre salaire maximum est de {job.salary}"
         
         return True, ""
 
@@ -148,7 +148,6 @@ class MarriageCard(Card):
     def can_be_played(self, player: 'Player') -> tuple[bool, str]:
         if player.is_married():
             return False, "Vous êtes déjà marié(e)"
-        
         
         if not player.has_any_flirt():
             return False, "Vous devez avoir un flirt pour vous marier"
@@ -237,7 +236,7 @@ class HouseCard(Card):
             return True, ""
         
         # Vérifier la somme totale des salaires
-        total_salary_value = sum(c.level for c in player.played if isinstance(c, SalaryCard))
+        total_salary_value = player.get_available_salary_sum()
         if total_salary_value < self.cost:
             return False, f"Vous avez besoin d'une somme de salaires de {self.cost}"
         
@@ -264,7 +263,7 @@ class TravelCard(Card):
             return True, ""
         
         # Vérifier la somme totale des salaires
-        total_salary_value = sum(c.level for c in player.played if isinstance(c, SalaryCard))
+        total_salary_value = player.get_available_salary_sum()
         if total_salary_value < self.cost:
             return False, f"Vous avez besoin d'une somme de salaires de {self.cost}"
         
@@ -339,7 +338,14 @@ class Player:
         self.id = player_id
         self.name = name
         self.hand: List[Card] = []
-        self.played: List[Card] = []
+        # Organisation des cartes jouées par catégories
+        self.played = {
+            "vie professionnelle": [],  # études, métier, salaires
+            "vie personnelle": [],      # flirts, mariage, adultère, enfants, animaux
+            "acquisitions": [],         # maisons, voyages
+            "salaire dépensé": [],      # salaires utilisés pour acheter
+            "cartes spéciales": []      # cartes spéciales et autres
+        }
         self.skip_turns = 0
         self.has_been_bandit = False
         self.heritage = 0
@@ -347,19 +353,85 @@ class Player:
         self.connected = True
         self.session_id = None
     
+    def get_all_played_cards(self) -> List[Card]:
+        """Retourne toutes les cartes jouées (toutes catégories)"""
+        all_cards = []
+        for category_cards in self.played.values():
+            all_cards.extend(category_cards)
+        return all_cards
+    
+    def add_card_to_played(self, card: Card):
+        """Ajoute une carte à la bonne catégorie"""
+        if isinstance(card, (StudyCard, JobCard, SalaryCard)):
+            self.played["vie professionnelle"].append(card)
+        elif isinstance(card, (FlirtCard, MarriageCard, AdulteryCard, ChildCard, AnimalCard)):
+            self.played["vie personnelle"].append(card)
+        elif isinstance(card, (HouseCard, TravelCard)):
+            self.played["acquisitions"].append(card)
+        elif isinstance(card, (SpecialCard, OtherCard)):
+            self.played["cartes spéciales"].append(card)
+    
+    def remove_card_from_played(self, card: Card) -> bool:
+        """Retire une carte des cartes jouées"""
+        for category_cards in self.played.values():
+            if card in category_cards:
+                category_cards.remove(card)
+                return True
+        return False
+    
+    def spend_salaries(self, amount: int) -> List[SalaryCard]:
+        """Dépense des salaires pour un achat et les déplace vers 'salaire dépensé'"""
+        available_salaries = [c for c in self.played["vie professionnelle"] if isinstance(c, SalaryCard)]
+        
+        # Trier par niveau décroissant pour optimiser
+        available_salaries.sort(key=lambda x: x.level, reverse=True)
+        
+        spent_salaries = []
+        remaining = amount
+        
+        for salary in available_salaries:
+            if remaining <= 0:
+                break
+            if salary.level <= remaining:
+                spent_salaries.append(salary)
+                remaining -= salary.level
+        
+        # Si on ne peut pas payer exactement, essayer d'autres combinaisons
+        if remaining > 0:
+            # Essayer avec les plus petites cartes
+            available_salaries.sort(key=lambda x: x.level)
+            spent_salaries = []
+            total = 0
+            for salary in available_salaries:
+                if total >= amount:
+                    break
+                spent_salaries.append(salary)
+                total += salary.level
+        
+        # Déplacer les salaires dépensés
+        for salary in spent_salaries:
+            self.played["vie professionnelle"].remove(salary)
+            self.played["salaire dépensé"].append(salary)
+        
+        return spent_salaries
+    
+    def get_available_salary_sum(self) -> int:
+        """Retourne la somme des salaires disponibles (non dépensés)"""
+        return sum(c.level for c in self.played["vie professionnelle"] if isinstance(c, SalaryCard))
+    
     def has_job(self) -> bool:
-        return any(isinstance(card, JobCard) for card in self.played)
+        return any(isinstance(card, JobCard) for card in self.played["vie professionnelle"])
     
     def has_any_flirt(self) -> bool:
         """Vérifie si le joueur a au moins un flirt"""
-        return any(isinstance(card, FlirtCard) for card in self.played)
+        return any(isinstance(card, FlirtCard) for card in self.played["vie personnelle"])
     
     def has_adultery(self) -> bool:
         """Vérifie si le joueur a un adultère"""
-        return any(isinstance(card, AdulteryCard) for card in self.played)
+        return any(isinstance(card, AdulteryCard) for card in self.played["vie personnelle"])
     
     def get_job(self) -> JobCard:
-        for card in self.played:
+        for card in self.played["vie professionnelle"]:
             if isinstance(card, JobCard):
                 return card
         return None
@@ -370,31 +442,29 @@ class Player:
     
     def count_studies(self) -> int:
         total = 0
-        for card in self.played:
+        for card in self.played["vie professionnelle"]:
             if isinstance(card, StudyCard):
                 total += card.levels
         return total
     
     def count_salaries(self) -> int:
-        return sum(1 for card in self.played if isinstance(card, SalaryCard))
+        return sum(1 for card in self.played["vie professionnelle"] if isinstance(card, SalaryCard))
     
     def is_married(self) -> bool:
-        return any(isinstance(card, MarriageCard) for card in self.played)
+        return any(isinstance(card, MarriageCard) for card in self.played["vie personnelle"])
     
     def has_flirt_at_location(self, location: str) -> bool:
         return any(isinstance(card, FlirtCard) and card.location == location 
-                   for card in self.played)
+                   for card in self.played["vie personnelle"])
     
     def calculate_smiles(self) -> int:
-        total = sum(card.smiles for card in self.played)
+        total = sum(card.smiles for card in self.get_all_played_cards())
         
         # Bonus licorne + arc-en-ciel + étoile filante
-        has_licorne = any(isinstance(c, AnimalCard) and c.animal_name == 'licorne' 
-                         for c in self.played)
-        has_arc = any(isinstance(c, SpecialCard) and c.special_type == 'arc en ciel' 
-                     for c in self.played)
-        has_etoile = any(isinstance(c, SpecialCard) and c.special_type == 'etoile filante' 
-                        for c in self.played)
+        all_cards = self.get_all_played_cards()
+        has_licorne = any(isinstance(c, AnimalCard) and c.animal_name == 'licorne' for c in all_cards)
+        has_arc = any(isinstance(c, SpecialCard) and c.special_type == 'arc en ciel' for c in all_cards)
+        has_etoile = any(isinstance(c, SpecialCard) and c.special_type == 'etoile filante' for c in all_cards)
         
         if has_licorne and has_arc and has_etoile:
             total += 3
@@ -407,7 +477,10 @@ class Player:
             'name': self.name,
             'hand': [] if hide_hand else [card.to_dict() for card in self.hand],
             'hand_count': len(self.hand),
-            'played': [card.to_dict() for card in self.played],
+            'played': {
+                category: [card.to_dict() for card in cards]
+                for category, cards in self.played.items()
+            },
             'skip_turns': self.skip_turns,
             'has_been_bandit': self.has_been_bandit,
             'heritage': self.heritage,

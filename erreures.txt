@@ -25,13 +25,20 @@ d'attaques qui sont utilisée ne sont pas envoyée dans la défausse mais jsute 
 V3
 
 - j'aimerais qu'on puisse passer notre tour a tout moment
-- 
+- l'attentat supprime toutes les cartes d'un joueurs, alors qu'elle devrait défausser tous les enfants de tous les joueurs
+- quand on achete une acquisision depuis la défausse, il faut vriament l'acheter
+- quand on achete une acquisision, j'aimerais que ca ouvre une fenetre avec la liste des cartes salaires qu'on a de posé et de libre (donc non dépensé) et que l'on sélectionne les salaire que l'on veut dépenser
+avec un compteur qui indique le prix de l'acquisision et combien on met a chaque instant
 
 
 
+V4
+- quand on utilise une attaque elle ne dois pas arrivé dans la défausse mais juste dans la pile des cartes recus de la cible
+- quand on achete une aquisition on peut mettre plus que le prix, le prix de l'aquisition est un prix minimum
+- quand on utilise l'attentat, c'est le joueur qui l'utilise qui le prend sur lui
 
 
 # pas important pour le moment
 - la prison dois aussi jeter dans la défausse 2 cartes aléatoire de la main et en repiocher 2 de la pioche en plus de passer 3 tour et jeter le métier de bandit
-
+- quand on pioche depuis la défausse, on est obliger de jouer la carte de la défausse (erreur lors d'une reprise d'aquisition cela la met dans la main)
 

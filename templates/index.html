@@ -27,10 +27,66 @@
         .modal {
             backdrop-filter: blur(4px);
         }
+        .category-section {
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .salary-card-selectable {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .salary-card-selectable:hover {
+            transform: scale(1.05);
+        }
+        .salary-card-selected {
+            border: 3px solid #10b981 !important;
+            background-color: #d1fae5 !important;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-400 to-pink-500 min-h-screen">
     
+    <!-- Modal de sélection de salaires pour achat -->
+    <div id="salary-selection-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">
+                💰 Sélectionner les salaires à dépenser
+            </h2>
+            
+            <div id="acquisition-card-display" class="mb-6 p-4 bg-green-50 rounded-lg border-2 border-green-300"></div>
+            
+            <div class="mb-4 p-4 bg-blue-50 rounded-lg">
+                <div class="flex justify-between items-center text-lg font-semibold">
+                    <span>Coût requis :</span>
+                    <span class="text-blue-600" id="required-cost">0</span>
+                </div>
+                <div class="flex justify-between items-center text-lg font-semibold mt-2">
+                    <span>Montant sélectionné :</span>
+                    <span class="text-green-600" id="selected-amount">0</span>
+                </div>
+                <div class="mt-2 text-sm text-gray-600">
+                    <span id="payment-status">Sélectionnez vos salaires</span>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="font-semibold mb-3 text-gray-700">Vos salaires disponibles :</h3>
+                <div id="available-salaries-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="confirmSalarySelection()" id="confirm-salary-btn" class="flex-1 bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    ✅ Confirmer l'achat
+                </button>
+                <button onclick="closeSalaryModal()" class="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de sélection de cible pour malus -->
     <div id="hardship-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full">
@@ -204,10 +260,39 @@
             <div id="player-hand" class="flex flex-wrap gap-2"></div>
         </div>
 
-        <!-- Cartes posées -->
+        <!-- Cartes posées par catégories -->
         <div class="bg-white rounded-lg shadow-lg p-4 mb-4">
             <h3 class="font-bold mb-3">Vos cartes posées</h3>
-            <div id="player-played" class="flex flex-wrap gap-2"></div>
+            
+            <!-- Vie professionnelle -->
+            <div class="category-section bg-blue-50">
+                <h4 class="font-semibold text-blue-800 mb-2">💼 Vie professionnelle</h4>
+                <div id="player-vie-pro" class="flex flex-wrap gap-2"></div>
+            </div>
+            
+            <!-- Vie personnelle -->
+            <div class="category-section bg-pink-50">
+                <h4 class="font-semibold text-pink-800 mb-2">💕 Vie personnelle</h4>
+                <div id="player-vie-perso" class="flex flex-wrap gap-2"></div>
+            </div>
+            
+            <!-- Acquisitions -->
+            <div class="category-section bg-green-50">
+                <h4 class="font-semibold text-green-800 mb-2">🏠 Acquisitions</h4>
+                <div id="player-acquisitions" class="flex flex-wrap gap-2"></div>
+            </div>
+            
+            <!-- Salaire dépensé -->
+            <div class="category-section bg-gray-50">
+                <h4 class="font-semibold text-gray-800 mb-2">💸 Salaires dépensés</h4>
+                <div id="player-salaire-depense" class="flex flex-wrap gap-2"></div>
+            </div>
+            
+            <!-- Cartes spéciales -->
+            <div class="category-section bg-yellow-50">
+                <h4 class="font-semibold text-yellow-800 mb-2">⭐ Cartes spéciales</h4>
+                <div id="player-speciales" class="flex flex-wrap gap-2"></div>
+            </div>
         </div>
 
         <!-- Attaques reçues -->
@@ -243,6 +328,11 @@
         let isHost = false;
         let pendingHardshipCard = null;
         let fromDiscard = false;
+        
+        // Variables pour la sélection de salaires
+        let pendingAcquisitionCard = null;
+        let requiredCost = 0;
+        let selectedSalaries = [];
 
         function log(message, data) {
             console.log(`[DEBUG] ${message}`, data || '');
@@ -273,6 +363,108 @@
         function showGame() {
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
+        }
+
+        function showSalarySelectionModal(card, cost, availableSalaries) {
+            pendingAcquisitionCard = card;
+            requiredCost = cost;
+            selectedSalaries = [];
+            
+            const modal = document.getElementById('salary-selection-modal');
+            const cardDisplay = document.getElementById('acquisition-card-display');
+            const salariesList = document.getElementById('available-salaries-list');
+            
+            cardDisplay.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl">${card.type === 'house' ? '🏠' : '✈️'}</span>
+                    <div>
+                        <div class="font-bold text-lg">${getCardLabel(card)}</div>
+                        <div class="text-sm text-gray-600">Coût: ${cost} 💰</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('required-cost').textContent = cost;
+            document.getElementById('selected-amount').textContent = '0';
+            document.getElementById('payment-status').textContent = 'Sélectionnez vos salaires';
+            
+            salariesList.innerHTML = availableSalaries.map(salary => `
+                <div onclick="toggleSalarySelection('${salary.id}', ${salary.subtype})" 
+                     id="salary-${salary.id}"
+                     class="salary-card-selectable p-3 bg-blue-100 border-2 border-blue-300 rounded-lg text-center">
+                    <div class="text-2xl">💰</div>
+                    <div class="font-bold">${salary.subtype}</div>
+                </div>
+            `).join('');
+            
+            document.getElementById('confirm-salary-btn').disabled = true;
+            modal.classList.remove('hidden');
+        }
+
+        function toggleSalarySelection(salaryId, salaryLevel) {
+            const salaryElement = document.getElementById(`salary-${salaryId}`);
+            
+            const index = selectedSalaries.findIndex(s => s.id === salaryId);
+            
+            if (index > -1) {
+                // Désélectionner
+                selectedSalaries.splice(index, 1);
+                salaryElement.classList.remove('salary-card-selected');
+            } else {
+                // Sélectionner
+                selectedSalaries.push({ id: salaryId, level: salaryLevel });
+                salaryElement.classList.add('salary-card-selected');
+            }
+            
+            updateSalarySelectionDisplay();
+        }
+
+        function updateSalarySelectionDisplay() {
+            const total = selectedSalaries.reduce((sum, s) => sum + s.level, 0);
+            
+            document.getElementById('selected-amount').textContent = total;
+            
+            const statusEl = document.getElementById('payment-status');
+            const confirmBtn = document.getElementById('confirm-salary-btn');
+            
+            if (total < requiredCost) {
+                statusEl.textContent = `Il manque ${requiredCost - total}`;
+                statusEl.className = 'mt-2 text-sm text-orange-600 font-semibold';
+                confirmBtn.disabled = true;
+            } else if (total > requiredCost) {
+                statusEl.textContent = `Trop ! Retirez ${total - requiredCost}`;
+                statusEl.className = 'mt-2 text-sm text-red-600 font-semibold';
+                confirmBtn.disabled = true;
+            } else {
+                statusEl.textContent = '✅ Montant exact !';
+                statusEl.className = 'mt-2 text-sm text-green-600 font-semibold';
+                confirmBtn.disabled = false;
+            }
+        }
+
+        function confirmSalarySelection() {
+            if (!pendingAcquisitionCard || selectedSalaries.length === 0) return;
+            
+            const total = selectedSalaries.reduce((sum, s) => sum + s.level, 0);
+            
+            if (total !== requiredCost) {
+                alert('Le montant sélectionné ne correspond pas au coût requis');
+                return;
+            }
+            
+            socket.emit('select_salaries_for_purchase', {
+                card_id: pendingAcquisitionCard.id,
+                salary_ids: selectedSalaries.map(s => s.id)
+            });
+            
+            closeSalaryModal();
+        }
+
+        function closeSalaryModal() {
+            document.getElementById('salary-selection-modal').classList.add('hidden');
+            pendingAcquisitionCard = null;
+            selectedSalaries = [];
+            requiredCost = 0;
         }
 
         function showHardshipModal(card, availableTargets, isFromDiscard = false) {
@@ -332,7 +524,7 @@
                 'maladie': 'Passer 1 tour',
                 'redoublement': 'Fait perdre une étude',
                 'prison': 'Passer 3 tours',
-                'attentat': 'Fait perdre toutes les cartes posées'
+                'attentat': 'Fait perdre tous les enfants de tous les joueurs'
             };
             return descriptions[type] || 'Coup dur';
         }
@@ -476,6 +668,11 @@
             showHardshipModal(data.card, data.available_targets, data.from_discard || false);
         });
 
+        socket.on('select_salaries_for_acquisition', (data) => {
+            log('Sélectionner salaires pour acquisition', data);
+            showSalarySelectionModal(data.card, data.required_cost, data.available_salaries);
+        });
+
         socket.on('game_over', (data) => {
             log('Partie terminée', data);
             showEndScreen(data.scores);
@@ -552,9 +749,9 @@
                 if (myPlayer.skip_turns > 0) {
                     updateMessage(`⏸️ Vous devez passer votre tour (${myPlayer.skip_turns} tour(s) restant(s)) - Cliquez sur "Passer mon tour"`);
                 } else if (currentGame.phase === 'draw') {
-                    updateMessage('Piochez une carte de la pioche ou de la défausse (ou défaussez un métier/mariage/adultère avant)');
+                    updateMessage('Piochez une carte de la pioche ou de la défausse (ou défaussez un métier/mariage/adultère avant, ou passez votre tour)');
                 } else {
-                    updateMessage('Jouez ou défaussez une carte de votre main');
+                    updateMessage('Jouez ou défaussez une carte de votre main (ou passez votre tour)');
                 }
             } else {
                 updateMessage(`En attente de ${currentPlayer.name}...`);
@@ -563,11 +760,12 @@
             const canDraw = isMyTurn && currentGame.phase === 'draw' && myPlayer.skip_turns === 0;
             const canPlay = isMyTurn && currentGame.phase === 'play';
             const mustSkip = isMyTurn && myPlayer.skip_turns > 0;
+            const canSkipVoluntarily = isMyTurn;
             const canDiscardPlayed = isMyTurn && currentGame.phase === 'draw' && myPlayer.skip_turns === 0;
             
             document.getElementById('draw-deck-btn').disabled = !canDraw;
             document.getElementById('draw-discard-btn').disabled = !canDraw || (currentGame.discard && currentGame.discard.length === 0);
-            document.getElementById('skip-turn-btn').disabled = !mustSkip;
+            document.getElementById('skip-turn-btn').disabled = !canSkipVoluntarily;
             
             const scoresContainer = document.getElementById('players-scores');
             scoresContainer.innerHTML = currentGame.players.map((player, i) => {
@@ -602,14 +800,8 @@
                 handContainer.innerHTML = '<p class="text-gray-500">Aucune carte en main</p>';
             }
             
-            const playedContainer = document.getElementById('player-played');
-            if (myPlayer.played && myPlayer.played.length > 0) {
-                playedContainer.innerHTML = myPlayer.played.map(card => {
-                    return createCardHTML(card, false, true, canDiscardPlayed);
-                }).join('');
-            } else {
-                playedContainer.innerHTML = '<p class="text-gray-500">Aucune carte posée</p>';
-            }
+            // Afficher les cartes par catégories
+            displayPlayerCategories(myPlayer, canDiscardPlayed);
             
             // Afficher les attaques reçues
             const hardshipsContainer = document.getElementById('hardships-received');
@@ -648,17 +840,65 @@
                                 </div>
                             ` : ''}
                             
-                            <div class="flex flex-wrap gap-2">
-                                ${player.played && player.played.length > 0 ? 
-                                    player.played.map(card => createCardHTML(card, false)).join('') :
-                                    '<p class="text-gray-500">Aucune carte posée</p>'}
-                            </div>
+                            ${displayOtherPlayerCategories(player)}
                         </div>
                     `;
                 }).join('');
         }
 
-        function createCardHTML(card, canPlay, isPlayed = false, canDiscard = false) {
+        function displayPlayerCategories(player, canDiscard) {
+            const categories = {
+                'vie professionnelle': 'player-vie-pro',
+                'vie personnelle': 'player-vie-perso',
+                'acquisitions': 'player-acquisitions',
+                'salaire dépensé': 'player-salaire-depense',
+                'cartes spéciales': 'player-speciales'
+            };
+            
+            for (const [category, elementId] of Object.entries(categories)) {
+                const container = document.getElementById(elementId);
+                const cards = player.played[category] || [];
+                
+                if (cards.length > 0) {
+                    const canDiscardThisCategory = canDiscard && (category === 'vie professionnelle' || category === 'vie personnelle');
+                    container.innerHTML = cards.map(card => {
+                        return createCardHTML(card, false, true, canDiscardThisCategory);
+                    }).join('');
+                } else {
+                    container.innerHTML = '<p class="text-gray-500 text-sm">Aucune carte</p>';
+                }
+            }
+        }
+
+        function displayOtherPlayerCategories(player) {
+            const categoryIcons = {
+                'vie professionnelle': '💼',
+                'vie personnelle': '💕',
+                'acquisitions': '🏠',
+                'salaire dépensé': '💸',
+                'cartes spéciales': '⭐'
+            };
+            
+            let html = '';
+            
+            for (const [category, icon] of Object.entries(categoryIcons)) {
+                const cards = player.played[category] || [];
+                if (cards.length > 0) {
+                    html += `
+                        <div class="mb-2">
+                            <div class="text-xs font-semibold text-gray-700 mb-1">${icon} ${category}</div>
+                            <div class="flex flex-wrap gap-1">
+                                ${cards.map(card => createCardHTML(card, false, false, false, true)).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            return html || '<p class="text-gray-500">Aucune carte posée</p>';
+        }
+
+        function createCardHTML(card, canPlay, isPlayed = false, canDiscard = false, isSmall = false) {
             const colors = {
                 'job': 'bg-blue-100 border-blue-300',
                 'study': 'bg-blue-100 border-blue-300',
@@ -687,20 +927,22 @@
             const icon = icons[card.type] || '🎴';
             
             const cursor = (canPlay || canDiscard) ? 'cursor-pointer hover:scale-105' : '';
+            const sizeClass = isSmall ? 'min-w-[80px] p-2' : 'min-w-[120px] p-3';
+            const textSize = isSmall ? 'text-xs' : 'text-sm';
             
             // Permettre de défausser métier, mariage et adultère déjà posés (AVANT de piocher)
             const canDiscardPlayed = isPlayed && canDiscard && (card.type === 'job' || card.type === 'marriage' || card.type === 'adultere');
 
             return `
-                <div class="card ${color} border-2 rounded-lg p-3 min-w-[120px] ${cursor}">
+                <div class="card ${color} border-2 rounded-lg ${sizeClass} ${cursor}">
                     <div class="flex items-center gap-2 mb-1">
-                        <span>${icon}</span>
-                        <span class="font-semibold text-sm">${label}</span>
+                        <span class="${isSmall ? 'text-sm' : ''}">${icon}</span>
+                        <span class="font-semibold ${textSize}">${label}</span>
                     </div>
                     ${card.smiles > 0 ? `
                         <div class="flex items-center gap-1 text-yellow-600">
-                            <span>😊</span>
-                            <span>${card.smiles}</span>
+                            <span class="${isSmall ? 'text-xs' : ''}">😊</span>
+                            <span class="${textSize}">${card.smiles}</span>
                         </div>
                     ` : ''}
                     ${canPlay ? `
@@ -745,11 +987,23 @@
         }
 
         function calculateSmiles(player) {
-            let total = player.played.reduce((sum, card) => sum + (card.smiles || 0), 0);
+            let total = 0;
             
-            const hasLicorne = player.played.some(c => c.type === 'animal' && c.subtype === 'licorne');
-            const hasArc = player.played.some(c => c.type === 'special' && c.subtype === 'arc en ciel');
-            const hasEtoile = player.played.some(c => c.type === 'special' && c.subtype === 'etoile filante');
+            // Calculer depuis toutes les catégories
+            for (const category in player.played) {
+                const cards = player.played[category];
+                total += cards.reduce((sum, card) => sum + (card.smiles || 0), 0);
+            }
+            
+            // Vérifier le bonus licorne + arc-en-ciel + étoile
+            let allCards = [];
+            for (const category in player.played) {
+                allCards = allCards.concat(player.played[category]);
+            }
+            
+            const hasLicorne = allCards.some(c => c.type === 'animal' && c.subtype === 'licorne');
+            const hasArc = allCards.some(c => c.type === 'special' && c.subtype === 'arc en ciel');
+            const hasEtoile = allCards.some(c => c.type === 'special' && c.subtype === 'etoile filante');
             
             if (hasLicorne && hasArc && hasEtoile) {
                 total += 3;
