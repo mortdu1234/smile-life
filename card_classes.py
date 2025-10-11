@@ -105,7 +105,7 @@ class SalaryCard(Card):
             return False, "Vous devez avoir un métier pour recevoir un salaire"
         
         if self.level > job.salary:
-            return False, f"Votre salaire maximum est de {job.salary}"
+            return False, f"Votre salaire maximum est de {job.level}"
         
         return True, ""
 
@@ -125,8 +125,9 @@ class FlirtCard(Card):
         return base
     
     def can_be_played(self, player: 'Player') -> tuple[bool, str]:
-        if player.is_married():
-            return False, "Vous êtes marié(e)"
+        # Peut flirter si pas marié OU si on a un adultère
+        if player.is_married() and not player.has_adultery():
+            return False, "Vous êtes marié(e) sans adultère"
         return True, ""
 
 class MarriageCard(Card):
@@ -148,8 +149,9 @@ class MarriageCard(Card):
         if player.is_married():
             return False, "Vous êtes déjà marié(e)"
         
-        if not player.has_flirt_at_location(self.location):
-            return False, f"Vous devez avoir un flirt à {self.location}"
+        
+        if not player.has_any_flirt():
+            return False, "Vous devez avoir un flirt pour vous marier"
         
         return True, ""
 
@@ -167,6 +169,11 @@ class AdulteryCard(Card):
     def can_be_played(self, player: 'Player') -> tuple[bool, str]:
         if not player.is_married():
             return False, "Vous devez être marié(e) pour commettre un adultère"
+        
+        # Vérifier qu'on n'a pas déjà un adultère
+        if player.has_adultery():
+            return False, "Vous avez déjà un adultère"
+        
         return True, ""
 
 class ChildCard(Card):
@@ -229,8 +236,10 @@ class HouseCard(Card):
         if job and job.power == 'house_free':
             return True, ""
         
-        if player.count_salaries() < self.cost:
-            return False, f"Vous avez besoin de {self.cost} salaires"
+        # Vérifier la somme totale des salaires
+        total_salary_value = sum(c.level for c in player.played if isinstance(c, SalaryCard))
+        if total_salary_value < self.cost:
+            return False, f"Vous avez besoin d'une somme de salaires de {self.cost}"
         
         return True, ""
 
@@ -254,8 +263,10 @@ class TravelCard(Card):
         if job and job.power == 'travel_free':
             return True, ""
         
-        if player.count_salaries() < self.cost:
-            return False, f"Vous avez besoin de {self.cost} salaires"
+        # Vérifier la somme totale des salaires
+        total_salary_value = sum(c.level for c in player.played if isinstance(c, SalaryCard))
+        if total_salary_value < self.cost:
+            return False, f"Vous avez besoin d'une somme de salaires de {self.cost}"
         
         return True, ""
 
@@ -339,15 +350,14 @@ class Player:
     def has_job(self) -> bool:
         return any(isinstance(card, JobCard) for card in self.played)
     
-    def can_be_played(self, player: 'Player') -> tuple[bool, str]:
-        if player.is_married():
-            return False, "Vous êtes déjà marié(e)"
-        
-        if not player.has_any_flirt():
-            return False, "Vous devez avoir un flirt pour vous marier"
-        
-        return True, ""
-
+    def has_any_flirt(self) -> bool:
+        """Vérifie si le joueur a au moins un flirt"""
+        return any(isinstance(card, FlirtCard) for card in self.played)
+    
+    def has_adultery(self) -> bool:
+        """Vérifie si le joueur a un adultère"""
+        return any(isinstance(card, AdulteryCard) for card in self.played)
+    
     def get_job(self) -> JobCard:
         for card in self.played:
             if isinstance(card, JobCard):

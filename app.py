@@ -3,7 +3,7 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 import random
 import uuid
 from datetime import datetime
-from card_classes import Card, Player, CardFactory, HardshipCard, JobCard, StudyCard, SalaryCard, MarriageCard
+from card_classes import Card, Player, CardFactory, HardshipCard, JobCard, StudyCard, SalaryCard, MarriageCard, AdulteryCard, HouseCard, TravelCard
 
 app = Flask(__name__)
 app.secret_key = 'votre_cle_secrete_ici_changez_la'
@@ -23,6 +23,7 @@ def get_game_state_for_player(game, player_id):
         ],
         'deck_count': len(game['deck']),
         'discard': [card.to_dict() for card in game['discard']],
+        'last_discard': game['discard'][-1].to_dict() if game['discard'] else None,
         'current_player': game['current_player'],
         'casino': game['casino'].to_dict() if game['casino'] else None,
         'phase': game['phase'],
@@ -56,69 +57,61 @@ def apply_hardship_effect(game, hardship_card, target_player):
     
     # Appliquer les effets
     if hardship_type == 'accident':
-        # Retirer une carte voyage si présente
-        travel_cards = [c for c in target_player.played if c.to_dict()['type'] == 'travel']
-        if travel_cards:
-            target_player.played.remove(travel_cards[0])
-            return True, f"{target_player.name} a perdu un voyage"
-        return True, f"{target_player.name} n'avait pas de voyage à perdre"
+        target_player.skip_turns = 1
+        return True, f"{target_player.name} doit passer 1 tour"
     
     elif hardship_type == 'burnout':
-        # Passe 2 tours
-        target_player.skip_turns = 2
-        return True, f"{target_player.name} doit passer 2 tours"
+        target_player.skip_turns = 1
+        return True, f"{target_player.name} doit passer 1 tour"
     
     elif hardship_type == 'divorce':
-        # Retirer le mariage
         marriage_cards = [c for c in target_player.played if isinstance(c, MarriageCard)]
         if marriage_cards:
-            target_player.played.remove(marriage_cards[0])
+            card_to_remove = marriage_cards[-1]
+            target_player.played.remove(card_to_remove)
+            game['discard'].append(card_to_remove)  # Envoyer dans la défausse
             return True, f"{target_player.name} a divorcé"
         return False, f"{target_player.name} n'est pas marié"
     
     elif hardship_type == 'impot':
-        # Retirer 2 salaires
         salary_cards = [c for c in target_player.played if isinstance(c, SalaryCard)]
-        removed = 0
-        for _ in range(min(2, len(salary_cards))):
-            target_player.played.remove(salary_cards[removed])
-            removed += 1
-        return True, f"{target_player.name} a perdu {removed} salaire(s)"
+        if salary_cards:
+            card_to_remove = salary_cards[-1]
+            target_player.played.remove(card_to_remove)
+            game['discard'].append(card_to_remove)  # Envoyer dans la défausse
+            return True, f"{target_player.name} a perdu 1 salaire"
+        return False, f"{target_player.name} n'a pas de salaire"
     
     elif hardship_type == 'licenciement':
-        # Retirer le métier
         job_card = target_player.get_job()
         if job_card:
             target_player.played = [c for c in target_player.played if not isinstance(c, JobCard)]
-            # Chômage: retirer aussi tous les salaires
-            target_player.played = [c for c in target_player.played if not isinstance(c, SalaryCard)]
+            game['discard'].append(job_card)  # Envoyer dans la défausse
             return True, f"{target_player.name} a été licencié"
         return False, f"{target_player.name} n'a pas de métier"
     
     elif hardship_type == 'maladie':
-        # Passe 1 tour et perd 1 salaire
         target_player.skip_turns = 1
-        salary_cards = [c for c in target_player.played if isinstance(c, SalaryCard)]
-        if salary_cards:
-            target_player.played.remove(salary_cards[0])
-        return True, f"{target_player.name} est malade (passe 1 tour et perd 1 salaire)"
+        return True, f"{target_player.name} est malade (passe 1 tour)"
     
     elif hardship_type == 'redoublement':
-        # Retirer une carte étude
         study_cards = [c for c in target_player.played if isinstance(c, StudyCard)]
         if study_cards:
-            target_player.played.remove(study_cards[0])
+            card_to_remove = study_cards[-1]
+            target_player.played.remove(card_to_remove)
+            game['discard'].append(card_to_remove)  # Envoyer dans la défausse
             return True, f"{target_player.name} a perdu une étude"
         return False, f"{target_player.name} n'a pas d'études à perdre"
     
     elif hardship_type == 'prison':
-        # Passe 3 tours
         target_player.skip_turns = 3
         return True, f"{target_player.name} est en prison pour 3 tours"
     
     elif hardship_type == 'attentat':
-        # Retirer toutes les cartes posées
         cards_count = len(target_player.played)
+        # Envoyer toutes les cartes dans la défausse
+        for card in target_player.played:
+            game['discard'].append(card)
         target_player.played = []
         return True, f"{target_player.name} a tout perdu ({cards_count} cartes)"
     
@@ -283,6 +276,56 @@ def handle_start_game(data):
                 'game': get_game_state_for_player(game, player.id)
             }, room=player.session_id)
 
+@socketio.on('skip_turn')
+def handle_skip_turn(data):
+    """Passer son tour manuellement"""
+    session_info = player_sessions.get(request.sid)
+    
+    if not session_info:
+        emit('error', {'message': 'Session non trouvée'})
+        return
+    
+    game_id = session_info['game_id']
+    player_id = session_info['player_id']
+    
+    if game_id not in games:
+        emit('error', {'message': 'Partie non trouvée'})
+        return
+    
+    game = games[game_id]
+    
+    if game['current_player'] != player_id:
+        emit('error', {'message': 'Ce n\'est pas votre tour'})
+        return
+    
+    player = game['players'][player_id]
+    
+    # Ne peut passer que si on a des tours à passer OU si on est en phase draw
+    if player.skip_turns > 0:
+        player.skip_turns -= 1
+        message = f"{player.name} passe son tour ({player.skip_turns} tour(s) restant(s))"
+    elif game['phase'] == 'draw':
+        emit('error', {'message': 'Vous ne pouvez pas passer votre tour, vous devez piocher'})
+        return
+    else:
+        emit('error', {'message': 'Vous ne pouvez pas passer votre tour après avoir pioché'})
+        return
+    
+    game['phase'] = 'draw'
+    game['current_player'] = (game['current_player'] + 1) % game['num_players']
+    
+    attempts = 0
+    while not game['players'][game['current_player']].connected and attempts < game['num_players']:
+        game['current_player'] = (game['current_player'] + 1) % game['num_players']
+        attempts += 1
+    
+    for p in game['players']:
+        if p.connected:
+            socketio.emit('game_updated', {
+                'game': get_game_state_for_player(game, p.id),
+                'message': message
+            }, room=p.session_id)
+
 @socketio.on('draw_card')
 def handle_draw_card(data):
     """Piocher une carte"""
@@ -312,24 +355,6 @@ def handle_draw_card(data):
     
     player = game['players'][player_id]
     
-    # Vérifier si le joueur doit passer son tour
-    if player.skip_turns > 0:
-        player.skip_turns -= 1
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        
-        attempts = 0
-        while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-            game['current_player'] = (game['current_player'] + 1) % game['num_players']
-            attempts += 1
-        
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': f"{player.name} passe son tour ({player.skip_turns + 1} tours restants)"
-                }, room=p.session_id)
-        return
-    
     if source == 'deck':
         if not game['deck']:
             scores = [(p.name, p.calculate_smiles(), p.id) for p in game['players'] if p.connected]
@@ -349,20 +374,97 @@ def handle_draw_card(data):
             return
         
         card = game['discard'].pop()
-        player.played.append(card)
-        game['phase'] = 'draw'
         
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        
-        attempts = 0
-        while not game['players'][game['current_player']].connected and attempts < game['num_players']:
+        # Si c'est une carte d'attaque, demander la cible
+        if isinstance(card, HardshipCard):
+            player.hand.append(card)  # Ajouter temporairement à la main
+            game['phase'] = 'play'  # Changer la phase pour permettre de jouer
+            
+            # Envoyer la demande de sélection de cible
+            for p in game['players']:
+                if p.connected and p.id == player_id:
+                    socketio.emit('select_hardship_target', {
+                        'card': card.to_dict(),
+                        'available_targets': [
+                            {'id': i, 'name': p.name} 
+                            for i, p in enumerate(game['players']) 
+                            if p.connected and i != player_id
+                        ],
+                        'from_discard': True
+                    }, room=p.session_id)
+        else:
+            # Carte normale : poser directement
+            player.played.append(card)
+            game['phase'] = 'draw'
+            
             game['current_player'] = (game['current_player'] + 1) % game['num_players']
-            attempts += 1
+            
+            attempts = 0
+            while not game['players'][game['current_player']].connected and attempts < game['num_players']:
+                game['current_player'] = (game['current_player'] + 1) % game['num_players']
+                attempts += 1
     
     for p in game['players']:
         if p.connected:
             socketio.emit('game_updated', {
                 'game': get_game_state_for_player(game, p.id)
+            }, room=p.session_id)
+
+@socketio.on('discard_played_card')
+def handle_discard_played_card(data):
+    """Défausser une carte déjà posée (métier, mariage ou adultère) - AVANT de piocher"""
+    card_id = data.get('card_id')
+    session_info = player_sessions.get(request.sid)
+    
+    if not session_info:
+        emit('error', {'message': 'Session non trouvée'})
+        return
+    
+    game_id = session_info['game_id']
+    player_id = session_info['player_id']
+    
+    if game_id not in games:
+        emit('error', {'message': 'Partie non trouvée'})
+        return
+    
+    game = games[game_id]
+    
+    if game['current_player'] != player_id:
+        emit('error', {'message': 'Ce n\'est pas votre tour'})
+        return
+    
+    # Ne peut défausser que AVANT de piocher (phase draw)
+    if game['phase'] != 'draw':
+        emit('error', {'message': 'Vous ne pouvez défausser qu\'avant de piocher'})
+        return
+    
+    player = game['players'][player_id]
+    
+    card = None
+    for c in player.played:
+        if c.id == card_id:
+            card = c
+            break
+    
+    if not card:
+        emit('error', {'message': 'Carte non trouvée'})
+        return
+    
+    # Seuls les métiers, mariages et adultères peuvent être défaussés
+    if not isinstance(card, (JobCard, MarriageCard, AdulteryCard)):
+        emit('error', {'message': 'Seuls les métiers, mariages et adultères peuvent être défaussés'})
+        return
+    
+    player.played.remove(card)
+    game['discard'].append(card)
+    
+    card_type = "métier" if isinstance(card, JobCard) else ("mariage" if isinstance(card, MarriageCard) else "adultère")
+    
+    for p in game['players']:
+        if p.connected:
+            socketio.emit('game_updated', {
+                'game': get_game_state_for_player(game, p.id),
+                'message': f"{player.name} a défaussé son {card_type}"
             }, room=p.session_id)
 
 @socketio.on('play_card')
@@ -415,15 +517,16 @@ def handle_play_card(data):
             }
             
             for p in game['players']:
-                if p.connected:
+                if p.connected and p.id == player_id:
                     socketio.emit('select_hardship_target', {
                         'card': card.to_dict(),
                         'available_targets': [
                             {'id': i, 'name': p.name} 
                             for i, p in enumerate(game['players']) 
                             if p.connected and i != player_id
-                        ]
-                    }, room=p.session_id if p.id == player_id else None)
+                        ],
+                        'from_discard': False
+                    }, room=p.session_id)
             return
         else:
             # Appliquer le malus
@@ -435,6 +538,7 @@ def handle_play_card(data):
             if success:
                 target_player.received_hardships.append(card.hardship_type)
             
+            # Envoyer la carte d'attaque dans la défausse
             game['discard'].append(card)
             game['pending_hardship'] = None
             
@@ -460,6 +564,23 @@ def handle_play_card(data):
     if not can_play:
         emit('error', {'message': error_message})
         return
+    
+    # Vérifier pour les acquisitions (maisons et voyages)
+    if isinstance(card, (HouseCard, TravelCard)):
+        total_salary_value = sum(c.level for c in player.played if isinstance(c, SalaryCard))
+        required = card.cost if isinstance(card, HouseCard) else 3
+        
+        # Vérifier le pouvoir du métier
+        job = player.get_job()
+        if job:
+            if isinstance(card, HouseCard) and job.power == 'house_free':
+                required = 0
+            elif isinstance(card, TravelCard) and job.power == 'travel_free':
+                required = 0
+        
+        if total_salary_value < required:
+            emit('error', {'message': f'Vous avez besoin d\'une somme de salaires de {required}'})
+            return
     
     player.hand.remove(card)
     player.played.append(card)

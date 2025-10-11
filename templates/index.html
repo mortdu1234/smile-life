@@ -159,9 +159,9 @@
     <div id="game-screen" class="hidden p-4 max-w-7xl mx-auto">
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-lg p-4 mb-4">
-            <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center flex-wrap gap-2">
                 <h2 id="current-player-name" class="text-2xl font-bold text-gray-800"></h2>
-                <div class="flex gap-4 items-center">
+                <div class="flex gap-4 items-center flex-wrap">
                     <div class="bg-blue-500 text-white px-4 py-2 rounded">
                         Pioche: <span id="deck-count">0</span>
                     </div>
@@ -173,18 +173,27 @@
             <div id="message" class="mt-2 bg-yellow-100 border-l-4 border-yellow-500 p-2 text-sm"></div>
         </div>
 
+        <!-- Dernière carte défaussée -->
+        <div id="last-discard-container" class="bg-white rounded-lg shadow-lg p-4 mb-4 hidden">
+            <h3 class="font-bold mb-2">🗑️ Dernière carte défaussée</h3>
+            <div id="last-discard-card"></div>
+        </div>
+
         <!-- Scores des joueurs -->
         <div id="players-scores" class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-4"></div>
 
         <!-- Actions disponibles -->
         <div id="actions-panel" class="bg-white rounded-lg shadow-lg p-4 mb-4">
             <h3 class="font-bold mb-3">🎯 Actions disponibles</h3>
-            <div class="flex gap-3">
-                <button onclick="drawCard('deck')" id="draw-deck-btn" class="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+            <div class="flex gap-3 flex-wrap">
+                <button onclick="drawCard('deck')" id="draw-deck-btn" class="flex-1 min-w-[200px] bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
                     📚 Piocher dans la pioche
                 </button>
-                <button onclick="drawCard('discard')" id="draw-discard-btn" class="flex-1 bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+                <button onclick="drawCard('discard')" id="draw-discard-btn" class="flex-1 min-w-[200px] bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
                     🗑️ Piocher dans la défausse
+                </button>
+                <button onclick="skipTurn()" id="skip-turn-btn" class="flex-1 min-w-[200px] bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+                    ⏭️ Passer mon tour
                 </button>
             </div>
         </div>
@@ -199,6 +208,12 @@
         <div class="bg-white rounded-lg shadow-lg p-4 mb-4">
             <h3 class="font-bold mb-3">Vos cartes posées</h3>
             <div id="player-played" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <!-- Attaques reçues -->
+        <div id="hardships-received-container" class="bg-red-50 rounded-lg shadow-lg p-4 mb-4 border-2 border-red-300">
+            <h3 class="font-bold mb-3 text-red-700">💥 Attaques reçues sur moi</h3>
+            <div id="hardships-received" class="flex flex-wrap gap-2"></div>
         </div>
 
         <!-- Autres joueurs -->
@@ -227,6 +242,7 @@
         let myPlayerId = null;
         let isHost = false;
         let pendingHardshipCard = null;
+        let fromDiscard = false;
 
         function log(message, data) {
             console.log(`[DEBUG] ${message}`, data || '');
@@ -259,8 +275,9 @@
             document.getElementById('game-screen').classList.remove('hidden');
         }
 
-        function showHardshipModal(card, availableTargets) {
+        function showHardshipModal(card, availableTargets, isFromDiscard = false) {
             pendingHardshipCard = card;
+            fromDiscard = isFromDiscard;
             
             const modal = document.getElementById('hardship-modal');
             const cardDisplay = document.getElementById('hardship-card-display');
@@ -289,6 +306,7 @@
         function closeHardshipModal() {
             document.getElementById('hardship-modal').classList.add('hidden');
             pendingHardshipCard = null;
+            fromDiscard = false;
         }
 
         function selectHardshipTarget(targetId) {
@@ -306,12 +324,12 @@
 
         function getHardshipDescription(type) {
             const descriptions = {
-                'accident': 'Fait perdre un voyage',
-                'burnout': 'Passer 2 tours',
+                'accident': 'Passer 1 tour',
+                'burnout': 'Passer 1 tour',
                 'divorce': 'Fait perdre le mariage',
-                'impot': 'Fait perdre 2 salaires',
-                'licenciement': 'Fait perdre le métier et tous les salaires',
-                'maladie': 'Passer 1 tour et perdre 1 salaire',
+                'impot': 'Fait perdre 1 salaire',
+                'licenciement': 'Fait perdre le métier',
+                'maladie': 'Passer 1 tour',
                 'redoublement': 'Fait perdre une étude',
                 'prison': 'Passer 3 tours',
                 'attentat': 'Fait perdre toutes les cartes posées'
@@ -360,6 +378,11 @@
             socket.emit('draw_card', { source: source });
         }
 
+        function skipTurn() {
+            log('Passer le tour');
+            socket.emit('skip_turn', {});
+        }
+
         function playCard(cardId) {
             log('Jouer carte', {cardId});
             
@@ -376,6 +399,20 @@
         function discardCard(cardId) {
             log('Défausser carte', {cardId});
             socket.emit('discard_card', { card_id: cardId });
+        }
+
+        function discardPlayedCard(cardId) {
+            log('Défausser carte posée', {cardId});
+            
+            // Vérifier qu'on est en phase draw
+            if (currentGame.phase !== 'draw') {
+                alert('Vous ne pouvez défausser qu\'avant de piocher');
+                return;
+            }
+            
+            if (confirm('Êtes-vous sûr de vouloir défausser cette carte ?')) {
+                socket.emit('discard_played_card', { card_id: cardId });
+            }
         }
 
         socket.on('game_created', (data) => {
@@ -436,7 +473,7 @@
 
         socket.on('select_hardship_target', (data) => {
             log('Sélectionner cible malus', data);
-            showHardshipModal(data.card, data.available_targets);
+            showHardshipModal(data.card, data.available_targets, data.from_discard || false);
         });
 
         socket.on('game_over', (data) => {
@@ -503,11 +540,19 @@
             document.getElementById('deck-count').textContent = currentGame.deck_count || 0;
             document.getElementById('discard-count').textContent = currentGame.discard ? currentGame.discard.length : 0;
             
+            // Afficher la dernière carte défaussée
+            if (currentGame.last_discard) {
+                document.getElementById('last-discard-container').classList.remove('hidden');
+                document.getElementById('last-discard-card').innerHTML = createCardHTML(currentGame.last_discard, false);
+            } else {
+                document.getElementById('last-discard-container').classList.add('hidden');
+            }
+            
             if (isMyTurn) {
                 if (myPlayer.skip_turns > 0) {
-                    updateMessage(`⏸️ Vous devez passer votre tour (${myPlayer.skip_turns} tour(s) restant(s))`);
+                    updateMessage(`⏸️ Vous devez passer votre tour (${myPlayer.skip_turns} tour(s) restant(s)) - Cliquez sur "Passer mon tour"`);
                 } else if (currentGame.phase === 'draw') {
-                    updateMessage('Piochez une carte de la pioche ou de la défausse');
+                    updateMessage('Piochez une carte de la pioche ou de la défausse (ou défaussez un métier/mariage/adultère avant)');
                 } else {
                     updateMessage('Jouez ou défaussez une carte de votre main');
                 }
@@ -517,9 +562,12 @@
             
             const canDraw = isMyTurn && currentGame.phase === 'draw' && myPlayer.skip_turns === 0;
             const canPlay = isMyTurn && currentGame.phase === 'play';
+            const mustSkip = isMyTurn && myPlayer.skip_turns > 0;
+            const canDiscardPlayed = isMyTurn && currentGame.phase === 'draw' && myPlayer.skip_turns === 0;
             
             document.getElementById('draw-deck-btn').disabled = !canDraw;
             document.getElementById('draw-discard-btn').disabled = !canDraw || (currentGame.discard && currentGame.discard.length === 0);
+            document.getElementById('skip-turn-btn').disabled = !mustSkip;
             
             const scoresContainer = document.getElementById('players-scores');
             scoresContainer.innerHTML = currentGame.players.map((player, i) => {
@@ -557,10 +605,24 @@
             const playedContainer = document.getElementById('player-played');
             if (myPlayer.played && myPlayer.played.length > 0) {
                 playedContainer.innerHTML = myPlayer.played.map(card => {
-                    return createCardHTML(card, false);
+                    return createCardHTML(card, false, true, canDiscardPlayed);
                 }).join('');
             } else {
                 playedContainer.innerHTML = '<p class="text-gray-500">Aucune carte posée</p>';
+            }
+            
+            // Afficher les attaques reçues
+            const hardshipsContainer = document.getElementById('hardships-received');
+            if (myPlayer.received_hardships && myPlayer.received_hardships.length > 0) {
+                hardshipsContainer.innerHTML = myPlayer.received_hardships.map(hardship => {
+                    return `
+                        <div class="bg-red-200 border-2 border-red-400 rounded-lg p-2 text-sm">
+                            <span class="font-semibold">⚠️ ${hardship}</span>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                hardshipsContainer.innerHTML = '<p class="text-gray-500">Aucune attaque reçue</p>';
             }
             
             const othersContainer = document.getElementById('other-players');
@@ -576,6 +638,16 @@
                                 ${player.skip_turns > 0 ? `<span class="text-orange-600 text-sm">(⏸️ ${player.skip_turns} tour(s))</span>` : ''}
                             </h3>
                             <div class="text-sm text-gray-600 mb-2">${handCount} cartes en main</div>
+                            
+                            ${player.received_hardships && player.received_hardships.length > 0 ? `
+                                <div class="mb-2">
+                                    <div class="text-xs font-semibold text-red-700 mb-1">Attaques reçues:</div>
+                                    <div class="flex flex-wrap gap-1">
+                                        ${player.received_hardships.map(h => `<span class="bg-red-200 text-xs px-2 py-1 rounded">⚠️ ${h}</span>`).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
                             <div class="flex flex-wrap gap-2">
                                 ${player.played && player.played.length > 0 ? 
                                     player.played.map(card => createCardHTML(card, false)).join('') :
@@ -586,7 +658,7 @@
                 }).join('');
         }
 
-        function createCardHTML(card, canPlay) {
+        function createCardHTML(card, canPlay, isPlayed = false, canDiscard = false) {
             const colors = {
                 'job': 'bg-blue-100 border-blue-300',
                 'study': 'bg-blue-100 border-blue-300',
@@ -614,7 +686,10 @@
             const color = colors[card.type] || 'bg-gray-100 border-gray-300';
             const icon = icons[card.type] || '🎴';
             
-            const cursor = canPlay ? 'cursor-pointer hover:scale-105' : '';
+            const cursor = (canPlay || canDiscard) ? 'cursor-pointer hover:scale-105' : '';
+            
+            // Permettre de défausser métier, mariage et adultère déjà posés (AVANT de piocher)
+            const canDiscardPlayed = isPlayed && canDiscard && (card.type === 'job' || card.type === 'marriage' || card.type === 'adultere');
 
             return `
                 <div class="card ${color} border-2 rounded-lg p-3 min-w-[120px] ${cursor}">
@@ -635,6 +710,13 @@
                             </button>
                             <button onclick="discardCard('${card.id}')" class="flex-1 bg-gray-500 text-white text-xs px-2 py-1 rounded hover:bg-gray-600">
                                 Défausser
+                            </button>
+                        </div>
+                    ` : ''}
+                    ${canDiscardPlayed ? `
+                        <div class="mt-2">
+                            <button onclick="discardPlayedCard('${card.id}')" class="w-full bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600">
+                                🗑️ Défausser
                             </button>
                         </div>
                     ` : ''}
