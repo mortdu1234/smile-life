@@ -35,7 +35,7 @@ def get_game_state_for_player(game, player_id):
     print(f"État du jeu pour joueur {player_id}: deck={game_state['deck_count']}, discard={len(game_state['discard'])}, phase={game_state['phase']}")
     return game_state
 
-def apply_hardship_effect(game, hardship_card, target_player):
+def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
     """Applique l'effet d'une carte malus sur un joueur cible"""
     hardship_type = hardship_card.hardship_type
     
@@ -58,10 +58,12 @@ def apply_hardship_effect(game, hardship_card, target_player):
     # Appliquer les effets
     if hardship_type == 'accident':
         target_player.skip_turns = 1
+        target_player.received_hardships.append(hardship_type)
         return True, f"{target_player.name} doit passer 1 tour"
     
     elif hardship_type == 'burnout':
         target_player.skip_turns = 1
+        target_player.received_hardships.append(hardship_type)
         return True, f"{target_player.name} doit passer 1 tour"
     
     elif hardship_type == 'divorce':
@@ -70,6 +72,7 @@ def apply_hardship_effect(game, hardship_card, target_player):
             card_to_remove = marriage_cards[-1]
             target_player.remove_card_from_played(card_to_remove)
             game['discard'].append(card_to_remove)
+            target_player.received_hardships.append(hardship_type)
             return True, f"{target_player.name} a divorcé"
         return False, f"{target_player.name} n'est pas marié"
     
@@ -79,6 +82,7 @@ def apply_hardship_effect(game, hardship_card, target_player):
             card_to_remove = salary_cards[-1]
             target_player.remove_card_from_played(card_to_remove)
             game['discard'].append(card_to_remove)
+            target_player.received_hardships.append(hardship_type)
             return True, f"{target_player.name} a perdu 1 salaire"
         return False, f"{target_player.name} n'a pas de salaire"
     
@@ -87,11 +91,13 @@ def apply_hardship_effect(game, hardship_card, target_player):
         if job_card:
             target_player.remove_card_from_played(job_card)
             game['discard'].append(job_card)
+            target_player.received_hardships.append(hardship_type)
             return True, f"{target_player.name} a été licencié"
         return False, f"{target_player.name} n'a pas de métier"
     
     elif hardship_type == 'maladie':
         target_player.skip_turns = 1
+        target_player.received_hardships.append(hardship_type)
         return True, f"{target_player.name} est malade (passe 1 tour)"
     
     elif hardship_type == 'redoublement':
@@ -100,27 +106,31 @@ def apply_hardship_effect(game, hardship_card, target_player):
             card_to_remove = study_cards[-1]
             target_player.remove_card_from_played(card_to_remove)
             game['discard'].append(card_to_remove)
+            target_player.received_hardships.append(hardship_type)
             return True, f"{target_player.name} a perdu une étude"
         return False, f"{target_player.name} n'a pas d'études à perdre"
     
     elif hardship_type == 'prison':
         target_player.skip_turns = 3
+        target_player.received_hardships.append(hardship_type)
         return True, f"{target_player.name} est en prison pour 3 tours"
     
     elif hardship_type == 'attentat':
-        # L'attentat défausse TOUS les enfants de TOUS les joueurs
-        total_children_removed = 0
-        for player in game['players']:
-            children_cards = [c for c in player.played["vie personnelle"] if isinstance(c, ChildCard)]
-            for child in children_cards:
-                player.remove_card_from_played(child)
-                game['discard'].append(child)
-                total_children_removed += 1
+        # L'attentat : c'est l'ATTAQUANT qui perd tous SES enfants
+        children_cards = [c for c in attacker_player.played["vie personnelle"] if isinstance(c, ChildCard)]
+        total_children_removed = len(children_cards)
+        
+        for child in children_cards:
+            attacker_player.remove_card_from_played(child)
+            game['discard'].append(child)
+        
+        # L'attaquant reçoit l'attentat sur lui-même
+        attacker_player.received_hardships.append(hardship_type)
         
         if total_children_removed > 0:
-            return True, f"Attentat ! {total_children_removed} enfant(s) ont été perdus par tous les joueurs"
+            return True, f"Attentat ! {attacker_player.name} perd {total_children_removed} enfant(s)"
         else:
-            return True, "Attentat ! Mais aucun enfant n'était présent"
+            return True, f"Attentat ! {attacker_player.name} n'avait pas d'enfant"
     
     return True, f"Malus {hardship_type} appliqué à {target_player.name}"
 
@@ -448,7 +458,7 @@ def handle_select_salaries(data):
         emit('error', {'message': 'Carte non valide'})
         return
     
-    # Calculer le coût requis
+    # Calculer le coût requis (minimum)
     required = card.cost if isinstance(card, HouseCard) else 3
     
     # Vérifier le pouvoir du métier
@@ -487,17 +497,14 @@ def handle_select_salaries(data):
                 selected_salaries.append(salary)
                 break
     
-    # Vérifier que la somme correspond
+    # Vérifier que la somme est >= au minimum requis
     total = sum(s.level for s in selected_salaries)
     
     if total < required:
-        emit('error', {'message': f'Montant insuffisant : {total}/{required}'})
+        emit('error', {'message': f'Montant insuffisant : {total}/{required} (minimum requis)'})
         return
     
-    if total > required:
-        emit('error', {'message': f'Montant trop élevé : {total}/{required}. Sélectionnez exactement {required}'})
-        return
-    
+    # ✅ CORRECTION : On accepte maintenant un montant supérieur au minimum
     # Déplacer les salaires vers "salaire dépensé"
     for salary in selected_salaries:
         player.played["vie professionnelle"].remove(salary)
@@ -697,17 +704,14 @@ def handle_play_card(data):
                     }, room=p.session_id)
             return
         else:
-            # Appliquer le malus
+            # ✅ CORRECTION : Appliquer le malus avec l'attaquant en paramètre
             target_player = game['players'][target_player_id]
-            success, message = apply_hardship_effect(game, card, target_player)
+            success, message = apply_hardship_effect(game, card, target_player, player)
             
             player.hand.remove(card)
             
-            if success:
-                target_player.received_hardships.append(card.hardship_type)
-            
-            # Envoyer la carte d'attaque dans la défausse
-            game['discard'].append(card)
+            # ✅ CORRECTION : La carte d'attaque NE VA PAS dans la défausse
+            # Elle reste juste utilisée (on pourrait la stocker quelque part si besoin)
             game['pending_hardship'] = None
             
             # Passer au joueur suivant
@@ -749,7 +753,7 @@ def handle_play_card(data):
             total_available = sum(s['subtype'] for s in available_salaries)
             
             if total_available < required:
-                emit('error', {'message': f'Vous avez besoin d\'une somme de salaires de {required}'})
+                emit('error', {'message': f'Vous avez besoin d\'une somme de salaires minimale de {required}'})
                 return
             
             # Envoyer une demande de sélection de salaires

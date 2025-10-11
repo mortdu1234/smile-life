@@ -9,10 +9,7 @@
 - il faut ajouter un moyen de défausser son métier et son mariage quand il est déja posé
 - impot fait perdre 2 salire alors qu'il faudrais qu'il en fasse perdre juste 1
 - licenciement fait perdre le métier et tous les salaires, alors qu'il faudrait qu'il fasse perdre uniquement le métier
-
-
 V2
-
 - les cartes qui sont supprimée par des effet d'attaques doivent etre envoyés dans la défausse de plus les cartes
 d'attaques qui sont utilisée ne sont pas envoyée dans la défausse mais jsute dans la liste des cartes recus par chaque joueurs
 - on ne peut pas avoir 2 adultaire en meme temps et on dois pouvoir annulé l'adultaire en le défaussant
@@ -21,24 +18,27 @@ d'attaques qui sont utilisée ne sont pas envoyée dans la défausse mais jsute 
 - une fois qu'on a piocher, on ne dois pas pouvoir passer son tour
 - pour poser une acquisision il faut avoir au moins une somme de 3 salaires, c'est a dire que ces combinaisons sont valables : 3*salaire niveau 1 / 2*salaire niveau 2 ...
 - quand on pioche une carte d'attaque depuis la défausse, il faut pas la poser devant chez nous mais la poser face a un adversaire (en affichant la page de choix de l'adversaire)
-
 V3
-
 - j'aimerais qu'on puisse passer notre tour a tout moment
 - l'attentat supprime toutes les cartes d'un joueurs, alors qu'elle devrait défausser tous les enfants de tous les joueurs
 - quand on achete une acquisision depuis la défausse, il faut vriament l'acheter
 - quand on achete une acquisision, j'aimerais que ca ouvre une fenetre avec la liste des cartes salaires qu'on a de posé et de libre (donc non dépensé) et que l'on sélectionne les salaire que l'on veut dépenser
 avec un compteur qui indique le prix de l'acquisision et combien on met a chaque instant
-
-
-
 V4
 - quand on utilise une attaque elle ne dois pas arrivé dans la défausse mais juste dans la pile des cartes recus de la cible
 - quand on achete une aquisition on peut mettre plus que le prix, le prix de l'aquisition est un prix minimum
 - quand on utilise l'attentat, c'est le joueur qui l'utilise qui le prend sur lui
 
 
+
+V5
+- les maisons ont un prix qui est divisé par 2 si le joueur est marié
+- lorsqu'un joueur ne peut pas recevoir un malus griser le nom de ce joueur lors de la sélection du joueurs pour un malus
+- quand on se prend un divorce alors qu'on a un adultaire alors on perds le mariage, l'adultaire et les enfants posé
+- les flirts qui sont posé grace a l'adultaire sont envoyé dans la catégorie "cartes spéciales" 
+
+
 # pas important pour le moment
 - la prison dois aussi jeter dans la défausse 2 cartes aléatoire de la main et en repiocher 2 de la pioche en plus de passer 3 tour et jeter le métier de bandit
 - quand on pioche depuis la défausse, on est obliger de jouer la carte de la défausse (erreur lors d'une reprise d'aquisition cela la met dans la main)
-
+- faire la vérification des limites des attaques (redoublement alors qu'on a un métier)

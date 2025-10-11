@@ -59,7 +59,7 @@
             
             <div class="mb-4 p-4 bg-blue-50 rounded-lg">
                 <div class="flex justify-between items-center text-lg font-semibold">
-                    <span>Coût requis :</span>
+                    <span>Coût minimum :</span>
                     <span class="text-blue-600" id="required-cost">0</span>
                 </div>
                 <div class="flex justify-between items-center text-lg font-semibold mt-2">
@@ -67,7 +67,7 @@
                     <span class="text-green-600" id="selected-amount">0</span>
                 </div>
                 <div class="mt-2 text-sm text-gray-600">
-                    <span id="payment-status">Sélectionnez vos salaires</span>
+                    <span id="payment-status">Sélectionnez vos salaires (minimum requis)</span>
                 </div>
             </div>
             
@@ -379,14 +379,14 @@
                     <span class="text-3xl">${card.type === 'house' ? '🏠' : '✈️'}</span>
                     <div>
                         <div class="font-bold text-lg">${getCardLabel(card)}</div>
-                        <div class="text-sm text-gray-600">Coût: ${cost} 💰</div>
+                        <div class="text-sm text-gray-600">Coût minimum: ${cost} 💰</div>
                     </div>
                 </div>
             `;
             
             document.getElementById('required-cost').textContent = cost;
             document.getElementById('selected-amount').textContent = '0';
-            document.getElementById('payment-status').textContent = 'Sélectionnez vos salaires';
+            document.getElementById('payment-status').textContent = 'Sélectionnez vos salaires (minimum requis, vous pouvez dépenser plus)';
             
             salariesList.innerHTML = availableSalaries.map(salary => `
                 <div onclick="toggleSalarySelection('${salary.id}', ${salary.subtype})" 
@@ -428,15 +428,16 @@
             const confirmBtn = document.getElementById('confirm-salary-btn');
             
             if (total < requiredCost) {
-                statusEl.textContent = `Il manque ${requiredCost - total}`;
+                statusEl.textContent = `Il manque ${requiredCost - total} (minimum requis)`;
                 statusEl.className = 'mt-2 text-sm text-orange-600 font-semibold';
                 confirmBtn.disabled = true;
-            } else if (total > requiredCost) {
-                statusEl.textContent = `Trop ! Retirez ${total - requiredCost}`;
-                statusEl.className = 'mt-2 text-sm text-red-600 font-semibold';
-                confirmBtn.disabled = true;
-            } else {
+            } else if (total === requiredCost) {
                 statusEl.textContent = '✅ Montant exact !';
+                statusEl.className = 'mt-2 text-sm text-green-600 font-semibold';
+                confirmBtn.disabled = false;
+            } else {
+                // ✅ On accepte maintenant de payer plus
+                statusEl.textContent = `✅ Montant valide ! (+${total - requiredCost} de surplus)`;
                 statusEl.className = 'mt-2 text-sm text-green-600 font-semibold';
                 confirmBtn.disabled = false;
             }
@@ -447,8 +448,8 @@
             
             const total = selectedSalaries.reduce((sum, s) => sum + s.level, 0);
             
-            if (total !== requiredCost) {
-                alert('Le montant sélectionné ne correspond pas au coût requis');
+            if (total < requiredCost) {
+                alert('Le montant sélectionné est inférieur au minimum requis');
                 return;
             }
             
@@ -524,7 +525,7 @@
                 'maladie': 'Passer 1 tour',
                 'redoublement': 'Fait perdre une étude',
                 'prison': 'Passer 3 tours',
-                'attentat': 'Fait perdre tous les enfants de tous les joueurs'
+                'attentat': 'VOUS perdez tous VOS enfants !'
             };
             return descriptions[type] || 'Coup dur';
         }
