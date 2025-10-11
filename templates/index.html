@@ -468,7 +468,7 @@
             requiredCost = 0;
         }
 
-        function showHardshipModal(card, availableTargets, isFromDiscard = false) {
+                function showHardshipModal(card, availableTargets, isFromDiscard = false) {
             pendingHardshipCard = card;
             fromDiscard = isFromDiscard;
             
@@ -486,12 +486,21 @@
                 </div>
             `;
             
-            targetsList.innerHTML = availableTargets.map(target => `
-                <button onclick="selectHardshipTarget(${target.id})" 
-                        class="w-full p-4 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:from-red-600 hover:to-orange-600 transition-all transform hover:scale-105 font-semibold shadow-lg">
-                    🎯 ${target.name}
-                </button>
-            `).join('');
+            targetsList.innerHTML = availableTargets.map(target => {
+                const isImmune = target.immune || false;
+                const buttonClass = isImmune 
+                    ? 'w-full p-4 bg-gray-400 text-gray-700 rounded-lg cursor-not-allowed opacity-50' 
+                    : 'w-full p-4 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:from-red-600 hover:to-orange-600 transition-all transform hover:scale-105 font-semibold shadow-lg';
+                const onClick = isImmune ? '' : `onclick="selectHardshipTarget(${target.id})"`;
+                const immuneText = isImmune ? ` 🛡️ (Protégé)` : '';
+                
+                return `
+                    <button ${onClick} ${isImmune ? 'disabled' : ''} 
+                            class="${buttonClass}">
+                        🎯 ${target.name}${immuneText}
+                    </button>
+                `;
+            }).join('');
             
             modal.classList.remove('hidden');
         }
@@ -966,6 +975,7 @@
                 </div>
             `;
         }
+        
 
         function getCardLabel(card) {
             if (card.type === 'job') return card.subtype;

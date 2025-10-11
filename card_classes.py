@@ -235,10 +235,15 @@ class HouseCard(Card):
         if job and job.power == 'house_free':
             return True, ""
         
+        # Calculer le coût requis (divisé par 2 si marié)
+        required_cost = self.cost
+        if player.is_married():
+            required_cost = required_cost // 2
+        
         # Vérifier la somme totale des salaires
         total_salary_value = player.get_available_salary_sum()
-        if total_salary_value < self.cost:
-            return False, f"Vous avez besoin d'une somme de salaires de {self.cost}"
+        if total_salary_value < required_cost:
+            return False, f"Vous avez besoin d'une somme de salaires de {required_cost}"
         
         return True, ""
 
@@ -344,7 +349,7 @@ class Player:
             "vie personnelle": [],      # flirts, mariage, adultère, enfants, animaux
             "acquisitions": [],         # maisons, voyages
             "salaire dépensé": [],      # salaires utilisés pour acheter
-            "cartes spéciales": []      # cartes spéciales et autres
+            "cartes spéciales": []      # cartes spéciales, autres, et flirts avec adultère
         }
         self.skip_turns = 0
         self.has_been_bandit = False
@@ -364,8 +369,14 @@ class Player:
         """Ajoute une carte à la bonne catégorie"""
         if isinstance(card, (StudyCard, JobCard, SalaryCard)):
             self.played["vie professionnelle"].append(card)
-        elif isinstance(card, (FlirtCard, MarriageCard, AdulteryCard, ChildCard, AnimalCard)):
+        elif isinstance(card, (MarriageCard, ChildCard, AnimalCard, AdulteryCard)):
             self.played["vie personnelle"].append(card)
+        elif isinstance(card, FlirtCard):
+            # ✅ Les flirts posés avec un adultère vont dans "cartes spéciales"
+            if self.has_adultery():
+                self.played["cartes spéciales"].append(card)
+            else:
+                self.played["vie personnelle"].append(card)
         elif isinstance(card, (HouseCard, TravelCard)):
             self.played["acquisitions"].append(card)
         elif isinstance(card, (SpecialCard, OtherCard)):
@@ -424,7 +435,10 @@ class Player:
     
     def has_any_flirt(self) -> bool:
         """Vérifie si le joueur a au moins un flirt"""
-        return any(isinstance(card, FlirtCard) for card in self.played["vie personnelle"])
+        # Chercher dans vie personnelle ET cartes spéciales (flirts avec adultère)
+        all_flirts = [c for c in self.played["vie personnelle"] if isinstance(c, FlirtCard)]
+        all_flirts.extend([c for c in self.played["cartes spéciales"] if isinstance(c, FlirtCard)])
+        return len(all_flirts) > 0
     
     def has_adultery(self) -> bool:
         """Vérifie si le joueur a un adultère"""
@@ -454,8 +468,10 @@ class Player:
         return any(isinstance(card, MarriageCard) for card in self.played["vie personnelle"])
     
     def has_flirt_at_location(self, location: str) -> bool:
-        return any(isinstance(card, FlirtCard) and card.location == location 
-                   for card in self.played["vie personnelle"])
+        # Chercher dans vie personnelle ET cartes spéciales
+        all_flirts = [c for c in self.played["vie personnelle"] if isinstance(c, FlirtCard)]
+        all_flirts.extend([c for c in self.played["cartes spéciales"] if isinstance(c, FlirtCard)])
+        return any(flirt.location == location for flirt in all_flirts)
     
     def calculate_smiles(self) -> int:
         total = sum(card.smiles for card in self.get_all_played_cards())
@@ -537,10 +553,38 @@ class CardFactory:
         {'name': 'licorne', 'smiles': 3},
         {'name': 'poussin', 'smiles': 1}
     ]
+
+
+    def test_create_deck(cls) -> List[Card]:
+        """effectue un tests avec des cartes customs"""
+        deck = []
+
+        for loc in cls.FLIRT_LOCATIONS:
+            deck.append(FlirtCard(loc))
+            deck.append(FlirtCard(loc))
+
+        for loc in cls.MARRIAGE_LOCATIONS:
+            deck.append(MarriageCard(loc))
+
+        for name in cls.CHILDREN_NAMES:
+            deck.append(ChildCard(name))
+
+        # Adultères
+        for _ in range(3):
+            deck.append(AdulteryCard())
+            deck.append(HardshipCard('divorce'))
+
+
+        return deck
     
     @classmethod
     def create_deck(cls) -> List[Card]:
         """Crée un deck complet de cartes"""
+        #########################
+        # return cls.test_create_deck(cls)
+        # TESTING
+        #########################
+        
         deck = []
         
         # Métiers
@@ -616,3 +660,4 @@ class CardFactory:
         deck.append(OtherCard('prix', 4))
         
         return deck
+    

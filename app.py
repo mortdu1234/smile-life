@@ -69,9 +69,34 @@ def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
     elif hardship_type == 'divorce':
         marriage_cards = [c for c in target_player.played["vie personnelle"] if isinstance(c, MarriageCard)]
         if marriage_cards:
-            card_to_remove = marriage_cards[-1]
-            target_player.remove_card_from_played(card_to_remove)
-            game['discard'].append(card_to_remove)
+            # Retirer le mariage
+            marriage_to_remove = marriage_cards[-1]
+            target_player.remove_card_from_played(marriage_to_remove)
+            game['discard'].append(marriage_to_remove)
+            
+            # Si le joueur a un adultère, retirer aussi l'adultère et les enfants
+            adultery_cards = [c for c in target_player.played["vie personnelle"] if isinstance(c, AdulteryCard)]
+            if adultery_cards:
+                # Retirer l'adultère
+                adultery = adultery_cards[0]
+                target_player.remove_card_from_played(adultery)
+                game['discard'].append(adultery)
+                
+                # Retirer tous les enfants
+                children_cards = [c for c in target_player.played["vie personnelle"] if isinstance(c, ChildCard)]
+                for child in children_cards:
+                    target_player.remove_card_from_played(child)
+                    game['discard'].append(child)
+                
+                # Retirer les flirts posés grâce à l'adultère (qui sont dans "cartes spéciales")
+                adultery_flirts = [c for c in target_player.played["cartes spéciales"] if isinstance(c, FlirtCard)]
+                for flirt in adultery_flirts:
+                    target_player.remove_card_from_played(flirt)
+                    game['discard'].append(flirt)
+                
+                target_player.received_hardships.append(hardship_type)
+                return True, f"{target_player.name} a divorcé et perdu son adultère, ses enfants et ses flirts adultères"
+            
             target_player.received_hardships.append(hardship_type)
             return True, f"{target_player.name} a divorcé"
         return False, f"{target_player.name} n'est pas marié"
