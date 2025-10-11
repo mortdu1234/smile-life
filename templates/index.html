@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jeu de Cartes Smile</title>
+    <title>Jeu de Cartes Smile - Multijoueur</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -16,41 +17,141 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
-        .card-playable {
-            border: 3px solid #10b981;
+        .pulse {
             animation: pulse 2s infinite;
         }
         @keyframes pulse {
-            0%, 100% { border-color: #10b981; }
-            50% { border-color: #34d399; }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .modal {
+            backdrop-filter: blur(4px);
         }
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-400 to-pink-500 min-h-screen">
     
-    <!-- Écran de démarrage -->
-    <div id="start-screen" class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full">
+    <!-- Modal de sélection de cible pour malus -->
+    <div id="hardship-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full">
+            <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">
+                ⚠️ Choisir une victime
+            </h2>
+            <div id="hardship-card-display" class="mb-6 p-4 bg-red-50 rounded-lg border-2 border-red-300"></div>
+            <div class="mb-6">
+                <h3 class="font-semibold mb-3 text-gray-700">Joueurs disponibles :</h3>
+                <div id="target-players-list" class="space-y-2"></div>
+            </div>
+            <button onclick="closeHardshipModal()" class="w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+                Annuler
+            </button>
+        </div>
+    </div>
+
+    <!-- Écran de menu -->
+    <div id="menu-screen" class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full">
             <div class="flex justify-center mb-6">
                 <span class="text-6xl">😊</span>
             </div>
             <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">Jeu de Cartes Smile</h1>
             
-            <div class="mb-6">
-                <label class="block text-gray-700 font-semibold mb-2">Nombre de joueurs:</label>
-                <select id="num-players" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none">
-                    <option value="2">2 joueurs</option>
-                    <option value="3">3 joueurs</option>
-                    <option value="4">4 joueurs</option>
-                    <option value="5">5 joueurs</option>
-                </select>
+            <div class="space-y-4">
+                <button onclick="showCreateGame()" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 px-6 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 font-semibold text-lg shadow-lg">
+                    🎮 Créer une partie
+                </button>
+                
+                <button onclick="showJoinGame()" class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-4 px-6 rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all transform hover:scale-105 font-semibold text-lg shadow-lg">
+                    🚪 Rejoindre une partie
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Écran création de partie -->
+    <div id="create-screen" class="hidden flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full">
+            <button onclick="backToMenu()" class="mb-4 text-gray-600 hover:text-gray-800">← Retour</button>
+            
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Créer une partie</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Votre nom:</label>
+                    <input type="text" id="host-name" value="Joueur 1" 
+                           class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Nombre de joueurs:</label>
+                    <select id="num-players" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none">
+                        <option value="2">2 joueurs</option>
+                        <option value="3">3 joueurs</option>
+                        <option value="4">4 joueurs</option>
+                        <option value="5">5 joueurs</option>
+                    </select>
+                </div>
+                
+                <button onclick="createGame()" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 px-6 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 font-semibold text-lg shadow-lg">
+                    Créer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Écran rejoindre partie -->
+    <div id="join-screen" class="hidden flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full">
+            <button onclick="backToMenu()" class="mb-4 text-gray-600 hover:text-gray-800">← Retour</button>
+            
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Rejoindre une partie</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Votre nom:</label>
+                    <input type="text" id="join-name" value="Joueur" 
+                           class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Code de la partie:</label>
+                    <input type="text" id="game-code" placeholder="Ex: abc123" 
+                           class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none uppercase">
+                </div>
+                
+                <button onclick="joinGame()" class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-4 px-6 rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all transform hover:scale-105 font-semibold text-lg shadow-lg">
+                    Rejoindre
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Écran salle d'attente -->
+    <div id="lobby-screen" class="hidden flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">Salle d'attente</h2>
+            <div class="text-center mb-6">
+                <p class="text-gray-600 mb-2">Code de la partie:</p>
+                <div class="inline-block bg-purple-100 px-6 py-3 rounded-lg">
+                    <span id="lobby-game-code" class="text-3xl font-bold text-purple-600"></span>
+                </div>
+                <p class="text-sm text-gray-500 mt-2">Partagez ce code avec vos amis</p>
             </div>
             
-            <div id="player-names" class="space-y-3 mb-6"></div>
+            <div class="mb-6">
+                <h3 class="font-bold mb-3 text-lg">Joueurs connectés:</h3>
+                <div id="lobby-players" class="space-y-2"></div>
+            </div>
             
-            <button onclick="startGame()" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 px-6 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 font-semibold text-lg shadow-lg">
-                Commencer la partie
-            </button>
+            <div id="start-button-container" class="hidden">
+                <button onclick="startGame()" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white py-4 px-6 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 font-semibold text-lg shadow-lg">
+                    🚀 Démarrer la partie
+                </button>
+            </div>
+            
+            <div class="text-center text-gray-600 text-sm mt-4">
+                <span id="players-count">En attente de joueurs...</span>
+            </div>
         </div>
     </div>
 
@@ -61,9 +162,6 @@
             <div class="flex justify-between items-center">
                 <h2 id="current-player-name" class="text-2xl font-bold text-gray-800"></h2>
                 <div class="flex gap-4 items-center">
-                    <button onclick="toggleHelp()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
-                        Aide
-                    </button>
                     <div class="bg-blue-500 text-white px-4 py-2 rounded">
                         Pioche: <span id="deck-count">0</span>
                     </div>
@@ -72,26 +170,7 @@
                     </div>
                 </div>
             </div>
-            <div id="message" class="mt-2 bg-yellow-100 border-l-4 border-yellow-500 p-2 text-sm hidden"></div>
-        </div>
-
-        <!-- Panneau d'aide -->
-        <div id="help-panel" class="hidden bg-white rounded-lg shadow-lg p-6 mb-4 max-h-96 overflow-y-auto">
-            <h3 class="text-xl font-bold mb-4">📖 Règles du jeu</h3>
-            <div class="space-y-4 text-sm">
-                <div>
-                    <h4 class="font-bold">🎯 Objectif</h4>
-                    <p>Avoir le plus de smiles posés à la fin de la pioche</p>
-                </div>
-                <div>
-                    <h4 class="font-bold">🎮 Actions par tour</h4>
-                    <ul class="list-disc ml-5">
-                        <li>Piocher dans la pioche ET poser une carte</li>
-                        <li>Piocher dans la défausse ET poser cette carte immédiatement</li>
-                        <li>Défausser une carte posée</li>
-                    </ul>
-                </div>
-            </div>
+            <div id="message" class="mt-2 bg-yellow-100 border-l-4 border-yellow-500 p-2 text-sm"></div>
         </div>
 
         <!-- Scores des joueurs -->
@@ -101,10 +180,10 @@
         <div id="actions-panel" class="bg-white rounded-lg shadow-lg p-4 mb-4">
             <h3 class="font-bold mb-3">🎯 Actions disponibles</h3>
             <div class="flex gap-3">
-                <button onclick="drawCard('deck')" class="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 font-semibold">
+                <button onclick="drawCard('deck')" id="draw-deck-btn" class="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
                     📚 Piocher dans la pioche
                 </button>
-                <button onclick="drawCard('discard')" class="flex-1 bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 font-semibold">
+                <button onclick="drawCard('discard')" id="draw-discard-btn" class="flex-1 bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
                     🗑️ Piocher dans la défausse
                 </button>
             </div>
@@ -112,7 +191,7 @@
 
         <!-- Main du joueur -->
         <div class="bg-white rounded-lg shadow-lg p-4 mb-4">
-            <h3 class="font-bold mb-3">Votre main</h3>
+            <h3 class="font-bold mb-3">Votre main (<span id="hand-count">0</span> cartes)</h3>
             <div id="player-hand" class="flex flex-wrap gap-2"></div>
         </div>
 
@@ -142,136 +221,372 @@
     </div>
 
     <script>
+        const socket = io();
         let gameId = null;
         let currentGame = null;
-        let currentPlayerId = 0;
+        let myPlayerId = null;
+        let isHost = false;
+        let pendingHardshipCard = null;
 
-        // Initialiser les champs de noms de joueurs
-        document.getElementById('num-players').addEventListener('change', function() {
-            const num = parseInt(this.value);
-            const container = document.getElementById('player-names');
-            container.innerHTML = '';
-            for (let i = 0; i < num; i++) {
-                container.innerHTML += `
-                    <div>
-                        <label class="block text-gray-700 font-semibold mb-1">Joueur ${i + 1}:</label>
-                        <input type="text" id="player-${i}" value="Joueur ${i + 1}" 
-                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none">
-                    </div>
-                `;
-            }
-        });
-        document.getElementById('num-players').dispatchEvent(new Event('change'));
-
-        async function startGame() {
-            const numPlayers = parseInt(document.getElementById('num-players').value);
-            const playerNames = [];
-            for (let i = 0; i < numPlayers; i++) {
-                playerNames.push(document.getElementById(`player-${i}`).value);
-            }
-
-            const response = await fetch('/api/new_game', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({num_players: numPlayers, player_names: playerNames})
-            });
-
-            const data = await response.json();
-            gameId = data.game_id;
-            currentGame = data.game;
-
-            document.getElementById('start-screen').classList.add('hidden');
-            document.getElementById('game-screen').classList.remove('hidden');
-
-            updateGameDisplay();
+        function log(message, data) {
+            console.log(`[DEBUG] ${message}`, data || '');
         }
 
-        async function drawCard(source) {
-            const response = await fetch(`/api/game/${gameId}/draw`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({source: source})
-            });
+        function showCreateGame() {
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('create-screen').classList.remove('hidden');
+        }
 
-            const data = await response.json();
+        function showJoinGame() {
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('join-screen').classList.remove('hidden');
+        }
+
+        function backToMenu() {
+            document.getElementById('create-screen').classList.add('hidden');
+            document.getElementById('join-screen').classList.add('hidden');
+            document.getElementById('menu-screen').classList.remove('hidden');
+        }
+
+        function showLobby() {
+            document.getElementById('create-screen').classList.add('hidden');
+            document.getElementById('join-screen').classList.add('hidden');
+            document.getElementById('lobby-screen').classList.remove('hidden');
+        }
+
+        function showGame() {
+            document.getElementById('lobby-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+        }
+
+        function showHardshipModal(card, availableTargets) {
+            pendingHardshipCard = card;
             
-            if (data.game_over) {
-                showEndScreen(data.scores);
+            const modal = document.getElementById('hardship-modal');
+            const cardDisplay = document.getElementById('hardship-card-display');
+            const targetsList = document.getElementById('target-players-list');
+            
+            cardDisplay.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl">⚠️</span>
+                    <div>
+                        <div class="font-bold text-lg">${getCardLabel(card)}</div>
+                        <div class="text-sm text-gray-600">${getHardshipDescription(card.subtype)}</div>
+                    </div>
+                </div>
+            `;
+            
+            targetsList.innerHTML = availableTargets.map(target => `
+                <button onclick="selectHardshipTarget(${target.id})" 
+                        class="w-full p-4 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:from-red-600 hover:to-orange-600 transition-all transform hover:scale-105 font-semibold shadow-lg">
+                    🎯 ${target.name}
+                </button>
+            `).join('');
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeHardshipModal() {
+            document.getElementById('hardship-modal').classList.add('hidden');
+            pendingHardshipCard = null;
+        }
+
+        function selectHardshipTarget(targetId) {
+            if (!pendingHardshipCard) return;
+            
+            log('Sélection cible malus', {cardId: pendingHardshipCard.id, targetId});
+            
+            socket.emit('play_card', {
+                card_id: pendingHardshipCard.id,
+                target_player_id: targetId
+            });
+            
+            closeHardshipModal();
+        }
+
+        function getHardshipDescription(type) {
+            const descriptions = {
+                'accident': 'Fait perdre un voyage',
+                'burnout': 'Passer 2 tours',
+                'divorce': 'Fait perdre le mariage',
+                'impot': 'Fait perdre 2 salaires',
+                'licenciement': 'Fait perdre le métier et tous les salaires',
+                'maladie': 'Passer 1 tour et perdre 1 salaire',
+                'redoublement': 'Fait perdre une étude',
+                'prison': 'Passer 3 tours',
+                'attentat': 'Fait perdre toutes les cartes posées'
+            };
+            return descriptions[type] || 'Coup dur';
+        }
+
+        function createGame() {
+            const playerName = document.getElementById('host-name').value || 'Joueur 1';
+            const numPlayers = parseInt(document.getElementById('num-players').value);
+            
+            log('Création de partie', {playerName, numPlayers});
+            
+            socket.emit('create_game', {
+                player_name: playerName,
+                num_players: numPlayers
+            });
+            
+            isHost = true;
+        }
+
+        function joinGame() {
+            const playerName = document.getElementById('join-name').value || 'Joueur';
+            const gameCode = document.getElementById('game-code').value.trim().toLowerCase();
+            
+            if (!gameCode) {
+                alert('Veuillez entrer un code de partie');
                 return;
             }
-
-            currentGame = data.game;
-            updateGameDisplay();
+            
+            log('Rejoindre partie', {playerName, gameCode});
+            
+            socket.emit('join_game', {
+                game_id: gameCode,
+                player_name: playerName
+            });
         }
 
-        async function playCard(cardId) {
-            const response = await fetch(`/api/game/${gameId}/play`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    card_id: cardId,
-                    player_id: currentGame.current_player
-                })
-            });
+        function startGame() {
+            log('Démarrage partie', {gameId});
+            socket.emit('start_game', { game_id: gameId });
+        }
 
-            const data = await response.json();
+        function drawCard(source) {
+            log('Pioche carte', {source});
+            socket.emit('draw_card', { source: source });
+        }
+
+        function playCard(cardId) {
+            log('Jouer carte', {cardId});
+            
+            const myPlayer = currentGame.players[myPlayerId];
+            const card = myPlayer.hand.find(c => c.id === cardId);
+            
+            if (card && card.type === 'hardship') {
+                socket.emit('play_card', { card_id: cardId });
+            } else {
+                socket.emit('play_card', { card_id: cardId });
+            }
+        }
+
+        function discardCard(cardId) {
+            log('Défausser carte', {cardId});
+            socket.emit('discard_card', { card_id: cardId });
+        }
+
+        socket.on('game_created', (data) => {
+            log('Partie créée', data);
+            gameId = data.game_id;
+            myPlayerId = data.player_id;
+            currentGame = data.game;
+            
+            document.getElementById('lobby-game-code').textContent = gameId.toUpperCase();
+            showLobby();
+            updateLobby();
+            
+            if (isHost) {
+                document.getElementById('start-button-container').classList.remove('hidden');
+            }
+        });
+
+        socket.on('game_joined', (data) => {
+            log('Partie rejointe', data);
+            gameId = data.game_id;
+            myPlayerId = data.player_id;
+            currentGame = data.game;
+            
+            document.getElementById('lobby-game-code').textContent = gameId.toUpperCase();
+            showLobby();
+            updateLobby();
+        });
+
+        socket.on('player_joined', (data) => {
+            log('Joueur rejoint', data);
+            updateMessage(`${data.player_name} a rejoint la partie !`);
+            if (!document.getElementById('lobby-screen').classList.contains('hidden')) {
+                updateLobby();
+            }
+        });
+
+        socket.on('player_disconnected', (data) => {
+            log('Joueur déconnecté', data);
+            updateMessage(`${data.player_name} s'est déconnecté`);
+        });
+
+        socket.on('game_started', (data) => {
+            log('Partie démarrée', data);
+            currentGame = data.game;
+            showGame();
+            updateGameDisplay();
+        });
+
+        socket.on('game_updated', (data) => {
+            log('Jeu mis à jour', data);
             currentGame = data.game;
             updateGameDisplay();
+            
+            if (data.message) {
+                updateMessage(data.message);
+            }
+        });
+
+        socket.on('select_hardship_target', (data) => {
+            log('Sélectionner cible malus', data);
+            showHardshipModal(data.card, data.available_targets);
+        });
+
+        socket.on('game_over', (data) => {
+            log('Partie terminée', data);
+            showEndScreen(data.scores);
+        });
+
+        socket.on('error', (data) => {
+            log('Erreur reçue', data);
+            alert('Erreur: ' + data.message);
+        });
+
+        function updateLobby() {
+            if (!currentGame) {
+                log('updateLobby: pas de currentGame');
+                return;
+            }
+            
+            log('Mise à jour lobby', currentGame);
+            
+            const container = document.getElementById('lobby-players');
+            container.innerHTML = currentGame.players.map((player, i) => {
+                const status = player.connected ? '✅ Connecté' : '⏳ En attente...';
+                const isYou = i === myPlayerId ? ' (Vous)' : '';
+                const color = player.connected ? 'bg-green-100' : 'bg-gray-100';
+                
+                return `
+                    <div class="flex items-center justify-between p-3 ${color} rounded-lg">
+                        <span class="font-semibold">${player.name}${isYou}</span>
+                        <span class="text-sm">${status}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            const connectedCount = currentGame.players.filter(p => p.connected).length;
+            document.getElementById('players-count').textContent = 
+                `${connectedCount} / ${currentGame.num_players} joueurs connectés`;
+            
+            if (isHost && connectedCount >= 2) {
+                document.querySelector('#start-button-container button').disabled = false;
+            }
         }
 
         function updateGameDisplay() {
-            const currentPlayer = currentGame.players[currentGame.current_player];
+            if (!currentGame) {
+                log('updateGameDisplay: pas de currentGame');
+                return;
+            }
             
-            // Mettre à jour le header
-            document.getElementById('current-player-name').textContent = `Tour de ${currentPlayer.name}`;
-            document.getElementById('deck-count').textContent = currentGame.deck.length;
-            document.getElementById('discard-count').textContent = currentGame.discard.length;
-
-            // Mettre à jour les scores
+            log('Mise à jour affichage jeu', {
+                deck: currentGame.deck_count,
+                discard: currentGame.discard ? currentGame.discard.length : 0,
+                phase: currentGame.phase,
+                currentPlayer: currentGame.current_player,
+                myId: myPlayerId
+            });
+            
+            const myPlayer = currentGame.players[myPlayerId];
+            const currentPlayer = currentGame.players[currentGame.current_player];
+            const isMyTurn = currentGame.current_player === myPlayerId;
+            
+            document.getElementById('current-player-name').textContent = 
+                isMyTurn ? 'À vous de jouer !' : `Tour de ${currentPlayer.name}`;
+            document.getElementById('deck-count').textContent = currentGame.deck_count || 0;
+            document.getElementById('discard-count').textContent = currentGame.discard ? currentGame.discard.length : 0;
+            
+            if (isMyTurn) {
+                if (myPlayer.skip_turns > 0) {
+                    updateMessage(`⏸️ Vous devez passer votre tour (${myPlayer.skip_turns} tour(s) restant(s))`);
+                } else if (currentGame.phase === 'draw') {
+                    updateMessage('Piochez une carte de la pioche ou de la défausse');
+                } else {
+                    updateMessage('Jouez ou défaussez une carte de votre main');
+                }
+            } else {
+                updateMessage(`En attente de ${currentPlayer.name}...`);
+            }
+            
+            const canDraw = isMyTurn && currentGame.phase === 'draw' && myPlayer.skip_turns === 0;
+            const canPlay = isMyTurn && currentGame.phase === 'play';
+            
+            document.getElementById('draw-deck-btn').disabled = !canDraw;
+            document.getElementById('draw-discard-btn').disabled = !canDraw || (currentGame.discard && currentGame.discard.length === 0);
+            
             const scoresContainer = document.getElementById('players-scores');
             scoresContainer.innerHTML = currentGame.players.map((player, i) => {
                 const smiles = calculateSmiles(player);
                 const isCurrent = i === currentGame.current_player;
+                const isMe = i === myPlayerId;
+                const bgColor = isCurrent ? 'bg-yellow-400 shadow-lg transform scale-105' : 
+                                isMe ? 'bg-blue-100' : 'bg-white';
+                
                 return `
-                    <div class="p-3 rounded-lg ${isCurrent ? 'bg-yellow-400 shadow-lg transform scale-105' : 'bg-white'}">
-                        <div class="font-bold text-sm">${player.name}</div>
+                    <div class="p-3 rounded-lg ${bgColor}">
+                        <div class="font-bold text-sm">${player.name}${isMe ? ' (Vous)' : ''}</div>
                         <div class="flex items-center gap-1 text-lg">
                             <span>😊</span>
                             <span>${smiles}</span>
                         </div>
+                        ${player.skip_turns > 0 ? `<div class="text-xs text-orange-600">⏸️ ${player.skip_turns} tour(s)</div>` : ''}
+                        ${!player.connected ? '<div class="text-xs text-red-600">Déconnecté</div>' : ''}
                     </div>
                 `;
             }).join('');
-
-            // Mettre à jour la main du joueur
+            
+            log('Main du joueur', myPlayer.hand);
             const handContainer = document.getElementById('player-hand');
-            handContainer.innerHTML = currentPlayer.hand.map(card => {
-                return createCardHTML(card, true);
-            }).join('');
-
-            // Mettre à jour les cartes posées
+            document.getElementById('hand-count').textContent = myPlayer.hand ? myPlayer.hand.length : 0;
+            
+            if (myPlayer.hand && myPlayer.hand.length > 0) {
+                handContainer.innerHTML = myPlayer.hand.map(card => {
+                    return createCardHTML(card, canPlay);
+                }).join('');
+            } else {
+                handContainer.innerHTML = '<p class="text-gray-500">Aucune carte en main</p>';
+            }
+            
             const playedContainer = document.getElementById('player-played');
-            playedContainer.innerHTML = currentPlayer.played.map(card => {
-                return createCardHTML(card, false);
-            }).join('');
-
-            // Mettre à jour les autres joueurs
+            if (myPlayer.played && myPlayer.played.length > 0) {
+                playedContainer.innerHTML = myPlayer.played.map(card => {
+                    return createCardHTML(card, false);
+                }).join('');
+            } else {
+                playedContainer.innerHTML = '<p class="text-gray-500">Aucune carte posée</p>';
+            }
+            
             const othersContainer = document.getElementById('other-players');
             othersContainer.innerHTML = currentGame.players
-                .filter((_, i) => i !== currentGame.current_player)
+                .filter((_, i) => i !== myPlayerId)
                 .map(player => {
+                    const handCount = player.hand_count || (player.hand ? player.hand.length : 0);
                     return `
                         <div class="bg-white rounded-lg shadow-lg p-4">
-                            <h3 class="font-bold mb-3">${player.name} - Cartes posées</h3>
+                            <h3 class="font-bold mb-3">
+                                ${player.name} 
+                                ${player.connected ? '' : '<span class="text-red-600 text-sm">(Déconnecté)</span>'}
+                                ${player.skip_turns > 0 ? `<span class="text-orange-600 text-sm">(⏸️ ${player.skip_turns} tour(s))</span>` : ''}
+                            </h3>
+                            <div class="text-sm text-gray-600 mb-2">${handCount} cartes en main</div>
                             <div class="flex flex-wrap gap-2">
-                                ${player.played.map(card => createCardHTML(card, false)).join('')}
+                                ${player.played && player.played.length > 0 ? 
+                                    player.played.map(card => createCardHTML(card, false)).join('') :
+                                    '<p class="text-gray-500">Aucune carte posée</p>'}
                             </div>
                         </div>
                     `;
                 }).join('');
         }
 
-        function createCardHTML(card, isInHand) {
+        function createCardHTML(card, canPlay) {
             const colors = {
                 'job': 'bg-blue-100 border-blue-300',
                 'study': 'bg-blue-100 border-blue-300',
@@ -289,30 +604,20 @@
             };
 
             const icons = {
-                'job': '💼',
-                'study': '📚',
-                'salary': '💰',
-                'flirt': '💕',
-                'marriage': '💑',
-                'child': '👶',
-                'animal': '🐾',
-                'adultere': '💔',
-                'house': '🏠',
-                'travel': '✈️',
-                'hardship': '⚠️',
-                'special': '⭐',
-                'other': '🎁'
+                'job': '💼', 'study': '📚', 'salary': '💰',
+                'flirt': '💕', 'marriage': '💍', 'child': '👶',
+                'animal': '🐾', 'adultere': '💔', 'house': '🏠',
+                'travel': '✈️', 'hardship': '⚠️', 'special': '⭐', 'other': '🎖'
             };
 
             const label = getCardLabel(card);
             const color = colors[card.type] || 'bg-gray-100 border-gray-300';
             const icon = icons[card.type] || '🎴';
             
-            const onclick = isInHand && currentGame.phase === 'play' ? `onclick="playCard('${card.id}')"` : '';
-            const cursor = isInHand && currentGame.phase === 'play' ? 'cursor-pointer hover:scale-105' : '';
+            const cursor = canPlay ? 'cursor-pointer hover:scale-105' : '';
 
             return `
-                <div class="card ${color} border-2 rounded-lg p-3 min-w-[120px] ${cursor}" ${onclick}>
+                <div class="card ${color} border-2 rounded-lg p-3 min-w-[120px] ${cursor}">
                     <div class="flex items-center gap-2 mb-1">
                         <span>${icon}</span>
                         <span class="font-semibold text-sm">${label}</span>
@@ -321,6 +626,16 @@
                         <div class="flex items-center gap-1 text-yellow-600">
                             <span>😊</span>
                             <span>${card.smiles}</span>
+                        </div>
+                    ` : ''}
+                    ${canPlay ? `
+                        <div class="mt-2 flex gap-1">
+                            <button onclick="playCard('${card.id}')" class="flex-1 ${card.type === 'hardship' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white text-xs px-2 py-1 rounded">
+                                ${card.type === 'hardship' ? 'Attaquer' : 'Jouer'}
+                            </button>
+                            <button onclick="discardCard('${card.id}')" class="flex-1 bg-gray-500 text-white text-xs px-2 py-1 rounded hover:bg-gray-600">
+                                Défausser
+                            </button>
                         </div>
                     ` : ''}
                 </div>
@@ -350,7 +665,6 @@
         function calculateSmiles(player) {
             let total = player.played.reduce((sum, card) => sum + (card.smiles || 0), 0);
             
-            // Bonus licorne
             const hasLicorne = player.played.some(c => c.type === 'animal' && c.subtype === 'licorne');
             const hasArc = player.played.some(c => c.type === 'special' && c.subtype === 'arc en ciel');
             const hasEtoile = player.played.some(c => c.type === 'special' && c.subtype === 'etoile filante');
@@ -362,9 +676,10 @@
             return total;
         }
 
-        function toggleHelp() {
-            const panel = document.getElementById('help-panel');
-            panel.classList.toggle('hidden');
+        function updateMessage(msg) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = msg;
+            messageEl.classList.remove('hidden');
         }
 
         function showEndScreen(scores) {
@@ -373,8 +688,8 @@
             
             document.getElementById('winner-name').textContent = `Gagnant : ${scores[0][0]}`;
             
+            const medals = ['🥇', '🥈', '🥉'];
             const scoresHTML = scores.map((score, i) => {
-                const medals = ['🥇', '🥈', '🥉'];
                 const medal = medals[i] || `#${i + 1}`;
                 const bgColor = i === 0 ? 'bg-gradient-to-r from-yellow-200 to-yellow-300 border-4 border-yellow-500' :
                                 i === 1 ? 'bg-gray-200 border-2 border-gray-400' :

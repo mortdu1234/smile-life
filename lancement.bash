@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Script de lancement du Jeu de Cartes Smile
+# Script de lancement du Jeu de Cartes Smile - Mode Multijoueur
 # Pour Linux Mint
 
 echo "=================================================="
-echo "  🎮 Jeu de Cartes Smile - Lancement"
+echo "  🎮 Jeu de Cartes Smile - Lancement Multijoueur"
 echo "=================================================="
 echo ""
 
@@ -24,19 +24,19 @@ if [ ! -d "venv" ]; then
     echo "📦 Création de l'environnement virtuel..."
     python3 -m venv venv
     
-    echo "📦 Installation de Flask..."
+    echo "📦 Installation des dépendances..."
     source venv/bin/activate
-    pip install flask
-    echo "✅ Flask installé"
+    pip install flask flask-socketio python-socketio eventlet
+    echo "✅ Dépendances installées"
 else
     echo "✅ Environnement virtuel détecté"
     source venv/bin/activate
 fi
 
-# Vérifier si Flask est installé
-if ! python3 -c "import flask" &> /dev/null; then
-    echo "📦 Installation de Flask..."
-    pip install flask
+# Vérifier si Flask-SocketIO est installé
+if ! python3 -c "import flask_socketio" &> /dev/null; then
+    echo "📦 Installation de Flask-SocketIO..."
+    pip install flask-socketio python-socketio eventlet
 fi
 
 # Vérifier si les fichiers nécessaires existent
@@ -59,17 +59,26 @@ IP=$(hostname -I | awk '{print $1}')
 
 echo ""
 echo "=================================================="
-echo "  🚀 Démarrage du serveur..."
+echo "  🚀 Démarrage du serveur multijoueur..."
 echo "=================================================="
 echo ""
 echo "📍 Le jeu sera accessible à :"
-echo "   • Sur cet ordinateur : http://localhost:5000"
-echo "   • Sur le réseau local : http://$IP:5000"
+echo ""
+echo "   🏠 Sur cet ordinateur :"
+echo "      http://localhost:5000"
+echo ""
+echo "   🌐 Autres appareils (même réseau) :"
+echo "      http://$IP:5000"
+echo ""
+echo "📝 Instructions :"
+echo "   1. L'hôte crée une partie et obtient un CODE"
+echo "   2. Les autres joueurs rejoignent avec ce CODE"
+echo "   3. L'hôte démarre la partie quand tout le monde est prêt"
 echo ""
 echo "⏹️  Pour arrêter le serveur, appuyez sur Ctrl+C"
 echo ""
 echo "=================================================="
 echo ""
 
-# Lancer le serveur Flask
+# Lancer le serveur Flask avec SocketIO
 python3 app.py

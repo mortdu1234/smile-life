@@ -1,0 +1,11 @@
+- quand un joueur dois passer son tour, il n'y a rien pour le faire et le jeu plante
+- ajoute une liste pour chaque joueur avec la liste des cartes d'attaque utilisée sur nous
+- ajoute un moyen de voir la derniere carte défaussée
+- la carte accident supprime un voyage alors qu'elle devrait faire passer 1 tour
+- la carte burn out fait passer 2 tour alors qu'elle devrait faire passer 1 tour
+- un mariage a fourqueux demande un flirt a fourqueux alors qu'il faut juste un flirt n'importe où
+- maladie fait passer 1 tour et perdre 1 salaire, alors qu'il faut juste qu'il passe 1 tour
+- les pertes de cartes sont faite a l'envers, on perd la premiere carte posée et non la derniere
+- il faut ajouter un moyen de défausser son métier et son mariage quand il est déja posé
+- impot fait perdre 2 salire alors qu'il faudrais qu'il en fasse perdre juste 1
+- licenciement fait perdre le métier et tous les salaires, alors qu'il faudrait qu'il fasse perdre uniquement le métier
