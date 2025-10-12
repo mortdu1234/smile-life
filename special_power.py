@@ -396,6 +396,10 @@ def handle_piston_job(data):
     
     player.add_card_to_played(job)
     
+    # 🆕 REPIOCHER UNE CARTE après avoir posé le métier
+    if game['deck']:
+        player.hand.append(game['deck'].pop())
+    
     # La carte piston est déjà posée dans handle_play_special_card
     game['pending_special'] = None
     
@@ -411,7 +415,7 @@ def handle_piston_job(data):
         if p.connected:
             socketio.emit('game_updated', {
                 'game': get_game_state_for_player(game, p.id),
-                'message': f"🎯 {player.name} a obtenu un métier par piston"
+                'message': f"🎯 {player.name} a obtenu un métier par piston et repioche 1 carte"
             }, room=p.session_id)
 
 @socketio.on('vengeance_selected')
@@ -510,9 +514,18 @@ def handle_arc_finished(data):
         return
     
     cards_played = game['pending_special'].get('cards_played', 0)
-    for _ in range(cards_played):
+    cards_discarded = game['pending_special'].get('cards_discarded', 0)
+    
+    # 🆕 Repiocher : (cartes jouées + cartes défaussées) - 1
+    # -1 car on ne repioche pas la carte Arc-en-ciel elle-même
+    total_cards_used = cards_played + cards_discarded
+    cards_to_draw = max(0, total_cards_used - 1)
+    
+    cards_drawn = 0
+    for _ in range(cards_to_draw):
         if game['deck']:
             player.hand.append(game['deck'].pop())
+            cards_drawn += 1
     
     game['pending_special'] = None
     game['phase'] = 'draw'
@@ -527,7 +540,7 @@ def handle_arc_finished(data):
         if p.connected:
             socketio.emit('game_updated', {
                 'game': get_game_state_for_player(game, p.id),
-                'message': f"🌈 {player.name} a repioché {cards_played} carte(s)"
+                'message': f"🌈 {player.name} a repioché {cards_drawn} carte(s) ({cards_played} posées + {cards_discarded} défaussées - 1)"
             }, room=p.session_id)
 
 @socketio.on('discard_card_selected')

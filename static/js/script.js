@@ -299,12 +299,12 @@ function playCard(cardId) {
     if (currentGame.pending_special && currentGame.pending_special.type === 'arc_en_ciel') {
         socket.emit('play_card', { card_id: cardId });
         
-        const remaining = 3 - (currentGame.pending_special.cards_played + 1);
-        updateArcRemaining(remaining);
+        // 🆕 Compteur incrémental au lieu de décrémenter
+        const actionsCount = (currentGame.pending_special.cards_played || 0) + 
+                            (currentGame.pending_special.cards_discarded || 0) + 1;
+        updateArcRemaining(actionsCount);
         
-        if (remaining <= 0) {
-            setTimeout(() => finishArcEnCiel(), 500);
-        }
+        // 🆕 PLUS de fin automatique - le joueur décide
         return;
     }
     

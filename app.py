@@ -255,11 +255,18 @@ def handle_discard_during_arc(data):
     player.hand.remove(card)
     game['discard'].append(card)
     
+    # 🆕 COMPTER les cartes défaussées
+    if 'cards_discarded' not in game['pending_special']:
+        game['pending_special']['cards_discarded'] = 0
+    game['pending_special']['cards_discarded'] += 1
+    
+    cards_discarded = game['pending_special']['cards_discarded']
+    
     for p in game['players']:
         if p.connected:
             socketio.emit('game_updated', {
                 'game': get_game_state_for_player(game, p.id),
-                'message': f"{player.name} a défaussé une carte pendant l'arc-en-ciel"
+                'message': f"{player.name} a défaussé une carte pendant l'arc-en-ciel ({cards_discarded} défaussée(s))"
             }, room=p.session_id)
             
 @socketio.on('discard_card')
@@ -497,37 +504,19 @@ def handle_play_card(data):
     if game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel':
         game['pending_special']['cards_played'] += 1
         cards_played = game['pending_special']['cards_played']
-        max_cards = game['pending_special'].get('max_cards', 3)
         
+        # 🆕 PLUS DE LIMITE DE CARTES
         game['phase'] = 'play'
         
         for p in game['players']:
             if p.connected:
                 socketio.emit('game_updated', {
                     'game': get_game_state_for_player(game, p.id),
-                    'message': f"{player.name} a posé une carte ({cards_played}/{max_cards})"
+                    'message': f"{player.name} a posé une carte ({cards_played} carte(s) jouée(s))"
                 }, room=p.session_id)
         
-        if cards_played >= max_cards:
-            for _ in range(cards_played):
-                if game['deck']:
-                    player.hand.append(game['deck'].pop())
-            
-            game['pending_special'] = None
-            game['phase'] = 'draw'
-            game['current_player'] = (game['current_player'] + 1) % game['num_players']
-            
-            attempts = 0
-            while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-                game['current_player'] = (game['current_player'] + 1) % game['num_players']
-                attempts += 1
-            
-            for p in game['players']:
-                if p.connected:
-                    socketio.emit('game_updated', {
-                        'game': get_game_state_for_player(game, p.id),
-                        'message': f"🌈 {player.name} a repioché {cards_played} carte(s)"
-                    }, room=p.session_id)
+        # 🆕 Le joueur décide quand s'arrêter (via le bouton "Terminer")
+        # Pas de fin automatique
         return
     
     game['phase'] = 'draw'

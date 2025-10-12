@@ -5,7 +5,7 @@
 // ARC-EN-CIEL
 function showArcEnCielMode() {
     document.getElementById('arc-en-ciel-banner').classList.remove('hidden');
-    updateArcRemaining(3);
+    updateArcRemaining(0);  // 🆕 Commence à 0 (compteur d'actions)
 }
 
 function updateArcRemaining(count) {

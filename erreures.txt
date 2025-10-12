@@ -61,6 +61,9 @@ V3
 V4
 - apres piston, il faut repiocher une carte
 - arc en ciel : il n'y a plus la limite des 3 actions, on ne repioche pas assez de cartes (en fonction du nombre de carte utilisées)
+V5
+- arc en ciel : quand on défausse une carte, changement de tour
+- arc en ciel : quand on ouvre le casino durant l'arc en ciel, ca passe le tour
 
 # pas important pour le moment
 - la prison dois aussi jeter dans la défausse 2 cartes aléatoire de la main et en repiocher 2 de la pioche en plus de passer 3 tour et jeter le métier de bandit

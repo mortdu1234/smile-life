@@ -22,21 +22,7 @@ class Card(ABC):
     
     @abstractmethod
     def can_be_played(self, player: 'Player') -> tuple[bool, str]:
-        job = player.get_job()
-        if not job:
-            return False, "Vous devez avoir un métier pour recevoir un salaire"
-        
-        # ✅ Vérifier si le joueur a le Grand Prix d'excellence
-        has_grand_prix = any(
-            isinstance(c, OtherCard) and c.card_type == 'prix' 
-            for c in player.get_all_played_cards()
-        )
-        
-        # ✅ Augmenter le salaire max de +1 si le joueur a le Grand Prix
-        max_salary = job.salary + 1 if has_grand_prix else job.salary
-        
-        if self.level > max_salary:
-            return False, f"Votre salaire maximum est de {max_salary}"
+        print("[WARNING] cette méthode ne devrait pas etre appellée")
         
         return True, ""
 
@@ -130,9 +116,19 @@ class SalaryCard(Card):
         job = player.get_job()
         if not job:
             return False, "Vous devez avoir un métier pour recevoir un salaire"
-        
-        if self.level > job.salary:
-            return False, f"Votre salaire maximum est de {job.salary}"
+
+        max_salary = job.salary
+        # ✅ Vérifier si le joueur a le Grand Prix d'excellence
+        for c in player.get_all_played_cards():
+            print(c.id)
+            if isinstance(c, PriceCard):
+                print("carte prix trouvée")
+                if c.job_link == job.id:
+                    print("le link est bon")
+                    max_salary = 4
+                    
+        if self.level > max_salary:
+            return False, f"Votre salaire maximum est de {max_salary}"
         
         return True, ""
 
@@ -394,6 +390,25 @@ class OtherCard(Card):
         
         return True, ""
 
+class PriceCard(OtherCard):
+    """Carte prix d'excellence"""
+    def __init__(self, smiles: int):
+        super().__init__('prix', smiles)
+        self.job_link = None
+    
+    def can_be_played(self, player: 'Player') -> tuple[bool, str]:
+        print("tentative de link de Prix", end=" ")
+        job = player.get_job()
+        if not job:
+            return False, "Vous devez avoir un métier"
+        if job.power not in ['prix_possible', 'see_hands_prix_possible']:
+            return False, "Votre métier ne permet pas de recevoir un prix"
+        self.job_link = job.id
+        print("le link est : ", self.job_link)
+
+        return True, ""
+
+
 class Player:
     """Classe représentant un joueur"""
     def __init__(self, player_id: int, name: str):
@@ -618,23 +633,45 @@ class CardFactory:
     def test_create_deck(cls) -> List[Card]:
         """effectue un tests avec des cartes customs"""
         deck = []
+        jobs_custom = [
+            {'name': 'barman', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'unlimited_flirt'},
+            {'name': 'barman', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'unlimited_flirt'},
+            {'name': 'barman', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'unlimited_flirt'},
+            {'name': 'ecrivain', 'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'prix_possible'},
+            {'name': 'ecrivain', 'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'prix_possible'},
+            {'name': 'ecrivain', 'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'prix_possible'},
+            {'name': 'ecrivain', 'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'prix_possible'},
+            {'name': 'ecrivain', 'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'prix_possible'}
+        ]
+        for job in jobs_custom:
+            deck.append(JobCard(job['name'], job['salary'], job['studies'], 
+                               job['status'], job['power']))
 
-        # Salaires
+        # salaires
         for level in range(1, 5):
             for _ in range(5):
                 deck.append(SalaryCard(level))
 
-
-        for special in ['anniversaire', 'arc en ciel', 'casino', 'chance']:
+         # Cartes spéciales
+        for special in ['anniversaire', 'arc en ciel', 'casino', 'chance', 
+                       'etoile filante', 'heritage', 'piston', 'troc', 
+                       'tsunami', 'vengeance']:
             deck.append(SpecialCard(special))
 
+        deck.append(PriceCard(4))
+        deck.append(PriceCard(4))
+        deck.append(PriceCard(4))
+        deck.append(PriceCard(4))
+        deck.append(PriceCard(4))
+        deck.append(PriceCard(4))
+        deck.append(PriceCard(4))
         return deck
     
     @classmethod
     def create_deck(cls) -> List[Card]:
         """Crée un deck complet de cartes"""
         #########################
-        # return cls.test_create_deck(cls)
+        return cls.test_create_deck(cls)
         # TESTING
         #########################
         
