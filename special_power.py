@@ -156,8 +156,14 @@ def handle_play_special_card(data):
         
         game['phase'] = 'play'
         
-        emit('arc_en_ciel_mode', {})
-    
+        # Envoyer la mise à jour à tous les joueurs
+        for p in game['players']:
+            if p.connected:
+                socketio.emit('game_updated', {
+                    'game': get_game_state_for_player(game, p.id),
+                    'message': f"🌈 {player.name} active l'Arc-en-ciel !"
+                }, room=p.session_id)
+        
     elif special_type == 'etoile filante':
         player.hand.remove(card)
         player.add_card_to_played(card)
@@ -422,13 +428,7 @@ def handle_vengeance(data):
 def handle_chance_card(data):
     """Choisir une carte parmi 3"""
     card_id = data.get('card_id')
-    session_info = player_sessions.get(request.sid)
-    
-    if not session_info:
-        return
-    
-    game_id = session_info['game_id']
-    game = games[game_id]
+    _, game, _ = check_game()
     
     if not game.get('pending_special') or game['pending_special']['type'] != 'chance':
         return
@@ -456,49 +456,6 @@ def handle_chance_card(data):
                 socketio.emit('game_updated', {
                     'game': get_game_state_for_player(game, p.id)
                 }, room=p.session_id)
-
-
-    """Défausser une carte pendant l'arc-en-ciel"""
-    card_id = data.get('card_id')
-    player_id, game, _ = check_game()
-    
-    if game['current_player'] != player_id:
-        emit('error', {'message': 'Ce n\'est pas votre tour'})
-        return
-    
-    # ✅ Vérifier qu'on est bien en mode arc-en-ciel
-    if not game.get('pending_special') or game['pending_special'].get('type') != 'arc_en_ciel':
-        emit('error', {'message': 'Vous n\'êtes pas en mode arc-en-ciel'})
-        return
-    
-    player = game['players'][player_id]
-    
-    card = None
-    for c in player.hand:
-        if c.id == card_id:
-            card = c
-            break
-    
-    if not card:
-        emit('error', {'message': 'Carte non trouvée'})
-        return
-    
-    player.hand.remove(card)
-    game['discard'].append(card)
-    
-    # 🆕 COMPTER les cartes défaussées
-    if 'cards_discarded' not in game['pending_special']:
-        game['pending_special']['cards_discarded'] = 0
-    game['pending_special']['cards_discarded'] += 1
-    
-    cards_discarded = game['pending_special']['cards_discarded']
-    
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': f"{player.name} a défaussé une carte pendant l'arc-en-ciel ({cards_discarded} défaussée(s))"
-            }, room=p.session_id)
 
 @socketio.on('arc_en_ciel_finished')
 def handle_arc_finished(data):

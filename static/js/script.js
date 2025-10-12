@@ -295,21 +295,8 @@ function playCard(cardId) {
     const myPlayer = currentGame.players[myPlayerId];
     const card = myPlayer.hand.find(c => c.id === cardId);
         
-    // Mode arc-en-ciel actif
-    if (currentGame.pending_special && currentGame.pending_special.type === 'arc_en_ciel') {
-        socket.emit('play_card', { card_id: cardId });
-        
-        const actionsCount = (currentGame.pending_special.cards_played || 0) + 
-                            (currentGame.pending_special.cards_discarded || 0) + 
-                            (currentGame.pending_special.card_bets || 0) + 1;
-        updateArcRemaining(actionsCount);
-        
-        return;
-    }
-    
-    // Appel normal
+    // Appel normal (le compteur sera mis à jour via game_updated)
     socket.emit('play_card', { card_id: cardId });
-    
 }
 
 function discardCard(cardId) {
@@ -481,6 +468,24 @@ function updateGameDisplay() {
     log('Casino status', currentGame.casino);
     updateCasinoDisplay(currentGame.casino);
     
+    // Mise a jour du mode arc en ciel
+    if (currentGame.pending_special && currentGame.pending_special.type === 'arc_en_ciel') {
+        const actionsCount = (currentGame.pending_special.cards_played || 0) + 
+                            (currentGame.pending_special.cards_discarded || 0) + 
+                            (currentGame.pending_special.card_bets || 0);
+        updateArcRemaining(actionsCount);
+        
+        // Afficher la bannière si elle est cachée
+        if (document.getElementById('arc-en-ciel-banner').classList.contains('hidden')) {
+            document.getElementById('arc-en-ciel-banner').classList.remove('hidden');
+        }
+    } else {
+        // Cacher la bannière si le mode n'est plus actif
+        if (!document.getElementById('arc-en-ciel-banner').classList.contains('hidden')) {
+            document.getElementById('arc-en-ciel-banner').classList.add('hidden');
+        }
+    }
+
     // Afficher l'héritage si disponible
     if (myPlayer.heritage > 0) {
         const heritageDisplay = `
