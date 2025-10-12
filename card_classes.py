@@ -8,6 +8,9 @@ class Card(ABC):
         self.id = str(uuid.uuid4())
         self.smiles = 0
     
+    def __str__(self):
+        return f"YOUSK id : {self.id}"
+    
     @abstractmethod
     def to_dict(self) -> Dict[str, Any]:
         """Convertit la carte en dictionnaire pour la sérialisation"""
@@ -32,6 +35,9 @@ class JobCard(Card):
         self.status = status
         self.power = power
         self.smiles = 2
+    
+    def __str__(self):
+        return f"{self.job_name} - smile : {self.smiles} - JobCard"
     
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
@@ -69,6 +75,9 @@ class StudyCard(Card):
         self.levels = levels
         self.smiles = 1
     
+    def __str__(self):
+        return f"{self.study_type} - smile : {self.smiles} - StudyCard"
+    
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
         base.update({
@@ -90,6 +99,9 @@ class SalaryCard(Card):
         super().__init__()
         self.level = level
         self.smiles = 1
+    
+    def __str__(self):
+        return f"{self.level} - smile : {self.smiles} - SalaryCard"
     
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
@@ -116,6 +128,9 @@ class FlirtCard(Card):
         self.location = location
         self.smiles = 1
     
+    def __str__(self):
+        return f"{self.location} - smile : {self.smiles} - FlirtCard"
+    
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
         base.update({
@@ -136,6 +151,9 @@ class MarriageCard(Card):
         super().__init__()
         self.location = location
         self.smiles = 3
+    
+    def __str__(self):
+        return f"{self.location} - smile : {self.smiles} - MarriageCard"
     
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
@@ -160,6 +178,9 @@ class AdulteryCard(Card):
         super().__init__()
         self.smiles = 1
     
+    def __str__(self):
+        return f"adultaire - smile : {self.smiles} - AdulteryCard"
+    
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
         base['type'] = 'adultere'
@@ -182,6 +203,9 @@ class ChildCard(Card):
         self.name = name
         self.smiles = 2
     
+    def __str__(self):
+        return f"{self.name} - smile : {self.smiles} - ChildCard"
+    
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
         base.update({
@@ -201,6 +225,9 @@ class AnimalCard(Card):
         super().__init__()
         self.animal_name = animal_name
         self.smiles = smiles
+
+    def __str__(self):
+        return f"{self.animal_name} - smile : {self.smiles} - AnimalCard"
     
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
@@ -220,6 +247,9 @@ class HouseCard(Card):
         self.house_type = house_type
         self.cost = cost
         self.smiles = smiles
+    
+    def __str__(self):
+        return f"{self.house_type} - smile : {self.smiles} - HouseCard"
     
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
@@ -254,6 +284,9 @@ class TravelCard(Card):
         self.cost = 3
         self.smiles = 1
     
+    def __str__(self):
+        return f"{self.cost} - smile : {self.smiles} - TravelCard"
+    
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
         base.update({
@@ -281,6 +314,9 @@ class SpecialCard(Card):
         self.special_type = special_type
         self.smiles = 0
     
+    def __str__(self):
+        return f"{self.special_type} - smile : {self.smiles} - SpecialCard"
+    
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
         base.update({
@@ -299,6 +335,9 @@ class HardshipCard(Card):
         super().__init__()
         self.hardship_type = hardship_type
         self.smiles = 0
+
+    def __str__(self):
+        return f"{self.hardship_type} - smile : {self.smiles} - HardshipCard"
     
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
@@ -319,6 +358,9 @@ class OtherCard(Card):
         self.card_type = card_type
         self.smiles = smiles
     
+    def __str__(self):
+        return f"{self.card_type} - smile : {self.smiles} - OtherCard"
+
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
         base.update({
@@ -357,6 +399,9 @@ class Player:
         self.received_hardships = []
         self.connected = True
         self.session_id = None
+    
+    def __str__(self):
+        return "Player YOUSK"
     
     def get_all_played_cards(self) -> List[Card]:
         """Retourne toutes les cartes jouées (toutes catégories)"""

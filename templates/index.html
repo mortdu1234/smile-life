@@ -72,7 +72,7 @@
             </div>
             
             <div class="mb-6">
-                <h3 class="font-semibold mb-3 text-gray-700">Vos salaires disponibles :</h3>
+                <h3 class="font-semibold mb-3 text-gray-700">Vos ressources disponibles :</h3>
                 <div id="available-salaries-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
             </div>
             
@@ -99,6 +99,104 @@
                 <div id="target-players-list" class="space-y-2"></div>
             </div>
             <button onclick="closeHardshipModal()" class="w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+                Annuler
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Anniversaire - Don de salaire -->
+    <div id="birthday-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full">
+            <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">
+                🎂 Anniversaire !
+            </h2>
+            <p id="birthday-message" class="text-center mb-4 text-gray-600"></p>
+            <div class="mb-6">
+                <h3 class="font-semibold mb-3 text-gray-700">Choisissez un salaire à offrir :</h3>
+                <div id="birthday-salaries-list" class="grid grid-cols-2 gap-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Troc - Choix du joueur -->
+    <div id="troc-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full">
+            <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">
+                🔄 Troc
+            </h2>
+            <p class="text-center mb-4 text-gray-600">Choisissez un joueur avec qui échanger une carte aléatoire</p>
+            <div id="troc-players-list" class="space-y-2"></div>
+            <button onclick="closeTrocModal()" class="mt-4 w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+                Annuler
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Piston - Choix du métier -->
+    <div id="piston-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">
+                🎯 Piston
+            </h2>
+            <p class="text-center mb-4 text-gray-600">Choisissez un métier à poser sans condition d'études</p>
+            <div id="piston-jobs-list" class="grid grid-cols-2 gap-3"></div>
+            <button onclick="closePistonModal()" class="mt-4 w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+                Annuler
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Vengeance - Choix de l'attaque et de la cible -->
+    <div id="vengeance-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">
+                ⚔️ Vengeance
+            </h2>
+            <div class="mb-6">
+                <h3 class="font-semibold mb-3 text-gray-700">Vos attaques reçues :</h3>
+                <div id="vengeance-hardships-list" class="space-y-2 mb-4"></div>
+            </div>
+            <div id="vengeance-targets-container" class="hidden">
+                <h3 class="font-semibold mb-3 text-gray-700">Choisir la victime :</h3>
+                <div id="vengeance-targets-list" class="space-y-2"></div>
+            </div>
+            <button onclick="closeVengeanceModal()" class="mt-4 w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+                Annuler
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Chance - Choix parmi 3 cartes -->
+    <div id="chance-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-3xl w-full">
+            <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">
+                🍀 Chance
+            </h2>
+            <p class="text-center mb-4 text-gray-600">Choisissez une carte parmi les 3 suivantes</p>
+            <div id="chance-cards-list" class="grid grid-cols-3 gap-4"></div>
+        </div>
+    </div>
+
+    <!-- Modal Arc-en-ciel - Mode spécial -->
+    <div id="arc-en-ciel-banner" class="hidden fixed top-20 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 text-white px-8 py-4 rounded-lg shadow-2xl z-40">
+        <div class="text-center">
+            <div class="text-2xl font-bold mb-2">🌈 Mode Arc-en-ciel actif !</div>
+            <div class="text-sm mb-3">Vous pouvez jouer jusqu'à 3 cartes - <span id="arc-remaining">3</span> restante(s)</div>
+            <button onclick="finishArcEnCiel()" class="bg-white text-purple-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100">
+                ✅ Terminer et repiocher
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Étoile filante - Choix dans la défausse -->
+    <div id="star-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">
+                ⭐ Étoile filante
+            </h2>
+            <p class="text-center mb-4 text-gray-600">Choisissez une carte de la défausse à poser (doit respecter les règles)</p>
+            <div id="star-discard-list" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3"></div>
+            <button onclick="closeStarModal()" class="mt-4 w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
                 Annuler
             </button>
         </div>
@@ -333,6 +431,12 @@
         let pendingAcquisitionCard = null;
         let requiredCost = 0;
         let selectedSalaries = [];
+        let heritageAvailable = 0;
+        let heritageUsed = 0;
+
+        // Variables pour les cartes spéciales
+        let selectedVengeanceHardship = null;
+        let availableVengeanceTargets = [];
 
         function log(message, data) {
             console.log(`[DEBUG] ${message}`, data || '');
@@ -365,10 +469,12 @@
             document.getElementById('game-screen').classList.remove('hidden');
         }
 
-        function showSalarySelectionModal(card, cost, availableSalaries) {
+        function showSalarySelectionModal(card, cost, availableSalaries, heritage = 0) {
             pendingAcquisitionCard = card;
             requiredCost = cost;
             selectedSalaries = [];
+            heritageAvailable = heritage;
+            heritageUsed = 0;
             
             const modal = document.getElementById('salary-selection-modal');
             const cardDisplay = document.getElementById('acquisition-card-display');
@@ -388,7 +494,7 @@
             document.getElementById('selected-amount').textContent = '0';
             document.getElementById('payment-status').textContent = 'Sélectionnez vos salaires (minimum requis, vous pouvez dépenser plus)';
             
-            salariesList.innerHTML = availableSalaries.map(salary => `
+            let salariesHTML = availableSalaries.map(salary => `
                 <div onclick="toggleSalarySelection('${salary.id}', ${salary.subtype})" 
                      id="salary-${salary.id}"
                      class="salary-card-selectable p-3 bg-blue-100 border-2 border-blue-300 rounded-lg text-center">
@@ -396,6 +502,21 @@
                     <div class="font-bold">${salary.subtype}</div>
                 </div>
             `).join('');
+            
+            // Ajouter l'héritage si disponible
+            if (heritage > 0) {
+                salariesHTML += `
+                    <div onclick="toggleHeritageSelection()" 
+                         id="heritage-selector"
+                         class="salary-card-selectable p-3 bg-purple-100 border-2 border-purple-300 rounded-lg text-center col-span-2">
+                        <div class="text-2xl">🎁</div>
+                        <div class="font-bold">Héritage: ${heritage}</div>
+                        <div class="text-xs text-gray-600">Cliquez pour utiliser</div>
+                    </div>
+                `;
+            }
+            
+            salariesList.innerHTML = salariesHTML;
             
             document.getElementById('confirm-salary-btn').disabled = true;
             modal.classList.remove('hidden');
@@ -419,10 +540,27 @@
             updateSalarySelectionDisplay();
         }
 
-        function updateSalarySelectionDisplay() {
-            const total = selectedSalaries.reduce((sum, s) => sum + s.level, 0);
+        function toggleHeritageSelection() {
+            const heritageEl = document.getElementById('heritage-selector');
             
-            document.getElementById('selected-amount').textContent = total;
+            if (heritageUsed > 0) {
+                // Désactiver l'héritage
+                heritageUsed = 0;
+                heritageEl.classList.remove('salary-card-selected');
+            } else {
+                // Activer l'héritage
+                heritageUsed = heritageAvailable;
+                heritageEl.classList.add('salary-card-selected');
+            }
+            
+            updateSalarySelectionDisplay();
+        }
+
+        function updateSalarySelectionDisplay() {
+            const totalSalaries = selectedSalaries.reduce((sum, s) => sum + s.level, 0);
+            const total = totalSalaries + heritageUsed;
+            
+            document.getElementById('selected-amount').textContent = `${totalSalaries}${heritageUsed > 0 ? ` + ${heritageUsed} (héritage)` : ''} = ${total}`;
             
             const statusEl = document.getElementById('payment-status');
             const confirmBtn = document.getElementById('confirm-salary-btn');
@@ -436,7 +574,6 @@
                 statusEl.className = 'mt-2 text-sm text-green-600 font-semibold';
                 confirmBtn.disabled = false;
             } else {
-                // ✅ On accepte maintenant de payer plus
                 statusEl.textContent = `✅ Montant valide ! (+${total - requiredCost} de surplus)`;
                 statusEl.className = 'mt-2 text-sm text-green-600 font-semibold';
                 confirmBtn.disabled = false;
@@ -444,9 +581,10 @@
         }
 
         function confirmSalarySelection() {
-            if (!pendingAcquisitionCard || selectedSalaries.length === 0) return;
+            if (!pendingAcquisitionCard || (selectedSalaries.length === 0 && heritageUsed === 0)) return;
             
-            const total = selectedSalaries.reduce((sum, s) => sum + s.level, 0);
+            const totalSalaries = selectedSalaries.reduce((sum, s) => sum + s.level, 0);
+            const total = totalSalaries + heritageUsed;
             
             if (total < requiredCost) {
                 alert('Le montant sélectionné est inférieur au minimum requis');
@@ -455,7 +593,8 @@
             
             socket.emit('select_salaries_for_purchase', {
                 card_id: pendingAcquisitionCard.id,
-                salary_ids: selectedSalaries.map(s => s.id)
+                salary_ids: selectedSalaries.map(s => s.id),
+                use_heritage: heritageUsed
             });
             
             closeSalaryModal();
@@ -466,9 +605,11 @@
             pendingAcquisitionCard = null;
             selectedSalaries = [];
             requiredCost = 0;
+            heritageAvailable = 0;
+            heritageUsed = 0;
         }
 
-                function showHardshipModal(card, availableTargets, isFromDiscard = false) {
+        function showHardshipModal(card, availableTargets, isFromDiscard = false) {
             pendingHardshipCard = card;
             fromDiscard = isFromDiscard;
             
@@ -539,6 +680,205 @@
             return descriptions[type] || 'Coup dur';
         }
 
+        // === CARTES SPÉCIALES ===
+
+        // ANNIVERSAIRE
+        function showBirthdayModal(birthdayPlayerName, availableSalaries) {
+            const modal = document.getElementById('birthday-modal');
+            const message = document.getElementById('birthday-message');
+            const salariesList = document.getElementById('birthday-salaries-list');
+            
+            message.textContent = `C'est l'anniversaire de ${birthdayPlayerName} ! Offrez-lui un salaire 🎁`;
+            
+            salariesList.innerHTML = availableSalaries.map(salary => `
+                <div onclick="selectBirthdayGift('${salary.id}')" 
+                     class="cursor-pointer p-4 bg-blue-100 border-2 border-blue-300 rounded-lg hover:bg-blue-200 hover:scale-105 transition-all text-center">
+                    <div class="text-3xl mb-2">💰</div>
+                    <div class="font-bold text-lg">${salary.subtype}</div>
+                </div>
+            `).join('');
+            
+            modal.classList.remove('hidden');
+        }
+
+        function selectBirthdayGift(salaryId) {
+            socket.emit('birthday_gift_selected', { salary_id: salaryId });
+            document.getElementById('birthday-modal').classList.add('hidden');
+        }
+
+        // TROC
+        function showTrocModal(availableTargets) {
+            const modal = document.getElementById('troc-modal');
+            const playersList = document.getElementById('troc-players-list');
+            
+            playersList.innerHTML = availableTargets.map(target => `
+                <button onclick="selectTrocTarget(${target.id})" 
+                        class="w-full p-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all transform hover:scale-105 font-semibold shadow-lg">
+                    🎯 ${target.name} (${target.hand_count} carte(s) en main)
+                </button>
+            `).join('');
+            
+            modal.classList.remove('hidden');
+        }
+
+        function selectTrocTarget(targetId) {
+            socket.emit('troc_target_selected', { target_id: targetId });
+            closeTrocModal();
+        }
+
+        function closeTrocModal() {
+            document.getElementById('troc-modal').classList.add('hidden');
+        }
+
+        // PISTON
+        function showPistonModal(availableJobs) {
+            const modal = document.getElementById('piston-modal');
+            const jobsList = document.getElementById('piston-jobs-list');
+            
+            jobsList.innerHTML = availableJobs.map(job => `
+                <div onclick="selectPistonJob('${job.id}')" 
+                     class="cursor-pointer p-4 bg-blue-100 border-2 border-blue-400 rounded-lg hover:bg-blue-200 hover:scale-105 transition-all">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-2xl">💼</span>
+                        <span class="font-bold">${job.subtype}</span>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <div>💰 Salaire: ${job.salary}</div>
+                        <div>📚 Études: ${job.studies}</div>
+                        ${job.smiles > 0 ? `<div>😊 ${job.smiles}</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+            
+            modal.classList.remove('hidden');
+        }
+
+        function selectPistonJob(jobId) {
+            socket.emit('piston_job_selected', { job_id: jobId });
+            closePistonModal();
+        }
+
+        function closePistonModal() {
+            document.getElementById('piston-modal').classList.add('hidden');
+        }
+
+        // VENGEANCE
+        function showVengeanceModal(receivedHardships, availableTargets) {
+            const modal = document.getElementById('vengeance-modal');
+            const hardshipsList = document.getElementById('vengeance-hardships-list');
+            
+            selectedVengeanceHardship = null;
+            availableVengeanceTargets = availableTargets;
+            
+            hardshipsList.innerHTML = receivedHardships.map(hardship => `
+                <button onclick="selectVengeanceHardship('${hardship}')" 
+                        class="w-full p-3 bg-red-100 border-2 border-red-300 rounded-lg hover:bg-red-200 transition-all text-left">
+                    <span class="font-semibold">⚠️ ${hardship}</span>
+                    <div class="text-xs text-gray-600 mt-1">${getHardshipDescription(hardship)}</div>
+                </button>
+            `).join('');
+            
+            document.getElementById('vengeance-targets-container').classList.add('hidden');
+            modal.classList.remove('hidden');
+        }
+
+        function selectVengeanceHardship(hardshipType) {
+            selectedVengeanceHardship = hardshipType;
+            
+            // Afficher la liste des cibles
+            const targetsContainer = document.getElementById('vengeance-targets-container');
+            const targetsList = document.getElementById('vengeance-targets-list');
+            
+            targetsList.innerHTML = availableVengeanceTargets.map(target => `
+                <button onclick="selectVengeanceTarget(${target.id})" 
+                        class="w-full p-4 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:from-red-600 hover:to-orange-600 transition-all transform hover:scale-105 font-semibold shadow-lg">
+                    🎯 ${target.name}
+                </button>
+            `).join('');
+            
+            targetsContainer.classList.remove('hidden');
+        }
+
+        function selectVengeanceTarget(targetId) {
+            if (!selectedVengeanceHardship) return;
+            
+            socket.emit('vengeance_selected', {
+                hardship_type: selectedVengeanceHardship,
+                target_id: targetId
+            });
+            
+            closeVengeanceModal();
+        }
+
+        function closeVengeanceModal() {
+            document.getElementById('vengeance-modal').classList.add('hidden');
+            selectedVengeanceHardship = null;
+            availableVengeanceTargets = [];
+        }
+
+        // CHANCE
+        function showChanceModal(cards) {
+            const modal = document.getElementById('chance-modal');
+            const cardsList = document.getElementById('chance-cards-list');
+            
+            cardsList.innerHTML = cards.map(card => `
+                <div onclick="selectChanceCard('${card.id}')" 
+                     class="cursor-pointer transform hover:scale-105 transition-all">
+                    ${createCardHTML(card, false)}
+                </div>
+            `).join('');
+            
+            modal.classList.remove('hidden');
+        }
+
+        function selectChanceCard(cardId) {
+            socket.emit('chance_card_selected', { card_id: cardId });
+            document.getElementById('chance-modal').classList.add('hidden');
+        }
+
+        // ARC-EN-CIEL
+        function showArcEnCielMode() {
+            document.getElementById('arc-en-ciel-banner').classList.remove('hidden');
+            updateArcRemaining(3);
+        }
+
+        function updateArcRemaining(count) {
+            document.getElementById('arc-remaining').textContent = count;
+        }
+
+        function finishArcEnCiel() {
+            socket.emit('arc_en_ciel_finished', {});
+            document.getElementById('arc-en-ciel-banner').classList.add('hidden');
+        }
+
+        // ÉTOILE FILANTE
+        function showStarModal(discardCards) {
+            const modal = document.getElementById('star-modal');
+            const discardList = document.getElementById('star-discard-list');
+            
+            if (!discardCards || discardCards.length === 0) {
+                discardList.innerHTML = '<p class="col-span-full text-center text-gray-500">La défausse est vide</p>';
+            } else {
+                discardList.innerHTML = discardCards.map(card => `
+                    <div onclick="selectStarCard('${card.id}')" 
+                         class="cursor-pointer transform hover:scale-105 transition-all">
+                        ${createCardHTML(card, false)}
+                    </div>
+                `).join('');
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        function selectStarCard(cardId) {
+            socket.emit('discard_card_selected', { card_id: cardId });
+            closeStarModal();
+        }
+
+        function closeStarModal() {
+            document.getElementById('star-modal').classList.add('hidden');
+        }
+
         function createGame() {
             const playerName = document.getElementById('host-name').value || 'Joueur 1';
             const numPlayers = parseInt(document.getElementById('num-players').value);
@@ -588,9 +928,36 @@
         function playCard(cardId) {
             log('Jouer carte', {cardId});
             
+            if (!currentGame || !currentGame.players[myPlayerId]) return;
+            
             const myPlayer = currentGame.players[myPlayerId];
             const card = myPlayer.hand.find(c => c.id === cardId);
             
+            // Vérifier si c'est une carte spéciale
+            if (card && card.type === 'special') {
+                // Cartes spéciales qui nécessitent une interaction
+                const specialTypes = ['anniversaire', 'troc', 'piston', 'vengeance', 'chance', 'arc en ciel', 'etoile filante', 'heritage', 'tsunami'];
+                
+                if (specialTypes.includes(card.subtype)) {
+                    socket.emit('play_special_card', { card_id: cardId });
+                    return;
+                }
+            }
+            
+            // Mode arc-en-ciel actif
+            if (currentGame.pending_special && currentGame.pending_special.type === 'arc_en_ciel') {
+                socket.emit('play_card', { card_id: cardId });
+                
+                const remaining = 3 - (currentGame.pending_special.cards_played + 1);
+                updateArcRemaining(remaining);
+                
+                if (remaining <= 0) {
+                    setTimeout(() => finishArcEnCiel(), 500);
+                }
+                return;
+            }
+            
+            // Appel normal
             if (card && card.type === 'hardship') {
                 socket.emit('play_card', { card_id: cardId });
             } else {
@@ -680,7 +1047,43 @@
 
         socket.on('select_salaries_for_acquisition', (data) => {
             log('Sélectionner salaires pour acquisition', data);
-            showSalarySelectionModal(data.card, data.required_cost, data.available_salaries);
+            showSalarySelectionModal(data.card, data.required_cost, data.available_salaries, data.heritage_available || 0);
+        });
+
+        // Écouteurs pour les cartes spéciales
+        socket.on('select_birthday_gift', (data) => {
+            log('Anniversaire - sélection cadeau', data);
+            showBirthdayModal(data.birthday_player_name, data.available_salaries);
+        });
+
+        socket.on('select_troc_target', (data) => {
+            log('Troc - sélection cible', data);
+            showTrocModal(data.available_targets);
+        });
+
+        socket.on('select_piston_job', (data) => {
+            log('Piston - sélection métier', data);
+            showPistonModal(data.available_jobs);
+        });
+
+        socket.on('select_vengeance', (data) => {
+            log('Vengeance - sélection', data);
+            showVengeanceModal(data.received_hardships, data.available_targets);
+        });
+
+        socket.on('select_chance_card', (data) => {
+            log('Chance - sélection carte', data);
+            showChanceModal(data.cards);
+        });
+
+        socket.on('arc_en_ciel_mode', (data) => {
+            log('Arc-en-ciel - mode activé', data);
+            showArcEnCielMode();
+        });
+
+        socket.on('select_from_discard', (data) => {
+            log('Étoile filante - sélection défausse', data);
+            showStarModal(data.discard_cards);
         });
 
         socket.on('game_over', (data) => {
@@ -755,6 +1158,35 @@
                 document.getElementById('last-discard-container').classList.add('hidden');
             }
             
+            // Afficher l'héritage si disponible
+            if (myPlayer.heritage > 0) {
+                const heritageDisplay = `
+                    <div class="bg-purple-100 border-2 border-purple-300 rounded-lg p-3 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">🎁</span>
+                            <div>
+                                <div class="font-bold">Héritage disponible</div>
+                                <div class="text-lg text-purple-600">${myPlayer.heritage} 💰</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                if (!document.getElementById('heritage-display')) {
+                    const actionsPanel = document.getElementById('actions-panel');
+                    const heritageDiv = document.createElement('div');
+                    heritageDiv.id = 'heritage-display';
+                    heritageDiv.innerHTML = heritageDisplay;
+                    actionsPanel.parentNode.insertBefore(heritageDiv, actionsPanel.nextSibling);
+                } else {
+                    document.getElementById('heritage-display').innerHTML = heritageDisplay;
+                }
+            } else {
+                const heritageDiv = document.getElementById('heritage-display');
+                if (heritageDiv) {
+                    heritageDiv.remove();
+                }
+            }
+            
             if (isMyTurn) {
                 if (myPlayer.skip_turns > 0) {
                     updateMessage(`⏸️ Vous devez passer votre tour (${myPlayer.skip_turns} tour(s) restant(s)) - Cliquez sur "Passer mon tour"`);
@@ -769,7 +1201,6 @@
             
             const canDraw = isMyTurn && currentGame.phase === 'draw' && myPlayer.skip_turns === 0;
             const canPlay = isMyTurn && currentGame.phase === 'play';
-            const mustSkip = isMyTurn && myPlayer.skip_turns > 0;
             const canSkipVoluntarily = isMyTurn;
             const canDiscardPlayed = isMyTurn && currentGame.phase === 'draw' && myPlayer.skip_turns === 0;
             
@@ -957,8 +1388,8 @@
                     ` : ''}
                     ${canPlay ? `
                         <div class="mt-2 flex gap-1">
-                            <button onclick="playCard('${card.id}')" class="flex-1 ${card.type === 'hardship' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white text-xs px-2 py-1 rounded">
-                                ${card.type === 'hardship' ? 'Attaquer' : 'Jouer'}
+                            <button onclick="playCard('${card.id}')" class="flex-1 ${card.type === 'hardship' ? 'bg-red-500 hover:bg-red-600' : card.type === 'special' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'} text-white text-xs px-2 py-1 rounded">
+                                ${card.type === 'hardship' ? 'Attaquer' : card.type === 'special' ? '⭐ Activer' : 'Jouer'}
                             </button>
                             <button onclick="discardCard('${card.id}')" class="flex-1 bg-gray-500 text-white text-xs px-2 py-1 rounded hover:bg-gray-600">
                                 Défausser

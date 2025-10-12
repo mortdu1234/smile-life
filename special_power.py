@@ -297,3 +297,5 @@ if __name__ == '__main__':
     
     house_cost = PowerManager.calculate_house_cost(player2, 10)
     print(f"Coût de la maison pour l'architecte: {house_cost}")
+
+    

@@ -28,17 +28,36 @@ V4
 - quand on utilise une attaque elle ne dois pas arrivé dans la défausse mais juste dans la pile des cartes recus de la cible
 - quand on achete une aquisition on peut mettre plus que le prix, le prix de l'aquisition est un prix minimum
 - quand on utilise l'attentat, c'est le joueur qui l'utilise qui le prend sur lui
-
-
-
 V5
 - les maisons ont un prix qui est divisé par 2 si le joueur est marié
 - lorsqu'un joueur ne peut pas recevoir un malus griser le nom de ce joueur lors de la sélection du joueurs pour un malus
 - quand on se prend un divorce alors qu'on a un adultaire alors on perds le mariage, l'adultaire et les enfants posé
 - les flirts qui sont posé grace a l'adultaire sont envoyé dans la catégorie "cartes spéciales" 
+########################################
+v1
+j'aimerais ajouter le fonctionnement des cartes spéciales, pour rappel:
+- héritage : donne l'équivalent d'un salaire niveau 3 pour les achats, il ne peut pas etre perdu
+- anniversaire : chaque joueurs doivent donner un salaire de leurs choix au joueur, pour cela une fenetre s'ouvre avec tous leurs salaire disponible, et il peuvent choisir celui qu'ils donnent
+- troc : le joueur qui pose cette carte choisi un joueur, alors les deux joeuurs echange une carte de leurs main chacun aléatoirement
+- tsunami : les cartes des mains de chaque joueurs sont mélanger et redistribuées aléatoirement
+- piston : quand un joueur joue cette carte, alors il choisit un métier parmis sa main et le pose sans condition de niveau
+- vangence : ouvre une fenetre avec tous les attaque que le joueur a recus et il peut en sélectionner une, puis un joueurs et envois cette attaque sur ce joueurs
+- chance : quand le joueur pose cette carte, il a une nouvelle fenetre qui souvre avec les 3 prochines cartes de la pioche, il en choisit une et les 2 autres sont défaussé, puis le joueur joue normalement
+- arc en ciel : quand le joueur pose cette carte, il peut alors poser jusqu'a 3 cartes d'un coup, puis repiocher le nombre de carte qu'il a poser 
+- étoile filante : quand le joueur joue cette carte, il a une fenetre qui s'ouvre avec l'ensemble des cartes défaussée, et le joueur choisi un carte qu'il peut poser (en respectant les règles du jeu)
+- casino : on vas l'ignorer pour le moment
+V2
+- tsunami : dois mélanger les cartes en main.
+- vangence : quand on active la carte, elle dois etre supprimée de la main et posée dans cartes spéciales
+- troc : quand elle est utilisé, dois etre supprimée de la main et posée dans cartes spéciales
+- etoile filante : on a un message mais on ne peut pas jouer plusieur cartes, dès la première carte, ca passe au joueur suivant
+- piston : quand il est utilisé, dois etre supprimée de la main et posée dans cartes spéciales
+
+
 
 
 # pas important pour le moment
 - la prison dois aussi jeter dans la défausse 2 cartes aléatoire de la main et en repiocher 2 de la pioche en plus de passer 3 tour et jeter le métier de bandit
 - quand on pioche depuis la défausse, on est obliger de jouer la carte de la défausse (erreur lors d'une reprise d'aquisition cela la met dans la main)
 - faire la vérification des limites des attaques (redoublement alors qu'on a un métier)
+- casino
