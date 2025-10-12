@@ -178,3 +178,15 @@ def check_game():
     
     game = games[game_id]
     return player_id, game, game_id
+
+
+def next_player(game):
+    if not (game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel'):
+        print("Tour terminé, passage au joueur suivant")
+        game['phase'] = 'draw'
+        game['current_player'] = (game['current_player'] + 1) % game['num_players']
+        
+        attempts = 0
+        while not game['players'][game['current_player']].connected and attempts < game['num_players']:
+            game['current_player'] = (game['current_player'] + 1) % game['num_players']
+            attempts += 1

@@ -1,6 +1,6 @@
 from flask_socketio import emit
 from card_classes import Card, Player, HardshipCard, JobCard, StudyCard, SalaryCard, MarriageCard, AdulteryCard, HouseCard, TravelCard, ChildCard, SpecialCard, FlirtCard
-from constants import app, socketio, games, player_sessions, get_game_state_for_player, apply_hardship_effect, check_game
+from constants import app, socketio, games, player_sessions, get_game_state_for_player, apply_hardship_effect, check_game, next_player
 from special_power import *
 import init
 
@@ -166,13 +166,7 @@ def handle_select_salaries(data):
         player.hand.remove(card)
         player.add_card_to_played(card)
         
-        game['phase'] = 'draw'
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        
-        attempts = 0
-        while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-            game['current_player'] = (game['current_player'] + 1) % game['num_players']
-            attempts += 1
+        next_player(game)
         
         for p in game['players']:
             if p.connected:
@@ -224,57 +218,13 @@ def handle_select_salaries(data):
                 'game': get_game_state_for_player(game, p.id),
                 'message': f"{player.name} a acheté {card_name} (salaires: {total_salaries}, héritage: {use_heritage})"
             }, room=p.session_id)
-            
-@socketio.on('discard_during_arc')
-def handle_discard_during_arc(data):
-    """Défausser une carte pendant l'arc-en-ciel"""
-    card_id = data.get('card_id')
-    player_id, game, _ = check_game()
-    
-    if game['current_player'] != player_id:
-        emit('error', {'message': 'Ce n\'est pas votre tour'})
-        return
-    
-    # ✅ Vérifier qu'on est bien en mode arc-en-ciel
-    if not game.get('pending_special') or game['pending_special'].get('type') != 'arc_en_ciel':
-        emit('error', {'message': 'Vous n\'êtes pas en mode arc-en-ciel'})
-        return
-    
-    player = game['players'][player_id]
-    
-    card = None
-    for c in player.hand:
-        if c.id == card_id:
-            card = c
-            break
-    
-    if not card:
-        emit('error', {'message': 'Carte non trouvée'})
-        return
-    
-    player.hand.remove(card)
-    game['discard'].append(card)
-    
-    # 🆕 COMPTER les cartes défaussées
-    if 'cards_discarded' not in game['pending_special']:
-        game['pending_special']['cards_discarded'] = 0
-    game['pending_special']['cards_discarded'] += 1
-    
-    cards_discarded = game['pending_special']['cards_discarded']
-    
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': f"{player.name} a défaussé une carte pendant l'arc-en-ciel ({cards_discarded} défaussée(s))"
-            }, room=p.session_id)
-            
+                        
 @socketio.on('discard_card')
 def handle_discard_card(data):
     """Défausser une carte"""
     card_id = data.get('card_id')
     player_id, game, _ = check_game()
-    
+
     if game['current_player'] != player_id:
         emit('error', {'message': 'Ce n\'est pas votre tour'})
         return
@@ -295,16 +245,15 @@ def handle_discard_card(data):
         emit('error', {'message': 'Carte non trouvée'})
         return
     
+
     player.hand.remove(card)
     game['discard'].append(card)
     
-    game['phase'] = 'draw'
-    game['current_player'] = (game['current_player'] + 1) % game['num_players']
-    
-    attempts = 0
-    while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        attempts += 1
+    # si on est en mode arc-en-ciel
+    if not (game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel'):            
+        next_player(game)
+    else :
+        game['pending_special']['cards_discarded'] += 1
     
     for p in game['players']:
         if p.connected:

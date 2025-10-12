@@ -90,7 +90,7 @@ class StudyCard(Card):
     
     def can_be_played(self, player: 'Player') -> tuple[bool, str]:
         # Les études ne peuvent être jouées que si on n'a pas encore de métier
-        if player.has_job():
+        if player.has_job() and not player.get_job().power == 'unlimited_study':
             return False, "Vous ne pouvez plus faire d'études après avoir trouvé un métier"
         return True, ""
 
@@ -360,6 +360,9 @@ class HardshipCard(Card):
     
     def can_be_played(self, player: 'Player') -> tuple[bool, str]:
         # Les coups durs sont joués sur d'autres joueurs
+        if player.has_job() and f'immune_{self.hardship_type}' in player.get_job().power:
+            return False, f"le joueur {player.name} est immunisé contre {self.hardship_type} grâce à son métier"
+
         return False, "Les coups durs doivent être joués sur un autre joueur"
 
 class OtherCard(Card):
@@ -585,8 +588,8 @@ class CardFactory:
     JOBS = {
         'architecte': {'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'house_free'},
         'astronaute': {'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'discard_pick'},
-        'avocat': {'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'no_divorce'},
-        'bandit': {'salary': 4, 'studies': 0, 'status': 'rien', 'power': 'no_fire_tax'},
+        'avocat': {'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'immune_divorce'},
+        'bandit': {'salary': 4, 'studies': 0, 'status': 'rien', 'power': 'immune_tax_immune_licenciement'},
         'barman': {'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'unlimited_flirt'},
         'chef des ventes': {'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'salary_discard'},
         'chef des achats': {'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'acquisition_discard'},
@@ -594,14 +597,14 @@ class CardFactory:
         'chirurgien': {'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'no_illness_extra_study'},
         'designer': {'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'none'},
         'ecrivain': {'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'prix_possible'},
-        'garagiste': {'salary': 2, 'studies': 1, 'status': 'rien', 'power': 'no_accident'},
+        'garagiste': {'salary': 2, 'studies': 1, 'status': 'rien', 'power': 'immune_accident'},
         'gourou': {'salary': 3, 'studies': 0, 'status': 'rien', 'power': 'none'},
         'jardinier': {'salary': 1, 'studies': 1, 'status': 'rien', 'power': 'none'},
         'journaliste': {'salary': 2, 'studies': 3, 'status': 'rien', 'power': 'see_hands_prix_possible'},
-        'médecin': {'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'no_illness_extra_study'},
+        'médecin': {'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'immune_maladie_extra_study'},
         'médium': {'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'see_deck'},
         'militaire': {'salary': 1, 'studies': 0, 'status': 'fonctionnaire', 'power': 'no_attentat'},
-        'pharmacien': {'salary': 3, 'studies': 5, 'status': 'rien', 'power': 'no_illness'},
+        'pharmacien': {'salary': 3, 'studies': 5, 'status': 'rien', 'power': 'immune_maladie'},
         'pilote de ligne': {'salary': 4, 'studies': 5, 'status': 'rien', 'power': 'travel_free'},
         'pizzaiolo': {'salary': 2, 'studies': 0, 'status': 'rien', 'power': 'none'},
         'plombier': {'salary': 1, 'studies': 1, 'status': 'intérimaire', 'power': 'none'},
@@ -634,14 +637,7 @@ class CardFactory:
         """effectue un tests avec des cartes customs"""
         deck = []
         jobs_custom = [
-            {'name': 'barman', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'unlimited_flirt'},
-            {'name': 'barman', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'unlimited_flirt'},
-            {'name': 'barman', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'unlimited_flirt'},
-            {'name': 'ecrivain', 'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'prix_possible'},
-            {'name': 'ecrivain', 'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'prix_possible'},
-            {'name': 'ecrivain', 'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'prix_possible'},
-            {'name': 'ecrivain', 'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'prix_possible'},
-            {'name': 'ecrivain', 'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'prix_possible'}
+ 
         ]
         for job in jobs_custom:
             deck.append(JobCard(job['name'], job['salary'], job['studies'], 
@@ -658,13 +654,6 @@ class CardFactory:
                        'tsunami', 'vengeance']:
             deck.append(SpecialCard(special))
 
-        deck.append(PriceCard(4))
-        deck.append(PriceCard(4))
-        deck.append(PriceCard(4))
-        deck.append(PriceCard(4))
-        deck.append(PriceCard(4))
-        deck.append(PriceCard(4))
-        deck.append(PriceCard(4))
         return deck
     
     @classmethod
@@ -736,7 +725,7 @@ class CardFactory:
             deck.append(HardshipCard('accident'))
             deck.append(HardshipCard('burnout'))
             deck.append(HardshipCard('divorce'))
-            deck.append(HardshipCard('impot'))
+            deck.append(HardshipCard('tax'))
             deck.append(HardshipCard('licenciement'))
             deck.append(HardshipCard('maladie'))
             deck.append(HardshipCard('redoublement'))
@@ -746,8 +735,8 @@ class CardFactory:
         
         # Autres
         deck.append(OtherCard('legion', 3))
-        deck.append(OtherCard('prix', 4))
-        deck.append(OtherCard('prix', 4))
+        deck.append(PriceCard(4))
+        deck.append(PriceCard(4))
         
         return deck
     

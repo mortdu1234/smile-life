@@ -9,6 +9,7 @@ function showArcEnCielMode() {
 }
 
 function updateArcRemaining(count) {
+    log('Mise à jour du compteur Arc-en-ciel', count);
     document.getElementById('arc-remaining').textContent = count;
 }
 

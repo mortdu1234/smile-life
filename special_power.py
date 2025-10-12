@@ -3,28 +3,15 @@ Extension pour gérer les pouvoirs spéciaux des métiers et cartes spéciales
 """
 from flask import request
 from flask_socketio import emit
-from constants import socketio, games, player_sessions, get_game_state_for_player, apply_hardship_effect
+from constants import next_player, socketio, games, player_sessions, get_game_state_for_player, apply_hardship_effect, check_game
 from card_classes import Card, Player, CardFactory, HardshipCard, JobCard, StudyCard, SalaryCard, MarriageCard, AdulteryCard, HouseCard, TravelCard, ChildCard, SpecialCard, FlirtCard
 import random
 
 def handle_play_special_card(data):
     """Jouer une carte spéciale"""
     card_id = data.get('card_id')
-    session_info = player_sessions.get(request.sid)
-    
-    if not session_info:
-        emit('error', {'message': 'Session non trouvée'})
-        return
-    
-    game_id = session_info['game_id']
-    player_id = session_info['player_id']
-    
-    if game_id not in games:
-        emit('error', {'message': 'Partie non trouvée'})
-        return
-    
-    game = games[game_id]
-    
+    player_id, game, _ = check_game()
+
     if game['current_player'] != player_id:
         emit('error', {'message': 'Ce n\'est pas votre tour'})
         return
@@ -63,13 +50,7 @@ def handle_play_special_card(data):
                     'available_salaries': [s.to_dict() for s in available_salaries]
                 }, room=other.session_id)
         
-        game['phase'] = 'draw'
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        
-        attempts = 0
-        while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-            game['current_player'] = (game['current_player'] + 1) % game['num_players']
-            attempts += 1
+        next_player(game)
         
         # ✅ Mettre à jour tous les joueurs
         for p in game['players']:
@@ -167,7 +148,9 @@ def handle_play_special_card(data):
         game['pending_special'] = {
             'type': 'arc_en_ciel',
             'player_id': player_id,
-            'cards_played': 0,
+            'card_bets': 0,
+            'cards_played': 0, 
+            'cards_discarded': 0,
             'max_cards': 3
         }
         
@@ -191,13 +174,7 @@ def handle_play_special_card(data):
         player.hand.remove(card)
         player.add_card_to_played(card)
         
-        game['phase'] = 'draw'
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        
-        attempts = 0
-        while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-            game['current_player'] = (game['current_player'] + 1) % game['num_players']
-            attempts += 1
+        next_player(game)
         
         for p in game['players']:
             if p.connected:
@@ -233,13 +210,7 @@ def handle_play_special_card(data):
                 card_index += cards_to_give
         
         
-        game['phase'] = 'draw'
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        
-        attempts = 0
-        while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-            game['current_player'] = (game['current_player'] + 1) % game['num_players']
-            attempts += 1
+        next_player(game)
         
         message = f"🌊 Tsunami ! Les cartes de {', '.join(affected)} ont été mélangées et redistribuées !" if affected else "🌊 Tsunami ! Personne n'avait de cartes"
         
@@ -270,13 +241,7 @@ def handle_play_special_card(data):
             })
         else:
             # Le casino reste ouvert, on passe au joueur suivant
-            game['phase'] = 'draw'
-            game['current_player'] = (game['current_player'] + 1) % game['num_players']
-            
-            attempts = 0
-            while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-                game['current_player'] = (game['current_player'] + 1) % game['num_players']
-                attempts += 1
+            next_player(game)
             
             for p in game['players']:
                 if p.connected:
@@ -444,13 +409,7 @@ def handle_vengeance(data):
         player.add_card_to_played(vengeance_card)
         game['pending_special'] = None
         
-        game['phase'] = 'draw'
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        
-        attempts = 0
-        while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-            game['current_player'] = (game['current_player'] + 1) % game['num_players']
-            attempts += 1
+        next_player(game)
         
         for p in game['players']:
             if p.connected:
@@ -498,6 +457,49 @@ def handle_chance_card(data):
                     'game': get_game_state_for_player(game, p.id)
                 }, room=p.session_id)
 
+
+    """Défausser une carte pendant l'arc-en-ciel"""
+    card_id = data.get('card_id')
+    player_id, game, _ = check_game()
+    
+    if game['current_player'] != player_id:
+        emit('error', {'message': 'Ce n\'est pas votre tour'})
+        return
+    
+    # ✅ Vérifier qu'on est bien en mode arc-en-ciel
+    if not game.get('pending_special') or game['pending_special'].get('type') != 'arc_en_ciel':
+        emit('error', {'message': 'Vous n\'êtes pas en mode arc-en-ciel'})
+        return
+    
+    player = game['players'][player_id]
+    
+    card = None
+    for c in player.hand:
+        if c.id == card_id:
+            card = c
+            break
+    
+    if not card:
+        emit('error', {'message': 'Carte non trouvée'})
+        return
+    
+    player.hand.remove(card)
+    game['discard'].append(card)
+    
+    # 🆕 COMPTER les cartes défaussées
+    if 'cards_discarded' not in game['pending_special']:
+        game['pending_special']['cards_discarded'] = 0
+    game['pending_special']['cards_discarded'] += 1
+    
+    cards_discarded = game['pending_special']['cards_discarded']
+    
+    for p in game['players']:
+        if p.connected:
+            socketio.emit('game_updated', {
+                'game': get_game_state_for_player(game, p.id),
+                'message': f"{player.name} a défaussé une carte pendant l'arc-en-ciel ({cards_discarded} défaussée(s))"
+            }, room=p.session_id)
+
 @socketio.on('arc_en_ciel_finished')
 def handle_arc_finished(data):
     """Terminer le mode arc-en-ciel et repiocher"""
@@ -515,11 +517,12 @@ def handle_arc_finished(data):
     
     cards_played = game['pending_special'].get('cards_played', 0)
     cards_discarded = game['pending_special'].get('cards_discarded', 0)
+    card_bets = game['pending_special'].get('card_bets', 0)
     
-    # 🆕 Repiocher : (cartes jouées + cartes défaussées) - 1
+    # 🆕 Repiocher : (cartes jouées + cartes défaussées)
     # -1 car on ne repioche pas la carte Arc-en-ciel elle-même
-    total_cards_used = cards_played + cards_discarded
-    cards_to_draw = max(0, total_cards_used - 1)
+    total_cards_used = cards_played + cards_discarded + card_bets
+    cards_to_draw = max(0, total_cards_used)
     
     cards_drawn = 0
     for _ in range(cards_to_draw):
@@ -540,7 +543,7 @@ def handle_arc_finished(data):
         if p.connected:
             socketio.emit('game_updated', {
                 'game': get_game_state_for_player(game, p.id),
-                'message': f"🌈 {player.name} a repioché {cards_drawn} carte(s) ({cards_played} posées + {cards_discarded} défaussées - 1)"
+                'message': f"🌈 {player.name} a repioché {cards_drawn} carte(s) ({cards_played} posées + {cards_discarded} défaussées + {card_bets} pariée - 1)"
             }, room=p.session_id)
 
 @socketio.on('discard_card_selected')
@@ -646,13 +649,16 @@ def handle_casino_bet(data):
         
         # Si c'est l'ouvreur, on passe au joueur suivant
         if is_opener:
-            game['phase'] = 'draw'
-            game['current_player'] = (game['current_player'] + 1) % game['num_players']
-            
-            attempts = 0
-            while not game['players'][game['current_player']].connected and attempts < game['num_players']:
+            if not (game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel'):
+                game['phase'] = 'draw'
                 game['current_player'] = (game['current_player'] + 1) % game['num_players']
-                attempts += 1
+                
+                attempts = 0
+                while not game['players'][game['current_player']].connected and attempts < game['num_players']:
+                    game['current_player'] = (game['current_player'] + 1) % game['num_players']
+                    attempts += 1
+            else:
+                game['pending_special']['card_bets'] += 1
         
         for p in game['players']:
             if p.connected:
@@ -693,14 +699,17 @@ def handle_casino_bet(data):
         game['casino']['second_bet'] = None
         game['casino']['opener_id'] = None
         
-        game['phase'] = 'draw'
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        
-        attempts = 0
-        while not game['players'][game['current_player']].connected and attempts < game['num_players']:
+        if not (game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel'):
+            game['phase'] = 'draw'
             game['current_player'] = (game['current_player'] + 1) % game['num_players']
-            attempts += 1
         
+            attempts = 0
+            while not game['players'][game['current_player']].connected and attempts < game['num_players']:
+                game['current_player'] = (game['current_player'] + 1) % game['num_players']
+                attempts += 1
+        else:
+            game['pending_special']['card_bets'] += 1
+            
         for p in game['players']:
             if p.connected:
                 socketio.emit('game_updated', {
@@ -731,15 +740,13 @@ def handle_skip_casino_bet(data):
     if game['casino'].get('opener_id') != player_id:
         emit('error', {'message': 'Seul l\'ouvreur peut refuser de miser'})
         return
-    
-    # Le casino reste ouvert, on passe au joueur suivant
-    game['phase'] = 'draw'
-    game['current_player'] = (game['current_player'] + 1) % game['num_players']
-    
-    attempts = 0
-    while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        attempts += 1
+
+    if not (game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel'):
+        # Le casino reste ouvert, on passe au joueur suivant
+        game['pending_special']['card_'] += 1
+        next_player(game)
+    else:
+        game['pending_special']['cards_played'] += 1
     
     for p in game['players']:
         if p.connected:

@@ -299,12 +299,11 @@ function playCard(cardId) {
     if (currentGame.pending_special && currentGame.pending_special.type === 'arc_en_ciel') {
         socket.emit('play_card', { card_id: cardId });
         
-        // 🆕 Compteur incrémental au lieu de décrémenter
         const actionsCount = (currentGame.pending_special.cards_played || 0) + 
-                            (currentGame.pending_special.cards_discarded || 0) + 1;
+                            (currentGame.pending_special.cards_discarded || 0) + 
+                            (currentGame.pending_special.card_bets || 0) + 1;
         updateArcRemaining(actionsCount);
         
-        // 🆕 PLUS de fin automatique - le joueur décide
         return;
     }
     
@@ -315,16 +314,6 @@ function playCard(cardId) {
 
 function discardCard(cardId) {
     log('Défausser carte', {cardId});
-    
-    // ✅ Mode arc-en-ciel : permettre de défausser des cartes
-    if (currentGame && currentGame.pending_special && 
-        currentGame.pending_special.type === 'arc_en_ciel') {
-        if (confirm('Voulez-vous défausser cette carte pendant l\'arc-en-ciel ?')) {
-            socket.emit('discard_during_arc', { card_id: cardId });
-        }
-        return;
-    }
-    
     socket.emit('discard_card', { card_id: cardId });
 }
 
