@@ -874,7 +874,7 @@ def handle_play_card(data):
             return
     
     if isinstance(card, SpecialCard):
-        print("la carte jouée est spéciale")
+        print("une carte jouée est spéciale")
         handle_play_special_card(data)
         return
     
