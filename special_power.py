@@ -712,5 +712,17 @@ def handle_skip_casino_bet(data):
                 'message': f"🎰 {player.name} n'a pas misé. Le casino reste ouvert !"
             }, room=p.session_id)
 
+#####################
+# Métiers avec pouvoirs spéciaux
+#####################
+def have_special_power(job_name):
+    """Vérifier si un métier a un pouvoir spécial"""
+    # Liste des métiers avec pouvoirs spéciaux instantanés
+    special_jobs = [
+        "astronaute", "chef des vents", "chefs des achats", 
+        "chercheur", "journaliste", "médium",
+    ]
+    return job_name in special_jobs
 
-
+def do_instant_power(job, data):
+    pass

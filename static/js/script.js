@@ -50,6 +50,7 @@ function showSalarySelectionModal(card, cost, availableSalaries, heritage = 0) {
     document.getElementById('selected-amount').textContent = '0';
     document.getElementById('payment-status').textContent = 'Sélectionnez vos salaires (minimum requis, vous pouvez dépenser plus)';
     
+    // ✅ CONSTRUIRE LE HTML D'ABORD
     let salariesHTML = availableSalaries.map(salary => `
         <div onclick="toggleSalarySelection('${salary.id}', ${salary.subtype})" 
                 id="salary-${salary.id}"
@@ -74,7 +75,9 @@ function showSalarySelectionModal(card, cost, availableSalaries, heritage = 0) {
     
     salariesList.innerHTML = salariesHTML;
     
-    document.getElementById('confirm-salary-btn').disabled = true;
+    // ✅ PUIS APPELER LA MISE À JOUR
+    updateSalarySelectionDisplay();
+    
     modal.classList.remove('hidden');
 }
 
@@ -121,6 +124,16 @@ function updateSalarySelectionDisplay() {
     const statusEl = document.getElementById('payment-status');
     const confirmBtn = document.getElementById('confirm-salary-btn');
     
+    // ✅ CAS SPÉCIAL : coût de 0 (GRATUIT - architecte)
+    if (requiredCost === 0) {
+        statusEl.textContent = '✅ Gratuit !';
+        statusEl.className = 'mt-2 text-sm text-green-600 font-semibold';
+        confirmBtn.disabled = false;  // ✅ ACTIVÉ IMMÉDIATEMENT
+
+        return;  // Sortir pour ne pas continuer les autres vérifications
+    }
+    
+    // Vérifications normales pour les acquisitions payantes
     if (total < requiredCost) {
         statusEl.textContent = `Il manque ${requiredCost - total} (minimum requis)`;
         statusEl.className = 'mt-2 text-sm text-orange-600 font-semibold';
@@ -137,23 +150,23 @@ function updateSalarySelectionDisplay() {
 }
 
 function confirmSalarySelection() {
-    if (!pendingAcquisitionCard || (selectedSalaries.length === 0 && heritageUsed === 0)) return;
+    if (!pendingAcquisitionCard) return;
     
+    // ✅ Permettre de confirmer si c'est gratuit ET montant valide
     const totalSalaries = selectedSalaries.reduce((sum, s) => sum + s.level, 0);
     const total = totalSalaries + heritageUsed;
     
-    if (total < requiredCost) {
+    if (requiredCost === 0 || total >= requiredCost) {
+        socket.emit('select_salaries_for_purchase', {
+            card_id: pendingAcquisitionCard.id,
+            salary_ids: selectedSalaries.map(s => s.id),
+            use_heritage: heritageUsed
+        });
+        
+        closeSalaryModal();
+    } else {
         alert('Le montant sélectionné est inférieur au minimum requis');
-        return;
     }
-    
-    socket.emit('select_salaries_for_purchase', {
-        card_id: pendingAcquisitionCard.id,
-        salary_ids: selectedSalaries.map(s => s.id),
-        use_heritage: heritageUsed
-    });
-    
-    closeSalaryModal();
 }
 
 function closeSalaryModal() {
@@ -306,12 +319,6 @@ function discardCard(cardId) {
 
 function discardPlayedCard(cardId) {
     log('Défausser carte posée', {cardId});
-    
-    // Vérifier qu'on est en phase draw
-    if (currentGame.phase !== 'draw') {
-        alert('Vous ne pouvez défausser qu\'avant de piocher');
-        return;
-    }
     
     if (confirm('Êtes-vous sûr de vouloir défausser cette carte ?')) {
         socket.emit('discard_played_card', { card_id: cardId });
@@ -530,8 +537,10 @@ function updateGameDisplay() {
     const canDraw = isMyTurn && currentGame.phase === 'draw' && myPlayer.skip_turns === 0;
     const canPlay = isMyTurn && currentGame.phase === 'play';
     const canSkipVoluntarily = isMyTurn;
+    // 🆕 canDiscardPlayed ne contrôle plus les métiers intérimaires
+    // Il contrôle seulement les mariages/adultères et métiers non-intérimaires
     const canDiscardPlayed = isMyTurn && currentGame.phase === 'draw' && myPlayer.skip_turns === 0;
-    
+        
     document.getElementById('draw-deck-btn').disabled = !canDraw;
     document.getElementById('draw-discard-btn').disabled = !canDraw || (currentGame.discard && currentGame.discard.length === 0);
     document.getElementById('skip-turn-btn').disabled = !canSkipVoluntarily;
@@ -631,14 +640,30 @@ function displayPlayerCategories(player, canDiscard) {
         'cartes spéciales': 'player-speciales'
     };
     
+    // 🆕 Vérifier si c'est le tour du joueur
+    const isMyTurn = currentGame.current_player === player.id;
+    
     for (const [category, elementId] of Object.entries(categories)) {
         const container = document.getElementById(elementId);
         const cards = player.played[category] || [];
         
         if (cards.length > 0) {
-            const canDiscardThisCategory = canDiscard && (category === 'vie professionnelle' || category === 'vie personnelle');
+            // 🆕 Logique améliorée pour chaque carte
             container.innerHTML = cards.map(card => {
-                return createCardHTML(card, false, true, canDiscardThisCategory);
+                let canDiscardCard = false;
+                
+                if (isMyTurn) {
+                    // 🆕 Métier intérimaire : défaussable à tout moment
+                    if (card.type === 'job' && card.status === 'intérimaire') {
+                        canDiscardCard = true;
+                    }
+                    // Autres cartes : seulement en phase draw
+                    else if (canDiscard && (category === 'vie professionnelle' || category === 'vie personnelle')) {
+                        canDiscardCard = true;
+                    }
+                }
+                
+                return createCardHTML(card, false, true, canDiscardCard);
             }).join('');
         } else {
             container.innerHTML = '<p class="text-gray-500 text-sm">Aucune carte</p>';
@@ -706,8 +731,16 @@ function createCardHTML(card, canPlay, isPlayed = false, canDiscard = false, isS
     const sizeClass = isSmall ? 'min-w-[80px] p-2' : 'min-w-[120px] p-3';
     const textSize = isSmall ? 'text-xs' : 'text-sm';
     
-    // Permettre de défausser métier, mariage et adultère déjà posés (AVANT de piocher)
-    const canDiscardPlayed = isPlayed && canDiscard && (card.type === 'job' || card.type === 'marriage' || card.type === 'adultere');
+    // 🆕 Le paramètre canDiscard gère déjà la logique métier intérimaire
+    // Il est passé depuis displayPlayerCategories qui vérifie le statut
+    const canDiscardPlayed = isPlayed && canDiscard && 
+                            (card.type === 'job' || card.type === 'marriage' || card.type === 'adultere');
+    
+    // 🆕 Message personnalisé pour les métiers intérimaires
+    let discardButtonText = '🗑️ Défausser';
+    if (card.type === 'job' && card.status === 'intérimaire') {
+        discardButtonText = '👋 Démissionner';
+    }
 
     return `
         <div class="card ${color} border-2 rounded-lg ${sizeClass} ${cursor}">
@@ -734,7 +767,7 @@ function createCardHTML(card, canPlay, isPlayed = false, canDiscard = false, isS
             ${canDiscardPlayed ? `
                 <div class="mt-2">
                     <button onclick="discardPlayedCard('${card.id}')" class="w-full bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600">
-                        🗑️ Défausser
+                        ${discardButtonText}
                     </button>
                 </div>
             ` : ''}

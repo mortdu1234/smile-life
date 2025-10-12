@@ -68,6 +68,7 @@ class JobCard(Card):
         
         return True, ""
 
+
 class StudyCard(Card):
     """Carte étude"""
     def __init__(self, study_type: str, levels: int):
@@ -585,38 +586,38 @@ class Player:
 class CardFactory:
     """Factory pour créer les cartes"""
     
-    JOBS = {
-        'architecte': {'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'house_free'},
-        'astronaute': {'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'discard_pick'},
-        'avocat': {'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'immune_divorce'},
-        'bandit': {'salary': 4, 'studies': 0, 'status': 'rien', 'power': 'immune_tax_immune_licenciement'},
-        'barman': {'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'unlimited_flirt'},
-        'chef des ventes': {'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'salary_discard'},
-        'chef des achats': {'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'acquisition_discard'},
-        'chercheur': {'salary': 2, 'studies': 6, 'status': 'rien', 'power': 'extra_card'},
-        'chirurgien': {'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'no_illness_extra_study'},
-        'designer': {'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'none'},
-        'ecrivain': {'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'prix_possible'},
-        'garagiste': {'salary': 2, 'studies': 1, 'status': 'rien', 'power': 'immune_accident'},
-        'gourou': {'salary': 3, 'studies': 0, 'status': 'rien', 'power': 'none'},
-        'jardinier': {'salary': 1, 'studies': 1, 'status': 'rien', 'power': 'none'},
-        'journaliste': {'salary': 2, 'studies': 3, 'status': 'rien', 'power': 'see_hands_prix_possible'},
-        'médecin': {'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'immune_maladie_extra_study'},
-        'médium': {'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'see_deck'},
-        'militaire': {'salary': 1, 'studies': 0, 'status': 'fonctionnaire', 'power': 'no_attentat'},
-        'pharmacien': {'salary': 3, 'studies': 5, 'status': 'rien', 'power': 'immune_maladie'},
-        'pilote de ligne': {'salary': 4, 'studies': 5, 'status': 'rien', 'power': 'travel_free'},
-        'pizzaiolo': {'salary': 2, 'studies': 0, 'status': 'rien', 'power': 'none'},
-        'plombier': {'salary': 1, 'studies': 1, 'status': 'intérimaire', 'power': 'none'},
-        'policier': {'salary': 1, 'studies': 1, 'status': 'fonctionnaire', 'power': 'block_bandit_gourou'},
-        'prof anglais': {'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none'},
-        'prof francais': {'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none'},
-        'prof histoire': {'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none'},
-        'prof maths': {'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none'},
-        'serveur': {'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'none'},
-        'stripteaser': {'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'none'},
-        'grand prof': {'salary': 3, 'studies': 'P', 'status': 'fonctionnaire', 'power': 'none'}
-    }
+    JOBS = [
+        {'name': 'architecte', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'house_free'},
+        {'name': 'astronaute', 'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'instant'},
+        {'name': 'avocat', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'immune_divorce'},
+        {'name': 'bandit', 'salary': 4, 'studies': 0, 'status': 'rien', 'power': 'immune_tax__immune_licenciement'},
+        {'name': 'barman', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'unlimited_flirt'},
+        {'name': 'chef des ventes', 'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'instant'},
+        {'name': 'chef des achats', 'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'instant'},
+        {'name': 'chercheur', 'salary': 2, 'studies': 6, 'status': 'rien', 'power': 'extra_card__prix_possible'},
+        {'name': 'chirurgien', 'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'no_illness__extra_study'},
+        {'name': 'designer', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'none'},
+        {'name': 'ecrivain', 'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'prix_possible'},
+        {'name': 'garagiste', 'salary': 2, 'studies': 1, 'status': 'rien', 'power': 'immune_accident'},
+        {'name': 'gourou', 'salary': 3, 'studies': 0, 'status': 'rien', 'power': 'none'},
+        {'name': 'jardinier', 'salary': 1, 'studies': 1, 'status': 'rien', 'power': 'none'},
+        {'name': 'journaliste', 'salary': 2, 'studies': 3, 'status': 'rien', 'power': 'instant__prix_possible'},
+        {'name': 'médecin', 'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'immune_maladie__extra_study'},
+        {'name': 'médium', 'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'instant'},
+        {'name': 'militaire', 'salary': 1, 'studies': 0, 'status': 'fonctionnaire', 'power': 'no_attentat'},
+        {'name': 'pharmacien', 'salary': 3, 'studies': 5, 'status': 'rien', 'power': 'immune_maladie'},
+        {'name': 'pilote de ligne', 'salary': 4, 'studies': 5, 'status': 'rien', 'power': 'travel_free'},
+        {'name': 'pizzaiolo', 'salary': 2, 'studies': 0, 'status': 'rien', 'power': 'none'},
+        {'name': 'plombier', 'salary': 1, 'studies': 1, 'status': 'intérimaire', 'power': 'none'},
+        {'name': 'policier', 'salary': 1, 'studies': 1, 'status': 'fonctionnaire', 'power': 'block_bandit_gourou'},
+        {'name': 'prof anglais', 'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none'},
+        {'name': 'prof francais', 'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none'},
+        {'name': 'prof histoire', 'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none'},
+        {'name': 'prof maths', 'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none'},
+        {'name': 'serveur', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'none'},
+        {'name': 'stripteaser', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'none'},
+        {'name': 'grand prof', 'salary': 3, 'studies': 'P', 'status': 'fonctionnaire', 'power': 'none'}
+    ]
     
     FLIRT_LOCATIONS = ['bar', 'boite de nuit', 'camping', 'cinema', 'hotel', 
                        'internet', 'parc', 'restaurant', 'theatre', 'zoo']
@@ -637,21 +638,37 @@ class CardFactory:
         """effectue un tests avec des cartes customs"""
         deck = []
         jobs_custom = [
- 
+            {'name': 'architecte', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'house_free'},
+            {'name': 'pilote de ligne', 'salary': 4, 'studies': 5, 'status': 'rien', 'power': 'travel_free'},
+            {'name': 'architecte', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'house_free'},
+            {'name': 'pilote de ligne', 'salary': 4, 'studies': 5, 'status': 'rien', 'power': 'travel_free'},
+            {'name': 'architecte', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'house_free'},
+            {'name': 'pilote de ligne', 'salary': 4, 'studies': 5, 'status': 'rien', 'power': 'travel_free'},
+            {'name': 'architecte', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'house_free'},
+            {'name': 'pilote de ligne', 'salary': 4, 'studies': 5, 'status': 'rien', 'power': 'travel_free'}
         ]
         for job in jobs_custom:
             deck.append(JobCard(job['name'], job['salary'], job['studies'], 
                                job['status'], job['power']))
 
-        # salaires
-        for level in range(1, 5):
-            for _ in range(5):
-                deck.append(SalaryCard(level))
+        for _ in range(10):
+            deck.append(StudyCard('double', 2))
+
+        # Maisons
+        deck.append(HouseCard('petite', 6, 1))
+        deck.append(HouseCard('petite', 6, 1))
+        deck.append(HouseCard('moyenne', 8, 2))
+        deck.append(HouseCard('moyenne', 8, 2))
+        deck.append(HouseCard('grande', 10, 3))
+        
+        # Voyages
+        for _ in range(5):
+            deck.append(TravelCard())
 
          # Cartes spéciales
-        for special in ['anniversaire', 'arc en ciel', 'casino', 'chance', 
-                       'etoile filante', 'heritage', 'piston', 'troc', 
-                       'tsunami', 'vengeance']:
+        for special in ['chance', 'arc en ciel', 'casino', 'chance', 
+                       'chance', 'piston', 'piston', 'piston', 
+                       'piston', 'piston']:
             deck.append(SpecialCard(special))
 
         return deck
@@ -660,16 +677,16 @@ class CardFactory:
     def create_deck(cls) -> List[Card]:
         """Crée un deck complet de cartes"""
         #########################
-        # return cls.test_create_deck(cls)
+        return cls.test_create_deck(cls)
         # TESTING
         #########################
         
         deck = []
         
         # Métiers
-        for job_name, job_data in cls.JOBS.items():
-            deck.append(JobCard(job_name, job_data['salary'], job_data['studies'], 
-                               job_data['status'], job_data['power']))
+        for job in cls.JOBS:
+            deck.append(JobCard(job['name'], job['salary'], job['studies'], 
+                        job['status'], job['power']))
         
         # Études
         for _ in range(22):

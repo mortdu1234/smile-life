@@ -64,8 +64,26 @@ V4
 V5
 - arc en ciel : quand on défausse une carte, changement de tour
 - arc en ciel : quand on ouvre le casino durant l'arc en ciel, ca passe le tour
+V6
+GESTION DES METIERS
+pouvoir au moment ou l'on pose la carte
+- astronaute : fait comme etoile filante
+- chef des ventes : faire un affichage de l'ensemble des salaires de la défausse, celui qui est sélectionner est poser devant le joueur si il peut
+- chef des achats : faire un affichage de l'ensemble des acquisision de la défausse, celle qui est sélectionnées est acheter
+- chercheur : donne une carte en plus, si il y a un licenciement ou une démission alors on supprime une carte aléatoire du jeu
+- journaliste : permet d'afficher les mains de chaque joueurs
+- médium : faire un affichage des 13 prochaines cartes de la pioche
+
+- pilote de ligne : tous les voyages qu'il achetes sont gratuit
+- architecte : la prochaine maison qu'il achete est gratuite
+
 
 # pas important pour le moment
 - la prison dois aussi jeter dans la défausse 2 cartes aléatoire de la main et en repiocher 2 de la pioche en plus de passer 3 tour et jeter le métier de bandit
 - quand on pioche depuis la défausse, on est obliger de jouer la carte de la défausse (erreur lors d'une reprise d'aquisition cela la met dans la main)
 - faire la vérification des limites des attaques (redoublement alors qu'on a un métier)
+
+
+trucs a tester :
+- pilote de ligne : voyage infinite
+- achitecte :  maison gratuite

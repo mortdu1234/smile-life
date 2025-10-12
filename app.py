@@ -155,6 +155,8 @@ def handle_select_salaries(data):
     if job:
         if isinstance(card, HouseCard) and job.power == 'house_free':
             required = 0
+            # ✅ MAINTENANT on modifie le pouvoir (après validation)
+            job.power = 'None'
         elif isinstance(card, TravelCard) and job.power == 'travel_free':
             required = 0
     
@@ -271,10 +273,7 @@ def handle_discard_played_card(data):
         emit('error', {'message': 'Ce n\'est pas votre tour'})
         return
     
-    if game['phase'] != 'draw':
-        emit('error', {'message': 'Vous ne pouvez défausser qu\'avant de piocher'})
-        return
-    
+    # 🆕 Récupérer la carte AVANT de vérifier la phase
     player = game['players'][player_id]
     
     card = None
@@ -288,6 +287,15 @@ def handle_discard_played_card(data):
         emit('error', {'message': 'Carte non trouvée'})
         return
     
+    # 🆕 Vérifier si c'est un métier intérimaire
+    is_temp_job = isinstance(card, JobCard) and card.status == 'intérimaire'
+    
+    # 🆕 Les métiers intérimaires peuvent être défaussés à tout moment
+    # Les autres cartes seulement en phase 'draw'
+    if not is_temp_job and game['phase'] != 'draw':
+        emit('error', {'message': 'Vous ne pouvez défausser qu\'avant de piocher (sauf métiers intérimaires)'})
+        return
+    
     if not isinstance(card, (JobCard, MarriageCard, AdulteryCard)):
         emit('error', {'message': 'Seuls les métiers, mariages et adultères peuvent être défaussés'})
         return
@@ -295,15 +303,20 @@ def handle_discard_played_card(data):
     player.remove_card_from_played(card)
     game['discard'].append(card)
     
+    # 🆕 Afficher le statut du métier dans le message
     card_type = "métier" if isinstance(card, JobCard) else ("mariage" if isinstance(card, MarriageCard) else "adultère")
+    job_status = f" ({card.status})" if isinstance(card, JobCard) else ""
+    
+    if not is_temp_job:
+        next_player(game)
     
     for p in game['players']:
         if p.connected:
             socketio.emit('game_updated', {
                 'game': get_game_state_for_player(game, p.id),
-                'message': f"{player.name} a défaussé son {card_type}"
+                'message': f"{player.name} a défaussé son {card_type}{job_status}"
             }, room=p.session_id)
-
+    
 @socketio.on('play_card')
 def handle_play_card(data):
     """Jouer une carte"""
@@ -331,7 +344,13 @@ def handle_play_card(data):
     if not card:
         emit('error', {'message': 'Carte non trouvée dans votre main'})
         return
-    
+
+    # Cartes Métiers    
+    if isinstance(card, JobCard):
+        if have_special_power(card.job_name):
+            do_instant_power(card, data)
+            return
+
     # Carte d'attaque
     if isinstance(card, HardshipCard):
         if target_player_id is None:
@@ -403,6 +422,7 @@ def handle_play_card(data):
         
         if job:
             if isinstance(card, HouseCard) and job.power == 'house_free':
+                # ✅ NE PAS modifier le pouvoir ici
                 cost = 0
             elif isinstance(card, TravelCard) and job.power == 'travel_free':
                 cost = 0
@@ -411,16 +431,16 @@ def handle_play_card(data):
         if isinstance(card, HouseCard) and player.is_married() and cost > 0:
             cost = cost // 2
         
-        if cost > 0:
+        if cost >= 0:
             available_salaries = [c for c in player.played["vie professionnelle"] if isinstance(c, SalaryCard)]
             
             if not available_salaries and player.heritage < cost:
-                emit('error', {'message': f'Vous avez besoin de salaires ou d\'hÃ©ritage pour acheter (coÃ»t: {cost})'})
+                emit('error', {'message': f'Vous avez besoin de salaires ou d\'héritage pour acheter (coût: {cost})'})
                 return
             
             emit('select_salaries_for_acquisition', {
                 'card': card.to_dict(),
-                'required_cost': cost,  # ✅ Coût déjà réduit si marié
+                'required_cost': cost,
                 'available_salaries': [s.to_dict() for s in available_salaries],
                 'heritage_available': player.heritage
             })
