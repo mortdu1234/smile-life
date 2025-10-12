@@ -22,7 +22,22 @@ class Card(ABC):
     
     @abstractmethod
     def can_be_played(self, player: 'Player') -> tuple[bool, str]:
-        """Vérifie si la carte peut être jouée par le joueur"""
+        job = player.get_job()
+        if not job:
+            return False, "Vous devez avoir un métier pour recevoir un salaire"
+        
+        # ✅ Vérifier si le joueur a le Grand Prix d'excellence
+        has_grand_prix = any(
+            isinstance(c, OtherCard) and c.card_type == 'prix' 
+            for c in player.get_all_played_cards()
+        )
+        
+        # ✅ Augmenter le salaire max de +1 si le joueur a le Grand Prix
+        max_salary = job.salary + 1 if has_grand_prix else job.salary
+        
+        if self.level > max_salary:
+            return False, f"Votre salaire maximum est de {max_salary}"
+        
         return True, ""
 
 class JobCard(Card):
@@ -619,7 +634,7 @@ class CardFactory:
     def create_deck(cls) -> List[Card]:
         """Crée un deck complet de cartes"""
         #########################
-        return cls.test_create_deck(cls)
+        # return cls.test_create_deck(cls)
         # TESTING
         #########################
         

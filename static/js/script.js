@@ -294,18 +294,7 @@ function playCard(cardId) {
     
     const myPlayer = currentGame.players[myPlayerId];
     const card = myPlayer.hand.find(c => c.id === cardId);
-    
-    // Vérifier si c'est une carte spéciale
-    if (card && card.type === 'special') {
-        // Cartes spéciales qui nécessitent une interaction
-        const specialTypes = ['anniversaire', 'troc', 'piston', 'vengeance', 'chance', 'arc en ciel', 'etoile filante', 'heritage', 'tsunami'];
         
-        if (specialTypes.includes(card.subtype)) {
-            socket.emit('play_special_card', { card_id: cardId });
-            return;
-        }
-    }
-    
     // Mode arc-en-ciel actif
     if (currentGame.pending_special && currentGame.pending_special.type === 'arc_en_ciel') {
         socket.emit('play_card', { card_id: cardId });
@@ -320,15 +309,22 @@ function playCard(cardId) {
     }
     
     // Appel normal
-    if (card && card.type === 'hardship') {
-        socket.emit('play_card', { card_id: cardId });
-    } else {
-        socket.emit('play_card', { card_id: cardId });
-    }
+    socket.emit('play_card', { card_id: cardId });
+    
 }
 
 function discardCard(cardId) {
     log('Défausser carte', {cardId});
+    
+    // ✅ Mode arc-en-ciel : permettre de défausser des cartes
+    if (currentGame && currentGame.pending_special && 
+        currentGame.pending_special.type === 'arc_en_ciel') {
+        if (confirm('Voulez-vous défausser cette carte pendant l\'arc-en-ciel ?')) {
+            socket.emit('discard_during_arc', { card_id: cardId });
+        }
+        return;
+    }
+    
     socket.emit('discard_card', { card_id: cardId });
 }
 
@@ -567,18 +563,24 @@ function updateGameDisplay() {
         `;
     }).join('');
     
+    // Main du joueur
     log('Main du joueur', myPlayer.hand);
     const handContainer = document.getElementById('player-hand');
     document.getElementById('hand-count').textContent = myPlayer.hand ? myPlayer.hand.length : 0;
-    
+
+    // ✅ AJOUT : Vérifier si on est en mode arc-en-ciel
+    const isArcMode = currentGame.pending_special && currentGame.pending_special.type === 'arc_en_ciel';
+
     if (myPlayer.hand && myPlayer.hand.length > 0) {
         handContainer.innerHTML = myPlayer.hand.map(card => {
-            return createCardHTML(card, canPlay);
+            // ✅ MODIFICATION : En mode arc-en-ciel, permettre de jouer OU défausser
+            const canPlayOrDiscard = isArcMode || canPlay;
+            return createCardHTML(card, canPlayOrDiscard);  // ← Utiliser canPlayOrDiscard au lieu de canPlay
         }).join('');
     } else {
         handContainer.innerHTML = '<p class="text-gray-500">Aucune carte en main</p>';
     }
-    
+
     // Afficher les cartes par catégories
     displayPlayerCategories(myPlayer, canDiscardPlayed);
     

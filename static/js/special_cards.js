@@ -324,11 +324,13 @@ function updateCasinoDisplay(casinoState) {
         const myPlayer = currentGame.players[myPlayerId];
         const availableSalaries = myPlayer.hand.filter(c => c.type === 'salary');
         
-        // Le joueur peut parier s'il y a de la place, qu'il a des salaires et que c'est son tour
+        // ✅ Le joueur peut parier s'il y a de la place, qu'il a des salaires, 
+        // que c'est son tour ET que la phase est 'play'
         const isMyTurn = currentGame.current_player === myPlayerId;
         const canBet = availableSalaries.length > 0 && 
                     (!casinoState.first_bet || !casinoState.second_bet) &&
-                    isMyTurn;
+                    isMyTurn &&
+                    currentGame.phase === 'play';  // ✅ Nouvelle condition
         
         if (canBet) {
             betButtonContainer.classList.remove('hidden');

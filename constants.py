@@ -1,0 +1,180 @@
+from flask import Flask, request
+from flask_socketio import SocketIO, emit
+
+app = Flask(__name__)
+app.secret_key = 'votre_cle_secrete_ici_changez_la'
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+# Stockage des parties et des joueurs connectés
+games = {}
+player_sessions = {}  # {session_id: {game_id, player_id}}
+
+
+def get_game_state_for_player(game, player_id):
+    """Retourne l'état du jeu adapté pour un joueur spécifique"""
+    game_state = {
+        'id': game['id'],
+        'players': [
+            player.to_dict(hide_hand=(i != player_id)) 
+            for i, player in enumerate(game['players'])
+        ],
+        'deck_count': len(game['deck']),
+        'discard': [card.to_dict() for card in game['discard']],
+        'last_discard': game['discard'][-1].to_dict() if game['discard'] else None,
+        'current_player': game['current_player'],
+        'casino': {
+            'open': game['casino']['open'],
+            'first_bet': {
+                'player_id': game['casino']['first_bet']['player_id'],
+                'player_name': game['players'][game['casino']['first_bet']['player_id']].name,
+                'salary_level': None  # Secret !
+            } if game['casino']['first_bet'] else None,
+            'second_bet': {
+                'player_id': game['casino']['second_bet']['player_id'],
+                'player_name': game['players'][game['casino']['second_bet']['player_id']].name,
+                'salary_level': None  # Secret !
+            } if game['casino']['second_bet'] else None
+        },
+        'phase': game['phase'],
+        'num_players': game['num_players'],
+        'players_joined': game['players_joined'],
+        'your_player_id': player_id,
+        'pending_hardship': game.get('pending_hardship'),
+        'pending_special': game.get('pending_special')
+    }
+    print(f"État du jeu pour joueur {player_id}: deck={game_state['deck_count']}, discard={len(game_state['discard'])}, phase={game_state['phase']}, casino_open={game_state['casino']['open']}")
+    return game_state
+
+def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
+    """Applique l'effet d'une carte malus sur un joueur cible"""
+    hardship_type = hardship_card.hardship_type
+    
+    # Vérifier les immunités
+    job = target_player.get_job()
+    if job:
+        immunities = {
+            'accident': ['no_accident'],
+            'maladie': ['no_illness', 'no_illness_extra_study'],
+            'attentat': ['no_attentat'],
+            'divorce': ['no_divorce'],
+            'licenciement': ['no_fire_tax'],
+            'impot': ['no_fire_tax']
+        }
+        
+        if hardship_type in immunities:
+            if job.power in immunities[hardship_type]:
+                return False, f"{target_player.name} est protégé par son métier ({job.job_name})"
+    
+    # Appliquer les effets
+    if hardship_type == 'accident':
+        target_player.skip_turns = 1
+        target_player.received_hardships.append(hardship_type)
+        return True, f"{target_player.name} doit passer 1 tour"
+    
+    elif hardship_type == 'burnout':
+        target_player.skip_turns = 1
+        target_player.received_hardships.append(hardship_type)
+        return True, f"{target_player.name} doit passer 1 tour"
+    
+    elif hardship_type == 'divorce':
+        marriage_cards = [c for c in target_player.played["vie personnelle"] if isinstance(c, MarriageCard)]
+        if marriage_cards:
+            marriage_to_remove = marriage_cards[-1]
+            target_player.remove_card_from_played(marriage_to_remove)
+            game['discard'].append(marriage_to_remove)
+            
+            adultery_cards = [c for c in target_player.played["vie personnelle"] if isinstance(c, AdulteryCard)]
+            if adultery_cards:
+                adultery = adultery_cards[0]
+                target_player.remove_card_from_played(adultery)
+                game['discard'].append(adultery)
+                
+                children_cards = [c for c in target_player.played["vie personnelle"] if isinstance(c, ChildCard)]
+                for child in children_cards:
+                    target_player.remove_card_from_played(child)
+                    game['discard'].append(child)
+                
+                adultery_flirts = [c for c in target_player.played["cartes spéciales"] if isinstance(c, FlirtCard)]
+                for flirt in adultery_flirts:
+                    target_player.remove_card_from_played(flirt)
+                    game['discard'].append(flirt)
+                
+                target_player.received_hardships.append(hardship_type)
+                return True, f"{target_player.name} a divorcé et perdu son adultère, ses enfants et ses flirts adultères"
+            
+            target_player.received_hardships.append(hardship_type)
+            return True, f"{target_player.name} a divorcé"
+        return False, f"{target_player.name} n'est pas marié"
+    
+    elif hardship_type == 'impot':
+        salary_cards = [c for c in target_player.played["vie professionnelle"] if isinstance(c, SalaryCard)]
+        if salary_cards:
+            card_to_remove = salary_cards[-1]
+            target_player.remove_card_from_played(card_to_remove)
+            game['discard'].append(card_to_remove)
+            target_player.received_hardships.append(hardship_type)
+            return True, f"{target_player.name} a perdu 1 salaire"
+        return False, f"{target_player.name} n'a pas de salaire"
+    
+    elif hardship_type == 'licenciement':
+        job_card = target_player.get_job()
+        if job_card:
+            target_player.remove_card_from_played(job_card)
+            game['discard'].append(job_card)
+            target_player.received_hardships.append(hardship_type)
+            return True, f"{target_player.name} a été licencié"
+        return False, f"{target_player.name} n'a pas de métier"
+    
+    elif hardship_type == 'maladie':
+        target_player.skip_turns = 1
+        target_player.received_hardships.append(hardship_type)
+        return True, f"{target_player.name} est malade (passe 1 tour)"
+    
+    elif hardship_type == 'redoublement':
+        study_cards = [c for c in target_player.played["vie professionnelle"] if isinstance(c, StudyCard)]
+        if study_cards:
+            card_to_remove = study_cards[-1]
+            target_player.remove_card_from_played(card_to_remove)
+            game['discard'].append(card_to_remove)
+            target_player.received_hardships.append(hardship_type)
+            return True, f"{target_player.name} a perdu une étude"
+        return False, f"{target_player.name} n'a pas d'études à perdre"
+    
+    elif hardship_type == 'prison':
+        target_player.skip_turns = 3
+        target_player.received_hardships.append(hardship_type)
+        return True, f"{target_player.name} est en prison pour 3 tours"
+    
+    elif hardship_type == 'attentat':
+        children_cards = [c for c in attacker_player.played["vie personnelle"] if isinstance(c, ChildCard)]
+        total_children_removed = len(children_cards)
+        
+        for child in children_cards:
+            attacker_player.remove_card_from_played(child)
+            game['discard'].append(child)
+        
+        attacker_player.received_hardships.append(hardship_type)
+        
+        if total_children_removed > 0:
+            return True, f"Attentat ! {attacker_player.name} perd {total_children_removed} enfant(s)"
+        else:
+            return True, f"Attentat ! {attacker_player.name} n'avait pas d'enfant"
+    
+    return True, f"Malus {hardship_type} appliqué à {target_player.name}"
+
+def check_game():
+    session_info = player_sessions.get(request.sid)
+    
+    if not session_info:
+        emit('error', {'message': 'Session non trouvée'})
+        return
+    
+    game_id = session_info['game_id']
+    player_id = session_info['player_id']
+    
+    if game_id not in games:
+        emit('error', {'message': 'Partie non trouvée'})
+        return
+    
+    game = games[game_id]
+    return player_id, game, game_id
