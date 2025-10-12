@@ -1,200 +1,24 @@
-0 : 4 - smile : 1 - SalaryCard
-1 : simple - smile : 1 - StudyCard
-2 : vengeance - smile : 0 - SpecialCard
-3 : 1 - smile : 1 - SalaryCard
-4 : chercheur - smile : 2 - JobCard
-5 : 3 - smile : 1 - TravelCard
-6 : harry - smile : 2 - ChildCard
-7 : 3 - smile : 1 - SalaryCard
-8 : maladie - smile : 0 - HardshipCard
-9 : corps-nuds - smile : 3 - MarriageCard
-10 : divorce - smile : 0 - HardshipCard
-11 : camping - smile : 1 - FlirtCard
-12 : restaurant - smile : 1 - FlirtCard
-13 : simple - smile : 1 - StudyCard
-14 : lapin - smile : 1 - AnimalCard
-15 : 4 - smile : 1 - SalaryCard
-16 : zelda - smile : 2 - ChildCard
-17 : Fourqueux - smile : 3 - MarriageCard
-18 : impot - smile : 0 - HardshipCard
-19 : grande - smile : 3 - HouseCard
-20 : chef des achats - smile : 2 - JobCard
-21 : prix - smile : 4 - OtherCard
-22 : luke - smile : 2 - ChildCard
-23 : cinema - smile : 1 - FlirtCard
-24 : licenciement - smile : 0 - HardshipCard
-25 : redoublement - smile : 0 - HardshipCard
-26 : chien - smile : 1 - AnimalCard
-27 : 2 - smile : 1 - SalaryCard
-28 : camping - smile : 1 - FlirtCard
-29 : redoublement - smile : 0 - HardshipCard
-30 : divorce - smile : 0 - HardshipCard
-31 : 1 - smile : 1 - SalaryCard
-32 : 3 - smile : 1 - SalaryCard
-33 : pharmacien - smile : 2 - JobCard
-34 : bar - smile : 1 - FlirtCard
-35 : prof anglais - smile : 2 - JobCard
-36 : 1 - smile : 1 - SalaryCard
-37 : stripteaser - smile : 2 - JobCard
-38 : chirurgien - smile : 2 - JobCard
-39 : serveur - smile : 2 - JobCard
-40 : bar - smile : 1 - FlirtCard
-41 : hotel - smile : 1 - FlirtCard
-42 : casino - smile : 0 - SpecialCard
-43 : ecrivain - smile : 2 - JobCard
-44 : hermionne - smile : 2 - ChildCard
-45 : impot - smile : 0 - HardshipCard
-46 : internet - smile : 1 - FlirtCard
-47 : impot - smile : 0 - HardshipCard
-48 : 3 - smile : 1 - SalaryCard
-49 : simple - smile : 1 - StudyCard
-50 : prof francais - smile : 2 - JobCard
-51 : 3 - smile : 1 - SalaryCard
-52 : burnout - smile : 0 - HardshipCard
-53 : accident - smile : 0 - HardshipCard
-54 : prof histoire - smile : 2 - JobCard
-55 : simple - smile : 1 - StudyCard
-56 : gourou - smile : 2 - JobCard
-57 : heritage - smile : 0 - SpecialCard
-58 : troc - smile : 0 - SpecialCard
-59 : designer - smile : 2 - JobCard
-60 : redoublement - smile : 0 - HardshipCard
-61 : 3 - smile : 1 - TravelCard
-62 : maladie - smile : 0 - HardshipCard
-63 : divorce - smile : 0 - HardshipCard
-64 : grand prof - smile : 2 - JobCard
-65 : petite - smile : 1 - HouseCard
-66 : 2 - smile : 1 - SalaryCard
-67 : 1 - smile : 1 - SalaryCard
-68 : pilote de ligne - smile : 2 - JobCard
-69 : parc - smile : 1 - FlirtCard
-70 : 4 - smile : 1 - SalaryCard
-71 : médecin - smile : 2 - JobCard
-72 : jardinier - smile : 2 - JobCard
-73 : simple - smile : 1 - StudyCard
-74 : lara - smile : 2 - ChildCard
-75 : boite de nuit - smile : 1 - FlirtCard
-76 : 4 - smile : 1 - SalaryCard
-77 : accident - smile : 0 - HardshipCard
-78 : 3 - smile : 1 - TravelCard
-79 : burnout - smile : 0 - HardshipCard
-80 : petite - smile : 1 - HouseCard
-81 : cinema - smile : 1 - FlirtCard
-82 : chat - smile : 1 - AnimalCard
-83 : mario - smile : 2 - ChildCard
-84 : double - smile : 1 - StudyCard
-85 : monteton - smile : 3 - MarriageCard
-86 : 1 - smile : 1 - SalaryCard
-87 : 2 - smile : 1 - SalaryCard
-88 : Fourqueux - smile : 3 - MarriageCard
-89 : simple - smile : 1 - StudyCard
-90 : barman - smile : 2 - JobCard
-91 : simple - smile : 1 - StudyCard
-92 : maladie - smile : 0 - HardshipCard
-93 : 3 - smile : 1 - SalaryCard
-94 : 4 - smile : 1 - SalaryCard
-95 : prison - smile : 0 - HardshipCard
-96 : policier - smile : 2 - JobCard
-97 : redoublement - smile : 0 - HardshipCard
-98 : 4 - smile : 1 - SalaryCard
-99 : impot - smile : 0 - HardshipCard
-100 : simple - smile : 1 - StudyCard
-101 : 3 - smile : 1 - TravelCard
-102 : montcuq - smile : 3 - MarriageCard
-103 : divorce - smile : 0 - HardshipCard
-104 : garagiste - smile : 2 - JobCard
-105 : hotel - smile : 1 - FlirtCard
-106 : arc en ciel - smile : 0 - SpecialCard
-107 : rocky - smile : 2 - ChildCard
-108 : internet - smile : 1 - FlirtCard
-109 : moyenne - smile : 2 - HouseCard
-110 : tsunami - smile : 0 - SpecialCard
-111 : etoile filante - smile : 0 - SpecialCard
-112 : adultaire - smile : 1 - AdulteryCard
-113 : 1 - smile : 1 - SalaryCard
-114 : theatre - smile : 1 - FlirtCard
-115 : accident - smile : 0 - HardshipCard
-116 : simple - smile : 1 - StudyCard
-117 : 3 - smile : 1 - TravelCard
-118 : parc - smile : 1 - FlirtCard
-119 : licenciement - smile : 0 - HardshipCard
-120 : burnout - smile : 0 - HardshipCard
-121 : simple - smile : 1 - StudyCard
-122 : simple - smile : 1 - StudyCard
-123 : licenciement - smile : 0 - HardshipCard
-124 : 2 - smile : 1 - SalaryCard
-125 : 3 - smile : 1 - SalaryCard
-126 : burnout - smile : 0 - HardshipCard
-127 : licorne - smile : 3 - AnimalCard
-128 : simple - smile : 1 - StudyCard
-129 : simple - smile : 1 - StudyCard
-130 : leia - smile : 2 - ChildCard
-131 : simple - smile : 1 - StudyCard
-132 : diana - smile : 2 - ChildCard
-133 : 4 - smile : 1 - SalaryCard
-134 : astronaute - smile : 2 - JobCard
-135 : 4 - smile : 1 - SalaryCard
-136 : double - smile : 1 - StudyCard
-137 : adultaire - smile : 1 - AdulteryCard
-138 : zoo - smile : 1 - FlirtCard
-139 : simple - smile : 1 - StudyCard
-140 : impot - smile : 0 - HardshipCard
-141 : bandit - smile : 2 - JobCard
-142 : luigi - smile : 2 - ChildCard
-143 : licenciement - smile : 0 - HardshipCard
-144 : journaliste - smile : 2 - JobCard
-145 : 2 - smile : 1 - SalaryCard
-146 : divorce - smile : 0 - HardshipCard
-147 : theatre - smile : 1 - FlirtCard
-148 : plombier - smile : 2 - JobCard
-149 : legion - smile : 3 - OtherCard
-150 : licenciement - smile : 0 - HardshipCard
-151 : Sainte-Vierge - smile : 3 - MarriageCard
-152 : avocat - smile : 2 - JobCard
-153 : 3 - smile : 1 - SalaryCard
-154 : accident - smile : 0 - HardshipCard
-155 : piston - smile : 0 - SpecialCard
-156 : accident - smile : 0 - HardshipCard
-157 : simple - smile : 1 - StudyCard
-158 : 2 - smile : 1 - SalaryCard
-159 : militaire - smile : 2 - JobCard
-160 : architecte - smile : 2 - JobCard
-161 : chef des ventes - smile : 2 - JobCard
-162 : 1 - smile : 1 - SalaryCard
-163 : moyenne - smile : 2 - HouseCard
-164 : 3 - smile : 1 - SalaryCard
-165 : redoublement - smile : 0 - HardshipCard
-166 : 1 - smile : 1 - SalaryCard
-167 : adultaire - smile : 1 - AdulteryCard
-168 : zoo - smile : 1 - FlirtCard
-169 : pizzaiolo - smile : 2 - JobCard
-170 : 2 - smile : 1 - SalaryCard
-171 : simple - smile : 1 - StudyCard
-172 : 1 - smile : 1 - SalaryCard
-173 : maladie - smile : 0 - HardshipCard
-174 : 4 - smile : 1 - SalaryCard
-175 : boite de nuit - smile : 1 - FlirtCard
-176 : 4 - smile : 1 - SalaryCard
-177 : 2 - smile : 1 - SalaryCard
-178 : 3 - smile : 1 - SalaryCard
-179 : restaurant - smile : 1 - FlirtCard
-180 : poussin - smile : 1 - AnimalCard
-181 : simple - smile : 1 - StudyCard
-182 : 2 - smile : 1 - SalaryCard
-183 : simple - smile : 1 - StudyCard
-184 : maladie - smile : 0 - HardshipCard
-185 : prof maths - smile : 2 - JobCard
-186 : attentat - smile : 0 - HardshipCard
-187 : simple - smile : 1 - StudyCard
-188 : 2 - smile : 1 - SalaryCard
-189 : Fourqueux - smile : 3 - MarriageCard
-190 : simple - smile : 1 - StudyCard
-191 : simple - smile : 1 - StudyCard
-192 : 3 - smile : 1 - SalaryCard
-193 : anniversaire - smile : 0 - SpecialCard
-194 : double - smile : 1 - StudyCard
-195 : 1 - smile : 1 - SalaryCard
-196 : médium - smile : 2 - JobCard
-197 : prix - smile : 4 - OtherCard
-198 : burnout - smile : 0 - HardshipCard
-199 : chance - smile : 0 - SpecialCard
+0 : 4 - smile : 1 - SalaryCard - 4e2bd44f-f9da-48c7-98eb-9d20f3ad9d0d
+1 : 4 - smile : 1 - SalaryCard - f7afe050-4eca-4c25-ac7c-573533c54b56
+2 : 1 - smile : 1 - SalaryCard - 8dda1f5e-0382-464d-9c6f-a0756bc9f223
+3 : 1 - smile : 1 - SalaryCard - 48888e80-464c-4295-ab2c-d40aef2cc3d6
+4 : 2 - smile : 1 - SalaryCard - 780f464e-bf71-41f4-a270-c228231326f7
+5 : 2 - smile : 1 - SalaryCard - 6fc430f7-2bbf-4270-a8df-ef962e7ab9b9
+6 : anniversaire - smile : 0 - SpecialCard - 4720ae63-9dbc-4be8-a344-d0a84eaacf78
+7 : 2 - smile : 1 - SalaryCard - b54e30d3-b319-4bbe-a15c-7055d15580b9
+8 : 2 - smile : 1 - SalaryCard - e828813b-b117-49ab-a6a8-bef3d2618333
+9 : 4 - smile : 1 - SalaryCard - 9920f04b-5c83-4aef-9d81-76d29500b463
+10 : 3 - smile : 1 - SalaryCard - 39e661e0-9165-4019-bd3c-94c1c3527fee
+11 : 4 - smile : 1 - SalaryCard - 0360424e-9f4c-42bd-86a3-abc324ea27de
+12 : chance - smile : 0 - SpecialCard - 4c1ab11c-5edf-493f-af24-fc8ca0cbe7f4
+13 : 1 - smile : 1 - SalaryCard - 8995089d-3d9e-4565-87d5-e72aa66eeec1
+14 : 3 - smile : 1 - SalaryCard - e19a1879-9054-47a9-95b9-bd0726e9c824
+15 : 1 - smile : 1 - SalaryCard - 57a6d285-61d0-405c-a13a-2ac8518f8a74
+16 : 3 - smile : 1 - SalaryCard - 0446290a-36b7-4ef6-83b5-a7da69bfbb86
+17 : 3 - smile : 1 - SalaryCard - 70f52a45-b8e9-4d3c-a07c-05ab4901db2a
+18 : 1 - smile : 1 - SalaryCard - bad707c5-da80-4aff-a483-a7b08eb3e841
+19 : 2 - smile : 1 - SalaryCard - 08bc78fd-2a49-4dd2-a77e-e7f040e40498
+20 : 3 - smile : 1 - SalaryCard - d1a47727-c3ac-4c59-84bb-05fdee1d96b3
+21 : casino - smile : 0 - SpecialCard - ed342dea-a0ac-4173-832c-ab8ae5bb7135
+22 : 4 - smile : 1 - SalaryCard - 5ead938a-3c11-43df-87f8-a0176dd7926c
+23 : arc en ciel - smile : 0 - SpecialCard - 0194a42b-77b1-47d7-b335-5c14ea67ccdb

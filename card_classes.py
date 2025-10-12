@@ -604,21 +604,14 @@ class CardFactory:
         """effectue un tests avec des cartes customs"""
         deck = []
 
-        for loc in cls.FLIRT_LOCATIONS:
-            deck.append(FlirtCard(loc))
-            deck.append(FlirtCard(loc))
+        # Salaires
+        for level in range(1, 5):
+            for _ in range(5):
+                deck.append(SalaryCard(level))
 
-        for loc in cls.MARRIAGE_LOCATIONS:
-            deck.append(MarriageCard(loc))
 
-        for name in cls.CHILDREN_NAMES:
-            deck.append(ChildCard(name))
-
-        # Adultères
-        for _ in range(3):
-            deck.append(AdulteryCard())
-            deck.append(HardshipCard('divorce'))
-
+        for special in ['anniversaire', 'arc en ciel', 'casino', 'chance']:
+            deck.append(SpecialCard(special))
 
         return deck
     
@@ -626,7 +619,7 @@ class CardFactory:
     def create_deck(cls) -> List[Card]:
         """Crée un deck complet de cartes"""
         #########################
-        # return cls.test_create_deck(cls)
+        return cls.test_create_deck(cls)
         # TESTING
         #########################
         

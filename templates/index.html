@@ -325,6 +325,37 @@
                 </div>
             </div>
             <div id="message" class="mt-2 bg-yellow-100 border-l-4 border-yellow-500 p-2 text-sm"></div>
+            <!-- Casino -->
+            <div id="casino-section" class="bg-gradient-to-br from-red-700 to-purple-900 rounded-lg shadow-2xl p-4 mb-4 hidden">
+                <div class="text-center mb-4">
+                    <h3 class="text-3xl font-bold text-yellow-400">🎰 CASINO 🎰</h3>
+                    <p class="text-white text-sm mt-2" id="casino-status-text">Le casino est ouvert !</p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Premier pari -->
+                    <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm border-2 border-yellow-400">
+                        <h4 class="text-yellow-400 font-bold text-center mb-2">1er Pari</h4>
+                        <div id="casino-first-bet-display" class="text-center text-white">
+                            <p class="text-sm italic">En attente...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Deuxième pari -->
+                    <div class="bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm border-2 border-yellow-400">
+                        <h4 class="text-yellow-400 font-bold text-center mb-2">2e Pari</h4>
+                        <div id="casino-second-bet-display" class="text-center text-white">
+                            <p class="text-sm italic">En attente...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="casino-bet-button-container" class="mt-4 text-center hidden">
+                    <button onclick="openCasinoBetModal()" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-8 py-3 rounded-lg transform hover:scale-105 transition-all shadow-lg">
+                        🎰 Placer un pari
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Dernière carte défaussée -->
@@ -915,6 +946,11 @@
             socket.emit('start_game', { game_id: gameId });
         }
 
+        function pickCard(source) {
+            log('Donne une carte depuis', {source});
+            socket.emit('pick_card', { source: source });
+        }
+
         function drawCard(source) {
             log('Pioche carte', {source});
             socket.emit('draw_card', { source: source });
@@ -1096,6 +1132,68 @@
             alert('Erreur: ' + data.message);
         });
 
+        socket.on('select_casino_bet', (data) => {
+            log('Casino - sélection mise par l\'ouvreur', data);
+            
+            const myPlayer = currentGame.players[myPlayerId];
+            const availableSalaries = myPlayer.hand.filter(c => c.type === 'salary');
+            
+            if (availableSalaries.length === 0) {
+                // Pas de salaires, passer directement au joueur suivant
+                socket.emit('skip_casino_bet', {});
+                return;
+            }
+            
+            const salariesHTML = availableSalaries.map(salary => `
+                <button onclick="placeOpenerCasinoBet('${salary.id}');pickCard('deck')" 
+                        class="w-full p-4 bg-yellow-400 hover:bg-yellow-500 text-black font-bold rounded-lg transform hover:scale-105 transition-all shadow-lg mb-2">
+                    🎰 Salaire ${salary.subtype}
+                </button>
+            `).join('');
+            
+            const modalHTML = `
+                <div id="casino-opener-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target.id==='casino-opener-modal') closeCasinoOpenerModal()">
+                    <div class="bg-gradient-to-b from-yellow-50 to-yellow-100 rounded-xl shadow-2xl p-8 max-w-md w-full border-4 border-yellow-400">
+                        <h2 class="text-3xl font-bold text-center mb-6 text-yellow-800">
+                            🎰 Vous ouvrez le casino !
+                        </h2>
+                        <p class="text-center mb-6 text-gray-700">
+                            Voulez-vous miser maintenant ? (Optionnel - le casino restera ouvert même si vous refusez)
+                        </p>
+                        <div class="space-y-2 mb-4">
+                            ${salariesHTML}
+                        </div>
+                        <button onclick="skipOpenerCasinoBet()" 
+                                class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg transition-all font-semibold mb-2">
+                            ⛔ Refuser de miser maintenant
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        });
+
+        function placeOpenerCasinoBet(salaryId) {
+            log('Ouvreur place un pari', {salaryId});
+            socket.emit('place_casino_bet', { 
+                salary_id: salaryId,
+                is_opener: true
+            });
+            closeCasinoOpenerModal();
+        }
+
+        function skipOpenerCasinoBet() {
+            log('Ouvreur refuse de miser');
+            socket.emit('skip_casino_bet', {});
+            closeCasinoOpenerModal();
+        }
+
+        function closeCasinoOpenerModal() {
+            const modal = document.getElementById('casino-opener-modal');
+            if (modal) modal.remove();
+        }
+
         function updateLobby() {
             if (!currentGame) {
                 log('updateLobby: pas de currentGame');
@@ -1157,6 +1255,10 @@
             } else {
                 document.getElementById('last-discard-container').classList.add('hidden');
             }
+
+            // Afficher le casino si disponible
+            log('Casino status', currentGame.casino);
+            updateCasinoDisplay(currentGame.casino);
             
             // Afficher l'héritage si disponible
             if (myPlayer.heritage > 0) {
@@ -1286,6 +1388,145 @@
                     `;
                 }).join('');
         }
+        // === CASINO ===
+        function openCasinoBetModal(isOpener = false) {
+            const myPlayer = currentGame.players[myPlayerId];
+            const availableSalaries = myPlayer.hand.filter(c => c.type === 'salary');
+            
+            if (availableSalaries.length === 0) {
+                if (isOpener) {
+                    // L'ouvreur peut refuser s'il n'a pas de salaires
+                    skipCasinoBet();
+                } else {
+                    alert('Vous n\'avez pas de salaires disponibles pour parier');
+                }
+                return;
+            }
+            
+            const salariesHTML = availableSalaries.map(salary => `
+                <button onclick="placeCasinoBet('${salary.id}')" 
+                        class="w-full p-4 bg-yellow-400 hover:bg-yellow-500 text-black font-bold rounded-lg transform hover:scale-105 transition-all shadow-lg mb-2">
+                    🎰 Salaire ${salary.subtype}
+                </button>
+            `).join('');
+            
+            let refuseButtonHTML = '';
+            if (isOpener) {
+                refuseButtonHTML = `
+                    <button onclick="skipCasinoBet()" 
+                            class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg transition-all font-semibold">
+                        ⛔ Refuser de miser (le casino reste ouvert)
+                    </button>
+                `;
+            }
+            
+            const modalHTML = `
+                <div id="casino-bet-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target.id==='casino-bet-modal') closeCasinoBetModal()">
+                    <div class="bg-gradient-to-b from-yellow-50 to-yellow-100 rounded-xl shadow-2xl p-8 max-w-md w-full border-4 border-yellow-400">
+                        <h2 class="text-3xl font-bold text-center mb-6 text-yellow-800">
+                            🎰 Choisir un salaire
+                        </h2>
+                        ${isOpener ? '<p class="text-center mb-4 text-sm text-gray-700 italic">Vous pouvez refuser de miser, le casino restera ouvert</p>' : ''}
+                        <div class="space-y-2">
+                            ${salariesHTML}
+                        </div>
+                        ${refuseButtonHTML}
+                        <button onclick="closeCasinoBetModal()" 
+                                class="mt-4 w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+                            Annuler
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        function closeCasinoBetModal() {
+            const modal = document.getElementById('casino-bet-modal');
+            if (modal) modal.remove();
+        }
+
+        function skipCasinoBet() {
+            log('Refuser de miser au casino');
+            socket.emit('skip_casino_bet', {});
+            closeCasinoBetModal();
+        }
+
+        function placeCasinoBet(salaryId) {
+            log('Placer pari casino', {salaryId});
+            socket.emit('place_casino_bet', { 
+                salary_id: salaryId,
+                is_opener: false
+            });
+            closeCasinoBetModal();
+        }
+
+
+        function updateCasinoDisplay(casinoState) {
+            const container = document.getElementById('casino-section');
+            const firstBetEl = document.getElementById('casino-first-bet-display');
+            const secondBetEl = document.getElementById('casino-second-bet-display');
+            const betButtonContainer = document.getElementById('casino-bet-button-container');
+            const statusEl = document.getElementById('casino-status-text');
+            
+            if (!casinoState.open) {
+                container.classList.add('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            
+            // Afficher le premier pari (SANS le montant)
+            if (casinoState.first_bet) {
+                firstBetEl.innerHTML = `
+                    <div class="text-2xl mb-2">🎰</div>
+                    <div class="font-bold text-xl">${casinoState.first_bet.player_name}</div>
+                    <div class="text-xs mt-1 text-yellow-300">Montant secret</div>
+                `;
+            } else {
+                firstBetEl.innerHTML = '<p class="text-sm italic">En attente...</p>';
+            }
+            
+            // Afficher le deuxième pari (SANS le montant)
+            if (casinoState.second_bet) {
+                secondBetEl.innerHTML = `
+                    <div class="text-2xl mb-2">🎰</div>
+                    <div class="font-bold text-xl">${casinoState.second_bet.player_name}</div>
+                    <div class="text-xs mt-1 text-yellow-300">Montant secret</div>
+                `;
+            } else {
+                secondBetEl.innerHTML = '<p class="text-sm italic">En attente...</p>';
+            }
+            
+            // Mettre à jour le statut
+            if (!casinoState.first_bet) {
+                statusEl.textContent = "En attente du 1er pari...";
+            } else if (!casinoState.second_bet) {
+                statusEl.textContent = "En attente du 2e pari...";
+            } else {
+                statusEl.textContent = "RÉsolution en cours...";
+            }
+            
+            // Afficher le bouton de pari si le joueur peut parier
+            if (currentGame && currentGame.players[myPlayerId]) {
+                const myPlayer = currentGame.players[myPlayerId];
+                const availableSalaries = myPlayer.hand.filter(c => c.type === 'salary');
+                
+                // Le joueur peut parier s'il y a de la place, qu'il a des salaires et que c'est son tour
+                const isMyTurn = currentGame.current_player === myPlayerId;
+                const canBet = availableSalaries.length > 0 && 
+                            (!casinoState.first_bet || !casinoState.second_bet) &&
+                            isMyTurn;
+                
+                if (canBet) {
+                    betButtonContainer.classList.remove('hidden');
+                } else {
+                    betButtonContainer.classList.add('hidden');
+                }
+            }
+        }
+
 
         function displayPlayerCategories(player, canDiscard) {
             const categories = {

@@ -52,6 +52,15 @@ V2
 - troc : quand elle est utilisé, dois etre supprimée de la main et posée dans cartes spéciales
 - etoile filante : on a un message mais on ne peut pas jouer plusieur cartes, dès la première carte, ca passe au joueur suivant
 - piston : quand il est utilisé, dois etre supprimée de la main et posée dans cartes spéciales
+V3
+
+
+
+
+- quand une maison est divisé par 2, cela ne marche pas : erreur Montant insuffisant 4/8 minimum requis
+- la carte piston elle est toute cassé
+- grand prix d'excelence ne fait pas son boulot d'augmenter le salaire max a 4
+- ajouter l'effet griser au bouton du casino si on ne peut pas cliquer dessus tout de suite (par exemeple avant de piocher)
 
 
 
@@ -60,4 +69,3 @@ V2
 - la prison dois aussi jeter dans la défausse 2 cartes aléatoire de la main et en repiocher 2 de la pioche en plus de passer 3 tour et jeter le métier de bandit
 - quand on pioche depuis la défausse, on est obliger de jouer la carte de la défausse (erreur lors d'une reprise d'aquisition cela la met dans la main)
 - faire la vérification des limites des attaques (redoublement alors qu'on a un métier)
-- casino

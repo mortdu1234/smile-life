@@ -25,7 +25,19 @@ def get_game_state_for_player(game, player_id):
         'discard': [card.to_dict() for card in game['discard']],
         'last_discard': game['discard'][-1].to_dict() if game['discard'] else None,
         'current_player': game['current_player'],
-        'casino': game['casino'].to_dict() if game['casino'] else None,
+        'casino': {
+            'open': game['casino']['open'],
+            'first_bet': {
+                'player_id': game['casino']['first_bet']['player_id'],
+                'player_name': game['players'][game['casino']['first_bet']['player_id']].name,
+                'salary_level': None  # Secret !
+            } if game['casino']['first_bet'] else None,
+            'second_bet': {
+                'player_id': game['casino']['second_bet']['player_id'],
+                'player_name': game['players'][game['casino']['second_bet']['player_id']].name,
+                'salary_level': None  # Secret !
+            } if game['casino']['second_bet'] else None
+        },
         'phase': game['phase'],
         'num_players': game['num_players'],
         'players_joined': game['players_joined'],
@@ -33,7 +45,7 @@ def get_game_state_for_player(game, player_id):
         'pending_hardship': game.get('pending_hardship'),
         'pending_special': game.get('pending_special')
     }
-    print(f"État du jeu pour joueur {player_id}: deck={game_state['deck_count']}, discard={len(game_state['discard'])}, phase={game_state['phase']}")
+    print(f"État du jeu pour joueur {player_id}: deck={game_state['deck_count']}, discard={len(game_state['discard'])}, phase={game_state['phase']}, casino_open={game_state['casino']['open']}")
     return game_state
 
 def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
@@ -190,12 +202,12 @@ def handle_create_game(data):
     random.shuffle(deck)
     
     ##################
-    # TESTS
+    # TESTS affichage des cartes
     ##################
     cards_distribution = ""
     invert_deck = deck[::-1]
     for i in range(len(deck)):
-        cards_distribution += f"{i} : {str(invert_deck[i])}\n"
+        cards_distribution += f"{i} : {str(invert_deck[i])} - {invert_deck[i].id}\n"
     with open("distribution.txt", 'w') as file:
         file.write(cards_distribution)
     #################
@@ -218,7 +230,11 @@ def handle_create_game(data):
         'deck': deck,
         'discard': [],
         'current_player': 0,
-        'casino': None,
+        'casino': {
+            'open': False,
+            'first_bet': None,
+            'second_bet': None
+        },
         'phase': 'waiting',
         'num_players': num_players,
         'players_joined': 1,
@@ -368,6 +384,40 @@ def handle_skip_turn(data):
                 'game': get_game_state_for_player(game, p.id),
                 'message': message
             }, room=p.session_id)
+
+@socketio.on('pick_card')
+def give_card(data):
+    """Donner une carte au joueur"""
+    source = data.get('source', 'deck')
+    session_info = player_sessions.get(request.sid)
+    
+    if not session_info:
+        emit('error', {'message': 'Session non trouvée'})
+        return
+    
+    game_id = session_info['game_id']
+    player_id = session_info['player_id']
+    if game_id not in games:
+        emit('error', {'message': 'Partie non trouvée'})
+        return
+    
+    game = games[game_id]
+    player = game['players'][player_id]
+
+    if source == 'deck':
+        if not game['deck']:
+            scores = [(p.name, p.calculate_smiles(), p.id) for p in game['players'] if p.connected]
+            scores.sort(key=lambda x: x[1], reverse=True)
+            socketio.emit('game_over', {'scores': scores}, room=game_id)
+            return
+        
+        card = game['deck'].pop()
+        player.hand.append(card)
+        
+        print(f"Joueur {player_id} a pris dans le deck, reste {len(game['deck'])} cartes")
+        socketio.emit('game_updated', {
+            'game': get_game_state_for_player(game, player.id)
+        }, room=player.session_id)
 
 @socketio.on('draw_card')
 def handle_draw_card(data):
@@ -773,6 +823,8 @@ def handle_play_card(data):
             emit('error', {'message': message})
         return
     
+
+    
     # Acquisition
     if isinstance(card, (HouseCard, TravelCard)):
         job = player.get_job()
@@ -820,6 +872,11 @@ def handle_play_card(data):
                         'message': f"{player.name} a posé une carte (gratuite grâce au métier)"
                     }, room=p.session_id)
             return
+    
+    if isinstance(card, SpecialCard):
+        print("la carte jouée est spéciale")
+        handle_play_special_card(data)
+        return
     
     # Vérifier si la carte peut être jouée
     can_play, message = card.can_be_played(player)
@@ -925,7 +982,6 @@ def handle_play_special_card(data):
         return
     
     special_type = card.special_type
-    
     if special_type == 'anniversaire':
         other_players = [p for i, p in enumerate(game['players']) if p.connected and i != player_id]
         
@@ -1124,29 +1180,41 @@ def handle_play_special_card(data):
                 }, room=p.session_id)
     
     elif special_type == 'casino':
-        won = random.choice([True, False])
-        
         player.hand.remove(card)
         player.add_card_to_played(card)
         
-        game['casino'] = {'won': won, 'amount': 2}
+        game['casino']['open'] = True
+        game['casino']['first_bet'] = None
+        game['casino']['second_bet'] = None
+        game['casino']['opener_id'] = player_id  # Mémoriser qui a ouvert
         
-        game['phase'] = 'draw'
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
+        # Le joueur qui a ouvert le casino peut directement miser
+        available_salaries = [c for c in player.hand if isinstance(c, SalaryCard)]
         
-        attempts = 0
-        while not game['players'][game['current_player']].connected and attempts < game['num_players']:
+        if available_salaries:
+            emit('select_casino_bet', {
+                'available_salaries': [s.to_dict() for s in available_salaries],
+                'is_opener': True,
+                'message': 'Voulez-vous miser au casino ? (Optionnel - le casino reste ouvert même si vous refusez)'
+            })
+        else:
+            # Le casino reste ouvert, on passe au joueur suivant
+            game['phase'] = 'draw'
             game['current_player'] = (game['current_player'] + 1) % game['num_players']
-            attempts += 1
+            
+            attempts = 0
+            while not game['players'][game['current_player']].connected and attempts < game['num_players']:
+                game['current_player'] = (game['current_player'] + 1) % game['num_players']
+                attempts += 1
+            
+            for p in game['players']:
+                if p.connected:
+                    socketio.emit('game_updated', {
+                        'game': get_game_state_for_player(game, p.id),
+                        'message': f"🎰 {player.name} a ouvert le casino !"
+                    }, room=p.session_id)
         
-        message = f"🎰 {player.name} {'a gagné' if won else 'a perdu'} 2 smiles au casino"
-        
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': message
-                }, room=p.session_id)
+        return
 
 @socketio.on('birthday_gift_selected')
 def handle_birthday_gift(data):
@@ -1433,6 +1501,166 @@ def handle_discard_card_selected(data):
             socketio.emit('game_updated', {
                 'game': get_game_state_for_player(game, p.id),
                 'message': f"⭐ {player.name} a récupéré une carte de la défausse"
+            }, room=p.session_id)
+
+
+@socketio.on('place_casino_bet')
+def handle_casino_bet(data):
+    """Placer un pari au casino"""
+    salary_id = data.get('salary_id')
+    is_opener = data.get('is_opener', False)
+    session_info = player_sessions.get(request.sid)
+    
+    if not session_info:
+        emit('error', {'message': 'Session non trouvée'})
+        return
+    
+    game_id = session_info['game_id']
+    player_id = session_info['player_id']
+    
+    if game_id not in games:
+        emit('error', {'message': 'Partie non trouvée'})
+        return
+    
+    game = games[game_id]
+    player = game['players'][player_id]
+    
+    # Vérifier que le casino est ouvert
+    if not game['casino']['open']:
+        emit('error', {'message': 'Le casino est fermé'})
+        return
+    
+    # Vérifier qu'il y a de la place
+    if game['casino']['first_bet'] and game['casino']['second_bet']:
+        emit('error', {'message': 'Le casino est plein'})
+        return
+    
+    # ✅ CHERCHER LE SALAIRE DANS LA MAIN
+    salary_card = None
+    for card in player.hand:
+        if isinstance(card, SalaryCard) and card.id == salary_id:
+            salary_card = card
+            break
+    
+    if not salary_card:
+        emit('error', {'message': 'Salaire non trouvé dans votre main'})
+        return
+    
+    # Retirer le salaire de la main du joueur
+    player.hand.remove(salary_card)
+    
+    # Premier pari
+    if not game['casino']['first_bet']:
+        game['casino']['first_bet'] = {
+            'player_id': player_id,
+            'salary_card': salary_card
+        }
+        
+        message = f"🎰 {player.name} a misé au casino (1er pari - montant secret)"
+        
+        # Si c'est l'ouvreur, on passe au joueur suivant
+        if is_opener:
+            game['phase'] = 'draw'
+            game['current_player'] = (game['current_player'] + 1) % game['num_players']
+            
+            attempts = 0
+            while not game['players'][game['current_player']].connected and attempts < game['num_players']:
+                game['current_player'] = (game['current_player'] + 1) % game['num_players']
+                attempts += 1
+        
+        for p in game['players']:
+            if p.connected:
+                socketio.emit('game_updated', {
+                    'game': get_game_state_for_player(game, p.id),
+                    'message': message
+                }, room=p.session_id)
+    
+    # Deuxième pari - résolution
+    else:
+        game['casino']['second_bet'] = {
+            'player_id': player_id,
+            'salary_card': salary_card
+        }
+        
+        first_bet = game['casino']['first_bet']
+        second_bet = game['casino']['second_bet']
+        
+        first_player = game['players'][first_bet['player_id']]
+        second_player = game['players'][second_bet['player_id']]
+        
+        # Comparer les niveaux
+        if first_bet['salary_card'].level == second_bet['salary_card'].level:
+            # Égalité : le deuxième joueur gagne les deux salaires
+            second_player.add_card_to_played(first_bet['salary_card'])
+            second_player.add_card_to_played(second_bet['salary_card'])
+            
+            message = f"🎰 Casino ! {second_player.name} GAGNE les deux salaires (égalité) !"
+        else:
+            # Différent : le premier joueur gagne les deux salaires
+            first_player.add_card_to_played(first_bet['salary_card'])
+            first_player.add_card_to_played(second_bet['salary_card'])
+            
+            message = f"🎰 Casino ! {first_player.name} GAGNE les deux salaires !"
+        
+        # Fermer le casino après résolution
+        game['casino']['first_bet'] = None
+        game['casino']['second_bet'] = None
+        game['casino']['opener_id'] = None
+        
+        game['phase'] = 'draw'
+        game['current_player'] = (game['current_player'] + 1) % game['num_players']
+        
+        attempts = 0
+        while not game['players'][game['current_player']].connected and attempts < game['num_players']:
+            game['current_player'] = (game['current_player'] + 1) % game['num_players']
+            attempts += 1
+        
+        for p in game['players']:
+            if p.connected:
+                socketio.emit('game_updated', {
+                    'game': get_game_state_for_player(game, p.id),
+                    'message': message
+                }, room=p.session_id)
+
+
+@socketio.on('skip_casino_bet')
+def handle_skip_casino_bet(data):
+    """L'ouvreur du casino décide de ne pas miser"""
+    session_info = player_sessions.get(request.sid)
+    
+    if not session_info:
+        emit('error', {'message': 'Session non trouvée'})
+        return
+    
+    game_id = session_info['game_id']
+    player_id = session_info['player_id']
+    
+    if game_id not in games:
+        emit('error', {'message': 'Partie non trouvée'})
+        return
+    
+    game = games[game_id]
+    player = game['players'][player_id]
+    
+    # Vérifier que c'est bien l'ouvreur
+    if game['casino'].get('opener_id') != player_id:
+        emit('error', {'message': 'Seul l\'ouvreur peut refuser de miser'})
+        return
+    
+    # Le casino reste ouvert, on passe au joueur suivant
+    game['phase'] = 'draw'
+    game['current_player'] = (game['current_player'] + 1) % game['num_players']
+    
+    attempts = 0
+    while not game['players'][game['current_player']].connected and attempts < game['num_players']:
+        game['current_player'] = (game['current_player'] + 1) % game['num_players']
+        attempts += 1
+    
+    for p in game['players']:
+        if p.connected:
+            socketio.emit('game_updated', {
+                'game': get_game_state_for_player(game, p.id),
+                'message': f"🎰 {player.name} n'a pas misé. Le casino reste ouvert !"
             }, room=p.session_id)
 
 if __name__ == '__main__':
