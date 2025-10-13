@@ -45,12 +45,12 @@ def handle_create_game(data):
     ##################
     # TESTS affichage des cartes
     ##################
-    cards_distribution = ""
-    invert_deck = deck[::-1]
-    for i in range(len(deck)):
-        cards_distribution += f"{i} : {str(invert_deck[i])} - {invert_deck[i].id}\n"
-    with open("distribution.txt", 'w') as file:
-        file.write(cards_distribution)
+    # cards_distribution = ""
+    # invert_deck = deck[::-1]
+    # for i in range(len(deck)):
+    #     cards_distribution += f"{i} : {str(invert_deck[i])} - {invert_deck[i].id}\n"
+    # with open("distribution.txt", 'w') as file:
+    #     file.write(cards_distribution)
     #################
 
 
