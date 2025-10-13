@@ -685,7 +685,7 @@ class CardFactory:
     def create_deck(cls) -> List[Card]:
         """Crée un deck complet de cartes"""
         #########################
-        return cls.test_create_deck(cls)
+        # return cls.test_create_deck(cls)
         # TESTING
         #########################
         
