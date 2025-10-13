@@ -2,6 +2,26 @@
 
 // === CARTES SPÉCIALES ===
 
+function closeSalaryModal() {
+    // ✅ Si c'est un achat chef des achats annulé, on ne fait RIEN côté serveur
+    // (le joueur reviendra à la modal chef des achats)
+    // On nettoie juste les variables locales
+    
+    document.getElementById('salary-selection-modal').classList.add('hidden');
+    pendingAcquisitionCard = null;
+    selectedSalaries = [];
+    requiredCost = 0;
+    heritageAvailable = 0;
+    heritageUsed = 0;
+    
+    // ✅ Si c'était un achat chef des achats, réafficher la modal chef des achats
+    if (currentGame.pending_special && currentGame.pending_special.type === 'chef_achats_purchase') {
+        // La modal chef des achats est toujours là en arrière-plan
+        // On ne fait rien de spécial, le joueur peut recliquer sur une autre acquisition
+    }
+}
+
+
 // ARC-EN-CIEL
 function showArcEnCielMode() {
     print("YOUSKKK tu dois pas voir ca")
@@ -433,3 +453,4 @@ function closeCasinoOpenerModal() {
     const modal = document.getElementById('casino-opener-modal');
     if (modal) modal.remove();
 }
+

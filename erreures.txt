@@ -76,14 +76,38 @@ pouvoir au moment ou l'on pose la carte
 
 - pilote de ligne : tous les voyages qu'il achetes sont gratuit
 - architecte : la prochaine maison qu'il achete est gratuite
+V7
+- le piston n'active pas les pouvoirs instantanées
+- la pioche depuis la défausse n'active pas les pouvoir instantanées
+- il y a une erreur avec l'astronaute qui est supprimé trop vite de la main du joueur
+V8
+- la carte choisi dois etre poser devant le joueur ou achetée
+- chefs des achats ne fait rien
+- chefs des ventes ne fait rien
+- il y a une erreur quand on a un piston avec le métier d'astronaute
+V9 
+- quand on fait piston avec chercheur, cela double le métier de chercheur dans les cartes posés
+- le métier de chercheur ne fonctionne pas
+- avec piston et astronaute il y a une dublication du métier astronaute dans les cartes posées
+- pour le chef des achat, il faut pouvoir le poser meme si il n'y a pas de maison dans la défausse
+- pour le chef des achats, il faut proposer d'acheter une maison dans la défausse, avec un choix de sélection d'une maison parmis toutes celle de la défausse, puis ouvre la fenetre d'achat d'aquisition
+V10
+- quand on démission du métier de chercheur, il faut défausser une carte aléatoire de la main
+- si on annule le choix d'achat après avoir poser le métier de chef des achats, la carte métier n'est plus dans la main
+V11
+- si on obtient le métier chercheur avec piston on obtient pas le pouvoir du chercheur
+- j'aimerias une mise a jour de l'affichage après avoir effectuer une annulation du choix d'achat après avoir poser un chef des achats
+trucs a tester :
+- pilote de ligne : voyage infinite
+- achitecte :  maison gratuite
 
 
+
+
+problemes trouvés :
 # pas important pour le moment
 - la prison dois aussi jeter dans la défausse 2 cartes aléatoire de la main et en repiocher 2 de la pioche en plus de passer 3 tour et jeter le métier de bandit
 - quand on pioche depuis la défausse, on est obliger de jouer la carte de la défausse (erreur lors d'une reprise d'aquisition cela la met dans la main)
 - faire la vérification des limites des attaques (redoublement alors qu'on a un métier)
-
-
-trucs a tester :
-- pilote de ligne : voyage infinite
-- achitecte :  maison gratuite
+- au casino un meme joueur peut etre joueur 1 et joueur 2
+- quand on a parier au casino, il est toujours possible de jouer derriere

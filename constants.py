@@ -1,6 +1,7 @@
 from flask import Flask, request
 from flask_socketio import SocketIO, emit
 
+
 app = Flask(__name__)
 app.secret_key = 'votre_cle_secrete_ici_changez_la'
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -42,7 +43,7 @@ def get_game_state_for_player(game, player_id):
         'pending_hardship': game.get('pending_hardship'),
         'pending_special': game.get('pending_special')
     }
-    print(f"État du jeu pour joueur {player_id}: deck={game_state['deck_count']}, discard={len(game_state['discard'])}, phase={game_state['phase']}, casino_open={game_state['casino']['open']}")
+    # print(f"État du jeu pour joueur {player_id}: deck={game_state['deck_count']}, discard={len(game_state['discard'])}, phase={game_state['phase']}, casino_open={game_state['casino']['open']}")
     return game_state
 
 def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
@@ -117,8 +118,11 @@ def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
         return False, f"{target_player.name} n'a pas de salaire"
     
     elif hardship_type == 'licenciement':
-        job_card = target_player.get_job()
         if job_card:
+            if job_card.job_name == "chercheur":
+                handle_loose_chercheur_job()
+
+            job_card = target_player.get_job()
             target_player.remove_card_from_played(job_card)
             game['discard'].append(job_card)
             target_player.received_hardships.append(hardship_type)
@@ -179,6 +183,28 @@ def check_game():
     game = games[game_id]
     return player_id, game, game_id
 
+@socketio.on('pick_card')
+def give_card(data):
+    """Donner une carte au joueur"""
+    source = data.get('source', 'deck')
+    player_id, game, game_id = check_game()
+
+    player = game['players'][player_id]
+    
+    if source == 'deck':
+        if not game['deck']:
+            scores = [(p.name, p.calculate_smiles(), p.id) for p in game['players'] if p.connected]
+            scores.sort(key=lambda x: x[1], reverse=True)
+            socketio.emit('game_over', {'scores': scores}, room=game_id)
+            return
+        
+        card = game['deck'].pop()
+        player.hand.append(card)
+        
+        print(f"Joueur {player_id} a pris dans le deck, reste {len(game['deck'])} cartes")
+        socketio.emit('game_updated', {
+            'game': get_game_state_for_player(game, player.id)
+        }, room=player.session_id)
 
 def next_player(game):
     if not (game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel'):

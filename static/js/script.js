@@ -176,6 +176,7 @@ function closeSalaryModal() {
     requiredCost = 0;
     heritageAvailable = 0;
     heritageUsed = 0;
+    socket.emit('cancel_select_salaries_for_purchase', {});
 }
 
 function showHardshipModal(card, availableTargets, isFromDiscard = false) {

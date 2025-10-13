@@ -638,14 +638,17 @@ class CardFactory:
         """effectue un tests avec des cartes customs"""
         deck = []
         jobs_custom = [
-            {'name': 'architecte', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'house_free'},
-            {'name': 'pilote de ligne', 'salary': 4, 'studies': 5, 'status': 'rien', 'power': 'travel_free'},
-            {'name': 'architecte', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'house_free'},
-            {'name': 'pilote de ligne', 'salary': 4, 'studies': 5, 'status': 'rien', 'power': 'travel_free'},
-            {'name': 'architecte', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'house_free'},
-            {'name': 'pilote de ligne', 'salary': 4, 'studies': 5, 'status': 'rien', 'power': 'travel_free'},
-            {'name': 'architecte', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'house_free'},
-            {'name': 'pilote de ligne', 'salary': 4, 'studies': 5, 'status': 'rien', 'power': 'travel_free'}
+            {'name': 'chef des ventes', 'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'instant'},
+            {'name': 'chercheur', 'salary': 2, 'studies': 6, 'status': 'rien', 'power': 'extra_card__prix_possible'},
+            {'name': 'chef des ventes', 'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'instant'},
+            {'name': 'chercheur', 'salary': 2, 'studies': 6, 'status': 'rien', 'power': 'extra_card__prix_possible'},
+            {'name': 'chef des ventes', 'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'instant'},
+            {'name': 'chercheur', 'salary': 2, 'studies': 6, 'status': 'rien', 'power': 'extra_card__prix_possible'},
+            {'name': 'chef des ventes', 'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'instant'},
+            {'name': 'chercheur', 'salary': 2, 'studies': 6, 'status': 'rien', 'power': 'extra_card__prix_possible'},
+            {'name': 'chef des ventes', 'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'instant'},
+            {'name': 'chercheur', 'salary': 2, 'studies': 6, 'status': 'rien', 'power': 'extra_card__prix_possible'}
+            
         ]
         for job in jobs_custom:
             deck.append(JobCard(job['name'], job['salary'], job['studies'], 
@@ -653,6 +656,11 @@ class CardFactory:
 
         for _ in range(10):
             deck.append(StudyCard('double', 2))
+
+
+        for level in range(1, 5):
+            for _ in range(5):
+                deck.append(SalaryCard(level))
 
         # Maisons
         deck.append(HouseCard('petite', 6, 1))

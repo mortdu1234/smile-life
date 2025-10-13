@@ -1,38 +1,60 @@
-0 : double - smile : 1 - StudyCard - 779a3d91-f25d-4631-8da1-248792480938
-1 : piston - smile : 0 - SpecialCard - 80da3c53-6ec9-4be8-9617-1d5230789778
-2 : moyenne - smile : 2 - HouseCard - e70d8124-94b6-45ad-95a0-d61f5fed5dfb
-3 : piston - smile : 0 - SpecialCard - 8b671629-3c67-4317-b05d-fcdfb17c2b80
-4 : double - smile : 1 - StudyCard - e56d3a48-cdc8-4ef0-b0dd-36c544a5db84
-5 : moyenne - smile : 2 - HouseCard - ea74aafe-242d-4837-b757-e8c509399571
-6 : double - smile : 1 - StudyCard - 787af94f-7804-405d-9109-5a5dd963c2f0
-7 : piston - smile : 0 - SpecialCard - daf3e635-9adf-44a4-b0ce-2cb12a90a043
-8 : pilote de ligne - smile : 2 - JobCard - 81a18eb8-c524-46b6-9856-c7b31e19eb5d
-9 : double - smile : 1 - StudyCard - 2266fd71-f1fb-4a68-8dbb-96e01a7ac7b0
-10 : 3 - smile : 1 - TravelCard - 21d49848-276a-4866-aa6a-d2e63992453c
-11 : 3 - smile : 1 - TravelCard - eeb700b3-d518-4bf0-ac6c-6aff538cefba
-12 : chance - smile : 0 - SpecialCard - 6e4ac994-6b12-46ab-bd55-f815110716ef
-13 : double - smile : 1 - StudyCard - a65e9013-1a99-47d1-a1aa-5c86253a39a2
-14 : arc en ciel - smile : 0 - SpecialCard - 94271b3a-706a-4f11-a053-b6d484278e10
-15 : architecte - smile : 2 - JobCard - 78d39000-3a6c-40be-bc08-f0cf80055645
-16 : architecte - smile : 2 - JobCard - 75a19951-c868-454f-9e55-616df07536eb
-17 : architecte - smile : 2 - JobCard - cd51003f-2bac-45a5-9de1-076a019511f2
-18 : double - smile : 1 - StudyCard - 6420cbfa-3999-4de6-953f-4137c1fe25e2
-19 : grande - smile : 3 - HouseCard - 955660f6-b783-40ff-a541-74db14b59492
-20 : casino - smile : 0 - SpecialCard - 01fd3296-b0d8-4888-88a2-13e2046c4043
-21 : petite - smile : 1 - HouseCard - f594ee05-b525-4b56-b27d-7e72cb5c5c89
-22 : architecte - smile : 2 - JobCard - 112037df-bf88-4839-87dc-b00dd379155a
-23 : chance - smile : 0 - SpecialCard - c341f8e6-b8fe-453b-84a5-758f0561be33
-24 : 3 - smile : 1 - TravelCard - 9cc8f85b-4178-472d-b982-042e13cae64b
-25 : pilote de ligne - smile : 2 - JobCard - c8d9bd63-6f04-41e4-8f20-d34f3c6b9ddf
-26 : chance - smile : 0 - SpecialCard - 8e8431c7-744d-4a54-86b1-bfa9c7eae7ce
-27 : double - smile : 1 - StudyCard - 64a5f0c4-d66a-4a1d-b1c4-eb0ec3c94b58
-28 : pilote de ligne - smile : 2 - JobCard - 1d7221ed-5ee4-4292-ab7e-332caa7fff9d
-29 : 3 - smile : 1 - TravelCard - aa8bb139-8697-439c-9667-581f01bf6321
-30 : 3 - smile : 1 - TravelCard - ca85ca28-2643-4e94-bd0b-3ee515c90006
-31 : piston - smile : 0 - SpecialCard - 9255cca2-79f3-4c1b-8175-be153f096ce8
-32 : double - smile : 1 - StudyCard - 0034b7f9-d7b3-46e2-b5ec-b18a8f8283b8
-33 : double - smile : 1 - StudyCard - ed0d2530-3eba-43fe-b4cc-9ed864b2f015
-34 : pilote de ligne - smile : 2 - JobCard - 1d8cc471-e10e-4e96-9b73-61fa26bf226b
-35 : piston - smile : 0 - SpecialCard - 276cdd8d-c120-4a09-b227-2d425985554b
-36 : double - smile : 1 - StudyCard - 62062ad9-5955-412c-b094-d10036f4c697
-37 : petite - smile : 1 - HouseCard - 737ca3bd-0a78-4e6d-875e-af0205a660ab
+0 : double - smile : 1 - StudyCard - c372de92-1c7b-4d7a-8b70-4e5809d2ad18
+1 : double - smile : 1 - StudyCard - d94257a9-b348-4d01-8575-e8ca196d4fd4
+2 : 4 - smile : 1 - SalaryCard - 82ecae8d-7b8d-47f5-be8b-6ef023c9cb89
+3 : 1 - smile : 1 - SalaryCard - 6a11e93b-6a3c-4c79-ac97-4cfa99b82d5d
+4 : 2 - smile : 1 - SalaryCard - 44d8c632-29a5-4102-8231-b5cef82a8879
+5 : 3 - smile : 1 - SalaryCard - 75ade990-c122-47d1-a046-e1e5b5136192
+6 : chercheur - smile : 2 - JobCard - c65e1e76-b25a-425d-9b3e-1a81af3c3a39
+7 : piston - smile : 0 - SpecialCard - b6ffdd24-3d31-4a19-ab06-2a50fdf1b670
+8 : 3 - smile : 1 - SalaryCard - 97c60ee4-fc09-4372-acf0-9c150f6db516
+9 : double - smile : 1 - StudyCard - 79bae48c-8728-4ba1-887e-cbc83179e2b1
+10 : grande - smile : 3 - HouseCard - 63c3d033-2a0f-4c5e-bde3-cb8d50542e00
+11 : 1 - smile : 1 - SalaryCard - 8a0aa825-47a6-4ff1-a547-6ae90a780ba4
+12 : 3 - smile : 1 - TravelCard - 7a6a76fe-e935-4668-bd6a-2b51766a14ce
+13 : 1 - smile : 1 - SalaryCard - 35e08929-9998-4826-b94d-7ebe1976753b
+14 : chance - smile : 0 - SpecialCard - 9e4437fd-d90f-4632-be65-ede65485e8b6
+15 : chef des ventes - smile : 2 - JobCard - b44a8837-0d15-459c-a271-11c0a78c8cba
+16 : 2 - smile : 1 - SalaryCard - 1d3e6ea7-6215-44da-838a-7a969ece5bc9
+17 : piston - smile : 0 - SpecialCard - 55d359f6-5475-49d7-bef1-5ce16f0f5d7e
+18 : chercheur - smile : 2 - JobCard - a80476e5-dff9-453a-aa4a-076d839244f0
+19 : double - smile : 1 - StudyCard - f75d3a57-413c-4bab-af52-f298bc3b289b
+20 : chercheur - smile : 2 - JobCard - 66a89793-ef85-479b-82cb-dbcd589bf7fe
+21 : 3 - smile : 1 - SalaryCard - 2c0b38c9-7d3b-4c9a-a9bd-e6e2f990d83f
+22 : double - smile : 1 - StudyCard - d95cc7b3-1dfc-4994-93f7-bcd674dfea8d
+23 : 4 - smile : 1 - SalaryCard - bc74ed68-b060-4ce9-b3b4-c6f1aa7d47a6
+24 : 3 - smile : 1 - TravelCard - 1c4763bf-8654-44a0-a983-834dd469982d
+25 : casino - smile : 0 - SpecialCard - 9558a2c0-6868-4751-ba5f-9571ec405531
+26 : double - smile : 1 - StudyCard - 79cfea66-6b3b-4d7c-8ee6-db7a8faf45dc
+27 : chercheur - smile : 2 - JobCard - 17c0715a-3c4c-406c-9ad9-314517375714
+28 : chef des ventes - smile : 2 - JobCard - c9694e3d-f832-4d7d-83d1-dc6d736bd1d1
+29 : 3 - smile : 1 - TravelCard - f07729b8-0733-406e-a711-3ef58bf98e2b
+30 : petite - smile : 1 - HouseCard - 6269ea59-9e17-49d3-801c-d3df012ea6b8
+31 : chef des ventes - smile : 2 - JobCard - d50a5177-fa33-4b93-a10a-0ec3004d98c8
+32 : 2 - smile : 1 - SalaryCard - 2475822e-8365-4482-839f-70ee5203069c
+33 : 1 - smile : 1 - SalaryCard - c17177f7-b5d7-4a86-ba21-09e44e4efb75
+34 : 4 - smile : 1 - SalaryCard - 2c021ae1-e7bb-495f-8042-20bf4fc7c12c
+35 : chance - smile : 0 - SpecialCard - 24bb2e8f-b59a-41cb-97f7-cb08bc891470
+36 : double - smile : 1 - StudyCard - e45e3230-fff3-4e2b-b889-a4144cf545d6
+37 : petite - smile : 1 - HouseCard - b50c8894-8dc9-434f-8b32-ea73d91cb7b0
+38 : 4 - smile : 1 - SalaryCard - 55adc065-4ebb-4028-bfc8-49e6d4166150
+39 : chance - smile : 0 - SpecialCard - 17fd64e8-4ccc-4e4e-bc2e-24e0f4daf78c
+40 : 2 - smile : 1 - SalaryCard - 92b603c3-1885-4767-8b69-2b7b916ea64b
+41 : double - smile : 1 - StudyCard - 0af36644-899c-402d-9dc7-653d16af695d
+42 : arc en ciel - smile : 0 - SpecialCard - 967a6d7e-416e-456e-ae9c-6422b89a2bbf
+43 : 3 - smile : 1 - TravelCard - dcce1405-1c6c-4a00-8229-d03d713af4fb
+44 : chercheur - smile : 2 - JobCard - 53cdb5ff-fe9b-4d2c-a16e-50fb6d9943d6
+45 : 3 - smile : 1 - SalaryCard - 7486f895-ca51-45c5-9a5c-6d7cb6de563f
+46 : piston - smile : 0 - SpecialCard - 1b0b4915-83d2-425b-b153-a33a758f74f7
+47 : moyenne - smile : 2 - HouseCard - 58b6c3b1-0f06-402d-83db-bdd4335eb917
+48 : double - smile : 1 - StudyCard - 1e1f15b2-45c0-48a3-bc56-3cab1ca42b85
+49 : 1 - smile : 1 - SalaryCard - f84301ff-e0c8-4006-ac2a-b5e068c60033
+50 : chef des ventes - smile : 2 - JobCard - 6f04666c-e8db-40f5-a9d9-8315664cc278
+51 : 3 - smile : 1 - SalaryCard - 5c6b6062-980a-41c6-b1f4-4db7f8e0646c
+52 : 4 - smile : 1 - SalaryCard - cf564861-9b3d-4260-9a6d-8e35e77b6f26
+53 : 3 - smile : 1 - TravelCard - 126719c5-8874-4406-8ece-c610c901d2c5
+54 : piston - smile : 0 - SpecialCard - a9f4fe79-a8e3-4ab5-bbbe-072f51c048c4
+55 : double - smile : 1 - StudyCard - 28df8339-a7cf-4199-af59-42ad0132f1a3
+56 : chef des ventes - smile : 2 - JobCard - 04fb08e0-f8f6-403b-b5f3-f108b538e793
+57 : 2 - smile : 1 - SalaryCard - 0150d20b-e443-42b2-952c-5785ee4e9ab2
+58 : piston - smile : 0 - SpecialCard - c23004e8-386f-4a6f-8a78-5940041b0d06
+59 : moyenne - smile : 2 - HouseCard - efc77f69-ed6a-4ed3-b048-e294c4066f8b
