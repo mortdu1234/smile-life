@@ -222,3 +222,16 @@ def update_all_player(game, message):
                 'game': get_game_state_for_player(game, p.id),
                 'message': message
             }, room=p.session_id)
+
+def get_card_by_id(card_id, deck):
+    """récupère une carte dans le deck par son id"""
+    print(f"recherche de la carte d'id : {card_id}")
+    researched_card = None
+    for card in deck:
+        if card.id == card_id:
+            researched_card = card
+            break
+
+    if not researched_card:
+        emit('error', {'message': 'Carte non trouvée'})
+    return researched_card

@@ -95,12 +95,8 @@ def handle_draw_card(data):
                     can_play, message = card.can_be_played(player)
                     if can_play:
                         player.add_card_to_played(card)
-                        game['phase'] = 'draw'
-                        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-                        attempts = 0
-                        while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-                            game['current_player'] = (game['current_player'] + 1) % game['num_players']
-                            attempts += 1
+                        next_player(game)
+                        
                     else:
                         player.hand.append(card)
                         game['phase'] = 'play'
@@ -109,14 +105,7 @@ def handle_draw_card(data):
             game['phase'] = 'play'
         else:
             player.add_card_to_played(card)
-            game['phase'] = 'draw'
-            
-            game['current_player'] = (game['current_player'] + 1) % game['num_players']
-            
-            attempts = 0
-            while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-                game['current_player'] = (game['current_player'] + 1) % game['num_players']
-                attempts += 1
+            next_player(game)
     
     update_all_player(game, "")
 
@@ -309,14 +298,7 @@ def handle_select_salaries(data):
         player.hand.remove(card)
     
     player.add_card_to_played(card)
-    
-    game['phase'] = 'draw'
-    game['current_player'] = (game['current_player'] + 1) % game['num_players']
-    
-    attempts = 0
-    while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        attempts += 1
+    next_player(game)
     
     card_name = getattr(card, 'house_type', 'un voyage')
     update_all_player(game, f"{player.name} a acheté {card_name} (salaires: {total_salaries}, héritage: {use_heritage})")
@@ -483,13 +465,7 @@ def handle_play_card(data):
             player.hand.remove(card)
             game['discard'].append(card)
             
-            game['phase'] = 'draw'
-            game['current_player'] = (game['current_player'] + 1) % game['num_players']
-            
-            attempts = 0
-            while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-                game['current_player'] = (game['current_player'] + 1) % game['num_players']
-                attempts += 1
+            next_player(game)
             
             update_all_player(game, message)
         else:

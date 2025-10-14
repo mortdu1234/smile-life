@@ -528,6 +528,9 @@ def handle_casino_bet(data):
         return
     
     # ✅ CHERCHER LE SALAIRE DANS LA MAIN
+    
+    salary_card = get_card_by_id(player.hand, salary_id)
+    
     salary_card = None
     for card in player.hand:
         if isinstance(card, SalaryCard) and card.id == salary_id:
@@ -553,13 +556,7 @@ def handle_casino_bet(data):
         # Si c'est l'ouvreur, on passe au joueur suivant
         if is_opener:
             if not (game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel'):
-                game['phase'] = 'draw'
-                game['current_player'] = (game['current_player'] + 1) % game['num_players']
-                
-                attempts = 0
-                while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-                    game['current_player'] = (game['current_player'] + 1) % game['num_players']
-                    attempts += 1
+                next_player(game)
             else:
                 game['pending_special']['card_bets'] += 1
         
@@ -601,13 +598,7 @@ def handle_casino_bet(data):
         game['casino']['opener_id'] = None
         
         if not (game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel'):
-            game['phase'] = 'draw'
-            game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        
-            attempts = 0
-            while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-                game['current_player'] = (game['current_player'] + 1) % game['num_players']
-                attempts += 1
+            next_player(game)
         else:
             game['pending_special']['card_bets'] += 1
             
