@@ -22,20 +22,8 @@ def handle_skip_turn(data):
     else:
         message = f"{player.name} passe son tour volontairement"
     
-    game['phase'] = 'draw'
-    game['current_player'] = (game['current_player'] + 1) % game['num_players']
-    
-    attempts = 0
-    while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        attempts += 1
-    
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': message
-            }, room=p.session_id)
+    next_player(game)
+    update_all_player(game, message)
 
 @socketio.on('draw_card')
 def handle_draw_card(data):
@@ -130,11 +118,7 @@ def handle_draw_card(data):
                 game['current_player'] = (game['current_player'] + 1) % game['num_players']
                 attempts += 1
     
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id)
-            }, room=p.session_id)
+    update_all_player(game, "")
 
 @socketio.on('discard_played_card')
 def handle_discard_played_card(data):
@@ -189,12 +173,7 @@ def handle_discard_played_card(data):
     if not is_temp_job:
         next_player(game)
     
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': f"{player.name} a défaussé son {card_type}{job_status}{message_suffix}"
-            }, room=p.session_id)
+    update_all_player(game, f"{player.name} a défaussé son {card_type}{job_status}{message_suffix}")
 
 def getCardLabel(card):
     """Retourne le label d'une carte pour l'affichage"""
@@ -294,11 +273,7 @@ def handle_select_salaries(data):
         
         next_player(game)
         
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id)
-                }, room=p.session_id)
+        update_all_player(game, "")
         return
     
     if use_heritage > player.heritage:
@@ -344,12 +319,7 @@ def handle_select_salaries(data):
         attempts += 1
     
     card_name = getattr(card, 'house_type', 'un voyage')
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': f"{player.name} a acheté {card_name} (salaires: {total_salaries}, héritage: {use_heritage})"
-            }, room=p.session_id)
+    update_all_player(game, f"{player.name} a acheté {card_name} (salaires: {total_salaries}, héritage: {use_heritage})")
 
 @socketio.on('cancel_select_salaries_for_purchase')
 def handle_cancel_select_salarie(data):
@@ -404,11 +374,7 @@ def handle_discard_card(data):
     else :
         game['pending_special']['cards_discarded'] += 1
     
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id)
-            }, room=p.session_id)
+    update_all_player(game, "")
     
 @socketio.on('play_card')
 def handle_play_card(data):
@@ -468,13 +434,7 @@ def handle_play_card(data):
             
             # Phase suivante
             next_player(game)
-            
-            for p in game['players']:
-                if p.connected:
-                    socketio.emit('game_updated', {
-                        'game': get_game_state_for_player(game, p.id),
-                        'message': f"{player.name} est devenu {card.job_name}"
-                    }, room=p.session_id)
+            update_all_player(game, f"{player.name} est devenu {card.job_name}")
             return
 
     # Carte d'attaque
@@ -531,12 +491,7 @@ def handle_play_card(data):
                 game['current_player'] = (game['current_player'] + 1) % game['num_players']
                 attempts += 1
             
-            for p in game['players']:
-                if p.connected:
-                    socketio.emit('game_updated', {
-                        'game': get_game_state_for_player(game, p.id),
-                        'message': message
-                    }, room=p.session_id)
+            update_all_player(game, message)
         else:
             emit('error', {'message': message})
         return
@@ -602,35 +557,14 @@ def handle_play_card(data):
         
         # 🆕 PLUS DE LIMITE DE CARTES
         game['phase'] = 'play'
-        
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': f"{player.name} a posé une carte ({cards_played} carte(s) jouée(s))"
-                }, room=p.session_id)
+        update_all_player(game, f"{player.name} a posé une carte ({cards_played} carte(s) jouée(s))")
         
         # 🆕 Le joueur décide quand s'arrêter (via le bouton "Terminer")
         # Pas de fin automatique
         return
     
-    game['phase'] = 'draw'
-    game['current_player'] = (game['current_player'] + 1) % game['num_players']
-    
-    attempts = 0
-    while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        attempts += 1
-    
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': f"{player.name} a posé une carte"
-            }, room=p.session_id)
-
-
-
+    next_player(game)
+    update_all_player(game, f"{player.name} a posé une carte")
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, host='0.0.0.0', port=5000)

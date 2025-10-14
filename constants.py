@@ -202,9 +202,7 @@ def give_card(data):
         player.hand.append(card)
         
         print(f"Joueur {player_id} a pris dans le deck, reste {len(game['deck'])} cartes")
-        socketio.emit('game_updated', {
-            'game': get_game_state_for_player(game, player.id)
-        }, room=player.session_id)
+        update_all_player(game, "")
 
 def next_player(game):
     if not (game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel'):
@@ -216,3 +214,11 @@ def next_player(game):
         while not game['players'][game['current_player']].connected and attempts < game['num_players']:
             game['current_player'] = (game['current_player'] + 1) % game['num_players']
             attempts += 1
+
+def update_all_player(game, message):
+    for p in game['players']:
+        if p.connected:
+            socketio.emit('game_updated', {
+                'game': get_game_state_for_player(game, p.id),
+                'message': message
+            }, room=p.session_id)

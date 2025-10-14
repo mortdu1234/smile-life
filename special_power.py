@@ -1,6 +1,7 @@
 """
 Extension pour gérer les pouvoirs spéciaux des métiers et cartes spéciales
 """
+from turtle import update
 from flask import request
 from flask_socketio import emit
 from constants import *
@@ -53,14 +54,8 @@ def handle_play_special_card(data):
                 }, room=other.session_id)
         
         next_player(game)
+        update_all_player(game, f"🎂 C'est l'anniversaire de {player.name} !")
         
-        # ✅ Mettre à jour tous les joueurs
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': f"🎂 C'est l'anniversaire de {player.name} !"
-                }, room=p.session_id)
 
     elif special_type == 'troc':
         other_players = [{'id': i, 'name': p.name, 'hand_count': len(p.hand)} 
@@ -157,14 +152,7 @@ def handle_play_special_card(data):
         }
         
         game['phase'] = 'play'
-        
-        # Envoyer la mise à jour à tous les joueurs
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': f"🌈 {player.name} active l'Arc-en-ciel !"
-                }, room=p.session_id)
+        update_all_player(game, f"🌈 {player.name} active l'Arc-en-ciel !")    
         
     elif special_type == 'etoile filante':
         player.hand.remove(card)
@@ -183,13 +171,7 @@ def handle_play_special_card(data):
         player.add_card_to_played(card)
         
         next_player(game)
-        
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': f"{player.name} a reçu un héritage de 3 💰"
-                }, room=p.session_id)
+        update_all_player(game, f"{player.name} a reçu un héritage de 3 💰")
     
     elif special_type == 'tsunami':
         affected = []
@@ -221,13 +203,7 @@ def handle_play_special_card(data):
         next_player(game)
         
         message = f"🌊 Tsunami ! Les cartes de {', '.join(affected)} ont été mélangées et redistribuées !" if affected else "🌊 Tsunami ! Personne n'avait de cartes"
-        
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': message
-                }, room=p.session_id)
+        update_all_player(game, message)
     
     elif special_type == 'casino':
         player.hand.remove(card)
@@ -250,13 +226,7 @@ def handle_play_special_card(data):
         else:
             # Le casino reste ouvert, on passe au joueur suivant
             next_player(game)
-            
-            for p in game['players']:
-                if p.connected:
-                    socketio.emit('game_updated', {
-                        'game': get_game_state_for_player(game, p.id),
-                        'message': f"🎰 {player.name} a ouvert le casino !"
-                    }, room=p.session_id)
+            update_all_player(game, f"🎰 {player.name} a ouvert le casino !")
         
         return
 
@@ -287,13 +257,8 @@ def handle_birthday_gift(data):
         player.remove_card_from_played(salary)
         birthday_player.add_card_to_played(salary)
         
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': f"🎂 {player.name} offre un salaire à {birthday_player.name}"
-                }, room=p.session_id)
-
+        update_all_player(game, f"🎂 {player.name} offre un salaire à {birthday_player.name}")
+        
 @socketio.on('troc_target_selected')
 def handle_troc_target(data):
     """Échanger une carte avec un autre joueur"""
@@ -326,20 +291,8 @@ def handle_troc_target(data):
     player.add_card_to_played(troc_card)
     game['pending_special'] = None
     
-    game['phase'] = 'draw'
-    game['current_player'] = (game['current_player'] + 1) % game['num_players']
-    
-    attempts = 0
-    while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        attempts += 1
-    
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': f"🔄 {player.name} a échangé une carte avec {target.name}"
-            }, room=p.session_id)
+    next_player(game)
+    update_all_player(game, f"🔄 {player.name} a échangé une carte avec {target.name}")
 
 @socketio.on('piston_job_selected')
 def handle_piston_job(data):
@@ -366,13 +319,9 @@ def handle_piston_job(data):
         emit('error', {'message': 'Métier non trouvé dans votre main'})
         return
     
-    
-    # ✅ NOUVEAU: Vérifier si le métier a un pouvoir instantané
     player.add_card_to_played(job)
-
     game['pending_special'] = None
 
-    # ✅ NOUVEAU: Vérifier si le métier a un pouvoir instantané
     if have_special_power(job.job_name):
         # Exécuter le pouvoir instantané directement (pas via do_instant_power)
         job_name = job.job_name
@@ -408,7 +357,6 @@ def handle_piston_cancel(data):
     game = games[game_id]
     player = game['players'][player_id]
     
-    # Trouver le métier chef des achats dans les cartes posées
     piston = None
     for card in player.played["cartes speciales"]:
         if isinstance(card, SpecialCard) and card.special_type == "piston":
@@ -416,19 +364,12 @@ def handle_piston_cancel(data):
             break
 
     if piston:
-        # Retirer des cartes posées et remettre dans la main
         player.remove_card_from_played(piston)
         player.hand.append(piston)
         
-        # Rester en phase play pour que le joueur puisse jouer autre chose
         game['phase'] = 'play'
-        
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': f"{player.name} a annulé le chef des achats"
-                }, room=p.session_id)
+        update_all_player(game, f"{player.name} a annulé une carte")
+        print("le joueur a annulé piston")
 
 @socketio.on('vengeance_selected')
 def handle_vengeance(data):
@@ -457,14 +398,8 @@ def handle_vengeance(data):
         game['pending_special'] = None
         
         next_player(game)
+        update_all_player(game, f"⚔️ {player.name} se venge sur {target.name} : {message}")
         
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': f"⚔️ {player.name} se venge sur {target.name} : {message}"
-                }, room=p.session_id)
-
 @socketio.on('chance_card_selected')
 def handle_chance_card(data):
     """Choisir une carte parmi 3"""
@@ -491,12 +426,7 @@ def handle_chance_card(data):
         random.shuffle(game['deck'])
         
         game['pending_special'] = None
-        
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id)
-                }, room=p.session_id)
+        update_all_player(game, "")
 
 @socketio.on('arc_en_ciel_finished')
 def handle_arc_finished(data):
@@ -517,8 +447,6 @@ def handle_arc_finished(data):
     cards_discarded = game['pending_special'].get('cards_discarded', 0)
     card_bets = game['pending_special'].get('card_bets', 0)
     
-    # 🆕 Repiocher : (cartes jouées + cartes défaussées)
-    # -1 car on ne repioche pas la carte Arc-en-ciel elle-même
     total_cards_used = cards_played + cards_discarded + card_bets
     cards_to_draw = max(0, total_cards_used)
     
@@ -529,20 +457,9 @@ def handle_arc_finished(data):
             cards_drawn += 1
     
     game['pending_special'] = None
-    game['phase'] = 'draw'
-    game['current_player'] = (game['current_player'] + 1) % game['num_players']
-    
-    attempts = 0
-    while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        attempts += 1
-    
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': f"🌈 {player.name} a repioché {cards_drawn} carte(s) ({cards_played} posées + {cards_discarded} défaussées + {card_bets} pariée - 1)"
-            }, room=p.session_id)
+
+    next_player(game)
+    update_all_player(game, f"🌈 {player.name} a repioché {cards_drawn} carte(s) ({cards_played} posées + {cards_discarded} défaussées + {card_bets} pariée - 1)")
 
 @socketio.on('discard_card_selected')
 def handle_discard_card_selected(data):
@@ -576,20 +493,8 @@ def handle_discard_card_selected(data):
     game['discard'].remove(card)
     player.add_card_to_played(card)
     
-    game['phase'] = 'draw'
-    game['current_player'] = (game['current_player'] + 1) % game['num_players']
-    
-    attempts = 0
-    while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        attempts += 1
-    
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': f"⭐ {player.name} a récupéré une carte de la défausse"
-            }, room=p.session_id)
+    next_player(game)
+    update_all_player(game, f"⭐ {player.name} a récupéré une carte de la défausse")
 
 @socketio.on('place_casino_bet')
 def handle_casino_bet(data):
@@ -658,12 +563,7 @@ def handle_casino_bet(data):
             else:
                 game['pending_special']['card_bets'] += 1
         
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': message
-                }, room=p.session_id)
+        update_all_player(game, message)
     
     # Deuxième pari - résolution
     else:
@@ -678,6 +578,9 @@ def handle_casino_bet(data):
         first_player = game['players'][first_bet['player_id']]
         second_player = game['players'][second_bet['player_id']]
         
+        if first_player.id == second_player.id:
+            print("YOUSK : le meme joueur a jouer au casino 2 fois")
+
         # Comparer les niveaux
         if first_bet['salary_card'].level == second_bet['salary_card'].level:
             # Égalité : le deuxième joueur gagne les deux salaires
@@ -708,12 +611,7 @@ def handle_casino_bet(data):
         else:
             game['pending_special']['card_bets'] += 1
             
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': message
-                }, room=p.session_id)
+        update_all_player(game, message)
 
 @socketio.on('skip_casino_bet')
 def handle_skip_casino_bet(data):
@@ -745,13 +643,8 @@ def handle_skip_casino_bet(data):
         next_player(game)
     else:
         game['pending_special']['cards_played'] += 1
-    
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': f"🎰 {player.name} n'a pas misé. Le casino reste ouvert !"
-            }, room=p.session_id)
+
+    update_all_player(game, f"🎰 {player.name} n'a pas misé. Le casino reste ouvert !")
 
 #####################
 # Métiers avec pouvoirs spéciaux
@@ -769,7 +662,6 @@ def do_instant_power(job_card, data, player, game):
     """Exécute le pouvoir instantané d'un métier"""
     job_name = job_card.job_name
     
-    # ✅ NOUVEAU: Retirer de la main avant d'exécuter le pouvoir
     if job_card in player.hand:
         player.hand.remove(job_card)
     player.add_card_to_played(job_card)
@@ -791,8 +683,6 @@ def do_instant_power(job_card, data, player, game):
 # ASTRONAUTE
 def handle_astronaute(player, game):
     """Astronaute : permettre au joueur de jouer une carte de la défausse"""
-    # ✅ MODIFICATION: L'astronaute a déjà été retiré de la main dans handle_play_card
-    # On ne le retire PAS ici
     
     # Filtrer les cartes de la défausse (exclure les coups durs)
     available_cards = [c for c in game['discard'] if not isinstance(c, HardshipCard)]
@@ -800,14 +690,7 @@ def handle_astronaute(player, game):
     if not available_cards:
         # Aucune carte disponible dans la défausse
         next_player(game)
-
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': f"🚀 {player.name} est devenu astronaute (défausse vide)"
-                }, room=p.session_id)
-
+        update_all_player(game, f"🚀 {player.name} est devenu astronaute (défausse vide)")
         return
     
     # Envoyer la liste des cartes disponibles au joueur
@@ -861,12 +744,7 @@ def handle_astronaute_selection(data):
         # Rester en phase play pour que le joueur puisse acheter
         game['phase'] = 'play'
         
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': f"🚀 {player.name} a récupéré une acquisition - achetez-la maintenant"
-                }, room=p.session_id)
+        update_all_player(game, f"🚀 {player.name} a récupéré une acquisition - achetez-la maintenant")
     else:
         # Carte normale : poser directement
         player.add_card_to_played(selected_card)
@@ -909,13 +787,7 @@ def handle_chef_ventes_selection(data):
     player.add_card_to_played(selected_salary)
     
     next_player(game)
-    
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': f"💼 {player.name} a récupéré un salaire de la défausse grâce au chef des ventes"
-            }, room=p.session_id)
+    update_all_player(game, f"💼 {player.name} a récupéré un salaire de la défausse grâce au chef des ventes")
 
 def handle_chef_des_ventes(player, game):
     """Chef des ventes : afficher les salaires de la défausse"""
@@ -925,13 +797,7 @@ def handle_chef_des_ventes(player, game):
     if not available_salaries:
         # si il n'y a pas de salaire dans la défausse jsute poser le métier
         next_player(game)
-        
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': f"🛒 {player.name} est devenu chef des achats (aucune acquisition disponible)"
-                }, room=p.session_id)
+        update_all_player(game, f"🛒 {player.name} est devenu chef des achats (aucune acquisition disponible)")
         return
     
     emit('select_chef_ventes_salary', {
@@ -965,14 +831,7 @@ def handle_cancel_chef_vente_job():
         
         # Rester en phase play pour que le joueur puisse jouer autre chose
         game['phase'] = 'play'
-        
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': f"{player.name} a annulé le chef des achats"
-                }, room=p.session_id)
-
+        update_all_player(game, f"{player.name} a annulé le chef des achats")
 
 # CHEF DES ACHATS
 def handle_chef_des_achats(player, game):
@@ -982,13 +841,7 @@ def handle_chef_des_achats(player, game):
     if not available_acquisitions:
         # Pas d'acquisitions : poser le métier normalement et passer au joueur suivant
         next_player(game)
-        
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': f"🛒 {player.name} est devenu chef des achats (aucune acquisition disponible)"
-                }, room=p.session_id)
+        update_all_player(game, f"🛒 {player.name} est devenu chef des achats (aucune acquisition disponible)")
         return
     
     # ✅ Stocker qu'on est en mode chef des achats pour permettre l'annulation
@@ -1086,13 +939,7 @@ def handle_cancel_chef_achats_job():
         
         # Rester en phase play pour que le joueur puisse jouer autre chose
         game['phase'] = 'play'
-        
-        for p in game['players']:
-            if p.connected:
-                socketio.emit('game_updated', {
-                    'game': get_game_state_for_player(game, p.id),
-                    'message': f"{player.name} a annulé le chef des achats"
-                }, room=p.session_id)
+        update_all_player(game, f"{player.name} a annulé le chef des achats")
 
 @socketio.on('cancel_chef_achats_purchase')
 def handle_cancel_chef_achats():
@@ -1108,13 +955,7 @@ def handle_cancel_chef_achats():
     
     if game.get('pending_special') and game['pending_special'].get('type') == 'chef_achats_purchase':
         game['pending_special'] = None
-
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': "poser le métier chef des achats sans acheter"
-            }, room=p.session_id)
+    update_all_player(game, "poser le métier chef des achats sans acheter")
 
 @socketio.on('confirm_chef_achats_without_purchase')
 def handle_confirm_chef_achats_without_purchase():
@@ -1131,13 +972,7 @@ def handle_confirm_chef_achats_without_purchase():
     player = game['players'][player_id]
     # Le métier est déjà posé, on passe juste au joueur suivant
     next_player(game)
-    
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': f"💼 {player.name} est devenu chef des achats (sans achat)"
-            }, room=p.session_id)
+    update_all_player(game, f"💼 {player.name} est devenu chef des achats (sans achat)")
 
 # CHERCHEUR
 @socketio.on('chercheur_confirm')
@@ -1156,13 +991,7 @@ def handle_chercheur_confirmation(data):
     player = game['players'][player_id]
     
     next_player(game)
-    
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': f"🔬 {player.name} a posé le métier chercheur et pioché une carte supplémentaire"
-            }, room=p.session_id)
+    update_all_player(game, f"🔬 {player.name} a posé le métier chercheur et pioché une carte supplémentaire")
 
 def handle_loose_chercheur_job():
     """retire une carte de la main du joueur"""
@@ -1193,14 +1022,8 @@ def handle_chercheur(player, game):
     
     # Passer au joueur suivant
     next_player(game)
-    
-    # Notifier tous les joueurs
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': f"🔬 {player.name} est devenu chercheur et pioche une carte bonus"
-            }, room=p.session_id)
+    update_all_player(game, f"🔬 {player.name} est devenu chercheur et pioche une carte bonus")
+
 
 # JOURNALISTE
 @socketio.on('journaliste_confirm')
@@ -1215,21 +1038,9 @@ def handle_journaliste_confirmation(data):
     player_id = session_info['player_id']
     game = games[game_id]
     player = game['players'][player_id]
-    
-    game['phase'] = 'draw'
-    game['current_player'] = (game['current_player'] + 1) % game['num_players']
-    
-    attempts = 0
-    while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        attempts += 1
-    
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': f"📰 {player.name} a posé le métier journaliste"
-            }, room=p.session_id)
+
+    next_player(game)
+    update_all_player(game, f"📰 {player.name} a posé le métier journaliste")
 
 def handle_journaliste(player, game):
     """Journaliste : afficher les mains de tous les joueurs"""
@@ -1259,20 +1070,8 @@ def handle_medium_confirmation(data):
     game = games[game_id]
     player = game['players'][player_id]
     
-    game['phase'] = 'draw'
-    game['current_player'] = (game['current_player'] + 1) % game['num_players']
-    
-    attempts = 0
-    while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        attempts += 1
-    
-    for p in game['players']:
-        if p.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': f"🔮 {player.name} a posé le métier médium"
-            }, room=p.session_id)
+    next_player(game)
+    update_all_player(game, f"🔮 {player.name} a posé le métier médium")
 
 def handle_medium(player, game):
     """Médium : afficher les 13 prochaines cartes de la pioche"""
