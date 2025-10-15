@@ -76,7 +76,7 @@ def handle_draw_card(data):
                         ],
                         'from_discard': True
                     }, room=p.session_id)
-        # ✅ NOUVEAU: Vérifier si c'est un JobCard avec pouvoir instantané
+                    
         elif isinstance(card, JobCard):
             # Vérifier si le métier a un pouvoir instantané
             if have_special_power(card.job_name):

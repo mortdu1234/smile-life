@@ -4,7 +4,7 @@ echo "🚀 Démarrage du tunnel Serveo..."
 
 # Configuration
 LOCAL_PORT=5000
-SUBDOMAIN="mon-jeu-smile"  # Personnalisez ici
+SUBDOMAIN="smile-life"  # Personnalisez ici
 
 # Fonction pour démarrer le tunnel
 start_tunnel() {

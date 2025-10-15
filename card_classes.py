@@ -68,7 +68,6 @@ class JobCard(Card):
         
         return True, ""
 
-
 class StudyCard(Card):
     """Carte étude"""
     def __init__(self, study_type: str, levels: int):
@@ -411,7 +410,6 @@ class PriceCard(OtherCard):
         print("le link est : ", self.job_link)
 
         return True, ""
-
 
 class Player:
     """Classe représentant un joueur"""
