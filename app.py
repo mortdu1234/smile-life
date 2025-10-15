@@ -8,6 +8,7 @@ import random
 @socketio.on('skip_turn')
 def handle_skip_turn(data):
     """Passer son tour manuellement"""
+    print("[start]: handle_skip_turn")
     player_id, game, _ = check_game()
 
     if game['current_player'] != player_id:
@@ -28,6 +29,7 @@ def handle_skip_turn(data):
 @socketio.on('draw_card')
 def handle_draw_card(data):
     """Piocher une carte"""
+    print("[start]: handle_draw_card")
     source = data.get('source', 'deck')
     player_id, game, game_id = check_game()
     
@@ -45,6 +47,7 @@ def handle_draw_card(data):
         if not game['deck']:
             scores = [(p.name, p.calculate_smiles(), p.id) for p in game['players'] if p.connected]
             scores.sort(key=lambda x: x[1], reverse=True)
+            print("[appel] : game_over")
             socketio.emit('game_over', {'scores': scores}, room=game_id)
             return
         
@@ -67,6 +70,7 @@ def handle_draw_card(data):
             
             for p in game['players']:
                 if p.connected and p.id == player_id:
+                    print("[appel] : select_hardship_target")
                     socketio.emit('select_hardship_target', {
                         'card': card.to_dict(),
                         'available_targets': [
@@ -112,7 +116,7 @@ def handle_draw_card(data):
 @socketio.on('discard_played_card')
 def handle_discard_played_card(data):
     """Défausser une carte déjà posée (métier, mariage ou adultère)"""
-    print("deffausse une carte")
+    print("[start]: handle_discard_played_card")
     card_id = data.get('card_id')
     player_id, game, _ = check_game()
     
@@ -166,6 +170,7 @@ def handle_discard_played_card(data):
 
 def getCardLabel(card):
     """Retourne le label d'une carte pour l'affichage"""
+    print("[start]: getCardLabel")
     if isinstance(card, JobCard):
         return card.job_name
     elif isinstance(card, StudyCard):
@@ -200,6 +205,7 @@ def getCardLabel(card):
 @socketio.on('select_salaries_for_purchase')
 def handle_select_salaries(data):
     """Le joueur sélectionne les salaires pour payer une acquisition"""
+    print("[start]: handle_select_salaries")
     card_id = data.get('card_id')
     salary_ids = data.get('salary_ids', [])
     use_heritage = data.get('use_heritage', 0)
@@ -306,6 +312,7 @@ def handle_select_salaries(data):
 @socketio.on('cancel_select_salaries_for_purchase')
 def handle_cancel_select_salarie(data):
     """le joueur annule la sélection d'achat d'une carte"""
+    print("[start]: handle_cancel_select_salarie")
     card_id = data.get('card_id')
     salary_ids = data.get('salary_ids', [])
     use_heritage = data.get('use_heritage', 0)
@@ -322,7 +329,7 @@ def handle_cancel_select_salarie(data):
 @socketio.on('discard_card')
 def handle_discard_card(data):
     """Défausser une carte"""
-    print("défausser une carte [handle discard_card]")
+    print("[start]: handle_discard_card")
     card_id = data.get('card_id')
     player_id, game, _ = check_game()
 
@@ -361,6 +368,7 @@ def handle_discard_card(data):
 @socketio.on('play_card')
 def handle_play_card(data):
     """Jouer une carte"""
+    print("[start]: handle_play_card")
     card_id = data.get('card_id')
     target_player_id = data.get('target_player_id')
     player_id, game, _ = check_game()
@@ -375,23 +383,13 @@ def handle_play_card(data):
     
     player = game['players'][player_id]
     
-    card = None
-    for c in player.hand:
-        if c.id == card_id:
-            card = c
-            break
+    card = get_card_by_id(card_id, player.hand)
     
-        
-    if not card:
-        emit('error', {'message': 'Carte non trouvée dans votre main'})
-        return
-    can_play, message = card.can_be_played(player)
-    if not can_play:
-        emit('error', {'message': message})
-        return
-    
+    print(f"info sur la carte : type: {type(card)} id:{card.id}")
+
     # Cartes Métiers avec pouvoirs spéciaux instantanés
     if isinstance(card, JobCard):
+        print("\t la carte est un métier")
         if have_special_power(card.job_name):
             # ✅ MODIFICATION: Ne retirer de la main QUE DANS do_instant_power
             # Passer le card_id pour que do_instant_power le retire
@@ -421,6 +419,7 @@ def handle_play_card(data):
 
     # Carte d'attaque
     if isinstance(card, HardshipCard):
+        print("\t la carte est une attaque")
         if target_player_id is None:
             available_targets = []
             for i, p in enumerate(game['players']):
@@ -452,6 +451,7 @@ def handle_play_card(data):
                 emit('error', {'message': 'Aucune cible disponible'})
                 return
             
+            print("[appel] : select_hardship_target")
             emit('select_hardship_target', {
                 'card': card.to_dict(),
                 'available_targets': available_targets
@@ -463,7 +463,6 @@ def handle_play_card(data):
         
         if success:
             player.hand.remove(card)
-            game['discard'].append(card)
             
             next_player(game)
             
@@ -474,6 +473,7 @@ def handle_play_card(data):
     
     # Acquisition
     if isinstance(card, (HouseCard, TravelCard)):
+        print("\t la carte est une aquisition")
         job = player.get_job()
         cost = card.cost if isinstance(card, HouseCard) else 3
         
@@ -495,6 +495,7 @@ def handle_play_card(data):
                 emit('error', {'message': f'Vous avez besoin de salaires ou d\'héritage pour acheter (coût: {cost})'})
                 return
             
+            print("[appel] : select_salaries_for_acquisition")
             emit('select_salaries_for_acquisition', {
                 'card': card.to_dict(),
                 'required_cost': cost,
@@ -505,10 +506,11 @@ def handle_play_card(data):
     
     # Carte spéciale
     if isinstance(card, SpecialCard):
-        print("une carte jouée est spéciale")
+        print("\t la carte est une carte spéciale")
         handle_play_special_card(data)
         return
     
+    print("pas bien")
     # Vérifier si la carte peut être jouée
     can_play, message = card.can_be_played(player)
     
@@ -518,6 +520,7 @@ def handle_play_card(data):
     
     # carte Mariage
     if isinstance(card, MarriageCard):
+        print("\t la carte est un mariage")
         if not card.can_be_played(player):
             emit('error', {'message': 'Vous devez avoir un flirt pour jouer un mariage'})
             return

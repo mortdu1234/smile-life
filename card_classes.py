@@ -4,9 +4,10 @@ from typing import Dict, Any, List
 
 class Card(ABC):
     """Classe de base pour toutes les cartes"""
-    def __init__(self):
+    def __init__(self, image_path: str):
         self.id = str(uuid.uuid4())
         self.smiles = 0
+        self.image: str = image_path
     
     def __str__(self):
         return f"YOUSK id : {self.id}"
@@ -17,7 +18,8 @@ class Card(ABC):
         return {
             'id': self.id,
             'smiles': self.smiles,
-            'type': self.__class__.__name__.lower()
+            'type': self.__class__.__name__.lower(),
+            'image': self.image
         }
     
     @abstractmethod
@@ -28,8 +30,8 @@ class Card(ABC):
 
 class JobCard(Card):
     """Carte métier"""
-    def __init__(self, job_name: str, salary: int, studies: int, status: str, power: str):
-        super().__init__()
+    def __init__(self, job_name: str, salary: int, studies: int, status: str, power: str, image_path: str):
+        super().__init__(image_path)
         self.job_name = job_name
         self.salary = salary
         self.studies = studies
@@ -70,8 +72,8 @@ class JobCard(Card):
 
 class StudyCard(Card):
     """Carte étude"""
-    def __init__(self, study_type: str, levels: int):
-        super().__init__()
+    def __init__(self, study_type: str, levels: int, image_path: str):
+        super().__init__(image_path)
         self.study_type = study_type
         self.levels = levels
         self.smiles = 1
@@ -96,8 +98,8 @@ class StudyCard(Card):
 
 class SalaryCard(Card):
     """Carte salaire"""
-    def __init__(self, level: int):
-        super().__init__()
+    def __init__(self, level: int, image_path: str):
+        super().__init__(image_path)
         self.level = level
         self.smiles = 1
     
@@ -134,8 +136,8 @@ class SalaryCard(Card):
 
 class FlirtCard(Card):
     """Carte flirt"""
-    def __init__(self, location: str):
-        super().__init__()
+    def __init__(self, location: str, image_path: str):
+        super().__init__(image_path)
         self.location = location
         self.smiles = 1
     
@@ -158,8 +160,8 @@ class FlirtCard(Card):
 
 class MarriageCard(Card):
     """Carte mariage"""
-    def __init__(self, location: str):
-        super().__init__()
+    def __init__(self, location: str, image_path:str):
+        super().__init__(image_path)
         self.location = location
         self.smiles = 3
     
@@ -185,8 +187,8 @@ class MarriageCard(Card):
 
 class AdulteryCard(Card):
     """Carte adultère"""
-    def __init__(self):
-        super().__init__()
+    def __init__(self, image_path: str):
+        super().__init__(image_path)
         self.smiles = 1
     
     def __str__(self):
@@ -209,8 +211,8 @@ class AdulteryCard(Card):
 
 class ChildCard(Card):
     """Carte enfant"""
-    def __init__(self, name: str):
-        super().__init__()
+    def __init__(self, name: str, image_path: str):
+        super().__init__(image_path)
         self.name = name
         self.smiles = 2
     
@@ -232,8 +234,8 @@ class ChildCard(Card):
 
 class AnimalCard(Card):
     """Carte animal"""
-    def __init__(self, animal_name: str, smiles: int):
-        super().__init__()
+    def __init__(self, animal_name: str, smiles: int, image_path: str):
+        super().__init__(image_path)
         self.animal_name = animal_name
         self.smiles = smiles
 
@@ -253,8 +255,8 @@ class AnimalCard(Card):
 
 class HouseCard(Card):
     """Carte maison"""
-    def __init__(self, house_type: str, cost: int, smiles: int):
-        super().__init__()
+    def __init__(self, house_type: str, cost: int, smiles: int, image_path: str):
+        super().__init__(image_path)
         self.house_type = house_type
         self.cost = cost
         self.smiles = smiles
@@ -290,8 +292,8 @@ class HouseCard(Card):
 
 class TravelCard(Card):
     """Carte voyage"""
-    def __init__(self):
-        super().__init__()
+    def __init__(self, image_path: str):
+        super().__init__(image_path)
         self.cost = 3
         self.smiles = 1
     
@@ -320,8 +322,8 @@ class TravelCard(Card):
 
 class SpecialCard(Card):
     """Carte spéciale"""
-    def __init__(self, special_type: str):
-        super().__init__()
+    def __init__(self, special_type: str, image_path: str):
+        super().__init__(image_path)
         self.special_type = special_type
         self.smiles = 0
     
@@ -342,8 +344,8 @@ class SpecialCard(Card):
 
 class HardshipCard(Card):
     """Carte coup dur"""
-    def __init__(self, hardship_type: str):
-        super().__init__()
+    def __init__(self, hardship_type: str, image_path: str):
+        super().__init__(image_path)
         self.hardship_type = hardship_type
         self.smiles = 0
 
@@ -360,6 +362,7 @@ class HardshipCard(Card):
     
     def can_be_played(self, player: 'Player') -> tuple[bool, str]:
         # Les coups durs sont joués sur d'autres joueurs
+        print(f"le joueurs : {player.name}")
         if player.has_job() and f'immune_{self.hardship_type}' in player.get_job().power:
             return False, f"le joueur {player.name} est immunisé contre {self.hardship_type} grâce à son métier"
 
@@ -367,8 +370,8 @@ class HardshipCard(Card):
 
 class OtherCard(Card):
     """Autres cartes (légion d'honneur, prix)"""
-    def __init__(self, card_type: str, smiles: int):
-        super().__init__()
+    def __init__(self, card_type: str, smiles: int, image_path: str):
+        super().__init__(image_path)
         self.card_type = card_type
         self.smiles = smiles
     
@@ -395,8 +398,8 @@ class OtherCard(Card):
 
 class PriceCard(OtherCard):
     """Carte prix d'excellence"""
-    def __init__(self, smiles: int):
-        super().__init__('prix', smiles)
+    def __init__(self, smiles: int, image_path: str):
+        super().__init__('prix', smiles, image_path)
         self.job_link = None
     
     def can_be_played(self, player: 'Player') -> tuple[bool, str]:
@@ -585,42 +588,42 @@ class CardFactory:
     """Factory pour créer les cartes"""
     
     JOBS = [
-        {'name': 'architecte', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'house_free'},
-        {'name': 'astronaute', 'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'instant'},
-        {'name': 'avocat', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'immune_divorce'},
-        {'name': 'bandit', 'salary': 4, 'studies': 0, 'status': 'rien', 'power': 'immune_tax__immune_licenciement'},
-        {'name': 'barman', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'unlimited_flirt'},
-        {'name': 'chef des ventes', 'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'instant'},
-        {'name': 'chef des achats', 'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'instant'},
-        {'name': 'chercheur', 'salary': 2, 'studies': 6, 'status': 'rien', 'power': 'extra_card__prix_possible'},
-        {'name': 'chirurgien', 'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'no_illness__extra_study'},
-        {'name': 'designer', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'none'},
-        {'name': 'ecrivain', 'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'prix_possible'},
-        {'name': 'garagiste', 'salary': 2, 'studies': 1, 'status': 'rien', 'power': 'immune_accident'},
-        {'name': 'gourou', 'salary': 3, 'studies': 0, 'status': 'rien', 'power': 'none'},
-        {'name': 'jardinier', 'salary': 1, 'studies': 1, 'status': 'rien', 'power': 'none'},
-        {'name': 'journaliste', 'salary': 2, 'studies': 3, 'status': 'rien', 'power': 'instant__prix_possible'},
-        {'name': 'médecin', 'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'immune_maladie__extra_study'},
-        {'name': 'médium', 'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'instant'},
-        {'name': 'militaire', 'salary': 1, 'studies': 0, 'status': 'fonctionnaire', 'power': 'no_attentat'},
-        {'name': 'pharmacien', 'salary': 3, 'studies': 5, 'status': 'rien', 'power': 'immune_maladie'},
-        {'name': 'pilote de ligne', 'salary': 4, 'studies': 5, 'status': 'rien', 'power': 'travel_free'},
-        {'name': 'pizzaiolo', 'salary': 2, 'studies': 0, 'status': 'rien', 'power': 'none'},
-        {'name': 'plombier', 'salary': 1, 'studies': 1, 'status': 'intérimaire', 'power': 'none'},
-        {'name': 'policier', 'salary': 1, 'studies': 1, 'status': 'fonctionnaire', 'power': 'block_bandit_gourou'},
-        {'name': 'prof anglais', 'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none'},
-        {'name': 'prof francais', 'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none'},
-        {'name': 'prof histoire', 'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none'},
-        {'name': 'prof maths', 'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none'},
-        {'name': 'serveur', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'none'},
-        {'name': 'stripteaser', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'none'},
-        {'name': 'grand prof', 'salary': 3, 'studies': 'P', 'status': 'fonctionnaire', 'power': 'none'}
+        {'name': 'architecte', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'house_free', 'image': 'personnal_life/professionnal_life/JobCards/architecte.png'},
+        {'name': 'astronaute', 'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'instant', 'image': 'personnal_life/professionnal_life/JobCards/astronaute.png'},
+        {'name': 'avocat', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'immune_divorce', 'image': 'personnal_life/professionnal_life/JobCards/avocat.png'},
+        {'name': 'bandit', 'salary': 4, 'studies': 0, 'status': 'rien', 'power': 'immune_tax__immune_licenciement', 'image': 'personnal_life/professionnal_life/JobCards/bandit.png'},
+        {'name': 'barman', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'unlimited_flirt', 'image': 'personnal_life/professionnal_life/JobCards/barman.png'},
+        {'name': 'chef des ventes', 'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'instant', 'image': 'personnal_life/professionnal_life/JobCards/chef_des_ventes.png'},
+        {'name': 'chef des achats', 'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'instant', 'image': 'personnal_life/professionnal_life/JobCards/chef_des_achats.png'},
+        {'name': 'chercheur', 'salary': 2, 'studies': 6, 'status': 'rien', 'power': 'extra_card__prix_possible', 'image': 'personnal_life/professionnal_life/JobCards/chercheur.png'},
+        {'name': 'chirurgien', 'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'no_illness__extra_study', 'image': 'personnal_life/professionnal_life/JobCards/chirurgien.png'},
+        {'name': 'designer', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/designer.png'},
+        {'name': 'ecrivain', 'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'prix_possible', 'image': 'personnal_life/professionnal_life/JobCards/ecrivain.png'},
+        {'name': 'garagiste', 'salary': 2, 'studies': 1, 'status': 'rien', 'power': 'immune_accident', 'image': 'personnal_life/professionnal_life/JobCards/garagiste.png'},
+        {'name': 'gourou', 'salary': 3, 'studies': 0, 'status': 'rien', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/gourou.png'},
+        {'name': 'jardinier', 'salary': 1, 'studies': 1, 'status': 'rien', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/jardinier.png'},
+        {'name': 'journaliste', 'salary': 2, 'studies': 3, 'status': 'rien', 'power': 'instant__prix_possible', 'image': 'personnal_life/professionnal_life/JobCards/journaliste.png'},
+        {'name': 'médecin', 'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'immune_maladie__extra_study', 'image': 'personnal_life/professionnal_life/JobCards/medecin.png'},
+        {'name': 'médium', 'salary': 1, 'studies': 0, 'status': 'rien', 'power': 'instant', 'image': 'personnal_life/professionnal_life/JobCards/medium.png'},
+        {'name': 'militaire', 'salary': 1, 'studies': 0, 'status': 'fonctionnaire', 'power': 'no_attentat', 'image': 'personnal_life/professionnal_life/JobCards/militaire.png'},
+        {'name': 'pharmacien', 'salary': 3, 'studies': 5, 'status': 'rien', 'power': 'immune_maladie', 'image': 'personnal_life/professionnal_life/JobCards/pharmacien.png'},
+        {'name': 'pilote de ligne', 'salary': 4, 'studies': 5, 'status': 'rien', 'power': 'travel_free', 'image': 'personnal_life/professionnal_life/JobCards/pilote_de_ligne.png'},
+        {'name': 'pizzaiolo', 'salary': 2, 'studies': 0, 'status': 'rien', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/pizzaiolo.png'},
+        {'name': 'plombier', 'salary': 1, 'studies': 1, 'status': 'intérimaire', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/plombier.png'},
+        {'name': 'policier', 'salary': 1, 'studies': 1, 'status': 'fonctionnaire', 'power': 'block_bandit_gourou', 'image': 'personnal_life/professionnal_life/JobCards/policier.png'},
+        {'name': 'prof anglais', 'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/prof_anglais.png'},
+        {'name': 'prof francais', 'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/prof_francais.png'},
+        {'name': 'prof histoire', 'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/prof_histoire.png'},
+        {'name': 'prof maths', 'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/prof_maths.png'},
+        {'name': 'serveur', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/server.png'},
+        {'name': 'stripteaser', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/stripteaser.png'},
+        {'name': 'grand prof', 'salary': 3, 'studies': 'P', 'status': 'fonctionnaire', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/grand_prof.png'}
     ]
     
     FLIRT_LOCATIONS = ['bar', 'boite de nuit', 'camping', 'cinema', 'hotel', 
                        'internet', 'parc', 'restaurant', 'theatre', 'zoo']
-    MARRIAGE_LOCATIONS = ['corps-nuds', 'montcuq', 'monteton', 'Sainte-Vierge', 
-                          'Fourqueux', 'Fourqueux', 'Fourqueux']
+    MARRIAGE_LOCATIONS = ['corps-nuds', 'montcuq', 'monteton', 'sainte-vierge', 
+                          'fourqueux', 'fourqueux', 'fourqueux']
     CHILDREN_NAMES = ['diana', 'harry', 'hermionne', 'lara', 'leia', 'luigi', 
                       'luke', 'mario', 'rocky', 'zelda']
     ANIMALS = [
@@ -631,6 +634,11 @@ class CardFactory:
         {'name': 'poussin', 'smiles': 1}
     ]
 
+    TRIP_NAMES = ["le caire", "londres", "new york", "rio", "sydney"]
+
+    SPECIAL_CARDS = ['anniversaire', 'arc en ciel', 'casino', 'chance', 
+                       'etoile filante', 'heritage', 'piston', 'troc', 
+                       'tsunami', 'vengeance']
 
     def test_create_deck(cls) -> List[Card]:
         """effectue un tests avec des cartes customs"""
@@ -650,7 +658,7 @@ class CardFactory:
         ]
         for job in jobs_custom:
             deck.append(JobCard(job['name'], job['salary'], job['studies'], 
-                               job['status'], job['power']))
+                               job['status'], job['power'], job['image']))
 
         for _ in range(10):
             deck.append(StudyCard('double', 2))
@@ -692,74 +700,76 @@ class CardFactory:
         # Métiers
         for job in cls.JOBS:
             deck.append(JobCard(job['name'], job['salary'], job['studies'], 
-                        job['status'], job['power']))
+                        job['status'], job['power'], job['image']))
         
         # Études
         for _ in range(22):
-            deck.append(StudyCard('simple', 1))
+            deck.append(StudyCard('simple', 1, "personnal_life/professionnal_life/StudyCards/study1.png"))
         for _ in range(3):
-            deck.append(StudyCard('double', 2))
+            deck.append(StudyCard('double', 2, "personnal_life/professionnal_life/StudyCards/study2.png"))
         
         # Salaires
         for level in range(1, 5):
             for _ in range(10):
-                deck.append(SalaryCard(level))
+                deck.append(SalaryCard(level, f"personnal_life/professionnal_life/SalaryCards/salary{level}.png"))
         
         # Flirts
         for loc in cls.FLIRT_LOCATIONS:
-            deck.append(FlirtCard(loc))
-            deck.append(FlirtCard(loc))
+            l = loc.replace(" ", "_")
+            deck.append(FlirtCard(loc, f"personnal_life/flirts/{l}.png"))
+            deck.append(FlirtCard(loc, f"personnal_life/flirts/{l}.png"))
         
         # Mariages
         for loc in cls.MARRIAGE_LOCATIONS:
-            deck.append(MarriageCard(loc))
+            l = loc.replace(" ", "_").replace("-", "_")
+            deck.append(MarriageCard(loc, f"personnal_life/mariages/mariage_{l}.png"))
         
         # Adultères
         for _ in range(3):
-            deck.append(AdulteryCard())
+            deck.append(AdulteryCard("personnal_life/mariages/adultere.png"))
         
         # Enfants
         for name in cls.CHILDREN_NAMES:
-            deck.append(ChildCard(name))
+            deck.append(ChildCard(name, f"personnal_life/children/{name}.png"))
         
         # Animaux
         for animal in cls.ANIMALS:
-            deck.append(AnimalCard(animal['name'], animal['smiles']))
+            deck.append(AnimalCard(animal['name'], animal['smiles'], f"aquisition_cards/animals/{animal['name']}.png"))
         
         # Maisons
-        deck.append(HouseCard('petite', 6, 1))
-        deck.append(HouseCard('petite', 6, 1))
-        deck.append(HouseCard('moyenne', 8, 2))
-        deck.append(HouseCard('moyenne', 8, 2))
-        deck.append(HouseCard('grande', 10, 3))
+        deck.append(HouseCard('petite', 6, 1, "aquisition_cards/houses/maison1.png"))
+        deck.append(HouseCard('petite', 6, 1, "aquisition_cards/houses/maison1.png"))
+        deck.append(HouseCard('moyenne', 8, 2, "aquisition_cards/houses/maison2.png"))
+        deck.append(HouseCard('moyenne', 8, 2, "aquisition_cards/houses/maison2.png"))
+        deck.append(HouseCard('grande', 10, 3, "aquisition_cards/houses/maison3.png"))
         
         # Voyages
-        for _ in range(5):
-            deck.append(TravelCard())
+        for trip_name in cls.TRIP_NAMES:
+            t = trip_name.replace(" ", "_")
+            deck.append(TravelCard(f"aquisition_cards/trip/{t}.png"))
         
         # Cartes spéciales
-        for special in ['anniversaire', 'arc en ciel', 'casino', 'chance', 
-                       'etoile filante', 'heritage', 'piston', 'troc', 
-                       'tsunami', 'vengeance']:
-            deck.append(SpecialCard(special))
+        for special in cls.SPECIAL_CARDS:
+            s = special.replace(' ', '_')
+            deck.append(SpecialCard(special, f"special_cards/{s}.png"))
         
         # Coups durs
         for _ in range(5):
-            deck.append(HardshipCard('accident'))
-            deck.append(HardshipCard('burnout'))
-            deck.append(HardshipCard('divorce'))
-            deck.append(HardshipCard('tax'))
-            deck.append(HardshipCard('licenciement'))
-            deck.append(HardshipCard('maladie'))
-            deck.append(HardshipCard('redoublement'))
+            deck.append(HardshipCard('accident', "hardship_cards/accident.png"))
+            deck.append(HardshipCard('burnout', "hardship_cards/burnout.png"))
+            deck.append(HardshipCard('divorce', "hardship_cards/divorce.png"))
+            deck.append(HardshipCard('tax', "hardship_cards/tax.png"))
+            deck.append(HardshipCard('licenciement', "hardship_cards/licenciement.png"))
+            deck.append(HardshipCard('maladie', "hardship_cards/maladie.png"))
+            deck.append(HardshipCard('redoublement', "hardship_cards/redoublement.png"))
         
-        deck.append(HardshipCard('prison'))
-        deck.append(HardshipCard('attentat'))
+        deck.append(HardshipCard('prison', "hardship_cards/prison.png"))
+        deck.append(HardshipCard('attentat', "hardship_cards/attentat.png"))
         
         # Autres
-        deck.append(OtherCard('legion', 3))
-        deck.append(PriceCard(4))
-        deck.append(PriceCard(4))
+        deck.append(OtherCard('legion', 3, "personnal_life/professionnal_life/legion.png"))
+        deck.append(PriceCard(4, "personnal_life/professionnal_life/price.png"))
+        deck.append(PriceCard(4, "personnal_life/professionnal_life/price.png"))
         
         return deck
     

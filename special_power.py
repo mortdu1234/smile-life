@@ -12,6 +12,7 @@ import random
 @socketio.on('handle_play_special_card')
 def handle_play_special_card(data):
     """Jouer une carte spéciale"""
+    print("[start]: handle_play_special_card")
     card_id = data.get('card_id')
     player_id, game, _ = check_game()
 
@@ -233,6 +234,7 @@ def handle_play_special_card(data):
 @socketio.on('birthday_gift_selected')
 def handle_birthday_gift(data):
     """Un joueur offre un salaire pour un anniversaire"""
+    print("[start] : handle_birthday_gift")
     salary_id = data.get('salary_id')
     session_info = player_sessions.get(request.sid)
     
@@ -262,6 +264,7 @@ def handle_birthday_gift(data):
 @socketio.on('troc_target_selected')
 def handle_troc_target(data):
     """Échanger une carte avec un autre joueur"""
+    print("[start] : handle_troc_target")
     target_id = data.get('target_id')
     session_info = player_sessions.get(request.sid)
     
@@ -297,6 +300,7 @@ def handle_troc_target(data):
 @socketio.on('piston_job_selected')
 def handle_piston_job(data):
     """Poser un métier sans condition"""
+    print("[start] : handle_piston_job")
     job_id = data.get('job_id')
     session_info = player_sessions.get(request.sid)
     
@@ -347,6 +351,7 @@ def handle_piston_job(data):
 @socketio.on("piston_job_cancel")
 def handle_piston_cancel(data):
     """annule le fait d'utiliser piston"""
+    print("[start] : handle_piston_cancel")
     session_info = player_sessions.get(request.sid)
     
     if not session_info:
@@ -374,6 +379,7 @@ def handle_piston_cancel(data):
 @socketio.on('vengeance_selected')
 def handle_vengeance(data):
     """Renvoyer un coup dur"""
+    print("[start] : handle_vengeance")
     hardship_type = data.get('hardship_type')
     target_id = data.get('target_id')
     session_info = player_sessions.get(request.sid)
@@ -403,6 +409,7 @@ def handle_vengeance(data):
 @socketio.on('chance_card_selected')
 def handle_chance_card(data):
     """Choisir une carte parmi 3"""
+    print("[start] : handle_chance_card")
     card_id = data.get('card_id')
     _, game, _ = check_game()
     
@@ -431,6 +438,7 @@ def handle_chance_card(data):
 @socketio.on('arc_en_ciel_finished')
 def handle_arc_finished(data):
     """Terminer le mode arc-en-ciel et repiocher"""
+    print("[start] : handle_arc_finished")
     session_info = player_sessions.get(request.sid)
     
     if not session_info:
@@ -464,6 +472,7 @@ def handle_arc_finished(data):
 @socketio.on('discard_card_selected')
 def handle_discard_card_selected(data):
     """Choisir une carte de la défausse (étoile filante)"""
+    print("[start] : handle_discard_card_selected")
     card_id = data.get('card_id')
     session_info = player_sessions.get(request.sid)
     
@@ -499,6 +508,7 @@ def handle_discard_card_selected(data):
 @socketio.on('place_casino_bet')
 def handle_casino_bet(data):
     """Placer un pari au casino"""
+    print("[start] : handle_casino_bet")
     salary_id = data.get('salary_id')
     is_opener = data.get('is_opener', False)
     session_info = player_sessions.get(request.sid)
@@ -607,6 +617,7 @@ def handle_casino_bet(data):
 @socketio.on('skip_casino_bet')
 def handle_skip_casino_bet(data):
     """L'ouvreur du casino décide de ne pas miser"""
+    print("[start] : handle_skip_casino_bet")
     session_info = player_sessions.get(request.sid)
     
     if not session_info:
@@ -642,6 +653,7 @@ def handle_skip_casino_bet(data):
 #####################
 def have_special_power(job_name):
     """Vérifier si un métier a un pouvoir spécial"""
+    print(" [start] : have_special_power")
     # Liste des métiers avec pouvoirs spéciaux instantanés
     special_jobs = [
         "astronaute", "chef des ventes", "chef des achats", 
@@ -651,6 +663,7 @@ def have_special_power(job_name):
 
 def do_instant_power(job_card, data, player, game):
     """Exécute le pouvoir instantané d'un métier"""
+    print("[start] : do_instant_power")
     job_name = job_card.job_name
     
     if job_card in player.hand:
@@ -674,6 +687,7 @@ def do_instant_power(job_card, data, player, game):
 # ASTRONAUTE
 def handle_astronaute(player, game):
     """Astronaute : permettre au joueur de jouer une carte de la défausse"""
+    print("[start] : handle_astronaute")
     
     # Filtrer les cartes de la défausse (exclure les coups durs)
     available_cards = [c for c in game['discard'] if not isinstance(c, HardshipCard)]
@@ -692,6 +706,7 @@ def handle_astronaute(player, game):
 @socketio.on('astronaute_card_selected')
 def handle_astronaute_selection(data):
     """Astronaute : sélectionner une carte de la défausse"""
+    print("[start] : handle_astronaute_selection")
     card_id = data.get('card_id')
     session_info = player_sessions.get(request.sid)
     
@@ -744,7 +759,7 @@ def handle_astronaute_selection(data):
 @socketio.on('chef_ventes_salary_selected')
 def handle_chef_ventes_selection(data):
     """Chef des ventes : sélectionner un salaire de la défausse"""
-    print("le joueur a sélectionner le salaire qu'il voulais")
+    print("[start]: handle_chef_ventes_selection")
     salary_id = data.get('salary_id')
     session_info = player_sessions.get(request.sid)
     
@@ -782,7 +797,7 @@ def handle_chef_ventes_selection(data):
 
 def handle_chef_des_ventes(player, game):
     """Chef des ventes : afficher les salaires de la défausse"""
-    print("le joueur joue la carte chef de vente")
+    print("[start]: handle_chef_des_ventes")
     available_salaries = [c for c in game['discard'] if isinstance(c, SalaryCard) and c.level <= 3]
     
     if not available_salaries:
@@ -797,7 +812,7 @@ def handle_chef_des_ventes(player, game):
 
 @socketio.on('cancel_chef_ventes_salary_selection')
 def handle_cancel_chef_vente_job():
-    print("annulation totale du posage de la carte")
+    print("[start] : handle_cancel_chef_vente_job")
     session_info = player_sessions.get(request.sid)
     
     if not session_info:
@@ -827,6 +842,7 @@ def handle_cancel_chef_vente_job():
 # CHEF DES ACHATS
 def handle_chef_des_achats(player, game):
     """Chef des achats : afficher les acquisitions de la défausse"""
+    print("[start]: handle_chef_des_achats")
     available_acquisitions = [c for c in game['discard'] if isinstance(c, HouseCard)]
     
     if not available_acquisitions:
@@ -848,7 +864,7 @@ def handle_chef_des_achats(player, game):
 @socketio.on('chef_achats_acquisition_selected')
 def handle_chef_achats_selection(data):
     """Chef des achats : sélectionner une acquisition de la défausse et l'acheter"""
-    print("posage de la carte normal avec un achat")
+    print("[start]: handle_chef_achats_selection")
     acquisition_id = data.get('acquisition_id')
     session_info = player_sessions.get(request.sid)
     
@@ -901,7 +917,7 @@ def handle_chef_achats_selection(data):
 @socketio.on('cancel_chef_achats_job')
 def handle_cancel_chef_achats_job():
     """Annuler complètement le chef des achats - le métier retourne dans la main"""
-    print("annulation totale du posage de la carte")
+    print("[start] : handle_cancel_chef_achats_job")
     session_info = player_sessions.get(request.sid)
     
     if not session_info:
@@ -935,7 +951,7 @@ def handle_cancel_chef_achats_job():
 @socketio.on('cancel_chef_achats_purchase')
 def handle_cancel_chef_achats():
     """Annuler un achat chef des achats"""
-    print("tu annule l'achat")
+    print("[start] : handle_cancel_chef_achats")
     session_info = player_sessions.get(request.sid)
     
     if not session_info:
@@ -951,7 +967,7 @@ def handle_cancel_chef_achats():
 @socketio.on('confirm_chef_achats_without_purchase')
 def handle_confirm_chef_achats_without_purchase():
     """Confirmer le chef des achats sans acheter - le métier reste posé"""
-    print("tu n'achete rien")
+    print("[start] : handle_confirm_chef_achats_without_purchase")
     session_info = player_sessions.get(request.sid)
     
     if not session_info:
@@ -969,6 +985,7 @@ def handle_confirm_chef_achats_without_purchase():
 @socketio.on('chercheur_confirm')
 def handle_chercheur_confirmation(data):
     """Chercheur : confirmer et continuer"""
+    print("[start] : handle_chercheur_confirmation")
     session_info = player_sessions.get(request.sid)
     give_card(data)
 
@@ -986,7 +1003,7 @@ def handle_chercheur_confirmation(data):
 
 def handle_loose_chercheur_job():
     """retire une carte de la main du joueur"""
-    print("un joueur a perdu le métier chercheur")
+    print("[start] : handle_loose_chercheur_job")
     session_info = player_sessions.get(request.sid)
     
     if not session_info:
@@ -1006,7 +1023,7 @@ def handle_loose_chercheur_job():
 def handle_chercheur(player, game):
     """Chercheur : piocher une carte en plus"""
     # La carte est déjà posée dans do_instant_power, on pioche juste une carte bonus
-    
+    print("[start] : handle_chercheur")
     if game['deck']:
         extra_card = game['deck'].pop()
         player.hand.append(extra_card)
@@ -1020,6 +1037,7 @@ def handle_chercheur(player, game):
 @socketio.on('journaliste_confirm')
 def handle_journaliste_confirmation(data):
     """Journaliste : afficher les mains puis continuer"""
+    print("[start] : handle_journaliste_confirmation")
     session_info = player_sessions.get(request.sid)
     
     if not session_info:
@@ -1037,7 +1055,7 @@ def handle_journaliste(player, game):
     """Journaliste : afficher les mains de tous les joueurs"""
     # Retirer le métier journaliste de la main (il sera posé dans app.py)
     # Ici on prépare juste les données
-    
+    print("[start] : handle_journaliste")
     hands_info = {}
     for p in game['players']:
         if p.connected and p.id != player.id:
@@ -1051,6 +1069,7 @@ def handle_journaliste(player, game):
 @socketio.on('medium_confirm')
 def handle_medium_confirmation(data):
     """Médium : afficher les 13 prochaines cartes puis continuer"""
+    print("[start] : handle_medium_confirmation")
     session_info = player_sessions.get(request.sid)
     
     if not session_info:
@@ -1066,6 +1085,7 @@ def handle_medium_confirmation(data):
 
 def handle_medium(player, game):
     """Médium : afficher les 13 prochaines cartes de la pioche"""
+    print("[start] : handle_medium")
     # Montrer les 13 prochaines cartes sans les retirer
     next_cards_count = min(13, len(game['deck']))
     next_cards = game['deck'][-next_cards_count:] if next_cards_count > 0 else []

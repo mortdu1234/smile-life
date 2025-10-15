@@ -729,53 +729,139 @@ function createCardHTML(card, canPlay, isPlayed = false, canDiscard = false, isS
     const icon = icons[card.type] || '🎴';
     
     const cursor = (canPlay || canDiscard) ? 'cursor-pointer hover:scale-105' : '';
-    const sizeClass = isSmall ? 'min-w-[80px] p-2' : 'min-w-[120px] p-3';
-    const textSize = isSmall ? 'text-xs' : 'text-sm';
+    const sizeClass = isSmall ? 'min-w-[100px]' : 'min-w-[140px]';
     
-    // 🆕 Le paramètre canDiscard gère déjà la logique métier intérimaire
-    // Il est passé depuis displayPlayerCategories qui vérifie le statut
     const canDiscardPlayed = isPlayed && canDiscard && 
                             (card.type === 'job' || card.type === 'marriage' || card.type === 'adultere');
     
-    // 🆕 Message personnalisé pour les métiers intérimaires
     let discardButtonText = '🗑️ Défausser';
     if (card.type === 'job' && card.status === 'intérimaire') {
         discardButtonText = '👋 Démissionner';
     }
 
-    return `
-        <div class="card ${color} border-2 rounded-lg ${sizeClass} ${cursor}">
-            <div class="flex items-center gap-2 mb-1">
-                <span class="${isSmall ? 'text-sm' : ''}">${icon}</span>
-                <span class="font-semibold ${textSize}">${label}</span>
+    // Construire le chemin de l'image
+    const imagePath = card.image ? `/ressources/${card.image}` : '';
+    
+    // ID unique pour gérer le fallback
+    const cardElementId = `card-${card.id}`;
+    
+    // HTML avec image prioritaire et fallback sur texte
+    const cardContentHTML = imagePath ? `
+        <div id="${cardElementId}" class="card-content h-full w-full relative">
+            <!-- Image (affichée par défaut) -->
+            <div class="card-image-container h-full w-full flex flex-col relative">
+                <img src="${imagePath}" 
+                     alt="${label}" 
+                     class="w-full h-full object-contain rounded"
+                     onerror="handleImageError('${cardElementId}')">
+                
+                <!-- Boutons par-dessus l'image -->
+                <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent">
+                    ${canPlay ? `
+                        <div class="flex gap-1">
+                            <button onclick="playCard('${card.id}')" class="flex-1 ${card.type === 'hardship' ? 'bg-red-500 hover:bg-red-600' : card.type === 'special' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'} text-white text-xs px-2 py-1 rounded font-semibold shadow-lg">
+                                ${card.type === 'hardship' ? 'Attaquer' : card.type === 'special' ? '⭐ Activer' : 'Jouer'}
+                            </button>
+                            <button onclick="discardCard('${card.id}')" class="flex-1 bg-gray-500 text-white text-xs px-2 py-1 rounded hover:bg-gray-600 font-semibold shadow-lg">
+                                Défausser
+                            </button>
+                        </div>
+                    ` : ''}
+                    ${canDiscardPlayed ? `
+                        <button onclick="discardPlayedCard('${card.id}')" class="w-full bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600 font-semibold shadow-lg">
+                            ${discardButtonText}
+                        </button>
+                    ` : ''}
+                </div>
             </div>
-            ${card.smiles > 0 ? `
-                <div class="flex items-center gap-1 text-yellow-600">
-                    <span class="${isSmall ? 'text-xs' : ''}">😊</span>
-                    <span class="${textSize}">${card.smiles}</span>
+            
+            <!-- Fallback texte (caché par défaut) -->
+            <div class="card-text-fallback hidden h-full w-full flex flex-col justify-between p-3">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="${isSmall ? 'text-sm' : ''}">${icon}</span>
+                        <span class="font-semibold ${isSmall ? 'text-xs' : 'text-sm'}">${label}</span>
+                    </div>
+                    ${card.smiles > 0 ? `
+                        <div class="flex items-center gap-1 text-yellow-600">
+                            <span class="${isSmall ? 'text-xs' : ''}">😊</span>
+                            <span class="${isSmall ? 'text-xs' : 'text-sm'}">${card.smiles}</span>
+                        </div>
+                    ` : ''}
                 </div>
-            ` : ''}
-            ${canPlay ? `
-                <div class="mt-2 flex gap-1">
-                    <button onclick="playCard('${card.id}')" class="flex-1 ${card.type === 'hardship' ? 'bg-red-500 hover:bg-red-600' : card.type === 'special' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'} text-white text-xs px-2 py-1 rounded">
-                        ${card.type === 'hardship' ? 'Attaquer' : card.type === 'special' ? '⭐ Activer' : 'Jouer'}
-                    </button>
-                    <button onclick="discardCard('${card.id}')" class="flex-1 bg-gray-500 text-white text-xs px-2 py-1 rounded hover:bg-gray-600">
-                        Défausser
-                    </button>
-                </div>
-            ` : ''}
-            ${canDiscardPlayed ? `
                 <div class="mt-2">
+                    ${canPlay ? `
+                        <div class="flex gap-1">
+                            <button onclick="playCard('${card.id}')" class="flex-1 ${card.type === 'hardship' ? 'bg-red-500 hover:bg-red-600' : card.type === 'special' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'} text-white text-xs px-2 py-1 rounded">
+                                ${card.type === 'hardship' ? 'Attaquer' : card.type === 'special' ? '⭐ Activer' : 'Jouer'}
+                            </button>
+                            <button onclick="discardCard('${card.id}')" class="flex-1 bg-gray-500 text-white text-xs px-2 py-1 rounded hover:bg-gray-600">
+                                Défausser
+                            </button>
+                        </div>
+                    ` : ''}
+                    ${canDiscardPlayed ? `
+                        <button onclick="discardPlayedCard('${card.id}')" class="w-full bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600">
+                            ${discardButtonText}
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    ` : `
+        <!-- Pas d'image : afficher directement le texte -->
+        <div class="p-3 h-full flex flex-col justify-between">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="${isSmall ? 'text-sm' : ''}">${icon}</span>
+                    <span class="font-semibold ${isSmall ? 'text-xs' : 'text-sm'}">${label}</span>
+                </div>
+                ${card.smiles > 0 ? `
+                    <div class="flex items-center gap-1 text-yellow-600">
+                        <span class="${isSmall ? 'text-xs' : ''}">😊</span>
+                        <span class="${isSmall ? 'text-xs' : 'text-sm'}">${card.smiles}</span>
+                    </div>
+                ` : ''}
+            </div>
+            <div class="mt-2">
+                ${canPlay ? `
+                    <div class="flex gap-1">
+                        <button onclick="playCard('${card.id}')" class="flex-1 ${card.type === 'hardship' ? 'bg-red-500 hover:bg-red-600' : card.type === 'special' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'} text-white text-xs px-2 py-1 rounded">
+                            ${card.type === 'hardship' ? 'Attaquer' : card.type === 'special' ? '⭐ Activer' : 'Jouer'}
+                        </button>
+                        <button onclick="discardCard('${card.id}')" class="flex-1 bg-gray-500 text-white text-xs px-2 py-1 rounded hover:bg-gray-600">
+                            Défausser
+                        </button>
+                    </div>
+                ` : ''}
+                ${canDiscardPlayed ? `
                     <button onclick="discardPlayedCard('${card.id}')" class="w-full bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600">
                         ${discardButtonText}
                     </button>
-                </div>
-            ` : ''}
+                ` : ''}
+            </div>
+        </div>
+    `;
+
+    return `
+        <div class="card ${color} border-2 rounded-lg ${sizeClass} ${cursor} overflow-hidden" style="height: 200px;">
+            ${cardContentHTML}
         </div>
     `;
 }
 
+// Nouvelle fonction pour gérer l'erreur de chargement d'image
+function handleImageError(cardElementId) {
+    const cardElement = document.getElementById(cardElementId);
+    if (cardElement) {
+        // Cacher l'image et afficher le fallback texte
+        const imageContainer = cardElement.querySelector('.card-image-container');
+        const textFallback = cardElement.querySelector('.card-text-fallback');
+        
+        if (imageContainer) imageContainer.classList.add('hidden');
+        if (textFallback) textFallback.classList.remove('hidden');
+    }
+}
 
 function getCardLabel(card) {
     if (card.type === 'job') return card.subtype;

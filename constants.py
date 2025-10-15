@@ -1,10 +1,13 @@
 from flask import Flask, request
 from flask_socketio import SocketIO, emit
-
+import os
 
 app = Flask(__name__)
 app.secret_key = 'votre_cle_secrete_ici_changez_la'
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+# Configuration pour servir les images
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'ressources')
 
 # Stockage des parties et des joueurs connectés
 games = {}
@@ -13,6 +16,7 @@ player_sessions = {}  # {session_id: {game_id, player_id}}
 
 def get_game_state_for_player(game, player_id):
     """Retourne l'état du jeu adapté pour un joueur spécifique"""
+    print("[start] : get_game_state_for_player")
     game_state = {
         'id': game['id'],
         'players': [
@@ -43,11 +47,11 @@ def get_game_state_for_player(game, player_id):
         'pending_hardship': game.get('pending_hardship'),
         'pending_special': game.get('pending_special')
     }
-    # print(f"État du jeu pour joueur {player_id}: deck={game_state['deck_count']}, discard={len(game_state['discard'])}, phase={game_state['phase']}, casino_open={game_state['casino']['open']}")
     return game_state
 
 def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
     """Applique l'effet d'une carte malus sur un joueur cible"""
+    print("[start] : apply_hardship_effect")
     hardship_type = hardship_card.hardship_type
     
     # Vérifier les immunités
@@ -66,6 +70,7 @@ def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
             if job.power in immunities[hardship_type]:
                 return False, f"{target_player.name} est protégé par son métier ({job.job_name})"
     
+    print(hardship_type)
     # Appliquer les effets
     if hardship_type == 'accident':
         target_player.skip_turns = 1
@@ -73,6 +78,9 @@ def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
         return True, f"{target_player.name} doit passer 1 tour"
     
     elif hardship_type == 'burnout':
+        job_card = target_player.get_job() 
+        if not job_card:
+            return False, f"{target_player.name} n'a pas de métier"
         target_player.skip_turns = 1
         target_player.received_hardships.append(hardship_type)
         return True, f"{target_player.name} doit passer 1 tour"
@@ -107,8 +115,12 @@ def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
             return True, f"{target_player.name} a divorcé"
         return False, f"{target_player.name} n'est pas marié"
     
-    elif hardship_type == 'impot':
+    elif hardship_type == 'tax':
+        job_card = target_player.get_job() 
+        if not job_card:
+            return False, f"{target_player.name} n'a pas de métier"
         salary_cards = [c for c in target_player.played["vie professionnelle"] if isinstance(c, SalaryCard)]
+        print(f"salary_cards : {salary_cards}")
         if salary_cards:
             card_to_remove = salary_cards[-1]
             target_player.remove_card_from_played(card_to_remove)
@@ -118,11 +130,11 @@ def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
         return False, f"{target_player.name} n'a pas de salaire"
     
     elif hardship_type == 'licenciement':
+        job_card = target_player.get_job() 
         if job_card:
             if job_card.job_name == "chercheur":
                 handle_loose_chercheur_job()
 
-            job_card = target_player.get_job()
             target_player.remove_card_from_played(job_card)
             game['discard'].append(job_card)
             target_player.received_hardships.append(hardship_type)
@@ -135,6 +147,9 @@ def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
         return True, f"{target_player.name} est malade (passe 1 tour)"
     
     elif hardship_type == 'redoublement':
+        job_card = target_player.get_job() 
+        if job_card:
+            return False, f"{target_player.name} a un métier"
         study_cards = [c for c in target_player.played["vie professionnelle"] if isinstance(c, StudyCard)]
         if study_cards:
             card_to_remove = study_cards[-1]
@@ -167,6 +182,7 @@ def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
     return True, f"Malus {hardship_type} appliqué à {target_player.name}"
 
 def check_game():
+    print("[start]: check_game")
     session_info = player_sessions.get(request.sid)
     
     if not session_info:
@@ -186,6 +202,7 @@ def check_game():
 @socketio.on('pick_card')
 def give_card(data):
     """Donner une carte au joueur"""
+    print("[start]: give_card")
     source = data.get('source', 'deck')
     player_id, game, game_id = check_game()
 
@@ -195,6 +212,7 @@ def give_card(data):
         if not game['deck']:
             scores = [(p.name, p.calculate_smiles(), p.id) for p in game['players'] if p.connected]
             scores.sort(key=lambda x: x[1], reverse=True)
+            print("[appel] : game_over")
             socketio.emit('game_over', {'scores': scores}, room=game_id)
             return
         
@@ -205,6 +223,8 @@ def give_card(data):
         update_all_player(game, "")
 
 def next_player(game):
+    """Passe au joueur suivant"""
+    print("[start]: next_player")
     if not (game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel'):
         print("Tour terminé, passage au joueur suivant")
         game['phase'] = 'draw'
@@ -216,8 +236,10 @@ def next_player(game):
             attempts += 1
 
 def update_all_player(game, message):
+    print("[start]: update_all_player")
     for p in game['players']:
         if p.connected:
+            print("[appel] : game_updated")
             socketio.emit('game_updated', {
                 'game': get_game_state_for_player(game, p.id),
                 'message': message
@@ -225,7 +247,7 @@ def update_all_player(game, message):
 
 def get_card_by_id(card_id, deck):
     """récupère une carte dans le deck par son id"""
-    print(f"recherche de la carte d'id : {card_id}")
+    print("[start]: get_card_by_id")
     researched_card = None
     for card in deck:
         if card.id == card_id:

@@ -1,21 +1,32 @@
-from flask import render_template, request
+from flask import render_template, request, send_from_directory
 from flask_socketio import emit, join_room
-from card_classes import Card, Player, CardFactory, HardshipCard, JobCard, StudyCard, SalaryCard, MarriageCard, AdulteryCard, HouseCard, TravelCard, ChildCard, SpecialCard, FlirtCard
+from card_classes import *
 from constants import app, socketio, games, player_sessions, get_game_state_for_player, apply_hardship_effect, check_game
 import random
 import uuid
 from datetime import datetime
+import os
 
 @app.route('/')
 def index():
+    print("[start] : index")
     return render_template('index.html')
+
+@app.route('/ressources/<path:filename>')
+def serve_image(filename):
+    """Servir les images des cartes"""
+    print("[start] : serve_image ")
+    ressources_dir = os.path.join(os.path.dirname(__file__), 'ressources')
+    return send_from_directory(ressources_dir, filename)
 
 @socketio.on('connect')
 def handle_connect():
+    print("[start] : handle_connect")
     print(f'Client connected: {request.sid}')
 
 @socketio.on('disconnect')
 def handle_disconnect():
+    print("[start] : handle_disconnect")
     print(f'Client disconnected: {request.sid}')
     if request.sid in player_sessions:
         session_info = player_sessions[request.sid]
@@ -26,6 +37,7 @@ def handle_disconnect():
             game = games[game_id]
             if player_id < len(game['players']):
                 game['players'][player_id].connected = False
+                print("[appel] : player_disconnected")
                 socketio.emit('player_disconnected', {
                     'player_id': player_id,
                     'player_name': game['players'][player_id].name
@@ -34,6 +46,7 @@ def handle_disconnect():
 @socketio.on('create_game')
 def handle_create_game(data):
     """Créer une nouvelle partie multijoueur"""
+    print("[start] : handle_create_game")
     num_players = data.get('num_players', 2)
     player_name = data.get('player_name', 'Joueur 1')
     
@@ -92,6 +105,7 @@ def handle_create_game(data):
     
     print(f"Partie créée: {game_id}, deck: {len(game['deck'])} cartes")
     
+    print("[appel] : game_created")
     emit('game_created', {
         'game_id': game_id,
         'player_id': 0,
@@ -101,6 +115,7 @@ def handle_create_game(data):
 @socketio.on('join_game')
 def handle_join_game(data):
     """Rejoindre une partie existante"""
+    print("[start] : handle_join_game")
     game_id = data.get('game_id')
     player_name = data.get('player_name', 'Joueur')
     
@@ -134,12 +149,14 @@ def handle_join_game(data):
     player_sessions[request.sid] = {'game_id': game_id, 'player_id': player_id}
     join_room(game_id)
     
+    print("[appel] game_joined")
     emit('game_joined', {
         'game_id': game_id,
         'player_id': player_id,
         'game': get_game_state_for_player(game, player_id)
     })
     
+    print('[appel] : player_joined')
     socketio.emit('player_joined', {
         'player_id': player_id,
         'player_name': player_name,
@@ -150,6 +167,7 @@ def handle_join_game(data):
 @socketio.on('start_game')
 def handle_start_game(data):
     """Démarrer la partie (seulement l'hôte)"""
+    print("[start] : handle_start_game")
     game_id = data.get('game_id')
     
     if game_id not in games:
@@ -177,6 +195,7 @@ def handle_start_game(data):
     
     for player in game['players']:
         if player.connected:
+            print("[appel] : game_started")
             socketio.emit('game_started', {
                 'game': get_game_state_for_player(game, player.id)
             }, room=player.session_id)
