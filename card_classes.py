@@ -615,7 +615,7 @@ class CardFactory:
         {'name': 'prof francais', 'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/prof_francais.png'},
         {'name': 'prof histoire', 'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/prof_histoire.png'},
         {'name': 'prof maths', 'salary': 2, 'studies': 2, 'status': 'fonctionnaire', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/prof_maths.png'},
-        {'name': 'serveur', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/server.png'},
+        {'name': 'serveur', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/serveur.png'},
         {'name': 'stripteaser', 'salary': 1, 'studies': 0, 'status': 'intérimaire', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/stripteaser.png'},
         {'name': 'grand prof', 'salary': 3, 'studies': 'P', 'status': 'fonctionnaire', 'power': 'none', 'image': 'personnal_life/professionnal_life/JobCards/grand_prof.png'}
     ]

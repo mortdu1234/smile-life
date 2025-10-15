@@ -1,7 +1,7 @@
 from flask import render_template, request, send_from_directory
 from flask_socketio import emit, join_room
 from card_classes import *
-from constants import app, socketio, games, player_sessions, get_game_state_for_player, apply_hardship_effect, check_game
+from constants import app, socketio, games, player_sessions, get_game_state_for_player, apply_hardship_effect, check_game, update_all_player
 import random
 import uuid
 from datetime import datetime
@@ -148,7 +148,8 @@ def handle_join_game(data):
     
     player_sessions[request.sid] = {'game_id': game_id, 'player_id': player_id}
     join_room(game_id)
-    
+    update_all_player(game, "")
+
     print("[appel] game_joined")
     emit('game_joined', {
         'game_id': game_id,
