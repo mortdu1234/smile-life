@@ -1,5 +1,6 @@
 from flask import Flask, request
 from flask_socketio import SocketIO, emit
+from card_classes import *
 import os
 
 app = Flask(__name__)
