@@ -118,3 +118,4 @@ problemes trouvés :
 - si un joueur a été bandit, alors il ne dois pas pouvoir avoir la légion d'honneur
 - avoir un anniversaire en meme temps que l'arc en ciel
 - miser au casino après son ouverture (en premier)
+- vérifier le tsunami
