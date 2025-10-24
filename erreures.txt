@@ -111,11 +111,14 @@ problemes trouvés :
 - faire la vérification des limites des attaques (redoublement alors qu'on a un métier)
 - au casino un meme joueur peut etre joueur 1 et joueur 2
 - quand on a parier au casino, il est toujours possible de jouer derriere
+
 # bugs renvontrées
+- avoir un anniversaire en meme temps que l'arc en ciel
+
+
+- vérifier le tsunami
+- si un joueur a été bandit, alors il ne dois pas pouvoir avoir la légion d'honneur
 - attentat ne marche pas
 - l'astronaute pioche une carte en trop après avoir utilié son pouvoir
-- le talent d'avoir des étude a l'infini ne marche pas
-- si un joueur a été bandit, alors il ne dois pas pouvoir avoir la légion d'honneur
-- avoir un anniversaire en meme temps que l'arc en ciel
 - miser au casino après son ouverture (en premier)
-- vérifier le tsunami
+- le talent d'avoir des étude a l'infini ne marche pas

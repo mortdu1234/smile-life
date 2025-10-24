@@ -92,7 +92,7 @@ class StudyCard(Card):
     
     def can_be_played(self, player: 'Player') -> tuple[bool, str]:
         # Les études ne peuvent être jouées que si on n'a pas encore de métier
-        if player.has_job() and not player.get_job().power == 'unlimited_study':
+        if player.has_job() and 'extra_study' not in player.get_job().power:
             return False, "Vous ne pouvez plus faire d'études après avoir trouvé un métier"
         return True, ""
 
@@ -395,6 +395,16 @@ class OtherCard(Card):
                 return False, "Votre métier ne permet pas de recevoir un prix"
         
         return True, ""
+    
+class LegionCard(OtherCard):
+    """Carte légion d'honneur"""
+    def __init__(self, smiles: int, image_path: str):
+        super().__init__("legion", smiles, image_path)
+
+    def can_be_played(self, player: 'Player') -> tuple[bool, str]:
+        if player.has_been_bandit:
+            return False, "Vous avez été bandit dans la partie"
+        return True, ""
 
 class PriceCard(OtherCard):
     """Carte prix d'excellence"""
@@ -624,7 +634,7 @@ class CardFactory:
                        'internet', 'parc', 'restaurant', 'theatre', 'zoo']
     MARRIAGE_LOCATIONS = ['corps-nuds', 'montcuq', 'monteton', 'sainte-vierge', 
                           'fourqueux', 'fourqueux', 'fourqueux']
-    CHILDREN_NAMES = ['diana', 'harry', 'hermionne', 'lara', 'leia', 'luigi', 
+    CHILDREN_NAMES = ['diana', 'harry', 'hermione', 'lara', 'leia', 'luigi', 
                       'luke', 'mario', 'rocky', 'zelda']
     ANIMALS = [
         {'name': 'chat', 'smiles': 1},
@@ -644,46 +654,56 @@ class CardFactory:
         """effectue un tests avec des cartes customs"""
         deck = []
         jobs_custom = [
-            {'name': 'chef des ventes', 'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'instant'},
-            {'name': 'chercheur', 'salary': 2, 'studies': 6, 'status': 'rien', 'power': 'extra_card__prix_possible'},
-            {'name': 'chef des ventes', 'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'instant'},
-            {'name': 'chercheur', 'salary': 2, 'studies': 6, 'status': 'rien', 'power': 'extra_card__prix_possible'},
-            {'name': 'chef des ventes', 'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'instant'},
-            {'name': 'chercheur', 'salary': 2, 'studies': 6, 'status': 'rien', 'power': 'extra_card__prix_possible'},
-            {'name': 'chef des ventes', 'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'instant'},
-            {'name': 'chercheur', 'salary': 2, 'studies': 6, 'status': 'rien', 'power': 'extra_card__prix_possible'},
-            {'name': 'chef des ventes', 'salary': 3, 'studies': 3, 'status': 'rien', 'power': 'instant'},
-            {'name': 'chercheur', 'salary': 2, 'studies': 6, 'status': 'rien', 'power': 'extra_card__prix_possible'}
-            
+            {'name': 'bandit', 'salary': 4, 'studies': 0, 'status': 'rien', 'power': 'immune_tax__immune_licenciement', 'image': 'personnal_life/professionnal_life/JobCards/bandit.png'},
+            {'name': 'bandit', 'salary': 4, 'studies': 0, 'status': 'rien', 'power': 'immune_tax__immune_licenciement', 'image': 'personnal_life/professionnal_life/JobCards/bandit.png'},
+            {'name': 'bandit', 'salary': 4, 'studies': 0, 'status': 'rien', 'power': 'immune_tax__immune_licenciement', 'image': 'personnal_life/professionnal_life/JobCards/bandit.png'},
+            {'name': 'bandit', 'salary': 4, 'studies': 0, 'status': 'rien', 'power': 'immune_tax__immune_licenciement', 'image': 'personnal_life/professionnal_life/JobCards/bandit.png'}    
         ]
         for job in jobs_custom:
             deck.append(JobCard(job['name'], job['salary'], job['studies'], 
                                job['status'], job['power'], job['image']))
 
-        for _ in range(10):
-            deck.append(StudyCard('double', 2))
+        for _ in range(5):
+            deck.append(StudyCard('double', 2, "personnal_life/professionnal_life/StudyCards/study2.png"))
 
 
         for level in range(1, 5):
             for _ in range(5):
-                deck.append(SalaryCard(level))
+                deck.append(SalaryCard(level, f"personnal_life/professionnal_life/SalaryCards/salary{level}.png"))
 
         # Maisons
-        deck.append(HouseCard('petite', 6, 1))
-        deck.append(HouseCard('petite', 6, 1))
-        deck.append(HouseCard('moyenne', 8, 2))
-        deck.append(HouseCard('moyenne', 8, 2))
-        deck.append(HouseCard('grande', 10, 3))
-        
+
         # Voyages
-        for _ in range(5):
+        for _ in range(0):
             deck.append(TravelCard())
 
+        # Flirts
+        """
+        for loc in cls.FLIRT_LOCATIONS:
+            l = loc.replace(" ", "_")
+            deck.append(FlirtCard(loc, f"personnal_life/flirts/{l}.png"))
+            deck.append(FlirtCard(loc, f"personnal_life/flirts/{l}.png"))
+        """
+
+        # Mariages
+        """
+        for loc in cls.MARRIAGE_LOCATIONS:
+            l = loc.replace(" ", "_").replace("-", "_")
+            deck.append(MarriageCard(loc, f"personnal_life/mariages/mariage_{l}.png"))
+        """
+        # Enfants
+        """
+        for name in cls.CHILDREN_NAMES:
+            deck.append(ChildCard(name, f"personnal_life/children/{name}.png"))
+        """
          # Cartes spéciales
-        for special in ['chance', 'arc en ciel', 'casino', 'chance', 
-                       'chance', 'piston', 'piston', 'piston', 
-                       'piston', 'piston']:
-            deck.append(SpecialCard(special))
+        for special in ['tsunami', 'arc en ciel', 'casino', 'chance',
+                        "arc en ciel", "arc en ciel", "anniversaire", "anniversaire", "anniversaire"]:
+            
+            s = special.replace(' ', '_')
+            deck.append(SpecialCard(special, f"special_cards/{s}.png"))
+        
+        
 
         return deck
     
@@ -691,7 +711,7 @@ class CardFactory:
     def create_deck(cls) -> List[Card]:
         """Crée un deck complet de cartes"""
         #########################
-        # return cls.test_create_deck(cls)
+        return cls.test_create_deck(cls)
         # TESTING
         #########################
         
@@ -767,7 +787,7 @@ class CardFactory:
         deck.append(HardshipCard('attentat', "hardship_cards/attentat.png"))
         
         # Autres
-        deck.append(OtherCard('legion', 3, "personnal_life/professionnal_life/legion.png"))
+        deck.append(LegionCard(3, "personnal_life/professionnal_life/legion.png"))
         deck.append(PriceCard(4, "personnal_life/professionnal_life/price.png"))
         deck.append(PriceCard(4, "personnal_life/professionnal_life/price.png"))
         

@@ -63,7 +63,12 @@ def handle_draw_card(data):
             return
         
         card = game['discard'].pop()
+        can_play, message = card.can_be_played(player)
+        if not can_play:
+            emit("error", {"message": "Vous ne pouvez pas jouer la carte"})
+            return
         
+
         if isinstance(card, HardshipCard):
             player.hand.append(card)
             game['phase'] = 'play'
@@ -510,7 +515,6 @@ def handle_play_card(data):
         handle_play_special_card(data)
         return
     
-    print("pas bien")
     # Vérifier si la carte peut être jouée
     can_play, message = card.can_be_played(player)
     
@@ -541,9 +545,9 @@ def handle_play_card(data):
         # 🆕 Le joueur décide quand s'arrêter (via le bouton "Terminer")
         # Pas de fin automatique
         return
-    
-    next_player(game)
-    update_all_player(game, f"{player.name} a posé une carte")
+    else:        
+        next_player(game)
+        update_all_player(game, f"{player.name} a posé une carte")
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, host='0.0.0.0', port=5000)

@@ -166,19 +166,24 @@ def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
         return True, f"{target_player.name} est en prison pour 3 tours"
     
     elif hardship_type == 'attentat':
-        children_cards = [c for c in attacker_player.played["vie personnelle"] if isinstance(c, ChildCard)]
-        total_children_removed = len(children_cards)
-        
-        for child in children_cards:
-            attacker_player.remove_card_from_played(child)
-            game['discard'].append(child)
-        
+        print(game)
+        players: list[Player] = game['players']
+        for p in players:
+            print(f"recup enfant : {p.name}")
+            children_cards = [c for c in p.played["vie personnelle"] if isinstance(c, ChildCard)]
+            total_children_removed = len(children_cards)
+            print(f"nombre d'enfant en moins : {total_children_removed}")
+            for child in children_cards:
+                p.remove_card_from_played(child)
+                game['discard'].append(child)
+            
+
         attacker_player.received_hardships.append(hardship_type)
-        
+            
         if total_children_removed > 0:
-            return True, f"Attentat ! {attacker_player.name} perd {total_children_removed} enfant(s)"
+            return True, f"Attentat ! des enfant(s)"
         else:
-            return True, f"Attentat ! {attacker_player.name} n'avait pas d'enfant"
+            return True, f"Attentat ! n'avait pas d'enfant"
     
     return True, f"Malus {hardship_type} appliqué à {target_player.name}"
 

@@ -53,11 +53,10 @@ def handle_play_special_card(data):
                     'birthday_player_name': player.name,
                     'available_salaries': [s.to_dict() for s in available_salaries]
                 }, room=other.session_id)
-        
+
         next_player(game)
         update_all_player(game, f"🎂 C'est l'anniversaire de {player.name} !")
         
-
     elif special_type == 'troc':
         other_players = [{'id': i, 'name': p.name, 'hand_count': len(p.hand)} 
                         for i, p in enumerate(game['players']) 
@@ -539,7 +538,7 @@ def handle_casino_bet(data):
     
     # ✅ CHERCHER LE SALAIRE DANS LA MAIN
     
-    salary_card = get_card_by_id(player.hand, salary_id)
+    salary_card = get_card_by_id(salary_id, player.hand)
     
     salary_card = None
     for card in player.hand:
@@ -613,6 +612,9 @@ def handle_casino_bet(data):
             game['pending_special']['card_bets'] += 1
             
         update_all_player(game, message)
+    
+    next_player(game)
+    update_all_player(game, message)
 
 @socketio.on('skip_casino_bet')
 def handle_skip_casino_bet(data):
@@ -639,12 +641,11 @@ def handle_skip_casino_bet(data):
         emit('error', {'message': 'Seul l\'ouvreur peut refuser de miser'})
         return
 
-    if not (game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel'):
+    if game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel':
         # Le casino reste ouvert, on passe au joueur suivant
-        game['pending_special']['card_'] += 1
-        next_player(game)
-    else:
         game['pending_special']['cards_played'] += 1
+    else:
+        next_player(game)
 
     update_all_player(game, f"🎰 {player.name} n'a pas misé. Le casino reste ouvert !")
 
@@ -657,11 +658,11 @@ def have_special_power(job_name):
     # Liste des métiers avec pouvoirs spéciaux instantanés
     special_jobs = [
         "astronaute", "chef des ventes", "chef des achats", 
-        "chercheur", "journaliste", "médium",
+        "chercheur", "journaliste", "médium", "bandit"
     ]   
     return job_name in special_jobs
 
-def do_instant_power(job_card, data, player, game):
+def do_instant_power(job_card, data, player: Player, game):
     """Exécute le pouvoir instantané d'un métier"""
     print("[start] : do_instant_power")
     job_name = job_card.job_name
@@ -682,6 +683,11 @@ def do_instant_power(job_card, data, player, game):
         handle_medium(player, game)
     elif job_name == "astronaute":
         handle_astronaute(player, game)
+    elif job_name == "bandit":
+        print("le joeuur a été bandit")
+        player.has_been_bandit = True
+        next_player(game)  
+        update_all_player(game, f"🚀 {player.name} est devenu bandit")
 
 
 # ASTRONAUTE
@@ -744,8 +750,8 @@ def handle_astronaute_selection(data):
         player.hand.append(selected_card)
         
         # Repiocher une carte bonus
-        if game['deck']:
-            player.hand.append(game['deck'].pop())
+        # if game['deck']:
+        #    player.hand.append(game['deck'].pop())
         
         # Rester en phase play pour que le joueur puisse acheter
         game['phase'] = 'play'
