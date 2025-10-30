@@ -16,11 +16,11 @@ def handle_play_special_card(data):
     card_id = data.get('card_id')
     player_id, game, _ = check_game()
 
-    if game['current_player'] != player_id:
+    if game.current_player != player_id:
         emit('error', {'message': 'Ce n\'est pas votre tour'})
         return
     
-    player = game['players'][player_id]
+    player = game.players[player_id]
     
     card = None
     for c in player.hand:
@@ -35,7 +35,7 @@ def handle_play_special_card(data):
     special_type = card.special_type
 
     if special_type == 'anniversaire':
-        other_players = [p for i, p in enumerate(game['players']) if p.connected and i != player_id]
+        other_players = [p for i, p in enumerate(game.players) if p.connected and i != player_id]
         
         if not other_players:
             emit('error', {'message': 'Aucun autre joueur connecté'})
@@ -59,7 +59,7 @@ def handle_play_special_card(data):
         
     elif special_type == 'troc':
         other_players = [{'id': i, 'name': p.name, 'hand_count': len(p.hand)} 
-                        for i, p in enumerate(game['players']) 
+                        for i, p in enumerate(game.players) 
                         if p.connected and i != player_id and len(p.hand) > 0]
         
         if not other_players:
@@ -67,7 +67,7 @@ def handle_play_special_card(data):
             return
         
         player.hand.remove(card)
-        game['pending_special'] = {
+        game.pending_special = {
             'type': 'troc',
             'card': card,
             'player_id': player_id
@@ -87,7 +87,7 @@ def handle_play_special_card(data):
         
         player.hand.remove(card)
         player.add_card_to_played(card)
-        game['pending_special'] = {
+        game.pending_special = {
             'type': 'piston',
             'card': card,
             'player_id': player_id
@@ -103,12 +103,12 @@ def handle_play_special_card(data):
             return
         
         other_players = [{'id': i, 'name': p.name} 
-                        for i, p in enumerate(game['players']) 
+                        for i, p in enumerate(game.players) 
                         if p.connected and i != player_id]
         
         player.hand.remove(card)
         player.add_card_to_played(card)
-        game['pending_special'] = {
+        game.pending_special = {
             'type': 'vengeance',
             'card': card,
             'player_id': player_id
@@ -122,17 +122,17 @@ def handle_play_special_card(data):
     elif special_type == 'chance':
         player.hand.remove(card)
         player.add_card_to_played(card)
-        if len(game['deck']) < 3:
+        if len(game.deck) < 3:
             emit('error', {'message': 'Pas assez de cartes dans la pioche'})
             return
         
-        choices = [game['deck'].pop() for _ in range(3)]
+        choices = [game.deck.pop() for _ in range(3)]
         
         emit('select_chance_card', {
             'cards': [c.to_dict() for c in choices]
         })
         
-        game['pending_special'] = {
+        game.pending_special = {
             'type': 'chance',
             'choices': choices,
             'player_id': player_id
@@ -142,7 +142,7 @@ def handle_play_special_card(data):
         player.hand.remove(card)
         player.add_card_to_played(card)
         
-        game['pending_special'] = {
+        game.pending_special = {
             'type': 'arc_en_ciel',
             'player_id': player_id,
             'card_bets': 0,
@@ -151,18 +151,18 @@ def handle_play_special_card(data):
             'max_cards': 3
         }
         
-        game['phase'] = 'play'
+        game.phase = 'play'
         update_all_player(game, f"🌈 {player.name} active l'Arc-en-ciel !")    
         
     elif special_type == 'etoile filante':
         player.hand.remove(card)
         player.add_card_to_played(card)
-        if not game['discard']:
+        if not game.discard:
             emit('error', {'message': 'La défausse est vide'})
             return
         
         emit('select_from_discard', {
-            'discard_cards': [c.to_dict() for c in game['discard']]
+            'discard_cards': [c.to_dict() for c in game.discard]
         })
 
     elif special_type == 'heritage':
@@ -180,7 +180,7 @@ def handle_play_special_card(data):
         player.hand.remove(card)
         player.add_card_to_played(card)
 
-        for p in game['players']:
+        for p in game.players:
             if p.connected and len(p.hand) > 0:
                 all_cards.extend(p.hand)
                 p.hand = []
@@ -188,7 +188,7 @@ def handle_play_special_card(data):
         
         random.shuffle(all_cards)
         
-        connected_players = [p for p in game['players'] if p.connected]
+        connected_players = [p for p in game.players if p.connected]
         if connected_players and all_cards:
             cards_per_player = len(all_cards) // len(connected_players)
             extra_cards = len(all_cards) % len(connected_players)
@@ -209,10 +209,10 @@ def handle_play_special_card(data):
         player.hand.remove(card)
         player.add_card_to_played(card)
         
-        game['casino']['open'] = True
-        game['casino']['first_bet'] = None
-        game['casino']['second_bet'] = None
-        game['casino']['opener_id'] = player_id  # Mémoriser qui a ouvert
+        game.casino['open'] = True
+        game.casino['first_bet'] = None
+        game.casino['second_bet'] = None
+        game.casino['opener_id'] = player_id  # Mémoriser qui a ouvert
         
         # Le joueur qui a ouvert le casino peut directement miser
         available_salaries = [c for c in player.hand if isinstance(c, SalaryCard)]
@@ -243,7 +243,7 @@ def handle_birthday_gift(data):
     game_id = session_info['game_id']
     player_id = session_info['player_id']
     game = games[game_id]
-    player = game['players'][player_id]
+    player = game.players[player_id]
     
     salary = None
     for s in player.played["vie professionnelle"]:
@@ -252,8 +252,8 @@ def handle_birthday_gift(data):
             break
     
     if salary:
-        birthday_player_id = (game['current_player'] - 1) % game['num_players']
-        birthday_player = game['players'][birthday_player_id]
+        birthday_player_id = (game.current_player - 1) % game.num_players
+        birthday_player = game.players[birthday_player_id]
         
         player.remove_card_from_played(salary)
         birthday_player.add_card_to_played(salary)
@@ -273,14 +273,14 @@ def handle_troc_target(data):
     game_id = session_info['game_id']
     player_id = session_info['player_id']
     game = games[game_id]
-    player = game['players'][player_id]
-    target = game['players'][target_id]
+    player = game.players[player_id]
+    target = game.players[target_id]
     
     if not player.hand or not target.hand:
         emit('error', {'message': 'Impossible d\'échanger'})
         return
     
-    troc_card = game['pending_special']['card']
+    troc_card = game.pending_special['card']
     
     card1 = random.choice(player.hand)
     card2 = random.choice(target.hand)
@@ -291,7 +291,7 @@ def handle_troc_target(data):
     target.hand.append(card1)
     
     player.add_card_to_played(troc_card)
-    game['pending_special'] = None
+    game.pending_special = None
     
     next_player(game)
     update_all_player(game, f"🔄 {player.name} a échangé une carte avec {target.name}")
@@ -309,7 +309,7 @@ def handle_piston_job(data):
     game_id = session_info['game_id']
     player_id = session_info['player_id']
     game = games[game_id]
-    player = game['players'][player_id]
+    player = game.players[player_id]
     
     job = None
     for c in player.hand:
@@ -323,14 +323,14 @@ def handle_piston_job(data):
         return
     
     player.add_card_to_played(job)
-    game['pending_special'] = None
+    game.pending_special = None
 
     if have_special_power(job.job_name):
         # Exécuter le pouvoir instantané directement (pas via do_instant_power)
         job_name = job.job_name
 
-        if game['deck']:
-            player.hand.append(game['deck'].pop())
+        if game.deck:
+            player.hand.append(game.deck.pop())
         
         if job_name == "chef des ventes":
             handle_chef_des_ventes(player, game)
@@ -359,7 +359,7 @@ def handle_piston_cancel(data):
     game_id = session_info['game_id']
     player_id = session_info['player_id']
     game = games[game_id]
-    player = game['players'][player_id]
+    player = game.players[player_id]
     
     piston = None
     for card in player.played["cartes speciales"]:
@@ -371,7 +371,7 @@ def handle_piston_cancel(data):
         player.remove_card_from_played(piston)
         player.hand.append(piston)
         
-        game['phase'] = 'play'
+        game.phase = 'play'
         update_all_player(game, f"{player.name} a annulé une carte")
         print("le joueur a annulé piston")
 
@@ -389,8 +389,8 @@ def handle_vengeance(data):
     game_id = session_info['game_id']
     player_id = session_info['player_id']
     game = games[game_id]
-    player = game['players'][player_id]
-    target = game['players'][target_id]
+    player = game.players[player_id]
+    target = game.players[target_id]
     
     if hardship_type in player.received_hardships:
         player.received_hardships.remove(hardship_type)
@@ -398,9 +398,9 @@ def handle_vengeance(data):
         hardship_card = HardshipCard(hardship_type)
         success, message = apply_hardship_effect(game, hardship_card, target, player)
         
-        vengeance_card = game['pending_special']['card']
+        vengeance_card = game.pending_special['card']
         player.add_card_to_played(vengeance_card)
-        game['pending_special'] = None
+        game.pending_special = None
         
         next_player(game)
         update_all_player(game, f"⚔️ {player.name} se venge sur {target.name} : {message}")
@@ -412,10 +412,10 @@ def handle_chance_card(data):
     card_id = data.get('card_id')
     _, game, _ = check_game()
     
-    if not game.get('pending_special') or game['pending_special']['type'] != 'chance':
+    if not game.get('pending_special') or game.pending_special['type'] != 'chance':
         return
     
-    choices = game['pending_special']['choices']
+    choices = game.pending_special['choices']
     selected = None
     
     for card in choices:
@@ -425,13 +425,13 @@ def handle_chance_card(data):
             break
     
     if selected:
-        player = game['players'][game['pending_special']['player_id']]
+        player = game.players[game.pending_special['player_id']]
         player.hand.append(selected)
         
-        game['deck'].extend(choices)
-        random.shuffle(game['deck'])
+        game.deck.extend(choices)
+        random.shuffle(game.deck)
         
-        game['pending_special'] = None
+        game.pending_special = None
         update_all_player(game, "")
 
 @socketio.on('arc_en_ciel_finished')
@@ -445,25 +445,25 @@ def handle_arc_finished(data):
     
     game_id = session_info['game_id']
     game = games[game_id]
-    player = game['players'][session_info['player_id']]
+    player = game.players[session_info['player_id']]
     
-    if not game.get('pending_special') or game['pending_special'].get('type') != 'arc_en_ciel':
+    if not game.get('pending_special') or game.pending_special.get('type') != 'arc_en_ciel':
         return
     
-    cards_played = game['pending_special'].get('cards_played', 0)
-    cards_discarded = game['pending_special'].get('cards_discarded', 0)
-    card_bets = game['pending_special'].get('card_bets', 0)
+    cards_played = game.pending_special.get('cards_played', 0)
+    cards_discarded = game.pending_special.get('cards_discarded', 0)
+    card_bets = game.pending_special.get('card_bets', 0)
     
     total_cards_used = cards_played + cards_discarded + card_bets
     cards_to_draw = max(0, total_cards_used)
     
     cards_drawn = 0
     for _ in range(cards_to_draw):
-        if game['deck']:
-            player.hand.append(game['deck'].pop())
+        if game.deck:
+            player.hand.append(game.deck.pop())
             cards_drawn += 1
     
-    game['pending_special'] = None
+    game.pending_special = None
 
     next_player(game)
     update_all_player(game, f"🌈 {player.name} a repioché {cards_drawn} carte(s) ({cards_played} posées + {cards_discarded} défaussées + {card_bets} pariée - 1)")
@@ -481,10 +481,10 @@ def handle_discard_card_selected(data):
     game_id = session_info['game_id']
     player_id = session_info['player_id']
     game = games[game_id]
-    player = game['players'][player_id]
+    player = game.players[player_id]
     
     card = None
-    for c in game['discard']:
+    for c in game.discard:
         if c.id == card_id:
             card = c
             break
@@ -498,7 +498,7 @@ def handle_discard_card_selected(data):
         emit('error', {'message': f'Impossible de jouer cette carte : {message}'})
         return
     
-    game['discard'].remove(card)
+    game.discard.remove(card)
     player.add_card_to_played(card)
     
     next_player(game)
@@ -524,15 +524,15 @@ def handle_casino_bet(data):
         return
     
     game = games[game_id]
-    player = game['players'][player_id]
+    player = game.players[player_id]
     
     # Vérifier que le casino est ouvert
-    if not game['casino']['open']:
+    if not game.casino['open']:
         emit('error', {'message': 'Le casino est fermé'})
         return
     
     # Vérifier qu'il y a de la place
-    if game['casino']['first_bet'] and game['casino']['second_bet']:
+    if game.casino['first_bet'] and game.casino['second_bet']:
         emit('error', {'message': 'Le casino est plein'})
         return
     
@@ -553,69 +553,89 @@ def handle_casino_bet(data):
     # Retirer le salaire de la main du joueur
     player.hand.remove(salary_card)
     
-    # Premier pari
-    if not game['casino']['first_bet']:
-        game['casino']['first_bet'] = {
+    # Premier pari - ✅ STOCKER UNIQUEMENT LES DONNÉES SÉRIALISABLES
+    if not game.casino['first_bet']:
+        game.casino['first_bet'] = {
             'player_id': player_id,
-            'salary_card': salary_card
+            'player_name': player.name,  # ✅ AJOUT
+            'salary_id': salary_card.id,  # ✅ AJOUT
+            'salary_level': salary_card.level  # ✅ STOCKER LE NIVEAU
         }
         
         message = f"🎰 {player.name} a misé au casino (1er pari - montant secret)"
         
         # Si c'est l'ouvreur, on passe au joueur suivant
         if is_opener:
-            if not (game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel'):
+            if not (game.get('pending_special') and game.pending_special.get('type') == 'arc_en_ciel'):
                 next_player(game)
             else:
-                game['pending_special']['card_bets'] += 1
+                game.pending_special['card_bets'] += 1
         
         update_all_player(game, message)
     
     # Deuxième pari - résolution
     else:
-        game['casino']['second_bet'] = {
+        game.casino['second_bet'] = {
             'player_id': player_id,
-            'salary_card': salary_card
+            'player_name': player.name,  # ✅ AJOUT
+            'salary_id': salary_card.id,  # ✅ AJOUT
+            'salary_level': salary_card.level  # ✅ STOCKER LE NIVEAU
         }
         
-        first_bet = game['casino']['first_bet']
-        second_bet = game['casino']['second_bet']
+        first_bet = game.casino['first_bet']
+        second_bet = game.casino['second_bet']
         
-        first_player = game['players'][first_bet['player_id']]
-        second_player = game['players'][second_bet['player_id']]
+        first_player = game.players[first_bet['player_id']]
+        second_player = game.players[second_bet['player_id']]
         
         if first_player.id == second_player.id:
             print("YOUSK : le meme joueur a jouer au casino 2 fois")
 
+        # ✅ RÉCUPÉRER LES CARTES SALAIRE DEPUIS LES IDs
+        first_salary = get_card_by_id(first_bet['salary_id'], [salary_card])  # Peut être dans la main du second joueur
+        # Chercher partout
+        for p in game.players:
+            if not first_salary:
+                first_salary = get_card_by_id(first_bet['salary_id'], p.hand)
+            if not first_salary:
+                # Chercher dans les cartes jouées
+                for cards in p.played.values():
+                    first_salary = get_card_by_id(first_bet['salary_id'], cards)
+                    if first_salary:
+                        break
+        
+        second_salary = salary_card  # Le second est forcément celui qu'on vient de jouer
+
         # Comparer les niveaux
-        if first_bet['salary_card'].level == second_bet['salary_card'].level:
+        if first_bet['salary_level'] == second_bet['salary_level']:
             # Égalité : le deuxième joueur gagne les deux salaires
-            second_player.add_card_to_played(first_bet['salary_card'])
-            second_player.add_card_to_played(second_bet['salary_card'])
+            if first_salary:
+                second_player.add_card_to_played(first_salary)
+            second_player.add_card_to_played(second_salary)
             
             message = f"🎰 Casino ! {second_player.name} GAGNE les deux salaires (égalité) !"
         else:
             # Différent : le premier joueur gagne les deux salaires
-            first_player.add_card_to_played(first_bet['salary_card'])
-            first_player.add_card_to_played(second_bet['salary_card'])
+            if first_salary:
+                first_player.add_card_to_played(first_salary)
+            first_player.add_card_to_played(second_salary)
             
             message = f"🎰 Casino ! {first_player.name} GAGNE les deux salaires !"
         
         # Fermer le casino après résolution
-        game['casino']['first_bet'] = None
-        game['casino']['second_bet'] = None
-        game['casino']['opener_id'] = None
+        game.casino['first_bet'] = None
+        game.casino['second_bet'] = None
+        game.casino['opener_id'] = None
         
-        if not (game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel'):
+        if not (game.get('pending_special') and game.pending_special.get('type') == 'arc_en_ciel'):
             next_player(game)
         else:
-            game['pending_special']['card_bets'] += 1
+            game.pending_special['card_bets'] += 1
             
         update_all_player(game, message)
     
-    next_player(game)
-    update_all_player(game, message)
-
+    # ✅ SUPPRIMÉ : next_player et update_all_player dupliqués
+    
 @socketio.on('skip_casino_bet')
 def handle_skip_casino_bet(data):
     """L'ouvreur du casino décide de ne pas miser"""
@@ -634,16 +654,16 @@ def handle_skip_casino_bet(data):
         return
     
     game = games[game_id]
-    player = game['players'][player_id]
+    player = game.players[player_id]
     
     # Vérifier que c'est bien l'ouvreur
-    if game['casino'].get('opener_id') != player_id:
+    if game.casino.get('opener_id') != player_id:
         emit('error', {'message': 'Seul l\'ouvreur peut refuser de miser'})
         return
 
-    if game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel':
+    if game.get('pending_special') and game.pending_special.get('type') == 'arc_en_ciel':
         # Le casino reste ouvert, on passe au joueur suivant
-        game['pending_special']['cards_played'] += 1
+        game.pending_special['cards_played'] += 1
     else:
         next_player(game)
 
@@ -696,7 +716,7 @@ def handle_astronaute(player, game):
     print("[start] : handle_astronaute")
     
     # Filtrer les cartes de la défausse (exclure les coups durs)
-    available_cards = [c for c in game['discard'] if not isinstance(c, HardshipCard)]
+    available_cards = [c for c in game.discard if not isinstance(c, HardshipCard)]
     
     if not available_cards:
         # Aucune carte disponible dans la défausse
@@ -722,11 +742,11 @@ def handle_astronaute_selection(data):
     game_id = session_info['game_id']
     player_id = session_info['player_id']
     game = games[game_id]
-    player = game['players'][player_id]
+    player = game.players[player_id]
     
     # Trouver la carte dans la défausse
     selected_card = None
-    for card in game['discard']:
+    for card in game.discard:
         if card.id == card_id:
             selected_card = card
             break
@@ -742,7 +762,7 @@ def handle_astronaute_selection(data):
         return
     
     # Retirer de la défausse et poser
-    game['discard'].remove(selected_card)
+    game.discard.remove(selected_card)
 
     # ✅ Vérifier si c'est une acquisition (nécessite paiement)
     if isinstance(selected_card, (HouseCard, TravelCard)):
@@ -750,11 +770,11 @@ def handle_astronaute_selection(data):
         player.hand.append(selected_card)
         
         # Repiocher une carte bonus
-        # if game['deck']:
-        #    player.hand.append(game['deck'].pop())
+        # if game.deck:
+        #    player.hand.append(game.deck.pop())
         
         # Rester en phase play pour que le joueur puisse acheter
-        game['phase'] = 'play'
+        game.phase = 'play'
         
         update_all_player(game, f"🚀 {player.name} a récupéré une acquisition - achetez-la maintenant")
     else:
@@ -775,11 +795,11 @@ def handle_chef_ventes_selection(data):
     game_id = session_info['game_id']
     player_id = session_info['player_id']
     game = games[game_id]
-    player = game['players'][player_id]
+    player = game.players[player_id]
     
     # Trouver le salaire dans la défausse
     selected_salary = None
-    for card in game['discard']:
+    for card in game.discard:
         if card.id == salary_id and isinstance(card, SalaryCard):
             selected_salary = card
             break
@@ -795,7 +815,7 @@ def handle_chef_ventes_selection(data):
         return
     
     # Retirer de la défausse et poser
-    game['discard'].remove(selected_salary)
+    game.discard.remove(selected_salary)
     player.add_card_to_played(selected_salary)
     
     next_player(game)
@@ -804,7 +824,7 @@ def handle_chef_ventes_selection(data):
 def handle_chef_des_ventes(player, game):
     """Chef des ventes : afficher les salaires de la défausse"""
     print("[start]: handle_chef_des_ventes")
-    available_salaries = [c for c in game['discard'] if isinstance(c, SalaryCard) and c.level <= 3]
+    available_salaries = [c for c in game.discard if isinstance(c, SalaryCard) and c.level <= 3]
     
     if not available_salaries:
         # si il n'y a pas de salaire dans la défausse jsute poser le métier
@@ -827,7 +847,7 @@ def handle_cancel_chef_vente_job():
     game_id = session_info['game_id']
     player_id = session_info['player_id']
     game = games[game_id]
-    player = game['players'][player_id]
+    player = game.players[player_id]
     
     # Trouver le métier chef des achats dans les cartes posées
     chef_ventes = None
@@ -842,14 +862,14 @@ def handle_cancel_chef_vente_job():
         player.hand.append(chef_ventes)
         
         # Rester en phase play pour que le joueur puisse jouer autre chose
-        game['phase'] = 'play'
+        game.phase = 'play'
         update_all_player(game, f"{player.name} a annulé le chef des achats")
 
 # CHEF DES ACHATS
 def handle_chef_des_achats(player, game):
     """Chef des achats : afficher les acquisitions de la défausse"""
     print("[start]: handle_chef_des_achats")
-    available_acquisitions = [c for c in game['discard'] if isinstance(c, HouseCard)]
+    available_acquisitions = [c for c in game.discard if isinstance(c, HouseCard)]
     
     if not available_acquisitions:
         # Pas d'acquisitions : poser le métier normalement et passer au joueur suivant
@@ -858,7 +878,7 @@ def handle_chef_des_achats(player, game):
         return
     
     # ✅ Stocker qu'on est en mode chef des achats pour permettre l'annulation
-    game['pending_special'] = {
+    game.pending_special = {
         'type': 'chef_achats_selection',
         'player_id': player.id
     }
@@ -880,11 +900,11 @@ def handle_chef_achats_selection(data):
     game_id = session_info['game_id']
     player_id = session_info['player_id']
     game = games[game_id]
-    player = game['players'][player_id]
+    player = game.players[player_id]
     
     # Trouver l'acquisition dans la défausse
     selected_acquisition = None
-    for card in game['discard']:
+    for card in game.discard:
         if card.id == acquisition_id and isinstance(card, HouseCard):
             selected_acquisition = card
             break
@@ -904,7 +924,7 @@ def handle_chef_achats_selection(data):
         cost = cost // 2
     
     # ✅ STOCKER l'ID de la carte dans pending_special avec le nouveau type
-    game['pending_special'] = {
+    game.pending_special = {
         'type': 'chef_achats_purchase',
         'acquisition_id': acquisition_id,
         'player_id': player_id
@@ -932,7 +952,7 @@ def handle_cancel_chef_achats_job():
     game_id = session_info['game_id']
     player_id = session_info['player_id']
     game = games[game_id]
-    player = game['players'][player_id]
+    player = game.players[player_id]
     
     # Trouver le métier chef des achats dans les cartes posées
     chef_achats = None
@@ -947,11 +967,11 @@ def handle_cancel_chef_achats_job():
         player.hand.append(chef_achats)
         
         # Nettoyer pending_special (chef_achats_selection ou chef_achats_purchase)
-        if game.get('pending_special') and game['pending_special'].get('type') in ['chef_achats_selection', 'chef_achats_purchase']:
-            game['pending_special'] = None
+        if game.get('pending_special') and game.pending_special.get('type') in ['chef_achats_selection', 'chef_achats_purchase']:
+            game.pending_special = None
         
         # Rester en phase play pour que le joueur puisse jouer autre chose
-        game['phase'] = 'play'
+        game.phase = 'play'
         update_all_player(game, f"{player.name} a annulé le chef des achats")
 
 @socketio.on('cancel_chef_achats_purchase')
@@ -966,8 +986,8 @@ def handle_cancel_chef_achats():
     game_id = session_info['game_id']
     game = games[game_id]
     
-    if game.get('pending_special') and game['pending_special'].get('type') == 'chef_achats_purchase':
-        game['pending_special'] = None
+    if game.get('pending_special') and game.pending_special.get('type') == 'chef_achats_purchase':
+        game.pending_special = None
     update_all_player(game, "poser le métier chef des achats sans acheter")
 
 @socketio.on('confirm_chef_achats_without_purchase')
@@ -982,7 +1002,7 @@ def handle_confirm_chef_achats_without_purchase():
     game_id = session_info['game_id']
     player_id = session_info['player_id']
     game = games[game_id]
-    player = game['players'][player_id]
+    player = game.players[player_id]
     # Le métier est déjà posé, on passe juste au joueur suivant
     next_player(game)
     update_all_player(game, f"💼 {player.name} est devenu chef des achats (sans achat)")
@@ -1002,7 +1022,7 @@ def handle_chercheur_confirmation(data):
     game_id = session_info['game_id']
     player_id = session_info['player_id']
     game = games[game_id]
-    player = game['players'][player_id]
+    player = game.players[player_id]
     
     next_player(game)
     update_all_player(game, f"🔬 {player.name} a posé le métier chercheur et pioché une carte supplémentaire")
@@ -1018,11 +1038,11 @@ def handle_loose_chercheur_job():
     game_id = session_info['game_id']
     player_id = session_info['player_id']
     game = games[game_id]
-    player = game['players'][player_id]
+    player = game.players[player_id]
 
     idx_selected_card = random.randint(0, len(player.hand)-1)
     selected_card = player.hand.pop(idx_selected_card)
-    game['discard'].append(selected_card)
+    game.discard.append(selected_card)
     return
 
 
@@ -1030,8 +1050,8 @@ def handle_chercheur(player, game):
     """Chercheur : piocher une carte en plus"""
     # La carte est déjà posée dans do_instant_power, on pioche juste une carte bonus
     print("[start] : handle_chercheur")
-    if game['deck']:
-        extra_card = game['deck'].pop()
+    if game.deck:
+        extra_card = game.deck.pop()
         player.hand.append(extra_card)
     
     # Passer au joueur suivant
@@ -1052,7 +1072,7 @@ def handle_journaliste_confirmation(data):
     game_id = session_info['game_id']
     player_id = session_info['player_id']
     game = games[game_id]
-    player = game['players'][player_id]
+    player = game.players[player_id]
 
     next_player(game)
     update_all_player(game, f"📰 {player.name} a posé le métier journaliste")
@@ -1063,7 +1083,7 @@ def handle_journaliste(player, game):
     # Ici on prépare juste les données
     print("[start] : handle_journaliste")
     hands_info = {}
-    for p in game['players']:
+    for p in game.players:
         if p.connected and p.id != player.id:
             hands_info[p.name] = [c.to_dict() for c in p.hand]
     
@@ -1084,7 +1104,7 @@ def handle_medium_confirmation(data):
     game_id = session_info['game_id']
     player_id = session_info['player_id']
     game = games[game_id]
-    player = game['players'][player_id]
+    player = game.players[player_id]
     
     next_player(game)
     update_all_player(game, f"🔮 {player.name} a posé le métier médium")
@@ -1093,11 +1113,11 @@ def handle_medium(player, game):
     """Médium : afficher les 13 prochaines cartes de la pioche"""
     print("[start] : handle_medium")
     # Montrer les 13 prochaines cartes sans les retirer
-    next_cards_count = min(13, len(game['deck']))
-    next_cards = game['deck'][-next_cards_count:] if next_cards_count > 0 else []
+    next_cards_count = min(13, len(game.deck))
+    next_cards = game.deck[-next_cards_count:] if next_cards_count > 0 else []
     next_cards = list(reversed(next_cards)) 
 
     emit('show_next_cards', {
         'cards': [c.to_dict() for c in next_cards],
-        'total': len(game['deck'])
+        'total': len(game.deck)
     })

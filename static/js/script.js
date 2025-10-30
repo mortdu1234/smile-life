@@ -452,7 +452,8 @@ function updateGameDisplay() {
         discard: currentGame.discard ? currentGame.discard.length : 0,
         phase: currentGame.phase,
         currentPlayer: currentGame.current_player,
-        myId: myPlayerId
+        myId: myPlayerId,
+        last_card: currentGame.last_discard 
     });
     
     const myPlayer = currentGame.players[myPlayerId];

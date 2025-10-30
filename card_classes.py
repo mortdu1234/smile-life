@@ -594,9 +594,71 @@ class Player:
             'connected': self.connected
         }
 
+class Game:
+    """classe qui gere une partie"""
+    def __init__(self, game_id: str, deck: list[Card], num_players: int):
+        self.id: str = game_id
+        
+        self.players: list[Player] = []
+        for i in range(num_players):
+            player = Player(i, 'En attente...')
+            player.connected = False
+            self.players.append(player)
+        
+        self.num_players: int = num_players
+        self.deck: list[Card] = deck
+        self.discard: list[Card] = []
+        self.last_discard = None
+        self.current_player: int = 0
+        self.phase: str = "waiting"
+        self.players_joined: int = 0
+        self.host_id: int = 0
+        self.casino: dict = {
+            'open': False,
+            'first_bet': None,
+            'second_bet': None,
+            'opener_id': None
+        }
+        self.pending_hardship = None
+        self.pending_special = None
+
+    def add_player(self, player: Player):
+        """Ajoute un joueur à la partie"""
+        if isinstance(player, Player):
+            self.players[self.players_joined] = player
+            if player.connected:
+                self.players_joined += 1
+
+    def change_current_player(self):
+        """Change le joueur qui joue en passant automatiquement les joueurs déconnectés"""
+        self.current_player = (self.current_player + 1) % self.num_players
+        
+        attempts = 0
+        while not self.players[self.current_player].connected and attempts < self.num_players:
+            self.current_player = (self.current_player + 1) % self.num_players
+            attempts += 1
+
+    def to_dict(self):
+        """Retourne une représentation dict complète du jeu"""
+        return {
+            "id": self.id,
+            "players": [p.to_dict() for p in self.players],
+            "deck": [c.to_dict() for c in self.deck],
+            "discard": [c.to_dict() for c in self.discard],
+            "current_player": self.current_player,
+            "phase": self.phase,
+            "last_discard": self.last_discard,
+            "num_players": self.num_players,
+            "players_joined": self.players_joined,
+            "host_id": self.host_id,
+            "casino": self.casino,
+            "pending_hardship": self.pending_hardship,
+            "pending_special": self.pending_special
+        }
+
 class CardFactory:
     """Factory pour créer les cartes"""
-    
+
     JOBS = [
         {'name': 'architecte', 'salary': 3, 'studies': 4, 'status': 'rien', 'power': 'house_free', 'image': 'personnal_life/professionnal_life/JobCards/architecte.png'},
         {'name': 'astronaute', 'salary': 4, 'studies': 6, 'status': 'rien', 'power': 'instant', 'image': 'personnal_life/professionnal_life/JobCards/astronaute.png'},

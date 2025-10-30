@@ -35,12 +35,12 @@ def handle_disconnect():
         
         if game_id in games:
             game = games[game_id]
-            if player_id < len(game['players']):
-                game['players'][player_id].connected = False
+            if player_id < len(game.players):
+                game.players[player_id].connected = False
                 print("[appel] : player_disconnected")
                 socketio.emit('player_disconnected', {
                     'player_id': player_id,
-                    'player_name': game['players'][player_id].name
+                    'player_name': game.players[player_id].name
                 }, room=game_id)
 
 @socketio.on('create_game')
@@ -71,39 +71,16 @@ def handle_create_game(data):
     player_0.hand = [deck.pop() for _ in range(5)]
     player_0.session_id = request.sid
     
-    players = [player_0]
     
-    for i in range(1, num_players):
-        player = Player(i, 'En attente...')
-        player.connected = False
-        players.append(player)
     
-    game = {
-        'id': game_id,
-        'players': players,
-        'deck': deck,
-        'discard': [],
-        'current_player': 0,
-        'casino': {
-            'open': False,
-            'first_bet': None,
-            'second_bet': None
-        },
-        'phase': 'waiting',
-        'num_players': num_players,
-        'players_joined': 1,
-        'created_at': datetime.now().isoformat(),
-        'host_id': 0,
-        'pending_hardship': None,
-        'pending_special': None
-    }
-    
+    game = Game(game_id, deck, num_players)
+    game.add_player(player_0)
     games[game_id] = game
     player_sessions[request.sid] = {'game_id': game_id, 'player_id': 0}
     
     join_room(game_id)
     
-    print(f"Partie créée: {game_id}, deck: {len(game['deck'])} cartes")
+    print(f"Partie créée: {game_id}, deck: {len(game.deck)} cartes")
     
     print("[appel] : game_created")
     emit('game_created', {
@@ -125,12 +102,12 @@ def handle_join_game(data):
     
     game = games[game_id]
     
-    if game['phase'] != 'waiting':
+    if game.phase != 'waiting':
         emit('error', {'message': 'La partie a déjà commencé'})
         return
     
     player_id = None
-    for i, player in enumerate(game['players']):
+    for i, player in enumerate(game.players):
         if not player.connected:
             player_id = i
             break
@@ -139,12 +116,12 @@ def handle_join_game(data):
         emit('error', {'message': 'La partie est complète'})
         return
     
-    player = game['players'][player_id]
+    player = game.players[player_id]
     player.name = player_name
-    player.hand = [game['deck'].pop() for _ in range(5)]
+    player.hand = [game.deck.pop() for _ in range(5)]
     player.connected = True
     player.session_id = request.sid
-    game['players_joined'] += 1
+    game.players_joined += 1
     
     player_sessions[request.sid] = {'game_id': game_id, 'player_id': player_id}
     join_room(game_id)
@@ -161,8 +138,8 @@ def handle_join_game(data):
     socketio.emit('player_joined', {
         'player_id': player_id,
         'player_name': player_name,
-        'players_joined': game['players_joined'],
-        'num_players': game['num_players']
+        'players_joined': game.players_joined,
+        'num_players': game.num_players
     }, room=game_id)
 
 @socketio.on('start_game')
@@ -178,23 +155,23 @@ def handle_start_game(data):
     game = games[game_id]
     session_info = player_sessions.get(request.sid)
     
-    if not session_info or session_info['player_id'] != game['host_id']:
+    if not session_info or session_info['player_id'] != game.host_id:
         emit('error', {'message': 'Seul l\'hôte peut démarrer la partie'})
         return
     
-    if game['players_joined'] < 2:
+    if game.players_joined < 2:
         emit('error', {'message': 'Il faut au moins 2 joueurs pour commencer'})
         return
     
-    game['phase'] = 'draw'
+    game.phase = 'draw'
     
-    connected_players = [i for i, p in enumerate(game['players']) if p.connected]
+    connected_players = [i for i, p in enumerate(game.players) if p.connected]
     if connected_players:
-        game['current_player'] = random.choice(connected_players)
+        game.current_player = random.choice(connected_players)
     
-    print(f"Partie démarrée: {game_id}, joueur actuel: {game['current_player']}")
+    print(f"Partie démarrée: {game_id}, joueur actuel: {game.current_player}")
     
-    for player in game['players']:
+    for player in game.players:
         if player.connected:
             print("[appel] : game_started")
             socketio.emit('game_started', {

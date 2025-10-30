@@ -15,42 +15,24 @@ games = {}
 player_sessions = {}  # {session_id: {game_id, player_id}}
 
 
-def get_game_state_for_player(game, player_id):
+def get_game_state_for_player(game: Game , player_id):
     """Retourne l'état du jeu adapté pour un joueur spécifique"""
     print("[start] : get_game_state_for_player")
-    game_state = {
-        'id': game['id'],
-        'players': [
-            player.to_dict(hide_hand=(i != player_id)) 
-            for i, player in enumerate(game['players'])
-        ],
-        'deck_count': len(game['deck']),
-        'discard': [card.to_dict() for card in game['discard']],
-        'last_discard': game['discard'][-1].to_dict() if game['discard'] else None,
-        'current_player': game['current_player'],
-        'casino': {
-            'open': game['casino']['open'],
-            'first_bet': {
-                'player_id': game['casino']['first_bet']['player_id'],
-                'player_name': game['players'][game['casino']['first_bet']['player_id']].name,
-                'salary_level': None  # Secret !
-            } if game['casino']['first_bet'] else None,
-            'second_bet': {
-                'player_id': game['casino']['second_bet']['player_id'],
-                'player_name': game['players'][game['casino']['second_bet']['player_id']].name,
-                'salary_level': None  # Secret !
-            } if game['casino']['second_bet'] else None
-        },
-        'phase': game['phase'],
-        'num_players': game['num_players'],
-        'players_joined': game['players_joined'],
-        'your_player_id': player_id,
-        'pending_hardship': game.get('pending_hardship'),
-        'pending_special': game.get('pending_special')
-    }
+    game_state = game.to_dict()
+    
+    # Remplacer le deck complet par juste le nombre de cartes
+    game_state['deck_count'] = len(game.deck)
+    game_state.pop('deck', None)  # Retirer la liste complète du deck
+    
+    # Ajouter la dernière carte défaussée si elle existe
+    if len(game.discard) > 0:
+        game_state["last_discard"] = game.discard[-1].to_dict()
+    else:
+        game_state['last_discard'] = None
+
     return game_state
 
-def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
+def apply_hardship_effect(game: Game, hardship_card, target_player, attacker_player):
     """Applique l'effet d'une carte malus sur un joueur cible"""
     print("[start] : apply_hardship_effect")
     hardship_type = hardship_card.hardship_type
@@ -91,23 +73,23 @@ def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
         if marriage_cards:
             marriage_to_remove = marriage_cards[-1]
             target_player.remove_card_from_played(marriage_to_remove)
-            game['discard'].append(marriage_to_remove)
+            game.discard.append(marriage_to_remove)
             
             adultery_cards = [c for c in target_player.played["vie personnelle"] if isinstance(c, AdulteryCard)]
             if adultery_cards:
                 adultery = adultery_cards[0]
                 target_player.remove_card_from_played(adultery)
-                game['discard'].append(adultery)
+                game.discard.append(adultery)
                 
                 children_cards = [c for c in target_player.played["vie personnelle"] if isinstance(c, ChildCard)]
                 for child in children_cards:
                     target_player.remove_card_from_played(child)
-                    game['discard'].append(child)
+                    game.discard.append(child)
                 
                 adultery_flirts = [c for c in target_player.played["cartes spéciales"] if isinstance(c, FlirtCard)]
                 for flirt in adultery_flirts:
                     target_player.remove_card_from_played(flirt)
-                    game['discard'].append(flirt)
+                    game.discard.append(flirt)
                 
                 target_player.received_hardships.append(hardship_type)
                 return True, f"{target_player.name} a divorcé et perdu son adultère, ses enfants et ses flirts adultères"
@@ -125,7 +107,7 @@ def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
         if salary_cards:
             card_to_remove = salary_cards[-1]
             target_player.remove_card_from_played(card_to_remove)
-            game['discard'].append(card_to_remove)
+            game.discard.append(card_to_remove)
             target_player.received_hardships.append(hardship_type)
             return True, f"{target_player.name} a perdu 1 salaire"
         return False, f"{target_player.name} n'a pas de salaire"
@@ -137,7 +119,7 @@ def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
                 handle_loose_chercheur_job()
 
             target_player.remove_card_from_played(job_card)
-            game['discard'].append(job_card)
+            game.discard.append(job_card)
             target_player.received_hardships.append(hardship_type)
             return True, f"{target_player.name} a été licencié"
         return False, f"{target_player.name} n'a pas de métier"
@@ -155,7 +137,7 @@ def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
         if study_cards:
             card_to_remove = study_cards[-1]
             target_player.remove_card_from_played(card_to_remove)
-            game['discard'].append(card_to_remove)
+            game.discard.append(card_to_remove)
             target_player.received_hardships.append(hardship_type)
             return True, f"{target_player.name} a perdu une étude"
         return False, f"{target_player.name} n'a pas d'études à perdre"
@@ -167,7 +149,7 @@ def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
     
     elif hardship_type == 'attentat':
         print(game)
-        players: list[Player] = game['players']
+        players: list[Player] = game.players
         for p in players:
             print(f"recup enfant : {p.name}")
             children_cards = [c for c in p.played["vie personnelle"] if isinstance(c, ChildCard)]
@@ -175,7 +157,7 @@ def apply_hardship_effect(game, hardship_card, target_player, attacker_player):
             print(f"nombre d'enfant en moins : {total_children_removed}")
             for child in children_cards:
                 p.remove_card_from_played(child)
-                game['discard'].append(child)
+                game.discard.append(child)
             
 
         attacker_player.received_hardships.append(hardship_type)
@@ -212,38 +194,33 @@ def give_card(data):
     source = data.get('source', 'deck')
     player_id, game, game_id = check_game()
 
-    player = game['players'][player_id]
+    player = game.players[player_id]
     
     if source == 'deck':
-        if not game['deck']:
-            scores = [(p.name, p.calculate_smiles(), p.id) for p in game['players'] if p.connected]
+        if not game.deck:
+            scores = [(p.name, p.calculate_smiles(), p.id) for p in game.players if p.connected]
             scores.sort(key=lambda x: x[1], reverse=True)
             print("[appel] : game_over")
             socketio.emit('game_over', {'scores': scores}, room=game_id)
             return
         
-        card = game['deck'].pop()
+        card = game.deck.pop()
         player.hand.append(card)
         
-        print(f"Joueur {player_id} a pris dans le deck, reste {len(game['deck'])} cartes")
+        print(f"Joueur {player_id} a pris dans le deck, reste {len(game.deck)} cartes")
         update_all_player(game, "")
 
-def next_player(game):
+def next_player(game: Game):
     """Passe au joueur suivant"""
     print("[start]: next_player")
-    if not (game.get('pending_special') and game['pending_special'].get('type') == 'arc_en_ciel'):
+    if not (game.pending_special and game.pending_special.get('type') == 'arc_en_ciel'):
         print("Tour terminé, passage au joueur suivant")
-        game['phase'] = 'draw'
-        game['current_player'] = (game['current_player'] + 1) % game['num_players']
-        
-        attempts = 0
-        while not game['players'][game['current_player']].connected and attempts < game['num_players']:
-            game['current_player'] = (game['current_player'] + 1) % game['num_players']
-            attempts += 1
+        game.phase = 'draw'
+        game.change_current_player()
 
 def update_all_player(game, message):
     print("[start]: update_all_player")
-    for p in game['players']:
+    for p in game.players:
         if p.connected:
             print("[appel] : game_updated")
             socketio.emit('game_updated', {
@@ -251,7 +228,7 @@ def update_all_player(game, message):
                 'message': message
             }, room=p.session_id)
 
-def get_card_by_id(card_id, deck):
+def get_card_by_id(card_id, deck: list[Card]):
     """récupère une carte dans le deck par son id"""
     print("[start]: get_card_by_id")
     researched_card = None
