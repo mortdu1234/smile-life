@@ -1,7 +1,7 @@
 from flask import render_template, request, send_from_directory
 from flask_socketio import emit, join_room
 from card_classes import *
-from constants import app, socketio, games, player_sessions, get_game_state_for_player, apply_hardship_effect, check_game, update_all_player
+from constants import app, socketio, games, player_sessions, get_game_state_for_player, update_all_player
 import random
 import uuid
 from datetime import datetime
@@ -18,6 +18,13 @@ def serve_image(filename):
     print("[start] : serve_image ")
     ressources_dir = os.path.join(os.path.dirname(__file__), 'ressources')
     return send_from_directory(ressources_dir, filename)
+
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    """Servir les fichiers statiques (CSS, JS)"""
+    print(f"[start] : serve_static - {filename}")
+    static_dir = os.path.join(os.path.dirname(__file__), 'static')
+    return send_from_directory(static_dir, filename)
 
 @socketio.on('connect')
 def handle_connect():

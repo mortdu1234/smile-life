@@ -121,4 +121,18 @@ problemes trouvés :
 - attentat ne marche pas
 - l'astronaute pioche une carte en trop après avoir utilié son pouvoir
 - miser au casino après son ouverture (en premier)
-- le talent d'avoir des étude a l'infini ne marche pas
+- le talent d'avoir des étude a l'infini ne marche pasù
+
+
+
+###################################
+a tester :
+- gourou
+- policier
+
+amélioration futur : 
+- changer la page du médium pour qu'il affiche les images des cartes directement
+- cahnger la page du journaliste pour qu'il affiche les images des cartes directement
+
+
+

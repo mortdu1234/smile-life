@@ -86,7 +86,7 @@
                 <button onclick="confirmSalarySelection()" id="confirm-salary-btn" class="flex-1 bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                     ✅ Confirmer l'achat
                 </button>
-                <button onclick="closeSalaryModal()" class="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+                <button onclick="discardSalarySelection()" class="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
                     Annuler
                 </button>
             </div>
@@ -104,7 +104,7 @@
                 <h3 class="font-semibold mb-3 text-gray-700">Joueurs disponibles :</h3>
                 <div id="target-players-list" class="space-y-2"></div>
             </div>
-            <button onclick="closeHardshipModal()" class="w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+            <button onclick="discardHardshipModal()" class="w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
                 Annuler
             </button>
         </div>
@@ -124,6 +124,27 @@
         </div>
     </div>
 
+    <!-- Modal Anniversaire - Page d'attente -->
+    <div id="birthday-waiting-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full">
+            <div class="flex justify-center mb-6">
+                <span class="text-8xl animate-bounce">🎂</span>
+            </div>
+            <h2 class="text-3xl font-bold text-center mb-4 text-gray-800">
+                C'est votre anniversaire !
+            </h2>
+            <p class="text-center text-gray-600 mb-4">
+                Les autres joueurs choisissent leurs cadeaux...
+            </p>
+            <div class="flex justify-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+            </div>
+            <p id="birthday-waiting-count" class="text-center text-gray-500 mt-4 text-sm">
+                En attente de <span id="remaining-gifts">0</span> joueur(s)
+            </p>
+        </div>
+    </div>
+
     <!-- Modal Troc - Choix du joueur -->
     <div id="troc-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full">
@@ -132,7 +153,7 @@
             </h2>
             <p class="text-center mb-4 text-gray-600">Choisissez un joueur avec qui échanger une carte aléatoire</p>
             <div id="troc-players-list" class="space-y-2"></div>
-            <button onclick="closeTrocModal()" class="mt-4 w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+            <button onclick="discardTrocSelection()" class="mt-4 w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
                 Annuler
             </button>
         </div>
@@ -146,7 +167,7 @@
             </h2>
             <p class="text-center mb-4 text-gray-600">Choisissez un métier à poser sans condition d'études</p>
             <div id="piston-jobs-list" class="grid grid-cols-2 gap-3"></div>
-            <button onclick="closePistonModal()" class="mt-4 w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+            <button onclick="cancelPistonJobSelection()" class="mt-4 w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
                 Annuler
             </button>
         </div>
@@ -166,7 +187,7 @@
                 <h3 class="font-semibold mb-3 text-gray-700">Choisir la victime :</h3>
                 <div id="vengeance-targets-list" class="space-y-2"></div>
             </div>
-            <button onclick="closeVengeanceModal()" class="mt-4 w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+            <button onclick="discardVengeance()" class="mt-4 w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
                 Annuler
             </button>
         </div>
@@ -205,7 +226,7 @@
             </h2>
             <p class="text-center mb-4 text-gray-600">Choisissez une carte de la défausse à poser (doit respecter les règles)</p>
             <div id="star-discard-list" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3"></div>
-            <button onclick="closeStarModal()" class="mt-4 w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+            <button onclick="discardStarCard()" class="mt-4 w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
                 Annuler
             </button>
         </div>

@@ -169,14 +169,21 @@ function confirmSalarySelection() {
     }
 }
 
+function discardSalarySelection() {
+    socket.emit('cancel_select_salaries_for_purchase', {
+        card_id: pendingAcquisitionCard.id
+    });
+    closeSalaryModal();
+}
+
 function closeSalaryModal() {
+    console.log("close Salary Modal")
     document.getElementById('salary-selection-modal').classList.add('hidden');
     pendingAcquisitionCard = null;
     selectedSalaries = [];
     requiredCost = 0;
     heritageAvailable = 0;
     heritageUsed = 0;
-    socket.emit('cancel_select_salaries_for_purchase', {});
 }
 
 function showHardshipModal(card, availableTargets, isFromDiscard = false) {
@@ -216,6 +223,14 @@ function showHardshipModal(card, availableTargets, isFromDiscard = false) {
     modal.classList.remove('hidden');
 }
 
+function discardHardshipModal() {
+    socket.emit('cancel_select_target_for_hardship', {
+        card_id: pendingHardshipCard.id,
+    });
+    
+    closeHardshipModal();
+}
+
 function closeHardshipModal() {
     document.getElementById('hardship-modal').classList.add('hidden');
     pendingHardshipCard = null;
@@ -227,7 +242,7 @@ function selectHardshipTarget(targetId) {
     
     log('Sélection cible malus', {cardId: pendingHardshipCard.id, targetId});
     
-    socket.emit('play_card', {
+    socket.emit('select_target_for_hardship', {
         card_id: pendingHardshipCard.id,
         target_player_id: targetId
     });
@@ -284,11 +299,6 @@ function joinGame() {
 function startGame() {
     log('Démarrage partie', {gameId});
     socket.emit('start_game', { game_id: gameId });
-}
-
-function pickCard(source) {
-    log('Donne une carte depuis', {source});
-    socket.emit('pick_card', { source: source });
 }
 
 function drawCard(source) {
@@ -478,11 +488,8 @@ function updateGameDisplay() {
     updateCasinoDisplay(currentGame.casino);
     
     // Mise a jour du mode arc en ciel
-    if (currentGame.pending_special && currentGame.pending_special.type === 'arc_en_ciel') {
-        const actionsCount = (currentGame.pending_special.cards_played || 0) + 
-                            (currentGame.pending_special.cards_discarded || 0) + 
-                            (currentGame.pending_special.card_bets || 0);
-        updateArcRemaining(actionsCount);
+    if (currentGame.arc_en_ciel) {
+        updateArcRemaining(currentGame.arc_en_ciel_card.count);
         
         // Afficher la bannière si elle est cachée
         if (document.getElementById('arc-en-ciel-banner').classList.contains('hidden')) {
