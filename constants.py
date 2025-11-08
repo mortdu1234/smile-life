@@ -5,7 +5,7 @@ import os
 
 app = Flask(__name__)
 app.secret_key = 'votre_cle_secrete_ici_changez_la'
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*",  async_mode='threading')
 
 # Configuration pour servir les images
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'ressources')

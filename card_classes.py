@@ -1,4 +1,5 @@
 import random
+from sre_constants import SUCCESS
 import uuid
 from flask_socketio import emit
 from abc import ABC, abstractmethod
@@ -144,8 +145,26 @@ class FlirtCard(Card):
             return False, "Vous êtes marié(e) sans adultère"
         return True, ""
     
-    
+    def steal_same_card(self, game: 'Game', current_player: 'Player'):
+        for player in game.players:
+            if player == current_player:
+                continue
+            played_cards = player.played["vie personnelle"]
+            idx = len(played_cards)-1
+            while idx >= 0:
+                card = played_cards[idx]
+                if isinstance(card, MarriageCard):
+                    idx = -1
+                if isinstance(card, FlirtCard):
+                    idx = -1
+                    if card.location == self.location:
+                        print("[INFO] : Vole de carte flirt")
+                        player.remove_card_from_played(card)
+                        current_player.add_card_to_played(card)
+                idx -= 1
+
     def play_card(self, game: 'Game', current_player: 'Player'):
+        self.steal_same_card(game, current_player)
         super().play_card(game, current_player)
 
 class MarriageCard(Card):
@@ -678,13 +697,16 @@ class ChanceCard(SpecialCard):
 
 
     def apply_card_effect(self, game, current_player):
+        print("[START] : Chance.apply_card_effect")
         for _ in range(min(3, len(game.deck))):
             self.next_cards.append(game.deck.pop())
         
+
+        print(f"[APPEL] : select_chance_card with {[c.to_dict() for c in self.next_cards]}")
         emit('select_chance_card', {
             'card_id': self.id,
             'cards': [c.to_dict() for c in self.next_cards]
-        })
+        }, room=current_player.session_id)
         
         print("[EVENT] : Wait for selection")
         self.selection_event.wait()
@@ -2139,9 +2161,12 @@ class CardFactory:
 
         # Flirts
         
-        for loc in range(5):
-            l = cls.FLIRT_LOCATIONS[0].replace(" ", "_")
-            deck.append(FlirtCard(l, f"personnal_life/flirts/{l}.png"))
+        for loc in range(10):
+            l0 = cls.FLIRT_LOCATIONS[0].replace(" ", "_")
+            l1 = cls.FLIRT_LOCATIONS[1].replace(" ", "_")
+    
+            deck.append(FlirtCard(l0, f"personnal_life/flirts/{l0}.png"))
+            deck.append(FlirtCard(l1, f"personnal_life/flirts/{l1}.png"))
 
         
         # Mariages
@@ -2151,7 +2176,7 @@ class CardFactory:
             deck.append(MarriageCard(l, f"personnal_life/mariages/mariage_{l}.png"))
         
         # Adultères
-        for _ in range(3):
+        for _ in range(0):
             deck.append(AdulteryCard("personnal_life/mariages/adultere.png"))
         
         # Enfants
@@ -2184,7 +2209,7 @@ class CardFactory:
 
         # cartes d'attaques
 
-        for _ in range(10):
+        for _ in range(5):
             # deck.append(AccidentCard("hardship_cards/accident.png"))
             # deck.append(BurnOutCard("hardship_cards/burnout.png"))
             deck.append(DivorceCard("hardship_cards/divorce.png"))
@@ -2205,7 +2230,7 @@ class CardFactory:
     def create_deck(cls) -> List[Card]:
         """Crée un deck complet de cartes"""
         #########################
-        # return cls.test_create_deck(cls)
+        return cls.test_create_deck(cls)
         # TESTING
         #########################
         

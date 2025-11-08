@@ -145,7 +145,8 @@ def handle_draw_card(data):
             game.next_player()
         else:
             game.discard.append(card)
-    
+            emit('error', {'message': 'Vous ne pouvez pas jouer cette carte'})
+            return
     update_all_player(game, "")
 
 
@@ -229,4 +230,6 @@ def handle_play_card(data):
     
 
 if __name__ == '__main__':
+    print(f"[INFO] SocketIO async_mode: {socketio.async_mode}")
+    print(f"[INFO] System: {os.name}")
     socketio.run(app, debug=True, host='0.0.0.0', port=5000)
