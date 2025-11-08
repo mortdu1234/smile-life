@@ -736,7 +736,7 @@ function createCardHTML(card, canPlay, isPlayed = false, canDiscard = false, isS
     const color = colors[card.type] || 'bg-gray-100 border-gray-300';
     const icon = icons[card.type] || '🎴';
     
-    const cursor = (canPlay || canDiscard) ? 'cursor-pointer hover:scale-105' : '';
+    const cursor = (canPlay || canDiscard) ? 'cursor-pointer hover:scale-105' : 'card-clickable';
     const sizeClass = isSmall ? 'min-w-[100px]' : 'min-w-[140px]';
     
     const canDiscardPlayed = isPlayed && canDiscard && 
@@ -747,10 +747,24 @@ function createCardHTML(card, canPlay, isPlayed = false, canDiscard = false, isS
         discardButtonText = '👋 Démissionner';
     }
 
+    
+    // ✅ Échapper correctement le texte de règle
+    const cardRule = card.rule || '';
+    const escapedRule = cardRule.replace(/\\/g, '\\\\')
+                                 .replace(/`/g, '\\`')
+                                 .replace(/\$/g, '\\$')
+                                 .replace(/\n/g, '\\n')
+                                 .replace(/\r/g, '\\r')
+                                 .replace(/'/g, "\\'");
+    const escapedLabel = label.replace(/'/g, "\\'");
+    
+    // ✅ Événement onclick pour afficher les règles (sauf si on clique sur un bouton)
+    const onClickEvent = cardRule ? `onclick="handleCardClick(event, '${escapedLabel}', '${escapedRule}')"` : '';
+
+
     // Construire le chemin de l'image
     const imagePath = card.image ? `/ressources/${card.image}` : '';
     
-    // ID unique pour gérer le fallback
     const cardElementId = `card-${card.id}`;
     
     // HTML avec image prioritaire et fallback sur texte
@@ -767,16 +781,16 @@ function createCardHTML(card, canPlay, isPlayed = false, canDiscard = false, isS
                 <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent">
                     ${canPlay ? `
                         <div class="flex gap-1">
-                            <button onclick="playCard('${card.id}')" class="flex-1 ${card.type === 'hardship' ? 'bg-red-500 hover:bg-red-600' : card.type === 'special' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'} text-white text-xs px-2 py-1 rounded font-semibold shadow-lg">
+                            <button onclick="event.stopPropagation(); playCard('${card.id}')" class="flex-1 ${card.type === 'hardship' ? 'bg-red-500 hover:bg-red-600' : card.type === 'special' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'} text-white text-xs px-2 py-1 rounded font-semibold shadow-lg">
                                 ${card.type === 'hardship' ? 'Attaquer' : card.type === 'special' ? '⭐ Activer' : 'Jouer'}
                             </button>
-                            <button onclick="discardCard('${card.id}')" class="flex-1 bg-gray-500 text-white text-xs px-2 py-1 rounded hover:bg-gray-600 font-semibold shadow-lg">
+                            <button onclick="event.stopPropagation(); discardCard('${card.id}')" class="flex-1 bg-gray-500 text-white text-xs px-2 py-1 rounded hover:bg-gray-600 font-semibold shadow-lg">
                                 Défausser
                             </button>
                         </div>
                     ` : ''}
                     ${canDiscardPlayed ? `
-                        <button onclick="discardPlayedCard('${card.id}')" class="w-full bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600 font-semibold shadow-lg">
+                        <button onclick="event.stopPropagation(); discardPlayedCard('${card.id}')" class="w-full bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600 font-semibold shadow-lg">
                             ${discardButtonText}
                         </button>
                     ` : ''}
@@ -800,16 +814,16 @@ function createCardHTML(card, canPlay, isPlayed = false, canDiscard = false, isS
                 <div class="mt-2">
                     ${canPlay ? `
                         <div class="flex gap-1">
-                            <button onclick="playCard('${card.id}')" class="flex-1 ${card.type === 'hardship' ? 'bg-red-500 hover:bg-red-600' : card.type === 'special' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'} text-white text-xs px-2 py-1 rounded">
+                            <button onclick="event.stopPropagation(); playCard('${card.id}')" class="flex-1 ${card.type === 'hardship' ? 'bg-red-500 hover:bg-red-600' : card.type === 'special' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'} text-white text-xs px-2 py-1 rounded">
                                 ${card.type === 'hardship' ? 'Attaquer' : card.type === 'special' ? '⭐ Activer' : 'Jouer'}
                             </button>
-                            <button onclick="discardCard('${card.id}')" class="flex-1 bg-gray-500 text-white text-xs px-2 py-1 rounded hover:bg-gray-600">
+                            <button onclick="event.stopPropagation(); discardCard('${card.id}')" class="flex-1 bg-gray-500 text-white text-xs px-2 py-1 rounded hover:bg-gray-600">
                                 Défausser
                             </button>
                         </div>
                     ` : ''}
                     ${canDiscardPlayed ? `
-                        <button onclick="discardPlayedCard('${card.id}')" class="w-full bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600">
+                        <button onclick="event.stopPropagation(); discardPlayedCard('${card.id}')" class="w-full bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600">
                             ${discardButtonText}
                         </button>
                     ` : ''}
@@ -834,16 +848,16 @@ function createCardHTML(card, canPlay, isPlayed = false, canDiscard = false, isS
             <div class="mt-2">
                 ${canPlay ? `
                     <div class="flex gap-1">
-                        <button onclick="playCard('${card.id}')" class="flex-1 ${card.type === 'hardship' ? 'bg-red-500 hover:bg-red-600' : card.type === 'special' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'} text-white text-xs px-2 py-1 rounded">
+                        <button onclick="event.stopPropagation(); playCard('${card.id}')" class="flex-1 ${card.type === 'hardship' ? 'bg-red-500 hover:bg-red-600' : card.type === 'special' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'} text-white text-xs px-2 py-1 rounded">
                             ${card.type === 'hardship' ? 'Attaquer' : card.type === 'special' ? '⭐ Activer' : 'Jouer'}
                         </button>
-                        <button onclick="discardCard('${card.id}')" class="flex-1 bg-gray-500 text-white text-xs px-2 py-1 rounded hover:bg-gray-600">
+                        <button onclick="event.stopPropagation(); discardCard('${card.id}')" class="flex-1 bg-gray-500 text-white text-xs px-2 py-1 rounded hover:bg-gray-600">
                             Défausser
                         </button>
                     </div>
                 ` : ''}
                 ${canDiscardPlayed ? `
-                    <button onclick="discardPlayedCard('${card.id}')" class="w-full bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600">
+                    <button onclick="event.stopPropagation(); discardPlayedCard('${card.id}')" class="w-full bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600">
                         ${discardButtonText}
                     </button>
                 ` : ''}
@@ -852,11 +866,106 @@ function createCardHTML(card, canPlay, isPlayed = false, canDiscard = false, isS
     `;
 
     return `
-        <div class="card ${color} border-2 rounded-lg ${sizeClass} ${cursor} overflow-hidden" style="height: 200px;">
+        <div class="card ${color} border-2 rounded-lg ${sizeClass} ${cursor} overflow-hidden" style="height: 200px;" ${onClickEvent}>
             ${cardContentHTML}
         </div>
     `;
 }
+
+// ✅ Nouvelle fonction pour gérer le clic sur la carte
+function handleCardClick(event, cardName, cardRule) {
+    console.log("[start] : handleCardClick")
+    // Ne pas afficher les règles si on a cliqué sur un bouton
+    if (event.target.tagName === 'BUTTON' || event.target.closest('button')) {
+        return;
+    }
+    
+    // Afficher la modal des règles
+    if (cardRule && cardRule.trim() !== '') {
+        showCardRules(cardName, cardRule);
+    }
+}
+
+// ########################################
+// BOUTON D'AIDE
+// ########################################
+
+// Fonction simplifiée pour afficher la modal des règles
+function showCardRules(cardName, cardRule) {
+    console.log("[showCardRules] lancer")
+    const modal = document.getElementById('rules-modal');
+    const titleEl = document.getElementById('rule-title');
+    const contentEl = document.getElementById('rule-content');
+    
+    titleEl.textContent = cardName || "Règles de la carte";
+    
+    // Si pas de règle fournie
+    if (!cardRule || cardRule.trim() === '') {
+        contentEl.innerHTML = `
+            <div class="bg-gray-50 p-4 rounded-lg text-center text-gray-600">
+                Aucune règle disponible pour cette carte.
+            </div>
+        `;
+        modal.classList.remove('hidden');
+        return;
+    }
+    
+    // Affichage du texte de règle avec formatage basique
+    // Détecte les sauts de ligne et les met en forme
+    const lines = cardRule.split('\n').filter(line => line.trim() !== '');
+    
+    let html = '<div class="space-y-3">';
+    
+    lines.forEach(line => {
+        const trimmedLine = line.trim();
+        
+        // Détection d'un titre (ligne qui commence par un emoji ou des majuscules)
+        if (trimmedLine.match(/^[🎯✨⚠️💰📚💼💵❤️🏠✈️⚔️🛡️📋🎮]/)) {
+            html += `
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-3 rounded-lg border-l-4 border-blue-500">
+                    <div class="font-semibold text-blue-800">${trimmedLine}</div>
+                </div>
+            `;
+        }
+        // Détection d'une liste (ligne qui commence par -, *, ou •)
+        else if (trimmedLine.match(/^[-*•]/)) {
+            html += `
+                <div class="flex items-start ml-2">
+                    <span class="text-green-500 mr-2">•</span>
+                    <span class="text-gray-700">${trimmedLine.replace(/^[-*•]\s*/, '')}</span>
+                </div>
+            `;
+        }
+        // Texte normal
+        else {
+            html += `
+                <div class="text-gray-700 leading-relaxed">${trimmedLine}</div>
+            `;
+        }
+    });
+    
+    html += '</div>';
+    
+    contentEl.innerHTML = html;
+    modal.classList.remove('hidden');
+}
+
+function closeRulesModal() {
+    document.getElementById('rules-modal').classList.add('hidden');
+}
+
+// Fermer en cliquant sur le backdrop
+document.getElementById('rules-modal').addEventListener('click', function(e) {
+    if (e.target.id === 'rules-modal') {
+        closeRulesModal();
+    }
+});
+
+
+
+// ########################################
+// 
+// ########################################
 
 // Nouvelle fonction pour gérer l'erreur de chargement d'image
 function handleImageError(cardElementId) {

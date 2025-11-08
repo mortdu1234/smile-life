@@ -25,7 +25,8 @@ class Card(ABC):
             'id': self.id,
             'smiles': self.smiles,
             'type': self.__class__.__name__.lower(),
-            'image': self.image
+            'image': self.image,
+            'rule' : self.get_card_rule()
         }
     
     @abstractmethod
@@ -39,6 +40,10 @@ class Card(ABC):
         print("pose la carte")
         current_player.hand.remove(self)
         current_player.add_card_to_played(self)
+
+    def get_card_rule(self):
+        return "Nous avons une carte classique\n" \
+        + f"il donne {self.smiles} smiles\n" 
 
 class StudyCard(Card):
     """Carte étude"""
@@ -61,6 +66,15 @@ class StudyCard(Card):
             'levels': self.levels
         })
         return base
+    
+    def get_card_rule(self):
+        return "Nous avons une carte d'étude\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il s'agit d'une etdue {self.study_type} elle donne {self.levels} niveaux d'étude\n" \
+        + "\nREGLES\n" \
+        + "- il est possible de jouer cette carte que quand on n'a pas de métier\n" \
+        + "- permet d'avoir un métier meilleur\n" \
+        + "- il est interdit d'avoir plus de 6 cartes études de poser au total (sauf cas spécial)"
     
     
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
@@ -92,6 +106,15 @@ class SalaryCard(Card):
             'subtype': self.level
         })
         return base
+    
+    def get_card_rule(self):
+        return "Nous avons une carte salaire\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il s'agit d'un salaire qui donne {self.level} liasse\n" \
+        + "\nREGLES\n" \
+        + "- il est possible de jouer cette carte après avoir un métier\n" \
+        + "- il est possible de jouer cette carte au casino s'il est ouvert\n" \
+        + "- permet d'acheter des acquisitions\n"
     
     
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
@@ -138,6 +161,16 @@ class FlirtCard(Card):
         })
         return base
     
+    
+    def get_card_rule(self):
+        return "Nous avons une carte flirt\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il s'agit du flirt dans {self.location}\n" \
+        + "\nREGLES\n" \
+        + "- il est possible de jouer cette carte tout le temps, sauf pendant un mariage\n" \
+        + "- on a pas le droit d'avoir plus de 5 flirt sans marriage\n" \
+        + "- si un joueur a en dernière carte un flirt de meme location que celui que vous poser, alors vous lui voler son flirt, ce vole peut dépasser la limite de flirt\n" \
+        + "- permet de se marier\n"
     
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
         # Peut flirter si pas marié OU si on a un adultère
@@ -187,6 +220,18 @@ class MarriageCard(Card):
         })
         return base
     
+
+    def get_card_rule(self):
+        return "Nous avons une carte marriage\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il s'agit du marriage dans la ville de {self.location}\n" \
+        + "\nREGLES\n" \
+        + "- il faut avoir au moins 1 flirt avant de pouvoir se marier\n" \
+        + "- il n'est pas possible d'avoir 2 marriage fois en meme temps sur le meme joueur\n" \
+        + "- vous pouvez divorcer à n'importe quel tour, pour cela il suffit de ne pas piocher au début du tour et de défausser son marriage\n" \
+        + "- permet de poser des enfants\n" \
+        + "- permet de poser un adultaire\n"
+
     def discard_play_card(self, game: 'Game', effected_player: 'Player'):
         effected_player.remove_card_from_played(self)
         game.discard.append(self)
@@ -215,6 +260,16 @@ class AdulteryCard(Card):
     def __str__(self):
         return f"adultaire - smile : {self.smiles} - AdulteryCard"
     
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Adultaire\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- il faut avoir au moins 1 marriage avant de pouvoir faire un adultaire\n" \
+        + "- il n'est pas possible d'avoir 2 adultaire fois en meme temps sur le meme joueur\n" \
+        + "- vous pouvez annuler votre adultaire à n'importe quel tour, pour cela il suffit de ne pas piocher au début du tour et de défausser son adultaire\n" \
+        + "- permet de poser des flirts en dépassant la limite des flirts\n" \
+        + "- attention en cas de divorce, vous perdrez, votre marriage, vos enfants et votre adultaire\n"
     
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
@@ -262,6 +317,14 @@ class ChildCard(Card):
         return base
     
     
+    def get_card_rule(self):
+        return "Nous avons une carte Enfant\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"l'enfant s'appelle : {self.name}\n" \
+        + "\nREGLES\n" \
+        + "- il faut avoir au moins 1 marriage avant de pouvoir poser un enfant\n"
+    
+
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
         if not current_player.is_married():
             return False, "Vous devez être marié(e) pour avoir un enfant"
@@ -291,6 +354,12 @@ class AnimalCard(Card):
         })
         return base
     
+    def get_card_rule(self):
+        return "Nous avons une carte Animal\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"l'animal est un : {self.animal_name}\n" \
+        + "\nREGLES\n" \
+        + "- possibilité de jouer la carte a tout moment\n"
     
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
         return True, ""
@@ -323,6 +392,13 @@ class AquisitionCard(Card):
         })
         return base
     
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Aquisition\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il coute : {self.cost} liasse de salaire\n" \
+        + "\nREGLES\n" \
+        + "\n"
     
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
         # Vérifier la somme totale des salaires
@@ -401,6 +477,15 @@ class HouseCard(AquisitionCard):
         return base
     
     
+    def get_card_rule(self):
+        return "Nous avons une carte Maison\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il coute : {self.cost} liasse de salaire\n" \
+        + "\nREGLES\n" \
+        + "- le prix de la maison est 50% moins chère quand le joueur est marrié\n" \
+        + "- il est possible de poser plus de liasse de salaire que le prix minimum\n" \
+        + "- permet d'investir les salaires, les salaires investis ne peuvent etre perdu\n"
+    
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
         job = current_player.get_job()
         if job and job.power == 'house_free':
@@ -433,7 +518,6 @@ class HouseCard(AquisitionCard):
         self.cost = old_cost
         print(f"new price after placing: {self.cost}-{old_cost}")
         
-
 class TravelCard(AquisitionCard):
     """Carte voyage"""
     def __init__(self, image_path: str):
@@ -455,6 +539,15 @@ class TravelCard(AquisitionCard):
         if job and job.power == 'travel_free':
             return True, ""
         return super().can_be_played(current_player, game)
+    
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Voyage\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il coute : {self.cost} liasse de salaire\n" \
+        + "\nREGLES\n" \
+        + "- il est possible de poser plus de liasse de salaire que le prix minimum\n" \
+        + "- permet d'investir les salaires, les salaires investis ne peuvent etre perdu\n"
     
     def play_card(self, game: 'Game', current_player: 'Player'):
         old_cost = self.cost
@@ -481,6 +574,12 @@ class SpecialCard(Card):
         })
         return base
     
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Spécial\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n"
+    
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
         # Logique spécifique selon le type
         return True, ""
@@ -502,6 +601,12 @@ class TrocCard(SpecialCard):
     
     def can_be_played(self, current_player, game):
         return super().can_be_played(current_player, game)
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Troc\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- il permet d'échanger 1 carte avec un autre joueur, entierement aléatoirement\n"
     
     def confirm_player_selection(self, data):
         """confirmation de la sélection des salaires"""
@@ -549,6 +654,12 @@ class TsunamiCard(SpecialCard):
     def can_be_played(self, current_player, game):
         return super().can_be_played(current_player, game)
     
+    def get_card_rule(self):
+        return "Nous avons une carte Tsunami\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- mélange toutes les cartes en main et redistribue les \n"
+    
     def apply_card_effect(self, game, current_player):
         current_player.hand.remove(self)
 
@@ -569,15 +680,23 @@ class TsunamiCard(SpecialCard):
         current_player.hand.append(self)
 
 class HeritageCard(SpecialCard):
-    def __init__(self, image_path: str):
+    def __init__(self, image_path: str, heritage_value):
         super().__init__("heritage", image_path)
         self.smiles = 0
+        self.value = heritage_value
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Heritage\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il donne {self.value} liasse\n" \
+        + "\nREGLES\n" \
+        + "- permet d'avoir l'équivalent de liasse pour investir\n" 
     
     def can_be_played(self, current_player, game):
         return super().can_be_played(current_player, game)
     
     def apply_card_effect(self, game, current_player):
-        current_player.heritage += 3
+        current_player.heritage += self.value
 
 class PistonCard(SpecialCard):
     def __init__(self, image_path: str):
@@ -587,6 +706,12 @@ class PistonCard(SpecialCard):
         self.job_id: int = None
         self.job_card: Player = None
         
+    def get_card_rule(self):
+        return "Nous avons une carte Piston\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- permet de poser un métier sans prendre en compte le niveau d'études requis\n" 
+    
     
     def confirm_job_selection(self, data):
         """confirmation de la sélection du métier"""
@@ -632,6 +757,13 @@ class VengeanceCard(SpecialCard):
         self.target_player: Player = None
         self.hardship_id: int = None
 
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Vengeance\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- permet d'attaquer quelqu'un avec une des cartes d'attaque que vous avez déja reçus\n" 
+    
     def confirm_vengeance_selection(self, data):
         """confirmation de la sélection de la cible"""
         self.target_player_id = int(data.get('target_id', None))
@@ -686,6 +818,13 @@ class ChanceCard(SpecialCard):
         return super().can_be_played(current_player, game)
     
     
+    def get_card_rule(self):
+        return "Nous avons une carte Chance\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- permet de piocher 3 cartes, en sélectionner 1 puis jouer normalement\n" 
+    
+    
     def confirm_card_selection(self, data):
         """confirmation de la sélection des salaires"""
         self.selected_card_id = data.get('selected_card_id', None)
@@ -727,6 +866,13 @@ class EtoileFilanteCard(SpecialCard):
         self.smiles = 0
         self.selection_event: Event = Event()
         self.selected_card_id = None
+    
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Etoile Filante\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- permet de choisir une carte de la défausse et de la poser directement en respectant les regles pour la poser\n" 
     
     def can_be_played(self, current_player, game):
         return super().can_be_played(current_player, game)
@@ -772,6 +918,19 @@ class CasinoCard(SpecialCard):
         self.first_player_bet: Player = None
         self.first_bet: SalaryCard = None
 
+    def get_card_rule(self):
+        return "Nous avons une carte Casino\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- poser cette carte ouvre le casino\n" \
+        + "- quand on ouvre le casino, il est possible de miser directement une cartes salaire de notre main\n" \
+        + "Voici le fonctionnement du Casino\n" \
+        + "- le premier joueur qui joue au casino peut miser une carte salaire\n" \
+        + "- le deuxieme joueur qui joue au casino peut miser une carte salaire\n" \
+        + "- si les 2 salaires misés sont identiques (meme niveau) alors c'est le joueur qui a misé en deuxieme qui pose ces deux salaires devant lui (meme sans métier)\n" \
+        + "- si les 2 salaires misés sont différents alors c'est le joueur qui a misé en premier qui pose ces deux salaires devant lui\n" \
+        + "- ensuite le casino est a nouveau disponible pour miser\n"
+    
     def can_be_played(self, current_player, game):
         return super().can_be_played(current_player, game)
     
@@ -860,7 +1019,12 @@ class AnniversaireCard(SpecialCard):
     def can_be_played(self, current_player, game):
         return super().can_be_played(current_player, game)
     
-
+    def get_card_rule(self):
+        return "Nous avons une carte Anniversaire\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- tous les joueurs doivent sélectionner un de leurs salaires posés pour le donner au joueur dont c'est l'anniversaire\n" \
+    
     def apply_card_effect(self, game, current_player):
         # Afficher la page d'attente au joueur qui joue la carte
         emit('show_birthday_waiting', {
@@ -916,6 +1080,12 @@ class ArcEnCielCard(SpecialCard):
         self.smiles = 0
         self.nb_cards_played = 0
     
+    def get_card_rule(self):
+        return "Nous avons une carte Arc en Ciel\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- après avoir posé cette car, il est possible de jouer jusqu'a 3 autres cartes, puis de repiocher\n"
+        
     def to_dict(self):
         base = super().to_dict()
         base.update({
@@ -952,6 +1122,11 @@ class HardshipCard(Card):
         self.target_player: Player = None
         self.target_player_id: int = None
 
+    def get_card_rule(self):
+        return "Nous avons une carte Coup Dur\n" \
+        + "\nREGLES\n" \
+        + "- \n"
+    
     def __str__(self):
         return f"smile : {self.smiles} - HardshipCard"
     
@@ -1031,6 +1206,12 @@ class TaxCard(HardshipCard):
     def __str__(self):
         return f"TaxCard"
     
+    def get_card_rule(self):
+        return "Nous avons une carte Impot sur le Revenu\n" \
+        + "\nREGLES\n" \
+        + "- retire le dernier salaire posé d'un joueur\n" \
+        + "- seul les joueurs qui ont un métier peuvent subir ce coup dur"
+    
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
         base.update({
@@ -1074,6 +1255,11 @@ class MaladieCard(HardshipCard):
     def __str__(self):
         return f"MaladieCard"
     
+    def get_card_rule(self):
+        return "Nous avons une carte Maladie\n" \
+        + "\nREGLES\n" \
+        + "- fait passer un tour\n"
+    
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
         base.update({
@@ -1100,6 +1286,11 @@ class AccidentCard(HardshipCard):
     
     def __str__(self):
         return f"AccidentCard"
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Accident\n" \
+        + "\nREGLES\n" \
+        + "- fait passer un tour au joueur visé\n"
     
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
@@ -1135,6 +1326,12 @@ class AttentatCard(HardshipCard):
         })
         return base
     
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Attentat\n" \
+        + "\nREGLES\n" \
+        + "- défausse absolument tous les enfants posé meme les tiens\n"
+    
     def can_be_played(self, current_player, game):
         for player in game.players:
             if player.has_job() and "no_attentat" in player.get_job().power:
@@ -1165,6 +1362,13 @@ class DivorceCard(HardshipCard):
     
     def __str__(self):
         return f"DivorceCard"
+    
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Divorce\n" \
+        + "\nREGLES\n" \
+        + "- retire le marriage d'un joueur\n" \
+        + "- seul les joueurs qui ont un marriage peuvent subir ce coup dur"
     
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
@@ -1209,6 +1413,13 @@ class BurnOutCard(HardshipCard):
     def __str__(self):
         return f"BurnOutCard"
     
+    
+    def get_card_rule(self):
+        return "Nous avons une carte BurnOut\n" \
+        + "\nREGLES\n" \
+        + "- fait passer un tour à un joueur\n" \
+        + "- seul les joueurs qui ont un métier peuvent subir ce coup dur"
+    
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
         base.update({
@@ -1234,6 +1445,13 @@ class RedoublementCard(HardshipCard):
     
     def __str__(self):
         return f"RedoublementCard"
+    
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Redoublement\n" \
+        + "\nREGLES\n" \
+        + "- retire le derniere carte étude posé d'un joueur\n" \
+        + "- seul les joueurs qui n'ont pas un métier peuvent subir ce coup dur"
     
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
@@ -1277,6 +1495,14 @@ class PrisonCard(HardshipCard):
         })
         return base
     
+    def get_card_rule(self):
+        return "Nous avons une carte Prison\n" \
+        + "\nREGLES\n" \
+        + "- retire le métier de bandit d'un joueur\n" \
+        + "- fait passer 3 tour à un joueur\n" \
+        + "- défausse 2 cartes aléatoire de la main d'un joueur\n" \
+        + "- seul les joueurs qui ont le métier de bandit peuvent subir ce coup dur"
+    
     def other_rules(self, game: 'Game', current_player: 'Player', player: 'Player'):
         return not (player.has_job() and player.get_job().job_name == "bandit")
 
@@ -1316,6 +1542,12 @@ class LicenciementCard(HardshipCard):
         })
         return base
     
+    def get_card_rule(self):
+        return "Nous avons une carte Licenciement\n" \
+        + "\nREGLES\n" \
+        + "- retire le métier posé d'un joueur\n" \
+        + "- seul les joueurs qui ont un métier qui n'est pas fonctionnaire peuvent subir ce coup dur"
+
     def other_rules(self, game: 'Game', current_player: 'Player', player: 'Player'):
         if not player.has_job():
             return True
@@ -1346,6 +1578,11 @@ class OtherCard(Card):
     
     def __str__(self):
         return f"{self.card_type} - smile : {self.smiles} - OtherCard"
+
+
+    def get_card_rule(self):
+        return "Nous avons une carte Other Card\n" \
+        + "\nREGLES\n"
 
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
@@ -1378,6 +1615,12 @@ class LegionCard(OtherCard):
             return False, "Vous avez été bandit dans la partie"
         return True, ""
     
+    def get_card_rule(self):
+        return "Nous avons une carte Légion\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- peut etre poser que si le joueur n'as pas été bandit dans la partie (il peut etre bandit après avoir eu la légion)\n"
+
     def play_card(self, game: 'Game', current_player: 'Player'):
         super().play_card(game, current_player)
 
@@ -1386,6 +1629,15 @@ class PriceCard(OtherCard):
     def __init__(self, smiles: int, image_path: str):
         super().__init__('prix', smiles, image_path)
         self.job_link = None
+        
+    def get_card_rule(self):
+        return "Nous avons une carte Grand Prix d'Exelence\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- peut etre poser que avec certain métier\n" \
+        + "- permet a ces métier de pouvoir poser des salaires de 1 à 4" \
+        + "- meme si le joueur perd son métier dont il a le prix d'exelence lier, il garde le bonus de smile du prix, mais ce prix n'as plus d'effet"
+
     
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
         print("tentative de link de Prix", end=" ")
@@ -1430,6 +1682,13 @@ class JobCard(Card):
         if effected_player.id == game.current_player and self.status != "intérimaire":
             game.next_player()
     
+    def get_card_rule(self):
+        return "Nous avons une carte JobCard\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n"
+    
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
         base.update({
@@ -1473,6 +1732,16 @@ class ChercheurJob(JobCard):
         self.status = ""
         self.power = "prix_possible"
 
+
+    def get_card_rule(self):
+        return "Nous avons une carte métier Chercheur\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- grand prix d'exelence possible\n" \
+        + "- jouer avec 6 cartes en mains\n"
+
     def apply_instant_power(self, game: 'Game', current_player: 'Player'):
         current_player.hand.append(game.deck.pop())
 
@@ -1490,6 +1759,14 @@ class AstronauteJob(JobCard):
         self.selection_event: Event = Event()
         self.selected_card_id = None
 
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Astronaute\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- pouvoir instantanée : récupérer une carte posable depuis la défausse et poser la\n"
     
     def confirm_selection(self, data):
         """confirmation de la sélection des salaires"""
@@ -1540,6 +1817,15 @@ class BanditJob(JobCard):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
         self.power = "no_tax__no_fire"
+        
+    def get_card_rule(self):
+        return "Nous avons une carte métier Bandit\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- Ne peux pas subir d'Impot sur le Revenu\n" \
+        + "- Ne peux pas etre licencier\n"
 
     def can_be_played(self, current_player: 'Player', game: 'Game'):
         for player in game.players:
@@ -1559,6 +1845,14 @@ class MediumJob(JobCard):
         self.status = ""
         self.power = ""
         self.selection_event: Event = Event()
+        
+    def get_card_rule(self):
+        return "Nous avons une carte métier Médium\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- pouvoir instantanée : regarder les 13 prochaine cartes de la pioche\n"
     
     def confirm_selection(self, data):
         """confirmation de la sélection des salaires"""
@@ -1596,6 +1890,15 @@ class JournalisteJob(JobCard):
         self.selection_event.set()  # Déclencher l'événement
 
 
+    def get_card_rule(self):
+        return "Nous avons une carte métier Chercheur\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- grand prix d'exelence possible\n" \
+        + "- pouvoir instantanée : voir la main des autres joueurs\n"
+
     def apply_instant_power(self, game: 'Game', current_player: 'Player'):    
         hands_info = {}
         for p in game.players:
@@ -1623,6 +1926,14 @@ class ChefDesAchatsJob(JobCard):
         self.selection_event: Event = Event()
         self.selected_card_id = None
 
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Chef des Achats\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- pouvoir instantanée : récupère une carte Acquisition de la défausse et propose de l'acheter\n"
     
     def confirm_selection(self, data):
         """confirmation de la sélection des salaires"""
@@ -1666,6 +1977,14 @@ class ChefDesVentesJob(JobCard):
         self.selected_card_id = None
 
     
+    def get_card_rule(self):
+        return "Nous avons une carte métier Chercheur\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- pouvoir instantanée : choisi un salaire posable depuis la défausse et pose le\n"
+    
     def confirm_selection(self, data):
         """confirmation de la sélection des salaires"""
         self.selected_card_id = data.get('selected_card_id')
@@ -1706,11 +2025,33 @@ class ProfJob(JobCard):
         self.status = "fonctionnaire"
         self.power = ""
 
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Prof\n" \
+        + f"ce métier est un {self.status}\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- ne peux pas etre licencié\n"
+
 class GrandProfJob(JobCard):
     def __init__(self, job_name: str, salary: int, image_path: str):
         super().__init__(job_name, salary, 0, image_path)
         self.status = "fonctionnaire"
         self.power = ""
+        
+    def get_card_rule(self):
+        return "Nous avons une carte métier Grand Prof\n" \
+        + f"ce métier est un {self.status}\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- ne peux pas etre licencié\n" \
+        + "- remplace le métier de professeur\n" \
+        + "- necessite d'etre professeur avant de poser cette carte\n"
+        
 
     def can_be_played(self, player, game):
         if player.has_job() and isinstance(player.get_job(), ProfJob):
@@ -1728,6 +2069,14 @@ class GourouJob(JobCard):
         self.status = ""
         self.power = ""
     
+    def get_card_rule(self):
+        return "Nous avons une carte métier Gourou\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + ""
+    
     def can_be_played(self, player, game):
         for player in game.players:
             if player.has_job() and "no_gourou" in player.get_job().power:
@@ -1740,6 +2089,15 @@ class PolicierJob(JobCard):
         self.status = "fonctionnaire"
         self.power = "no_bandit__no_gourou"
     
+    def get_card_rule(self):
+        return "Nous avons une carte métier Gourou\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- ne peux pas etre licencié\n" \
+        + "- il ne peux pas y avoir de bandit ou de gourou avec un policier\n"
+    
     def apply_instant_power(self, game, current_player):
         for player in game.players:
             if player.has_job() and isinstance(player.get_job(), (GourouJob, BanditJob)):
@@ -1750,6 +2108,14 @@ class ArchitecteJob(JobCard):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
         self.power = "house_free"
+        
+    def get_card_rule(self):
+        return "Nous avons une carte métier Architecte\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- permet de poser gratuitement la prochaine maison\n"
     
     def use_power(self):
         self.power = ""
@@ -1762,54 +2128,132 @@ class AvocatJob(JobCard):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
         self.power = "no_divorce"
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Avocat\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- ne peux pas recevoir de Divorce\n"
 
 class BarmanJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = "intérimaire"
         self.power = "unlimited_flirt"
+    
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Gourou\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- flirt illimité avant le mariage\n" \
+        + "- possibilité de démissionner à n'importe quel moment du tour"
 
 class ChirurgienJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
         self.power = "no_illness__extra_study"
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Chirurgien\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- ne peux pas recevoir de maladie\n" \
+        + "- peut continuer les études a l'infini\n"
 
 class DesignerJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
-        self.status = "fonctionnaire"
-        self.power = "no_bandit__no_gourou"
+        self.status = ""
+        self.power = ""
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Designer\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + ""
 
 class GaragisteJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = ""
+        self.power = "no_accident"
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Garagiste\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- ne peux pas subir d'accident"
 
 class JardinierJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
         self.power = ""
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Jardinier\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + ""
 
 class MedecinJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
         self.power = "no_maladie__extra_study"
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Médecin\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- ne peux pas recevoir de maladie\n" \
+        + "- peut continuer les études a l'infini\n"
 
 class MilitaireJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = "fonctionnaire"
-        self.power = "no_bandit__no_gourou"
+        self.power = "no_attentat"
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Jardinier\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- ne peux pas etre licencier\n" \
+        + "- il ne peux pas y avoir d'attentat quand ce métier est posé\n"
 
 class PharmacienJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
         self.power = "no_maladie"
+    
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Jardinier\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- ne peux pas subir de Maladie\n"
 
 class PiloteDeLigneJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
@@ -1817,35 +2261,84 @@ class PiloteDeLigneJob(JobCard):
         self.status = ""
         self.power = "travel_free"
 
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Pilote de ligne\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- tous les voyages sont gratuits\n"
+
 class PizzaioloJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
         self.power = ""
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Pizzaiolo\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + ""
 
 class PlombierJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = "intérimaire"
         self.power = ""
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Plombier\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- peux démissionner a tout moment du tour\n"
 
 class ServeurJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = "intérimaire"
         self.power = ""
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Serveur\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- peux démissionner a tout moment du tour\n"
 
 class StripTeaserJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = "intérimaire"
         self.power = ""
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier StripTeaser\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- peux démissionner a tout moment du tour\n"
 
 class EcrivainJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
         self.power = "prix_possible"
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Ecrivain\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- grand prix d'exelence possible\n"
 
 
 class Player:
@@ -2230,7 +2723,7 @@ class CardFactory:
     def create_deck(cls) -> List[Card]:
         """Crée un deck complet de cartes"""
         #########################
-        return cls.test_create_deck(cls)
+        # return cls.test_create_deck(cls)
         # TESTING
         #########################
         
@@ -2318,7 +2811,7 @@ class CardFactory:
         # Cartes spéciales
         deck.append(TrocCard("special_cards/troc.png"))
         deck.append(TsunamiCard("special_cards/tsunami.png"))
-        deck.append(HeritageCard("special_cards/heritage.png"))
+        deck.append(HeritageCard("special_cards/heritage.png", 3))
         deck.append(PistonCard("special_cards/piston.png"))
         deck.append(AnniversaireCard("special_cards/anniversaire.png"))
         deck.append(CasinoCard("special_cards/casino.png"))
