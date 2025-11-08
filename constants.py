@@ -55,15 +55,11 @@ def check_game():
     game: Game = games[game_id]
     return game.current_player, game, game_id
 
-def update_all_player(game, message):
-    print("[start]: update_all_player")
-    for p in game.players:
-        if p.connected:
-            print("[appel] : game_updated")
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, p.id),
-                'message': message
-            }, room=p.session_id)
+def update_all_player(game: Game, message):
+    """Fonction legacy - redirige vers la méthode de la classe Game"""
+    print("[start]: update_all_player (legacy)")
+    game.broadcast_update(message)
+
 
 def get_card_by_id(card_id, deck: list[Card]):
     """récupère une carte dans le deck par son id"""

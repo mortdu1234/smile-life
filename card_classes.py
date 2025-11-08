@@ -596,11 +596,10 @@ class PistonCard(SpecialCard):
 
         for card in current_player.hand:
             if card.id == self.job_id:
-                self.job_card = card
+                self.job_card: JobCard = card
                 break
-        
-        current_player.add_card_to_played(self.job_card)
-        current_player.hand.remove(self.job_card)
+
+        self.job_card.play_card(game, current_player)
         
         pick_card = game.deck.pop()
         current_player.hand.append(pick_card)
@@ -816,6 +815,7 @@ class CasinoCard(SpecialCard):
                 self.first_player_bet = current_player
                 if is_opener:
                     current_player.hand.append(game.deck.pop())
+            game.broadcast_update()
 
     def apply_card_effect(self, game, current_player):
         self.bet_on_casino(game, current_player, True)
@@ -918,6 +918,9 @@ class ArcEnCielCard(SpecialCard):
         if self.nb_cards_played >= 4:
             self.end_arc_en_ciel(game, current_player)    
 
+
+
+
 class HardshipCard(Card):
     """Carte coup dur"""
     def __init__(self, image_path: str):
@@ -1016,13 +1019,17 @@ class TaxCard(HardshipCard):
     def other_rules(self, game: 'Game', current_player: 'Player', player: 'Player'):
         # si il possède pas de métier
         if not player.has_job():
+            print(f"[DEBUG] : {player.name} pas de métier")
             return True
         # si le métier n'est pas imunisé au tax
         if "no_tax" in player.get_job().power:
+            print(f"[DEBUG] : {player.name} un pouvoir no_tax")
             return True
-        # si il possède au moins 1 salaire
-        if player.get_available_salary_sum() > 0:
+        # si il a pas de salaires
+        if player.get_available_salary_sum() == 0:
+            print(f"[DEBUG] : {player.name} pas de salaire")
             return True
+        print(f"[DEBUG] : {player.name} ne peux pas recevoir de taxe")
         return False
 
     def can_be_played(self, current_player, game):
@@ -1053,7 +1060,7 @@ class MaladieCard(HardshipCard):
         return base
     
     def other_rules(self, game: 'Game', current_player: 'Player', player: 'Player'):
-        return player.has_job() and "no_illness" in player.get_job().power
+        return player.has_job() and "no_maladie" in player.get_job().power
              
     def can_be_played(self, current_player, game):
         return super().can_be_played(current_player, game)
@@ -1116,9 +1123,7 @@ class AttentatCard(HardshipCard):
         targets = []
         for player in game.players:
             values = player.to_dict()
-            values["immune"] = True
-            if player == current_player:
-                values["immune"] = False
+            values["immune"] = False
             targets.append(values)
         return targets
 
@@ -1161,14 +1166,16 @@ class DivorceCard(HardshipCard):
 
     def apply_effect(self, game, target_player, current_player):
         # si le joueur a un adultaire
-        if current_player.has_adultery():
+        cards_played = tuple(target_player.played["vie personnelle"])
+        if target_player.has_adultery():
             # jette tous les enfants
-            for card in target_player.played["vie personnelle"]:
-                if isinstance(card, (AdulteryCard, ChildCard, MarriageCard)):
+            for card in cards_played:
+                print(f"[DEBUG] : card {card}")
+                if isinstance(card, (AdulteryCard, MarriageCard, ChildCard)):
                     target_player.remove_card_from_played(card)
                     game.discard.append(card)
         else:
-            for card in target_player.played["vie personnelle"]:
+            for card in cards_played:
                 if isinstance(card, MarriageCard):
                     target_player.remove_card_from_played(card)
                     game.discard.append(card)
@@ -1306,6 +1313,8 @@ class LicenciementCard(HardshipCard):
         job_card = target_player.get_job() 
         job_card.discard_play_card(game, target_player)
 
+
+
 class OtherCard(Card):
     """Autres cartes (légion d'honneur, prix)"""
     def __init__(self, card_type: str, smiles: int, image_path: str):
@@ -1348,7 +1357,7 @@ class LegionCard(OtherCard):
         return True, ""
     
     def play_card(self, game: 'Game', current_player: 'Player'):
-        super.play_card(game, current_player)
+        super().play_card(game, current_player)
 
 class PriceCard(OtherCard):
     """Carte prix d'excellence"""
@@ -1415,6 +1424,7 @@ class JobCard(Card):
     def can_be_played(self, player: 'Player', game: 'Game') -> tuple[bool, str]:
         # Vérifier si le joueur a déjà un métier
         if player.has_job():
+            print(f"debug : {game.to_dict()}")
             return False, "Vous avez déjà un métier"
         
         # Vérifier si le joueur a les études nécessaires
@@ -1471,8 +1481,10 @@ class AstronauteJob(JobCard):
 
 
     def apply_instant_power(self, game: 'Game', current_player: 'Player'):
-        available_cards = [c for c in game.discard if c.can_be_played(current_player, game)[0] and not isinstance(c, JobCard)]
-        
+        current_player.add_card_to_played(self)
+        available_cards = [c for c in game.discard if c.can_be_played(current_player, game)[0]]
+        current_player.remove_card_from_played(self)
+
         emit('select_astronaute_card', {
         'card_id' : self.id,
         'cards': [c.to_dict() for c in available_cards]
@@ -1507,11 +1519,11 @@ class BanditJob(JobCard):
         self.status = ""
         self.power = "no_tax__no_fire"
 
-    def can_be_played(self, player, game):
+    def can_be_played(self, current_player: 'Player', game: 'Game'):
         for player in game.players:
             if player.has_job() and "no_bandit" in player.get_job().power:
                 return False, "il y a un job qui empeche le bandit"
-        return super().can_be_played(player, game)
+        return super().can_be_played(current_player, game)
 
     def apply_instant_power(self, game: 'Game', current_player: 'Player'):
         current_player.has_been_bandit = True
@@ -1554,7 +1566,7 @@ class JournalisteJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = ""
+        self.power = "prix_possible"
         self.selection_event: Event = Event()
     
     def confirm_selection(self, data):
@@ -1925,6 +1937,7 @@ class Player:
     
     def has_adultery(self) -> bool:
         """Vérifie si le joueur a un adultère"""
+        print(f"[DEBUG] : {self.played}, {self.name}\n\n")
         return any(isinstance(card, AdulteryCard) for card in self.played["vie personnelle"])
     
     def get_job(self) -> JobCard:
@@ -2010,6 +2023,7 @@ class Game:
         self.arcEnCielMode = False
         self.arcEnCielCard: ArcEnCielCard = None
 
+
     def add_player(self, player: Player):
         """Ajoute un joueur à la partie"""
         if isinstance(player, Player):
@@ -2049,6 +2063,26 @@ class Game:
             "arc_en_ciel_card": self.arcEnCielCard.to_dict() if self.arcEnCielCard else {}    
         }
 
+    def broadcast_update(self, message: str = ""):
+        """
+        Envoie une mise à jour à tous les joueurs connectés
+        
+        Args:
+            message: Message optionnel à afficher aux joueurs
+            socketio: Instance de SocketIO pour l'émission (doit être passée depuis l'extérieur)
+        """            
+        from constants import get_game_state_for_player, socketio
+        
+        print(f"[start]: Game.broadcast_update - message: '{message}'")
+        
+        for player in self.players:
+            if player.connected:
+                print(f"[broadcast] Sending update to player {player.id} ({player.name})")
+                socketio.emit('game_updated', {
+                    'game': get_game_state_for_player(self, player.id),
+                    'message': message
+                }, room=player.session_id)
+
 class CardFactory:
     """Factory pour créer les cartes"""
 
@@ -2077,45 +2111,16 @@ class CardFactory:
         """effectue un tests avec des cartes customs"""
         deck = []
         
-        deck.append(ArchitecteJob("architecte", 3, 4, "personnal_life/professionnal_life/JobCards/architecte.png"))
-        deck.append(AstronauteJob("astronaute", 4, 6, "personnal_life/professionnal_life/JobCards/astronaute.png"))
-        deck.append(AvocatJob("avocat", 3, 4, "personnal_life/professionnal_life/JobCards/avocat.png"))
-        deck.append(BanditJob("bandit", 4, 0, "personnal_life/professionnal_life/JobCards/bandit.png"))
-        deck.append(BarmanJob("barman", 1, 0, "personnal_life/professionnal_life/JobCards/barman.png"))
-        deck.append(ChefDesVentesJob("chef des ventes", 3, 3, "personnal_life/professionnal_life/JobCards/chef_des_ventes.png"))
-        deck.append(ChefDesAchatsJob("chef des achats", 3, 3, "personnal_life/professionnal_life/JobCards/chef_des_achats.png"))
-        deck.append(ChercheurJob("chercheur", 2, 6, "personnal_life/professionnal_life/JobCards/chercheur.png"))
-        deck.append(ChirurgienJob("chirurgien", 4, 6, "personnal_life/professionnal_life/JobCards/chirurgien.png"))
-        deck.append(DesignerJob("designer", 3, 4, "personnal_life/professionnal_life/JobCards/designer.png"))
-        deck.append(EcrivainJob("ecrivain", 1, 0, "personnal_life/professionnal_life/JobCards/ecrivain.png"))
-        deck.append(GaragisteJob("garagiste", 2, 1, "personnal_life/professionnal_life/JobCards/garagiste.png"))
-        deck.append(GourouJob("gourou", 3, 0, "personnal_life/professionnal_life/JobCards/gourou.png"))
-        deck.append(JardinierJob("jardinier", 1, 1, "personnal_life/professionnal_life/JobCards/jardinier.png"))
-        deck.append(JournalisteJob("journaliste", 2, 3, "personnal_life/professionnal_life/JobCards/journaliste.png"))
-        deck.append(MedecinJob("médecin", 4, 6, "personnal_life/professionnal_life/JobCards/medecin.png"))
-        deck.append(MediumJob("médium", 1, 0, "personnal_life/professionnal_life/JobCards/medium.png"))
-        deck.append(MilitaireJob("militaire", 1, 0, "personnal_life/professionnal_life/JobCards/militaire.png"))
-        deck.append(PharmacienJob("pharmacien", 3, 5, "personnal_life/professionnal_life/JobCards/pharmacien.png"))
-        deck.append(PiloteDeLigneJob("pilote de ligne", 4, 5, "personnal_life/professionnal_life/JobCards/pilote_de_ligne.png"))
-        deck.append(PizzaioloJob("pizzaiolo", 2, 0, "personnal_life/professionnal_life/JobCards/pizzaiolo.png"))
-        deck.append(PlombierJob("plombier", 1, 1, "personnal_life/professionnal_life/JobCards/plombier.png"))
-        deck.append(PolicierJob("policier", 1, 1, "personnal_life/professionnal_life/JobCards/policier.png"))
-        deck.append(ProfJob("prof anglais", 2, 2, "personnal_life/professionnal_life/JobCards/prof_anglais.png"))
-        deck.append(ProfJob("prof francais", 2, 2, "personnal_life/professionnal_life/JobCards/prof_francais.png"))
-        deck.append(ProfJob("prof histoire", 2, 2, "personnal_life/professionnal_life/JobCards/prof_histoire.png"))
-        deck.append(ProfJob("prof maths", 2, 2, "personnal_life/professionnal_life/JobCards/prof_maths.png"))
-        deck.append(ServeurJob("serveur", 1, 0, "personnal_life/professionnal_life/JobCards/serveur.png"))
-        deck.append(StripTeaserJob("stripteaser", 1, 0, "personnal_life/professionnal_life/JobCards/stripteaser.png"))
-        deck.append(GrandProfJob("grand prof", 3, "P", "personnal_life/professionnal_life/JobCards/grand_prof.png"))
-
+        
+        
         # Etudes
-        for _ in range(5):
+        for _ in range(0):
             deck.append(StudyCard('double', 2, "personnal_life/professionnal_life/StudyCards/study2.png"))
         
         # Salaires
         
         for level in range(3, 5):
-            for _ in range(5):
+            for _ in range(0):
                 deck.append(SalaryCard(level, f"personnal_life/professionnal_life/SalaryCards/salary{level}.png"))
         
         # Maisons
@@ -2128,7 +2133,7 @@ class CardFactory:
         
         # Voyages
         
-        for trip_name in range(5):
+        for trip_name in range(0):
             t = cls.TRIP_NAMES[0].replace(" ", "_")
             deck.append(TravelCard(f"aquisition_cards/trip/{t}.png"))
 
@@ -2145,23 +2150,27 @@ class CardFactory:
             l = cls.MARRIAGE_LOCATIONS[0].replace(" ", "_").replace("-", "_")
             deck.append(MarriageCard(l, f"personnal_life/mariages/mariage_{l}.png"))
         
+        # Adultères
+        for _ in range(3):
+            deck.append(AdulteryCard("personnal_life/mariages/adultere.png"))
+        
         # Enfants
         
-        for name in range(0):
+        for name in range(5):
             deck.append(ChildCard(cls.CHILDREN_NAMES[0], f"personnal_life/children/{cls.CHILDREN_NAMES[0]}.png"))
         
          # Cartes spéciales
 
-        deck.append(TrocCard("special_cards/troc.png"))
-        deck.append(TsunamiCard("special_cards/tsunami.png"))
-        deck.append(HeritageCard("special_cards/heritage.png"))
-        deck.append(PistonCard("special_cards/piston.png"))
-        deck.append(AnniversaireCard("special_cards/anniversaire.png"))
-        deck.append(CasinoCard("special_cards/casino.png"))
-        deck.append(ChanceCard("special_cards/chance.png"))
-        deck.append(EtoileFilanteCard("special_cards/etoile_filante.png"))
-        deck.append(VengeanceCard("special_cards/vengeance.png"))
-        deck.append(ArcEnCielCard("special_cards/arc_en_ciel.png"))
+        # deck.append(TrocCard("special_cards/troc.png"))
+        # deck.append(TsunamiCard("special_cards/tsunami.png"))
+        # deck.append(HeritageCard("special_cards/heritage.png"))
+        # deck.append(PistonCard("special_cards/piston.png"))
+        # deck.append(AnniversaireCard("special_cards/anniversaire.png"))
+        # deck.append(CasinoCard("special_cards/casino.png"))
+        # deck.append(ChanceCard("special_cards/chance.png"))
+        # deck.append(EtoileFilanteCard("special_cards/etoile_filante.png"))
+        # deck.append(VengeanceCard("special_cards/vengeance.png"))
+        # deck.append(ArcEnCielCard("special_cards/arc_en_ciel.png"))
 
         deck.append(ChanceCard("special_cards/chance.png"))
         deck.append(ChanceCard("special_cards/chance.png"))
@@ -2175,12 +2184,12 @@ class CardFactory:
 
         # cartes d'attaques
 
-        for _ in range(5):
+        for _ in range(10):
             # deck.append(AccidentCard("hardship_cards/accident.png"))
             # deck.append(BurnOutCard("hardship_cards/burnout.png"))
             deck.append(DivorceCard("hardship_cards/divorce.png"))
             # deck.append(TaxCard("hardship_cards/tax.png"))
-            deck.append(LicenciementCard("hardship_cards/licenciement.png"))
+            # deck.append(LicenciementCard("hardship_cards/licenciement.png"))
             # deck.append(MaladieCard("hardship_cards/maladie.png"))
             # deck.append(RedoublementCard("hardship_cards/redoublement.png"))
         

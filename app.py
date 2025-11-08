@@ -1,8 +1,8 @@
 from flask_socketio import emit
 from card_classes import *
-from constants import app, socketio, check_game
+from constants import app, socketio, check_game, update_all_player
 from special_power import *
-import init # pour avoir la route initiale /
+import init # pour avoir la route initiale /  # noqa: F401
 
 
 #######################
@@ -75,15 +75,6 @@ def handle_cancel_select_salarie(data):
     if card is not None and isinstance(card, AquisitionCard):
         card.discard_salary_selection(data)
     
-    return
-    if True:
-    # ✅ VÉRIFIER SI C'EST UN ACHAT CHEF DES ACHATS
-        is_chef_achats = (game.pending_special and 
-                        game.pending_special.get('type') == 'chef_achats_purchase')
-        
-        if is_chef_achats:
-            handle_cancel_chef_achats_job()
-
 #########################
 # Hardship
 #########################

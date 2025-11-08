@@ -217,6 +217,7 @@ def handle_casino_confirm_card(data):
     card = game.casino_card
     if isinstance(card, CasinoCard):
         card.confirm_bet_selection(data)
+        
 
 @socketio.on('discard_casino_bet')
 def handle_casino_discard_card(data):
