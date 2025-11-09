@@ -829,13 +829,11 @@ class ChanceCard(SpecialCard):
     def can_be_played(self, current_player, game):
         return super().can_be_played(current_player, game)
     
-    
     def get_card_rule(self):
         return "Nous avons une carte Chance\n" \
         + f"il donne {self.smiles} smiles\n" \
         + "\nREGLES\n" \
         + "- permet de piocher 3 cartes, en sélectionner 1 puis jouer normalement\n" 
-    
     
     def confirm_card_selection(self, data):
         """confirmation de la sélection des salaires"""
@@ -845,7 +843,6 @@ class ChanceCard(SpecialCard):
     def discard_card_selection(self, data):
         """annulation de la sélection des salaires"""
         self.selection_event.set()  # Déclencher l'événement
-
 
     def apply_card_effect(self, game, current_player):
         print("[START] : Chance.apply_card_effect")
@@ -1122,7 +1119,23 @@ class ArcEnCielCard(SpecialCard):
         if self.nb_cards_played >= 4:
             self.end_arc_en_ciel(game, current_player)    
 
-
+class MuguetCard(SpecialCard):
+    def __init__(self, image_path: str):
+        super().__init__("muguet", image_path)
+        self.smiles = 1
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Muguet\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il donne {self.value} liasse\n" \
+        + "\nREGLES\n" \
+        + "- permet de rejouer\n" 
+    
+    def can_be_played(self, current_player, game):
+        return super().can_be_played(current_player, game)
+    
+    def apply_card_effect(self, game: 'Game', current_player):
+        game.phase = "draw"
 
 
 class HardshipCard(Card):
@@ -2352,6 +2365,61 @@ class EcrivainJob(JobCard):
         + "\nREGLES\n" \
         + "- grand prix d'exelence possible\n"
 
+class YoutuberJob(JobCard):
+    def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
+        super().__init__(job_name, salary, studies, image_path)
+        self.status = ""
+        self.power = ""
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Youtubeur\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "-\n"
+
+class CoiffeurJob(JobCard):
+    def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
+        super().__init__(job_name, salary, studies, image_path)
+        self.status = ""
+        self.power = ""
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Coiffeur\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "-\n"
+
+class DeejayJob(JobCard):
+    def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
+        super().__init__(job_name, salary, studies, image_path)
+        self.status = "intérimaire"
+        self.power = ""
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Plombier\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- peux démissionner a tout moment du tour\n" \
+        + "- quand on le pose, mélange toutes les cartes en main des joueurs\n"
+    
+    def apply_instant_power(self, game: 'Game', current_player: 'Player'):
+        print("[START] : DeeJay.apply_instant_power")
+        hands: list[Card] = []
+        for player in game.players:
+            hands.extend(player.hand)
+        random.shuffle(hands)
+        for player in game.players:
+            nb_cards = len(player.hand)
+            player.hand = []
+            for _ in range(nb_cards):
+                player.hand.append(hands.pop())
+
 
 class Player:
     """Classe représentant un joueur"""
@@ -2872,8 +2940,15 @@ class CardFactory:
         
 
         # EXTENTIONS
-        
+        # cartes spéciales supplémentaires
         deck.append(HeritageCard("special_cards/super_heritage.png", 5))
+        deck.append(MuguetCard("special_cards/muguet.png"))
+
+        # metiers supplementaires
+        deck.append(ProfJob("prof education sexuelle", 2, 2, "personnal_life/professionnal_life/JobCards/prof_education_sexuelle.png"))
+        deck.append(YoutuberJob("youtubeur", 4, 0, "personnal_life/professionnal_life/JobCards/youtubeur.png"))
+        deck.append(CoiffeurJob("coiffeur", 1, 1, "personnal_life/professionnal_life/JobCards/coiffeur.png"))
+        deck.append(DeejayJob("deejay", 2, 0, "personnal_life/professionnal_life/JobCards/deejay.png"))
         
 
 
