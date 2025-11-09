@@ -1,119 +1,94 @@
 @echo off
 chcp 65001 >nul
-setlocal enabledelayedexpansion
+color 0A
 
-echo ================================================
-echo   🎮 JEU DE CARTES SMILE - LANCEUR COMPLET
-echo ================================================
+echo ========================================
+echo   Lancement Flask + Cloudflare Tunnel
+echo ========================================
 echo.
 
-REM Vérifier Python
-python --version >nul 2>&1
-if errorlevel 1 (
-    echo ❌ Python n'est pas installé
+REM Vérifier si app.py existe
+if not exist "app.py" (
+    echo [ERREUR] Le fichier app.py n'existe pas dans ce dossier
     pause
     exit /b 1
 )
 
-REM Créer l'environnement virtuel si nécessaire
-if not exist ".venv" (
-    echo 📦 Installation initiale...
-    python -m venv .venv
-    call .venv\Scripts\activate.bat
-    pip install flask flask-socketio python-socketio eventlet
-) else (
-    call .venv\Scripts\activate.bat
-)
+REM Menu de choix
+:menu
+echo Choisissez le mode de lancement :
+echo.
+echo [1] Mode PRIVE (localhost uniquement)
+echo [2] Mode PUBLIC (accessible depuis Internet via Cloudflare)
+echo [Q] Quitter
+echo.
+set /p choice="Votre choix (1/2/Q) : "
 
-echo.
-echo 📋 CHOIX DU MODE :
-echo.
-echo   [1] 🏠 Jeu LOCAL ^(même réseau WiFi uniquement^)
-echo   [2] 🌍 Jeu PUBLIC ^(accessible depuis Internet avec Serveo^)
-echo.
-set /p choice="Votre choix (1 ou 2) : "
-
-if "%choice%"=="1" goto local
+if /i "%choice%"=="Q" exit /b 0
+if "%choice%"=="1" goto private
 if "%choice%"=="2" goto public
-goto invalid
+echo Choix invalide, veuillez reessayer.
+echo.
+goto menu
 
-:local
+:private
+cls
+echo ========================================
+echo   MODE PRIVE - Localhost uniquement
+echo ========================================
 echo.
-echo ================================================
-echo   🏠 MODE LOCAL
-echo ================================================
+echo Lancement de l'application Flask...
 echo.
-
-REM Obtenir l'adresse IP locale
-for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /c:"IPv4"') do (
-    set IP=%%a
-    set IP=!IP:~1!
-    goto :found_ip
-)
-:found_ip
-
-echo ✅ Démarrage du serveur...
+start "Flask Application" cmd /k "title Flask Application (PRIVE) && color 0E && echo ======================================== && echo    APPLICATION FLASK - MODE PRIVE && echo ======================================== && echo. && echo URL locale : http://127.0.0.1:5000 && echo. && python app.py"
 echo.
-echo 📍 Accès au jeu :
+echo ========================================
+echo Application lancee en mode PRIVE
+echo URL : http://127.0.0.1:5000
+echo ========================================
 echo.
-echo    Sur cet ordinateur : http://localhost:5000
-echo    Autres appareils : http://!IP!:5000
-echo.
-python app.py
-goto end
+echo Appuyez sur une touche pour quitter...
+pause >nul
+exit /b 0
 
 :public
-echo.
-echo ================================================
-echo   🌍 MODE PUBLIC ^(avec tunnel Serveo^)
-echo ================================================
+cls
+echo ========================================
+echo   MODE PUBLIC - Cloudflare Tunnel
+echo ========================================
 echo.
 
-REM Vérifier SSH
-where ssh >nul 2>&1
-if errorlevel 1 (
-    echo ❌ SSH n'est pas installé
-    echo 📦 Installez OpenSSH depuis les paramètres Windows
-    echo    ^(Paramètres ^> Applications ^> Fonctionnalités facultatives^)
+REM Vérifier si cloudflared existe
+where cloudflared >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo [ERREUR] cloudflared n'est pas installe ou pas dans le PATH
+    echo Telechargez-le depuis: https://github.com/cloudflare/cloudflared/releases
+    echo.
     pause
     exit /b 1
 )
 
-echo ✅ SSH détecté
+echo [1/2] Demarrage de l'application Flask dans un terminal separe...
 echo.
 
-set subdomain=smile-life
+REM Lancer Flask dans une nouvelle fenêtre
+start "Flask Application" cmd /k "title Flask Application (PUBLIC) && color 0E && echo ======================================== && echo    APPLICATION FLASK - MODE PUBLIC && echo ======================================== && echo. && python app.py"
 
-echo 🚀 Lancement du serveur ET du tunnel...
-echo.
-echo 📍 Votre jeu sera accessible sur :
-echo    https://%subdomain%.serveo.net
-echo.
-echo ⚠️  Partagez cette adresse avec vos amis !
-echo.
-timeout /t 2 >nul
+REM Attendre que Flask démarre
+timeout /t 4 /nobreak >nul
 
-REM Lancer le serveur Flask en arrière-plan
-start /b python app.py
-
-echo ⏳ Démarrage du serveur Flask...
-timeout /t 3 >nul
-
-echo 📡 Connexion au tunnel Serveo...
+echo [2/2] Creation du tunnel Cloudflare...
 echo.
-echo ⚠️  Pour arrêter le serveur, fermez cette fenêtre ou appuyez sur Ctrl+C
+echo ========================================
+echo   VOTRE URL PUBLIQUE APPARAITRA ICI :
+echo ========================================
 echo.
 
-:tunnel_loop
-ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -R %subdomain%:80:127.0.0.1:5000 serveo.net
-echo ⚠️ Connexion perdue. Reconnexion dans 5 secondes...
-timeout /t 5 >nul
-goto tunnel_loop
+cloudflared tunnel --url http://localhost:5000
 
-:invalid
-echo Choix invalide
-pause
-exit /b 1
-
-:end
-endlocal
+echo.
+echo ========================================
+echo Tunnel ferme.
+echo FERMEZ MANUELLEMENT la fenetre Flask si necessaire.
+echo.
+echo Appuyez sur une touche pour quitter...
+pause >nul
