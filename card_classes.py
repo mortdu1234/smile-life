@@ -1,5 +1,4 @@
 import random
-from sre_constants import SUCCESS
 import uuid
 from flask_socketio import emit
 from abc import ABC, abstractmethod
@@ -148,7 +147,6 @@ class FlirtCard(Card):
         self.location = location
         self.smiles = 1
     
-    
     def __str__(self):
         return f"{self.location} - smile : {self.smiles} - FlirtCard"
     
@@ -199,6 +197,11 @@ class FlirtCard(Card):
     def play_card(self, game: 'Game', current_player: 'Player'):
         self.steal_same_card(game, current_player)
         super().play_card(game, current_player)
+
+class FlirtWithChildCard(FlirtCard):
+    def __init__(self, location: str, image_path: str):
+        super().__init__(location, image_path)
+        self.child_link: ChildCard = None
 
 class MarriageCard(Card):
     """Carte mariage"""
@@ -326,12 +329,18 @@ class ChildCard(Card):
     
 
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
+        last_flirt = current_player.get_last_flirt()
+        if isinstance(last_flirt, FlirtWithChildCard) and last_flirt.child_link is None:
+            return True, ""
         if not current_player.is_married():
             return False, "Vous devez être marié(e) pour avoir un enfant"
         return True, ""
     
     
     def play_card(self, game: 'Game', current_player: 'Player'):
+        last_flirt = current_player.get_last_flirt()
+        if isinstance(last_flirt, FlirtWithChildCard) and last_flirt.child_link is None:
+            last_flirt.child_link = self
         super().play_card(game, current_player)
 
 class AnimalCard(Card):
@@ -555,6 +564,9 @@ class TravelCard(AquisitionCard):
             self.cost = 0
         super().play_card(game, current_player)
         self.cost = old_cost
+
+
+
 
 class SpecialCard(Card):
     """Carte spéciale"""
@@ -2365,6 +2377,18 @@ class Player:
     def __str__(self):
         return "Player YOUSK"
     
+    def get_last_flirt(self) -> FlirtCard:
+        print("[START] : Player.get_last_flirt()")
+        i = len(self.played["vie personnelle"])-1
+        while i >= 0:
+            card: Card = self.played["vie personnelle"][i]
+            if isinstance(card, FlirtCard):
+                i = -1
+            if isinstance(card, FlirtWithChildCard):
+                return card
+            i -= 1
+        return None
+
     def get_all_played_cards(self) -> List[Card]:
         """Retourne toutes les cartes jouées (toutes catégories)"""
         all_cards = []
@@ -2602,8 +2626,9 @@ class CardFactory:
     """Factory pour créer les cartes"""
 
     
-    FLIRT_LOCATIONS = ['bar', 'boite de nuit', 'camping', 'cinema', 'hotel', 
+    FLIRT_LOCATIONS = ['bar', 'boite de nuit', 'cinema', 
                        'internet', 'parc', 'restaurant', 'theatre', 'zoo']
+    FLIRT_LOCATIONS_WITH_CHILD = ['camping', 'hotel']
     MARRIAGE_LOCATIONS = ['corps-nuds', 'montcuq', 'monteton', 'sainte-vierge', 
                           'fourqueux', 'fourqueux', 'fourqueux']
     CHILDREN_NAMES = ['diana', 'harry', 'hermione', 'lara', 'leia', 'luigi', 
@@ -2658,8 +2683,8 @@ class CardFactory:
             l0 = cls.FLIRT_LOCATIONS[0].replace(" ", "_")
             l1 = cls.FLIRT_LOCATIONS[1].replace(" ", "_")
     
-            deck.append(FlirtCard(l0, f"personnal_life/flirts/{l0}.png"))
-            deck.append(FlirtCard(l1, f"personnal_life/flirts/{l1}.png"))
+            deck.append(FlirtWithChildCard(l0, f"personnal_life/flirts/{l0}.png"))
+            deck.append(FlirtWithChildCard(l1, f"personnal_life/flirts/{l1}.png"))
 
         
         # Mariages
@@ -2778,6 +2803,12 @@ class CardFactory:
             l = loc.replace(" ", "_")
             deck.append(FlirtCard(loc, f"personnal_life/flirts/{l}.png"))
             deck.append(FlirtCard(loc, f"personnal_life/flirts/{l}.png"))
+
+            
+        for loc in cls.FLIRT_LOCATIONS_WITH_CHILD:
+            l = loc.replace(" ", "_")
+            deck.append(FlirtWithChildCard(loc, f"personnal_life/flirts/{l}.png"))
+            deck.append(FlirtWithChildCard(loc, f"personnal_life/flirts/{l}.png"))
         
         # Mariages
         for loc in cls.MARRIAGE_LOCATIONS:
@@ -2839,5 +2870,16 @@ class CardFactory:
         deck.append(PriceCard(4, "personnal_life/professionnal_life/price.png"))
         deck.append(PriceCard(4, "personnal_life/professionnal_life/price.png"))
         
+
+        # EXTENTIONS
+        
+        deck.append(HeritageCard("special_cards/super_heritage.png", 5))
+        
+
+
+
+
+
+
         return deck
     
