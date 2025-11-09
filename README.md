@@ -1,6 +1,6 @@
-# ðŸ˜Š Jeu de Cartes Smile - Version Multijoueur
+# Jeu de Cartes Smiles Life - Version Multijoueur
 
-Un jeu de cartes stratégique et humoristique où vous devez construire la vie la plus heureuse possible en accumulant des smiles ! Gérez votre carrière, votre vie personnelle, vos acquisitions tout en évitant les coups durs de vos adversaires.
+Il s'agit d'une version en ligne du jeu de société Smile Life https://www.smilelife.fr/
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![Python](https://img.shields.io/badge/python-3.8+-green)
@@ -73,18 +73,18 @@ sudo dpkg -i cloudflared-linux-amd64.deb
 
 ### 1. Cloner le projet
 ```bash
-git clone <url-du-repo>
+git clone https://github.com/mortdu1234/smile-life.git
 cd smile-card-game
 ```
 
 ### 2. Créer un environnement virtuel (recommandé)
 ```bash
 # Windows
-python -m venv venv
+python -m .venv .venv
 venv\Scripts\activate
 
 # macOS/Linux
-python3 -m venv venv
+python3 -m .venv .venv
 source venv/bin/activate
 ```
 
@@ -433,20 +433,6 @@ socket.on('mon_pouvoir_modal', (data) => {
 - **"Ce n'est pas votre tour"** : La synchronisation a échoué, rafraîchissez
 - **Images non chargées** : Vérifiez le chemin dans `ressources/`
 - **Déconnexions** : Vérifiez que Eventlet est bien installé
-
-## 📝 Licence
-
-Ce projet est sous licence MIT. Vous êtes libre de l'utiliser, le modifier et le distribuer.
-
-## 🤝 Contribution
-
-Les contributions sont les bienvenues ! 
-
-1. Fork le projet
-2. Créez une branche (`git checkout -b feature/ma-feature`)
-3. Committez vos changements (`git commit -m 'Ajout de ma feature'`)
-4. Push vers la branche (`git push origin feature/ma-feature`)
-5. Ouvrez une Pull Request
 
 ## 📧 Support
 
