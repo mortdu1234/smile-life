@@ -1,29 +1,4 @@
-function showCreateGame() {
-    document.getElementById('menu-screen').classList.add('hidden');
-    document.getElementById('create-screen').classList.remove('hidden');
-}
 
-function showJoinGame() {
-    document.getElementById('menu-screen').classList.add('hidden');
-    document.getElementById('join-screen').classList.remove('hidden');
-}
-
-function backToMenu() {
-    document.getElementById('create-screen').classList.add('hidden');
-    document.getElementById('join-screen').classList.add('hidden');
-    document.getElementById('menu-screen').classList.remove('hidden');
-}
-
-function showLobby() {
-    document.getElementById('create-screen').classList.add('hidden');
-    document.getElementById('join-screen').classList.add('hidden');
-    document.getElementById('lobby-screen').classList.remove('hidden');
-}
-
-function showGame() {
-    document.getElementById('lobby-screen').classList.add('hidden');
-    document.getElementById('game-screen').classList.remove('hidden');
-}
 
 function showSalarySelectionModal(card, cost, availableSalaries, heritage = 0) {
     pendingAcquisitionCard = card;
@@ -265,41 +240,9 @@ function getHardshipDescription(type) {
     return descriptions[type] || 'Coup dur';
 }
 
-function createGame() {
-    const playerName = document.getElementById('host-name').value || 'Joueur 1';
-    const numPlayers = parseInt(document.getElementById('num-players').value);
-    
-    log('Création de partie', {playerName, numPlayers});
-    
-    socket.emit('create_game', {
-        player_name: playerName,
-        num_players: numPlayers
-    });
-    
-    isHost = true;
-}
 
-function joinGame() {
-    const playerName = document.getElementById('join-name').value || 'Joueur';
-    const gameCode = document.getElementById('game-code').value.trim().toLowerCase();
-    
-    if (!gameCode) {
-        alert('Veuillez entrer un code de partie');
-        return;
-    }
-    
-    log('Rejoindre partie', {playerName, gameCode});
-    
-    socket.emit('join_game', {
-        game_id: gameCode,
-        player_name: playerName
-    });
-}
 
-function startGame() {
-    log('Démarrage partie', {gameId});
-    socket.emit('start_game', { game_id: gameId });
-}
+
 
 function drawCard(source) {
     log('Pioche carte', {source});
@@ -336,51 +279,7 @@ function discardPlayedCard(cardId) {
     }
 }
 
-socket.on('game_created', (data) => {
-    log('Partie créée', data);
-    gameId = data.game_id;
-    myPlayerId = data.player_id;
-    currentGame = data.game;
-    
-    document.getElementById('lobby-game-code').textContent = gameId.toUpperCase();
-    showLobby();
-    updateLobby();
-    
-    if (isHost) {
-        document.getElementById('start-button-container').classList.remove('hidden');
-    }
-});
 
-socket.on('game_joined', (data) => {
-    log('Partie rejointe', data);
-    gameId = data.game_id;
-    myPlayerId = data.player_id;
-    currentGame = data.game;
-    
-    document.getElementById('lobby-game-code').textContent = gameId.toUpperCase();
-    showLobby();
-    updateLobby();
-});
-
-socket.on('player_joined', (data) => {
-    log('Joueur rejoint', data);
-    updateMessage(`${data.player_name} a rejoint la partie !`);
-    if (!document.getElementById('lobby-screen').classList.contains('hidden')) {
-        updateLobby();
-    }
-});
-
-socket.on('player_disconnected', (data) => {
-    log('Joueur déconnecté', data);
-    updateMessage(`${data.player_name} s'est déconnecté`);
-});
-
-socket.on('game_started', (data) => {
-    log('Partie démarrée', data);
-    currentGame = data.game;
-    showGame();
-    updateGameDisplay();
-});
 
 socket.on('game_updated', (data) => {
     log('Jeu mis à jour', data);
@@ -420,36 +319,6 @@ socket.on('error', (data) => {
 
 
 
-function updateLobby() {
-    if (!currentGame) {
-        log('updateLobby: pas de currentGame');
-        return;
-    }
-    
-    log('Mise à jour lobby', currentGame);
-    
-    const container = document.getElementById('lobby-players');
-    container.innerHTML = currentGame.players.map((player, i) => {
-        const status = player.connected ? '✅ Connecté' : '⏳ En attente...';
-        const isYou = i === myPlayerId ? ' (Vous)' : '';
-        const color = player.connected ? 'bg-green-100' : 'bg-gray-100';
-        
-        return `
-            <div class="flex items-center justify-between p-3 ${color} rounded-lg">
-                <span class="font-semibold">${player.name}${isYou}</span>
-                <span class="text-sm">${status}</span>
-            </div>
-        `;
-    }).join('');
-    
-    const connectedCount = currentGame.players.filter(p => p.connected).length;
-    document.getElementById('players-count').textContent = 
-        `${connectedCount} / ${currentGame.num_players} joueurs connectés`;
-    
-    if (isHost && connectedCount >= 2) {
-        document.querySelector('#start-button-container button').disabled = false;
-    }
-}
 
 function updateGameDisplay() {
     if (!currentGame) {

@@ -106,6 +106,28 @@
         </div>
     </div>
 
+    <!-- Écran sélection de cartes -->
+    <div id="card-selector-screen" class="hidden flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <button onclick="backFromDeckConfig()" class="mb-4 text-gray-600 hover:text-gray-800">← Retour</button>
+        
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">😊 Configuration du Deck</h2>
+            
+            <div id="card-selector-container" class="flex-1 overflow-y-auto">
+                <!-- Le contenu sera généré dynamiquement -->
+            </div>
+            
+            <div class="mt-6 flex gap-3">
+                <button onclick="resetDeckToDefault()" class="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600">
+                    🔄 Réinitialiser
+                </button>
+                <button onclick="validateDeckConfigFromLobby()" id="validate-deck-btn" class="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 px-6 rounded-lg hover:from-green-600 hover:to-emerald-600 font-semibold">
+                ✅ Valider (<span id="total-cards">0</span> cartes)
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de sélection de cible pour malus -->
     <div id="hardship-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full">
@@ -339,7 +361,12 @@
                 <h3 class="font-bold mb-3 text-lg">Joueurs connectés:</h3>
                 <div id="lobby-players" class="space-y-2"></div>
             </div>
-            
+            <div id="deck-config-button-container" class="hidden mb-4">
+                <button onclick="showDeckConfigFromLobby()" 
+                        class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 px-6 rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all transform hover:scale-105 font-semibold shadow-lg">
+                    🎴 Personnaliser le deck
+                </button>
+            </div>
             <div id="start-button-container" class="hidden">
                 <button onclick="startGame()" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white py-4 px-6 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 font-semibold text-lg shadow-lg">
                     🚀 Démarrer la partie
@@ -495,5 +522,6 @@
     <script src="{{ url_for('static', filename='js/special_cards.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     <script src="{{ url_for('static', filename='js/job_power.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
 </body>
 </html>
