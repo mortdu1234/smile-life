@@ -239,6 +239,7 @@ card_builders = {
     # --- VOYAGES ---
 
     # --- CARTES SPÉCIALES ---
+    "girl_power": lambda: ArcEnCielCard("special_cards/girl_power.png"),
     
     # --- COUPS DURS ---
     "charge_mentale": lambda: ChargeMentalHardhip("hardship_cards/charge_mentale.png"),

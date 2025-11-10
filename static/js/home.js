@@ -338,6 +338,7 @@ const cardCategories = {
         // --- VOYAGES ---
 
         // --- CARTES SPÉCIALES ---
+        { id: "girl_power", name: "Girl Power", defaultCount: 0, image: "special_cards/girl_power.png" },
         
         // --- COUPS DURS ---
         { id: "charge_mentale", name: "Charge Mentale", defaultCount: 5, image: "hardship_cards/charge_mentale.png" },

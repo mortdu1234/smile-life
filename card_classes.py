@@ -448,6 +448,10 @@ class ZeldaChild(ChildCard):
 
 
 
+class BeatrixChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, image_path)
+
 class AnimalCard(Card):
     """Carte animal"""
     def __init__(self, animal_name: str, smiles: int, image_path: str):
@@ -721,7 +725,50 @@ class TravelCard(AquisitionCard):
         super().play_card(game, current_player)
         self.cost = old_cost
 
+class ConcertTicket(AquisitionCard):
+    def __init__(self, cost: int, smiles: int, image_path: str):
+        super().__init__(cost, smiles, image_path)
 
+class SabreCard(AquisitionCard):
+    def __init__(self, cost: int, smiles: int, image_path: str):
+        super().__init__(cost, smiles, image_path)
+        self.selection_event: Event = Event()
+        self.hardship_id: int = None
+    
+    def confirm_vengeance_selection(self, data):
+        """confirmation de la sélection de la cible"""
+        self.hardship_id = data.get('hardship_id', None)
+        self.selection_event.set()  # Déclencher l'événement
+
+    def discard_vengeance_selection(self, data):
+        """annulation de la sélection de la cible"""
+        self.selection_event.set()  # Déclencher l'événement
+    
+    def apply_card_effect(self, game: 'Game', current_player: 'Player'):
+        children_played = current_player.get_played_card_vie_perso()
+        if any(isinstance(card, BeatrixChild) for card in children_played):
+            other_players = [p for p in game.players if p != current_player]
+            for player in other_players:    
+                received_hardships = [h for h in current_player.received_hardships if h.can_be_played(current_player, game)]
+                print("[APPEL] : select_vengeance")
+                emit('select_vengeance', {
+                    'card_id' : self.id,
+                    'received_hardships': [h.to_dict() for h in received_hardships],
+                    'available_targets': [player.to_dict()]
+                }) # TODO
+
+                print("[EVENT] : Wait for selection")
+                self.selection_event.wait()
+                self.selection_event.clear()  # Réinitialiser l'événement
+                print("[EVENT] : trigger selection")
+    
+                print(f"player target : {player.name} hardship_id = {self.hardship_id} \n {player.received_hardships}")
+                for card in current_player.received_hardships:
+                    if card.id == self.hardship_id:                
+                        current_player.received_hardships.remove(card)
+                        card.apply_effect(game, self.target_player, current_player)
+                        player.received_hardships.append(card)
+                        break
 
 
 class SpecialCard(Card):
@@ -758,7 +805,24 @@ class SpecialCard(Card):
     def play_card(self, game: 'Game', current_player: 'Player'):
         self.apply_card_effect(game, current_player)
         super().play_card(game, current_player)
+
+class GirlPowerCard(SpecialCard):
+    def __init__(self, special_type: str, image_path: str):
+        super().__init__(special_type, image_path)
         
+    def get_card_rule(self):
+        return "Nous avons une carte Spécial\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- chaque fille posée permet de rejouer une carte spéciale"
+    
+    def apply_card_effect(self, game, current_player):
+        """effectue a nouveaux toutes les cartes spéciales déja posée par le joueur"""
+        for special_card in current_player.get_played_card_special():
+            if isinstance(special_card, SpecialCard) and special_card.can_be_played(current_player, game):
+                special_card.apply_card_effect(game, current_player)
+
+    
 class TrocCard(SpecialCard):
     def __init__(self, image_path: str):
         super().__init__("troc", image_path)
@@ -966,7 +1030,6 @@ class VengeanceCard(SpecialCard):
 
         self.target_player = game.players[self.target_player_id]
         print(f"player target : {self.target_player.name} hardship_id = {self.hardship_id} \n {self.target_player.received_hardships}")
-        self.hardship_card = None
         for card in current_player.received_hardships:
             if card.id == self.hardship_id:                
                 current_player.received_hardships.remove(card)
@@ -2715,6 +2778,15 @@ class Player:
                 return card
             i -= 1
         return None
+    
+    def get_played_card_vie_perso(self):
+        return self.played["vie personnelle"]
+    
+    def get_played_card_vie_pro(self):
+        return self.played["vie professionnelle"]
+    
+    def get_played_card_special(self):
+        return self.played["cartes speciales"]
 
     def get_all_played_cards(self) -> List[Card]:
         """Retourne toutes les cartes jouées (toutes catégories)"""
