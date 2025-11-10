@@ -3,7 +3,7 @@ from card_classes import *
 from constants import app, socketio, check_game, update_all_player
 from special_power import *
 import init # pour avoir la route initiale /  # noqa: F401
-
+from girl_power_extention import *
 
 #######################
 # Passer son tour / tour suivant

@@ -62,36 +62,51 @@ echo.
 python app.py
 goto end
 
-:public
-echo.
+@echo off
+chcp 65001 >nul
+setlocal enabledelayedexpansion
+
 echo ================================================
-echo   🌍 MODE PUBLIC ^(avec tunnel Serveo^)
+echo   🎮 JEU DE CARTES SMILE - MODE PUBLIC
+echo   (avec Cloudflare Tunnel)
 echo ================================================
 echo.
 
-REM Vérifier SSH
-where ssh >nul 2>&1
+REM Vérifier Python
+python --version >nul 2>&1
 if errorlevel 1 (
-    echo ❌ SSH n'est pas installé
-    echo 📦 Installez OpenSSH depuis les paramètres Windows
-    echo    ^(Paramètres ^> Applications ^> Fonctionnalités facultatives^)
+    echo ❌ Python n'est pas installé
     pause
     exit /b 1
 )
 
-echo ✅ SSH détecté
-echo.
+REM Créer l'environnement virtuel si nécessaire
+if not exist ".venv" (
+    echo 📦 Installation initiale...
+    python -m venv .venv
+    call .venv\Scripts\activate.bat
+    pip install flask flask-socketio python-socketio eventlet
+) else (
+    call .venv\Scripts\activate.bat
+)
 
-set subdomain=smile-life
+REM Vérifier si cloudflared est installé
+where cloudflared >nul 2>&1
+if errorlevel 1 (
+    echo ❌ cloudflared n'est pas installé
+    echo.
+    echo 📦 Pour installer cloudflared :
+    echo    1. Allez sur https://github.com/cloudflare/cloudflared/releases
+    echo    2. Téléchargez cloudflared-windows-amd64.exe
+    echo    3. Renommez-le en cloudflared.exe
+    echo    4. Placez-le dans ce dossier ou dans votre PATH
+    echo.
+    pause
+    exit /b 1
+)
 
-echo 🚀 Lancement du serveur ET du tunnel...
+echo ✅ cloudflared détecté
 echo.
-echo 📍 Votre jeu sera accessible sur :
-echo    https://%subdomain%.serveo.net
-echo.
-echo ⚠️  Partagez cette adresse avec vos amis !
-echo.
-timeout /t 2 >nul
 
 REM Lancer le serveur Flask en arrière-plan
 start /b python app.py
@@ -99,21 +114,21 @@ start /b python app.py
 echo ⏳ Démarrage du serveur Flask...
 timeout /t 3 >nul
 
-echo 📡 Connexion au tunnel Serveo...
 echo.
-echo ⚠️  Pour arrêter le serveur, fermez cette fenêtre ou appuyez sur Ctrl+C
+echo 🚀 Lancement du tunnel Cloudflare...
+echo.
+echo ⚠️  IMPORTANT : L'URL sera affichée ci-dessous
+echo    Cherchez une ligne comme :
+echo    https://xxxx-xxxx-xxxx.trycloudflare.com
+echo.
+echo ⚠️  Partagez cette adresse HTTPS avec vos amis !
+echo.
+echo ⚠️  Pour arrêter, fermez cette fenêtre ou appuyez sur Ctrl+C
 echo.
 
-:tunnel_loop
-ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -R %subdomain%:80:127.0.0.1:5000 serveo.net
-echo ⚠️ Connexion perdue. Reconnexion dans 5 secondes...
-timeout /t 5 >nul
-goto tunnel_loop
+cloudflared tunnel --url http://localhost:5000
 
-:invalid
-echo Choix invalide
+echo.
+echo ⚠️  Le tunnel s'est arrêté
 pause
-exit /b 1
-
-:end
 endlocal

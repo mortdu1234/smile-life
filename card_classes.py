@@ -34,8 +34,12 @@ class Card(ABC):
         
         return True, ""
     
+    def apply_card_effect(self, game: 'Game', current_player: 'Player'):
+        pass
+    
     def play_card(self, game: 'Game', current_player: 'Player'):
         """pose la carte"""
+        self.apply_card_effect(game, current_player)
         print("pose la carte")
         current_player.hand.remove(self)
         current_player.add_card_to_played(self)
@@ -301,9 +305,10 @@ class AdulteryCard(Card):
 
 class ChildCard(Card):
     """Carte enfant"""
-    def __init__(self, name: str, image_path: str):
+    def __init__(self, name: str, sexe: str, image_path: str):
         super().__init__(image_path)
         self.name = name
+        self.sexe = sexe
         self.smiles = 2
     
     
@@ -342,6 +347,106 @@ class ChildCard(Card):
         if isinstance(last_flirt, FlirtWithChildCard) and last_flirt.child_link is None:
             last_flirt.child_link = self
         super().play_card(game, current_player)
+class AngelaChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, "GirlPower", image_path)
+
+class BeatrixChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, "Female", image_path)
+
+class DaenerysChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, "Female", image_path)
+        self.selection_event: Event = Event()
+        self.target_card_id: int = None
+        self.target_card: Card = None
+    
+    def confirm_player_selection(self, data):
+        """confirmation de la carte a détruire"""
+        self.target_card_id = data.get('target_card_id', None)
+        self.selection_event.set()  # Déclencher l'événement
+
+    def discard_player_selection(self, data):
+        """annulation de la carte a détruire"""
+        self.selection_event.set()  # Déclencher l'événement
+
+    def apply_card_effect(self, game, current_player):
+        if any(isinstance(c, DragonAnimal) for c in current_player.get_all_played_cards()):
+            for player in game.players:
+                if player != current_player:
+                    played_cards: list[Card] = player.get_all_played_cards()
+                    emit('select_burn_card', {
+                        "card_id": self.id,
+                        'player_name': player.name,
+                        'available_targets': [c.to_dict() for c in played_cards] 
+                    })
+
+                    print("[EVENT] : Wait for selection")
+                    self.selection_event.wait()
+                    self.selection_event.clear()  # Réinitialiser l'événement
+                    print("[EVENT] : trigger selection")
+                    
+                    if self.target_card_id:
+                        self.target_card = player.get_played_card_by_id(self.target_card_id) 
+                        player.remove_card_from_played(self.target_card)
+
+class DianaChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, "Female", image_path)
+
+class HarryChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, "Male", image_path)
+
+class HermioneChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, "Female", image_path)
+
+class LaraChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, "Female", image_path)
+
+class LeiaChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, "Female", image_path)
+
+class LouiseChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, "GirlPower", image_path)
+
+class LuigiChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, "Male", image_path)
+
+class MarioChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, "Male", image_path)
+
+class LukeChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, "Male", image_path)
+
+class OlympeChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, "GirlPower", image_path)
+
+class RockyChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, "Male", image_path)
+
+class SimoneChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, "GirlPower", image_path)
+
+class ZeldaChild(ChildCard):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, "Female", image_path)
+
+
+
+
+
 
 class AnimalCard(Card):
     """Carte animal"""
@@ -376,6 +481,57 @@ class AnimalCard(Card):
     
     def play_card(self, game: 'Game', current_player: 'Player'):
         super().play_card(game, current_player)
+
+
+
+class LicorneAnimal(AnimalCard):
+    def __init__(self, animal_name: str, smiles: int, image_path: str):
+        super().__init__(animal_name, smiles, image_path)
+
+class DragonAnimal(AnimalCard):
+    def __init__(self, animal_name: str, smiles: int, image_path: str):
+        super().__init__(animal_name, smiles, image_path)
+        self.selection_event: Event = Event()
+        self.target_card_id: int = None
+        self.target_card: Card = None
+    
+    def confirm_player_selection(self, data):
+        """confirmation de la carte a détruire"""
+        self.target_card_id = data.get('target_card_id', None)
+        self.selection_event.set()  # Déclencher l'événement
+
+    def discard_player_selection(self, data):
+        """annulation de la carte a détruire"""
+        self.selection_event.set()  # Déclencher l'événement
+
+    def apply_card_effect(self, game, current_player):
+        if any(isinstance(c, DaenerysChild) for c in current_player.get_all_played_cards()):
+            for player in game.players:
+                if player != current_player:
+                    played_cards: list[Card] = player.get_all_played_cards()
+                    emit('select_burn_card', {
+                        "card_id": self.id,
+                        'player_name': player.name,
+                        'available_targets': [c.to_dict() for c in played_cards] 
+                    })
+
+                    print("[EVENT] : Wait for selection")
+                    self.selection_event.wait()
+                    self.selection_event.clear()  # Réinitialiser l'événement
+                    print("[EVENT] : trigger selection")
+                    
+                    if self.target_card_id:
+                        self.target_card = player.get_played_card_by_id(self.target_card_id) 
+                        player.remove_card_from_played(self.target_card)
+
+
+
+
+
+
+
+
+
 
 class AquisitionCard(Card):
     """carte a acheter avec de l'argent"""
@@ -1222,6 +1378,95 @@ class HardshipCard(Card):
 
     def apply_effect(self, game: 'Game', target_player: 'Player', current_player: 'Player'):
         print("apply_effect_hardhipCard")
+
+class ChargeMentalHardhip(HardshipCard):
+    def __init__(self, image_path: str):
+        super().__init__(image_path)
+    
+    def __str__(self):
+        return f"ChargeMentalHardhip"
+    
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Charge Mental\n" \
+        + "\nREGLES\n" \
+        + "- jetter un enfant dans la défausse\n" \
+        + "- seul les joueurs qui ont un métier peuvent subir ce coup dur"
+    
+    def to_dict(self) -> Dict[str, Any]:
+        base = super().to_dict()
+        base.update({
+            'subtype': 'ChargeMental'
+        })
+        return base
+    
+    def other_rules(self, game: 'Game', current_player: 'Player', target_player: 'Player'):
+        if target_player.has_job():
+            return True
+        cards = target_player.get_played_vie_perso()
+        nb_children = 0
+        for c in cards:
+            if isinstance(c, ChildCard):
+                nb_children += 1
+        if nb_children == 0:
+            return True
+        return False 
+    
+    def can_be_played(self, current_player, game):
+        return super().can_be_played(current_player, game)
+
+    def play_card(self, game, current_player):
+        super().play_card(game, current_player)
+
+    def apply_effect(self, game, target_player, current_player):
+        cards = target_player.get_played_vie_perso()
+        for last_child in cards[::-1]:
+            if isinstance(last_child, ChildCard):
+                game.discard.append(last_child)
+                target_player.remove_card_from_played(last_child)
+
+class TachesMenageresHardship(HardshipCard):
+    def __init__(self, image_path: str):
+        super().__init__(image_path)
+    
+    def __str__(self):
+        return f"TachesMenageresHardship"
+    
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Tache Ménagere\n" \
+        + "\nREGLES\n" \
+        + "- chaque maison posée vaut 1 smile de moi\n" \
+        + "- seul les joueurs qui ont au moins une maison peuvent subir ce coup dur"
+    
+    def to_dict(self) -> Dict[str, Any]:
+        base = super().to_dict()
+        base.update({
+            'subtype': 'TachesMenageresHardship'
+        })
+        return base
+    
+    def other_rules(self, game: 'Game', current_player: 'Player', target_player: 'Player'):
+        cards = target_player.get_played_acquisitions()
+        nb_house = 0
+        for c in cards:
+            if isinstance(c, HouseCard):
+                nb_house += 1
+        if nb_house == 0:
+            return True
+        return False 
+    
+    def can_be_played(self, current_player, game):
+        return super().can_be_played(current_player, game)
+
+    def play_card(self, game, current_player):
+        super().play_card(game, current_player)
+
+    def apply_effect(self, game, target_player, current_player):
+        cards = target_player.get_played_acquisitions()
+        for house in cards:
+            if isinstance(house, HouseCard):
+                target_player.skip_turns += house.smiles
 
 class TaxCard(HardshipCard):
     def __init__(self, image_path: str):
@@ -2441,6 +2686,21 @@ class Player:
         self.connected = True
         self.session_id = None
     
+    def get_played_vie_pro(self):
+        return self.played["vie professionnelle"]
+    
+    def get_played_vie_perso(self):
+        return self.played["vie personnelle"]
+
+    def get_played_acquisitions(self):
+        return self.played["acquisitions"]
+    
+    def get_played_salaire_depense(self):
+        return self.played["salaire dépensé"]
+    
+    def get_played_carte_speciale(self):
+        return self.played["cartes spéciales"]
+
     def __str__(self):
         return "Player YOUSK"
     
@@ -2490,6 +2750,13 @@ class Player:
                 category_cards.remove(card)
                 return True
         return False
+    
+    def get_played_card_by_id(self, card_id):
+        cards = self.get_all_played_cards()
+        for card in cards:
+            if card.id == card_id:
+                return card
+        return None
     
     def spend_salaries(self, amount: int) -> List[SalaryCard]:
         """Dépense des salaires pour un achat et les déplace vers 'salaire dépensé'"""
@@ -2576,7 +2843,7 @@ class Player:
         
         # Bonus licorne + arc-en-ciel + étoile filante
         all_cards = self.get_all_played_cards()
-        has_licorne = any(isinstance(c, AnimalCard) and c.animal_name == 'licorne' for c in all_cards)
+        has_licorne = any(isinstance(c, LicorneAnimal) for c in all_cards)
         has_arc = any(isinstance(c, SpecialCard) and c.special_type == 'arc en ciel' for c in all_cards)
         has_etoile = any(isinstance(c, SpecialCard) and c.special_type == 'etoile filante' for c in all_cards)
         

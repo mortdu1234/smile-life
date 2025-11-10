@@ -11,12 +11,21 @@ const presetDecks = {
         config: {
 
         }
+    },
+    "exemple":{
+        name: "deck exemple",
+        description: "desciption exemple",
+        config: {
+          "child_daenerys": 10,
+          "animal_dragon": 10,
+          "flirt_child_hotel": 10
+        }
     }
 };
 
 const cardCategories = {
     "Jeu Standards": [
-        // --- PROFESSIONS ---
+        // --- MÉTIERS ---
         { id: "architecte", name: "Architecte", defaultCount: 1, image: "personnal_life/professionnal_life/JobCards/architecte.png" },
         { id: "astronaute", name: "Astronaute", defaultCount: 1, image: "personnal_life/professionnal_life/JobCards/astronaute.png" },
         { id: "avocat", name: "Avocat", defaultCount: 1, image: "personnal_life/professionnal_life/JobCards/avocat.png" },
@@ -266,23 +275,64 @@ const cardCategories = {
     ],
     "Extentions Girl Power": [
         // --- MÉTIERS ---
+        { id: "architecte_f", name: "Architecte", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/architecte_f.png" },
+        { id: "astronaute_f", name: "Astronaute", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/astronaute_f.png" },
+        { id: "avocate", name: "Avocate", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/avocate.png" },
+        { id: "bandit_f", name: "Bandit", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/bandit_f.png" },
+        { id: "barmaid", name: "Barmaid", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/barmaid.png" },
+        { id: "cheffe_des_ventes", name: "Cheffe des ventes", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/cheffe_des_ventes.png" },
+        { id: "cheffe_des_achats", name: "Cheffe des achats", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/cheffe_des_achats.png" },
+        { id: "chercheuse", name: "Chercheuse", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/chercheuse.png" },
+        { id: "chirurgienne", name: "Chirurgienne", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/chirurgienne.png" },
+        { id: "designeuse", name: "Designeuse", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/designeuse.png" },
+        { id: "ecrivaine", name: "Écrivaine", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/ecrivaine.png" },
+        { id: "garagiste_f", name: "Garagiste", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/garagiste_f.png" },
+        { id: "gourou_f", name: "Gourou", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/gourou_f.png" },
+        { id: "jardiniere", name: "Jardinière", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/jardiniere.png" },
+        { id: "journaliste_f", name: "Journaliste", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/journaliste_f.png" },
+        { id: "medecin_f", name: "Médecin", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/medecin_f.png" },
+        { id: "voyante", name: "Voyante", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/voyante.png" },
+        { id: "militaire_f", name: "Militaire", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/militaire_f.png" },
+        { id: "pharmacienne", name: "pharmacienne", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/pharmacienne.png" },
+        { id: "pilote_de_ligne_f", name: "Pilote de ligne", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/pilote_de_ligne_f.png" },
+        { id: "pizzaiola", name: "Pizzaiola", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/pizzaiola.png" },
+        { id: "plombiere", name: "Plombière", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/plombiere.png" },
+        { id: "policiere", name: "Policière", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/policiere.png" },
+        { id: "prof_chimie", name: "Prof de chimie", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/prof_chimie.png" },
+        { id: "prof_geo", name: "Prof de geo", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/prof_geo.png" },
+        { id: "prof_musique", name: "Prof de musique", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/prof_musique.png" },
+        { id: "prof_philo", name: "Prof de philo", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/prof_philo.png" },
+        { id: "serveuse", name: "Serveuse", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/serveuse.png" },
+        { id: "stripteaseuse", name: "Strip-teaseuse", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/stripteaseuse.png" },
+        { id: "grand_prof_f", name: "Grand Prof", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/grand_prof_f.png" },
 
         // --- ÉTUDES ---
 
         // --- SALAIRES ---
 
         // --- FLIRTS ---
+        { id: "flirt_manif", name: "Flirt à la manif", defaultCount: 0, image: "personnal_life/flirts/manif.png" },
 
         // --- FLIRTS AVEC ENFANT ---
-
+        { id: "flirt_child_bibliotheque", name: "Flirt à la bibliothèque (avec enfant)", defaultCount: 0, image: "personnal_life/flirts/bibliotheque.png" },
+        
         // --- MARIAGES ---
 
         // --- ADULTÈRE ---
 
         // --- ENFANTS ---
 
+        { id: "child_angela", name: "Angela", defaultCount: 0, image: "personnal_life/children/angela.png" },
+        { id: "child_beatrix", name: "Beatrix", defaultCount: 0, image: "personnal_life/children/beatrix.png" },
+        { id: "child_daenerys", name: "Daenerys", defaultCount: 0, image: "personnal_life/children/daenerys.png" },
+        { id: "child_louise", name: "Louise", defaultCount: 0, image: "personnal_life/children/louise.png" },
+        { id: "child_olympe", name: "Olympe", defaultCount: 0, image: "personnal_life/children/olympe.png" },
+        { id: "child_simone", name: "Simone", defaultCount: 0, image: "personnal_life/children/simone.png" },
+        
         // --- ANIMAUX ---
-
+        { id: "animal_crapaud", name: "Crapaud", defaultCount: 0, image: "aquisition_cards/animals/crapaud.png" },
+        { id: "animal_dragon", name: "Dragon", defaultCount: 0, image: "aquisition_cards/animals/dragon.png" },
+        
         // --- MAISONS ---
 
         // --- VOYAGES ---
@@ -290,7 +340,12 @@ const cardCategories = {
         // --- CARTES SPÉCIALES ---
         
         // --- COUPS DURS ---
-
+        { id: "charge_mentale", name: "Charge Mentale", defaultCount: 5, image: "hardship_cards/charge_mentale.png" },
+        { id: "gynocratie", name: "Gynocratie", defaultCount: 5, image: "hardship_cards/gynocratie.png" },
+        { id: "phallocratie", name: "Phallocratie", defaultCount: 5, image: "hardship_cards/phallocratie.png" },
+        { id: "plafond_de_verre", name: "Plafond de verre", defaultCount: 5, image: "hardship_cards/plafond_de_verre.png" },
+        { id: "porc", name: "Porc", defaultCount: 5, image: "hardship_cards/porc.png" },
+        { id: "taches_menageres", name: "Tâches Menagères", defaultCount: 5, image: "hardship_cards/taches_menageres.png" },
         // --- AUTRES ---
     
     ],

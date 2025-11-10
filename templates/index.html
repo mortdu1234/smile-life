@@ -53,6 +53,32 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-400 to-pink-500 min-h-screen">
+    <!-- Modal Brûler une carte posée Girl POWER EXTENTION -->
+    <div id="burn-card-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">
+                🔥 Brûler une carte
+            </h2>
+            <p id="burn-target-message" class="text-center mb-6 text-gray-600">
+                Choisissez une carte de <span class="font-bold text-red-600"></span> à détruire
+            </p>
+            
+            <!-- Cartes disponibles -->
+            <div class="mb-6">
+                <h3 class="font-semibold mb-3 text-gray-700">Cartes disponibles :</h3>
+                <div id="burn-cards-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    <!-- Cartes générées dynamiquement -->
+                </div>
+            </div>
+            
+            <!-- Bouton Aucun -->
+            <button onclick="discardBurnSelection()" 
+                    class="w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+                ❌ Aucune carte (annuler)
+            </button>
+        </div>
+    </div>
+
     <!-- Modal des règles -->
     <div id="rules-modal" class="modal-backdrop hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -523,5 +549,6 @@
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     <script src="{{ url_for('static', filename='js/job_power.js') }}"></script>
     <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/girl_power_extention.js') }}"></script>
 </body>
 </html>
