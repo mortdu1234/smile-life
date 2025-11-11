@@ -111,9 +111,6 @@ def handle_update_deck_config(data):
 
 @app.route('/api/card_rule/<card_id>')
 def get_card_rule(card_id):
-    """Récupère la règle d'une carte par son ID"""
-    print(f"[start] : get_card_rule - {card_id}")
-    
     if card_id in card_builders:
         try:
             card = card_builders[card_id]()
@@ -121,12 +118,11 @@ def get_card_rule(card_id):
                 'success': True,
                 'rule': card.get_card_rule(),
                 'name': getattr(card, 'name', card_id),
-                'type': card.type if hasattr(card, 'type') else 'unknown'
+                'type': card.type if hasattr(card, 'type') else 'unknown',
+                'image': card.image if hasattr(card, 'image') else None  # ✅ AJOUT
             }
         except Exception as e:
-            print(f"[ERROR] get_card_rule: {e}")
             return {'success': False, 'error': str(e)}, 500
-    
     return {'success': False, 'error': 'Carte non trouvée'}, 404
 
 

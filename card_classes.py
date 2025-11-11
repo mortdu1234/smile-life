@@ -7,6 +7,7 @@ from threading import Event
 
 
 
+
 class Card(ABC):
     """Classe de base pour toutes les cartes"""
     def __init__(self, image_path: str):
@@ -34,19 +35,24 @@ class Card(ABC):
         
         return True, ""
     
-    def apply_card_effect(self, game: 'Game', current_player: 'Player'):
-        pass
+    def apply_card_effect(self, game: 'Game', current_player: 'Player') -> bool:
+        """renvois true si success, false sinon"""
+        return True
     
     def play_card(self, game: 'Game', current_player: 'Player'):
         """pose la carte"""
-        self.apply_card_effect(game, current_player)
         print("pose la carte")
-        current_player.hand.remove(self)
-        current_player.add_card_to_played(self)
+        if self.apply_card_effect(game, current_player):
+            current_player.hand.remove(self)
+            current_player.add_card_to_played(self)
 
     def get_card_rule(self):
         return "Nous avons une carte classique\n" \
         + f"il donne {self.smiles} smiles\n" 
+
+class PermanentEffet(ABC):
+    def get_power(self) -> list[str]:
+        return []
 
 class StudyCard(Card):
     """Carte étude"""
@@ -82,7 +88,7 @@ class StudyCard(Card):
     
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
         # Les études ne peuvent être jouées que si on n'a pas encore de métier
-        if current_player.has_job() and 'extra_study' not in current_player.get_job().power:
+        if current_player.has_job() and 'extra_study' not in current_player.get_power():
             return False, "Vous ne pouvez plus faire d'études après avoir trouvé un métier"
         return True, ""
     
@@ -121,20 +127,19 @@ class SalaryCard(Card):
     
     
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
-        job = current_player.get_job()
-        if not job:
+        jobs = current_player.get_job()
+        if not jobs:
             return False, "Vous devez avoir un métier pour recevoir un salaire"
 
-        max_salary = job.salary
-        # ✅ Vérifier si le joueur a le Grand Prix d'excellence
-        for c in current_player.get_all_played_cards():
-            print(c.id)
-            if isinstance(c, PriceCard):
-                print("carte prix trouvée")
-                if c.job_link == job.id:
-                    print("le link est bon")
-                    max_salary = 4
-                    
+        max_salary = max(job.get_salary() for job in jobs)
+        if "egalite_salaire" in current_player.get_power():
+            global_max_salary = 0
+            for player in game.players:
+                if player.has_job():
+                    jobs = player.get_job()
+                    for job in jobs:
+                        global_max_salary = max(global_max_salary, job.get_salary())
+            max_salary = max(max_salary, global_max_salary)
         if self.level > max_salary:
             return False, f"Votre salaire maximum est de {max_salary}"
         
@@ -303,12 +308,16 @@ class AdulteryCard(Card):
     def play_card(self, game: 'Game', current_player: 'Player'):
         super().play_card(game, current_player)
 
+
+
+
+
+
 class ChildCard(Card):
     """Carte enfant"""
-    def __init__(self, name: str, sexe: str, image_path: str):
+    def __init__(self, name: str, image_path: str):
         super().__init__(image_path)
         self.name = name
-        self.sexe = sexe
         self.smiles = 2
     
     
@@ -347,17 +356,40 @@ class ChildCard(Card):
         if isinstance(last_flirt, FlirtWithChildCard) and last_flirt.child_link is None:
             last_flirt.child_link = self
         super().play_card(game, current_player)
-class AngelaChild(ChildCard):
-    def __init__(self, name: str, image_path: str):
-        super().__init__(name, "GirlPower", image_path)
 
-class BeatrixChild(ChildCard):
-    def __init__(self, name: str, image_path: str):
-        super().__init__(name, "Female", image_path)
+class FemaleChild(Card):
+    def apply_card_effect(self, game: 'Game', current_player: 'Player'):
+        for card in current_player.get_played_effet_permanent():
+            if isinstance(card, GirlPowerCard):
+                current_player.remove_card_from_played(card)
+                current_player.add_card_to_hand(card)
+                card.effect(game, current_player)
+        return True
+    
+class MaleChild(Card):
+    pass
 
-class DaenerysChild(ChildCard):
+class GirlPowerChild(Card):
+    pass
+
+class AngelaChild(ChildCard, GirlPowerChild):
     def __init__(self, name: str, image_path: str):
-        super().__init__(name, "Female", image_path)
+        super().__init__(name, image_path)
+
+class BeatrixChild(ChildCard, FemaleChild):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, image_path)
+    
+    def apply_card_effect(self, game, current_player):
+        played = current_player.get_played_acquisitions()
+        for card in played:
+            if isinstance(card, SabreCard):
+                card.apply_card_effect(game, current_player)
+        return True
+
+class DaenerysChild(ChildCard, FemaleChild):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, image_path)
         self.selection_event: Event = Event()
         self.target_card_id: int = None
         self.target_card: Card = None
@@ -390,67 +422,65 @@ class DaenerysChild(ChildCard):
                     if self.target_card_id:
                         self.target_card = player.get_played_card_by_id(self.target_card_id) 
                         player.remove_card_from_played(self.target_card)
+        return True
 
-class DianaChild(ChildCard):
-    def __init__(self, name: str, image_path: str):
-        super().__init__(name, "Female", image_path)
-
-class HarryChild(ChildCard):
-    def __init__(self, name: str, image_path: str):
-        super().__init__(name, "Male", image_path)
-
-class HermioneChild(ChildCard):
-    def __init__(self, name: str, image_path: str):
-        super().__init__(name, "Female", image_path)
-
-class LaraChild(ChildCard):
-    def __init__(self, name: str, image_path: str):
-        super().__init__(name, "Female", image_path)
-
-class LeiaChild(ChildCard):
-    def __init__(self, name: str, image_path: str):
-        super().__init__(name, "Female", image_path)
-
-class LouiseChild(ChildCard):
-    def __init__(self, name: str, image_path: str):
-        super().__init__(name, "GirlPower", image_path)
-
-class LuigiChild(ChildCard):
-    def __init__(self, name: str, image_path: str):
-        super().__init__(name, "Male", image_path)
-
-class MarioChild(ChildCard):
-    def __init__(self, name: str, image_path: str):
-        super().__init__(name, "Male", image_path)
-
-class LukeChild(ChildCard):
-    def __init__(self, name: str, image_path: str):
-        super().__init__(name, "Male", image_path)
-
-class OlympeChild(ChildCard):
-    def __init__(self, name: str, image_path: str):
-        super().__init__(name, "GirlPower", image_path)
-
-class RockyChild(ChildCard):
-    def __init__(self, name: str, image_path: str):
-        super().__init__(name, "Male", image_path)
-
-class SimoneChild(ChildCard):
-    def __init__(self, name: str, image_path: str):
-        super().__init__(name, "GirlPower", image_path)
-
-class ZeldaChild(ChildCard):
-    def __init__(self, name: str, image_path: str):
-        super().__init__(name, "Female", image_path)
-
-
-
-
-
-
-class BeatrixChild(ChildCard):
+class DianaChild(ChildCard, FemaleChild):
     def __init__(self, name: str, image_path: str):
         super().__init__(name, image_path)
+
+class HarryChild(ChildCard, MaleChild):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, image_path)
+
+class HermioneChild(ChildCard, FemaleChild):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, image_path)
+
+class LaraChild(ChildCard, FemaleChild):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, image_path)
+
+class LeiaChild(ChildCard, FemaleChild):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, image_path)
+
+class LouiseChild(ChildCard, GirlPowerChild):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, image_path)
+
+class LuigiChild(ChildCard, MaleChild):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, image_path)
+
+class MarioChild(ChildCard, MaleChild):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, image_path)
+
+class LukeChild(ChildCard, MaleChild):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, image_path)
+
+class OlympeChild(ChildCard, GirlPowerChild):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, image_path)
+
+class RockyChild(ChildCard, MaleChild):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, image_path)
+
+class SimoneChild(ChildCard, GirlPowerChild):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, image_path)
+
+class ZeldaChild(ChildCard, FemaleChild):
+    def __init__(self, name: str, image_path: str):
+        super().__init__(name, image_path)
+
+
+
+
+
+
 
 class AnimalCard(Card):
     """Carte animal"""
@@ -485,8 +515,6 @@ class AnimalCard(Card):
     
     def play_card(self, game: 'Game', current_player: 'Player'):
         super().play_card(game, current_player)
-
-
 
 class LicorneAnimal(AnimalCard):
     def __init__(self, animal_name: str, smiles: int, image_path: str):
@@ -527,7 +555,7 @@ class DragonAnimal(AnimalCard):
                     if self.target_card_id:
                         self.target_card = player.get_played_card_by_id(self.target_card_id) 
                         player.remove_card_from_played(self.target_card)
-
+        return True
 
 
 
@@ -656,8 +684,8 @@ class HouseCard(AquisitionCard):
         + "- permet d'investir les salaires, les salaires investis ne peuvent etre perdu\n"
     
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
-        job = current_player.get_job()
-        if job and job.power == 'house_free':
+        player_powers = current_player.get_power()
+        if 'house_free' in player_powers:
             return True, ""
         
         # Calculer le coût requis (divisé par 2 si marié)
@@ -675,11 +703,14 @@ class HouseCard(AquisitionCard):
     
     def play_card(self, game: 'Game', current_player: 'Player'):
         old_cost = self.cost
-        if current_player.has_job() and "house_free" in current_player.get_job().power:
+        if "house_free" in current_player.get_power():
             self.cost = 0
-            job = current_player.get_job()
-            if isinstance(job, ArchitecteJob):
-                job.use_power()
+            if current_player.has_job():    
+                jobs = current_player.get_job()
+                for job in jobs:
+                    if isinstance(job, ArchitecteJob):
+                        job.use_power()
+
         if current_player.is_married():
             self.cost = self.cost // 2
         print(f"new price before placing: {self.cost}-{old_cost}")
@@ -704,8 +735,8 @@ class TravelCard(AquisitionCard):
         return base
     
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
-        job = current_player.get_job()
-        if job and job.power == 'travel_free':
+        player_power = current_player.get_power()
+        if 'travel_free' in player_power:
             return True, ""
         return super().can_be_played(current_player, game)
     
@@ -720,7 +751,7 @@ class TravelCard(AquisitionCard):
     
     def play_card(self, game: 'Game', current_player: 'Player'):
         old_cost = self.cost
-        if current_player.has_job() and "travel_free" in current_player.get_job().power:
+        if current_player.has_job() and "travel_free" in current_player.get_power():
             self.cost = 0
         super().play_card(game, current_player)
         self.cost = old_cost
@@ -733,42 +764,70 @@ class SabreCard(AquisitionCard):
     def __init__(self, cost: int, smiles: int, image_path: str):
         super().__init__(cost, smiles, image_path)
         self.selection_event: Event = Event()
-        self.hardship_id: int = None
+        self.target_player_id: int = None
+        self.hardship_id: str = None
     
-    def confirm_vengeance_selection(self, data):
-        """confirmation de la sélection de la cible"""
+    def confirm_sabre_selection(self, data):
+        """confirmation de la sélection de la cible et de l'attaque"""
+        self.target_player_id = data.get('target_id', None)
         self.hardship_id = data.get('hardship_id', None)
         self.selection_event.set()  # Déclencher l'événement
 
-    def discard_vengeance_selection(self, data):
+    def discard_sabre_selection(self, data):
         """annulation de la sélection de la cible"""
         self.selection_event.set()  # Déclencher l'événement
     
     def apply_card_effect(self, game: 'Game', current_player: 'Player'):
-        children_played = current_player.get_played_card_vie_perso()
+        children_played = current_player.get_played_vie_perso()
         if any(isinstance(card, BeatrixChild) for card in children_played):
             other_players = [p for p in game.players if p != current_player]
+            
             for player in other_players:    
-                received_hardships = [h for h in current_player.received_hardships if h.can_be_played(current_player, game)]
-                print("[APPEL] : select_vengeance")
-                emit('select_vengeance', {
-                    'card_id' : self.id,
-                    'received_hardships': [h.to_dict() for h in received_hardships],
-                    'available_targets': [player.to_dict()]
-                }) # TODO
+                received_hardships = [h for h in current_player.received_hardships if h.can_be_played(current_player, game)[0]]
+                
+                print("[APPEL] : select_sabre")
+                emit('select_sabre', {
+                    'card_id': self.id,
+                    'target_player': player.to_dict(),
+                    'received_hardships': [h.to_dict() for h in received_hardships]
+                }, room=current_player.session_id)
 
                 print("[EVENT] : Wait for selection")
                 self.selection_event.wait()
                 self.selection_event.clear()  # Réinitialiser l'événement
                 print("[EVENT] : trigger selection")
     
-                print(f"player target : {player.name} hardship_id = {self.hardship_id} \n {player.received_hardships}")
+                if not self.hardship_id:
+                    continue
+                    
+                target_player = game.players[self.target_player_id]
+                print(f"player target : {target_player.name} hardship_id = {self.hardship_id}")
+                
                 for card in current_player.received_hardships:
                     if card.id == self.hardship_id:                
                         current_player.received_hardships.remove(card)
-                        card.apply_effect(game, self.target_player, current_player)
-                        player.received_hardships.append(card)
+                        card.apply_effect(game, target_player, current_player)
+                        target_player.received_hardships.append(card)
                         break
+        return True
+
+class NounouCard(AquisitionCard):
+    def __init__(self, cost: int, smiles: int, image_path: str):
+        super().__init__(cost, smiles, image_path)
+    
+    def apply_card_effect(self, game: 'Game', current_player: 'Player'):
+        for child in current_player.get_played_vie_perso():
+            if isinstance(child, ChildCard):
+                current_player.remove_card_from_played(child)
+                current_player.add_card_to_salaire_depense(child)
+        return True
+
+
+
+
+
+
+
 
 
 class SpecialCard(Card):
@@ -777,10 +836,8 @@ class SpecialCard(Card):
         super().__init__(image_path)
         self.special_type = special_type
         self.smiles = 0
-    
     def __str__(self):
         return f"{self.special_type} - smile : {self.smiles} - SpecialCard"
-    
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
         base.update({
@@ -788,8 +845,6 @@ class SpecialCard(Card):
             'subtype': self.special_type
         })
         return base
-    
-    
     def get_card_rule(self):
         return "Nous avons une carte Spécial\n" \
         + f"il donne {self.smiles} smiles\n" \
@@ -798,31 +853,393 @@ class SpecialCard(Card):
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
         # Logique spécifique selon le type
         return True, ""
-    
-    def apply_card_effect(self, game: 'Game', current_player: 'Player'):
-        pass
 
     def play_card(self, game: 'Game', current_player: 'Player'):
-        self.apply_card_effect(game, current_player)
         super().play_card(game, current_player)
 
-class GirlPowerCard(SpecialCard):
-    def __init__(self, special_type: str, image_path: str):
-        super().__init__(special_type, image_path)
+class RedistributionDesTachesCard(SpecialCard):
+    def __init__(self, image_path):
+        super().__init__("redistribution des taches", image_path)
+        self.selection_event: Event = Event()
+        self.choices: dict[int] = None
+
+    def get_card_rule(self):
+        return "Nous avons une carte Redistribution des taches\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- récupère tous les métiers présent et redistribue les a ta guise\n" \
+        + "- il n'y a pas de regle concernant les niveaux de métier ou autre"
+    
+    def confirm_selection(self, data):
+        """confirmation de la sélection de la cible"""
+        self.choices = data.get('distribution', None)
+        self.selection_event.set()  # Déclencher l'événement
+    
+    def apply_card_effect(self, game, current_player):
+        initial_data = {}
+        job_id_to_card = {}
+        for player in game.players:
+            jobs = []
+            for job in player.get_job():
+                jobs.append(job.id)
+                job_id_to_card[job.id] = [job, player]
+            initial_data[player.id] = [jobs, len(jobs)]
+        
+        print("[APPEL] : redistribution_des_taches")
+        emit('redistribution_des_taches', {
+            'card_id' : self.id,
+            'data_initial': initial_data
+        })
+
+        print("[EVENT] : Wait for selection")
+        self.selection_event.wait()
+        self.selection_event.clear()
+        print("[EVENT] : trigger selection")
+
+        # Appliquer la redistribution si elle a été confirmée
+        if self.choices:
+            # Retirer tous les métiers de leurs joueurs actuels
+            for job_id, (job_card, original_player) in job_id_to_card.items():
+                original_player.remove_card_from_played(job_card)
+            
+            # Redistribuer selon les choix
+            for player_id, job_ids in self.choices.items():
+                player = game.players[int(player_id)]
+                for job_id in job_ids:
+                    if job_id in job_id_to_card:
+                        job_card = job_id_to_card[job_id][0]
+                        player.add_card_to_played(job_card)
+        
+        return True
+
+
+            
+        
+
+
+
+
+
+
+    
+
+
+
+class EgaliteDesSalaireCard(SpecialCard, PermanentEffet):
+    def __init__(self, image_path:str):
+        super().__init__("egalite des salaire", image_path)
+
+    def get_card_rule(self):
+        return "Nous avons une carte Egalite des Salaire\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- votre limite max de niveau de salaire est le meme que le meilleur joueur\n" \
+        + "- effet permanant"
+    
+    def get_power(self):
+        return ["egalite_salaire"]
+
+
+class ClicheCard(SpecialCard, PermanentEffet):
+    def __init__(self, image_path: str):
+        super().__init__("cliché", image_path)
+
+class ClicheAccident(ClicheCard):
+    def __init__(self, image_path:str):
+        super().__init__(image_path)
+
+    def get_card_rule(self):
+        return "Nous avons une carte cliché\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- ne peu plus subir d'accident\n" \
+        + "- effet permanant"
+    
+    def get_power(self):
+        return ["no_accident"]
+
+class ClicheFlirt(ClicheCard):
+    def __init__(self, image_path:str):
+        super().__init__(image_path)
+
+    def get_card_rule(self):
+        return "Nous avons une carte cliché\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- flirt a volonté avant le marriage\n" \
+        + "- effet permanant"
+    
+    def get_power(self):
+        return ["unlimited_flirt"]
+
+class ClicheMetier(ClicheCard):
+    def __init__(self, image_path:str):
+        super().__init__(image_path)
+
+    def get_card_rule(self):
+        return "Nous avons une carte cliché\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- vous pouvez cumuler 2 métier\n" \
+        + "- effet permanant"
+    
+    def get_power(self):
+        return ["2_jobs"]
+
+class GirlPowerCard(SpecialCard, PermanentEffet):
+    def __init__(self, image_path: str):
+        super().__init__("girl power", image_path)
+        self.special_cards_uses: list[SpecialCard] = []
+        self.selection_event: Event = Event()
+        self.special_card_id = None
         
     def get_card_rule(self):
         return "Nous avons une carte Spécial\n" \
         + f"il donne {self.smiles} smiles\n" \
         + "\nREGLES\n" \
-        + "- chaque fille posée permet de rejouer une carte spéciale"
+        + "- chaque fille posée permet de rejouer une carte spéciale\n" \
+        + "- effet permanant"
     
+    def confirm_selection(self, data):
+        """confirmation de la sélection des salaires"""
+        self.special_card_id = data.get('selected_card_id', None)
+        self.selection_event.set()  # Déclencher l'événement
+
+    def discard_selection(self, data):
+        """annulation de la sélection des salaires"""
+        self.selection_event.set()  # Déclencher l'événement
+
+    def effect(self, game, current_player):
+        specials_cards: list[SpecialCard] = [card for card in current_player.get_played_carte_speciale() if isinstance(card, SpecialCard) and card not in self.special_cards_uses and card.can_be_played(current_player, game)]
+        print("[appel] : select_girl_power_card")
+        emit('select_girl_power_card', {
+            'card_id': self.id,
+            'special_cards': [card.to_dict() for card in specials_cards]
+        })
+        print("[EVENT] : Wait for selection")
+        self.selection_event.wait()
+        self.selection_event.clear()  # Réinitialiser l'événement
+        print("[EVENT] : trigger selection")
+
+        if self.special_card_id is not None:
+            selected_card: SpecialCard = current_player.get_played_carte_speciale_by_id(self.special_card_id)
+            self.special_cards_uses.append(selected_card)
+            current_player.remove_card_from_played(selected_card)
+            current_player.add_card_to_hand(selected_card)
+            selected_card.play_card(game, current_player)
+
     def apply_card_effect(self, game, current_player):
         """effectue a nouveaux toutes les cartes spéciales déja posée par le joueur"""
-        for special_card in current_player.get_played_card_special():
-            if isinstance(special_card, SpecialCard) and special_card.can_be_played(current_player, game):
-                special_card.apply_card_effect(game, current_player)
+        nb_filles = 0
+        for children in current_player.get_played_vie_perso():
+            if isinstance(children, FemaleChild):
+                nb_filles += 1
+        
+        for _ in range(nb_filles):
+            self.effect(game, current_player)
+
+        return True
+    
+    def get_power(self):
+        return super().get_power() + ["double_special_card"]
+
+class SoireeEntreFilleCard(SpecialCard):
+    def __init__(self, image_path: str):
+        super().__init__("soirée entre fille", image_path)
+        self.target_player_id: int = ""
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Spécial\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- récupère tous les enfants dans les mains et pose les sans conditions"
+    
+    def apply_card_effect(self, game: 'Game', current_player: 'Player'):
+        for player in game.players:
+            nb_children = 0
+            hand = player.hand
+            for card in hand:
+                if isinstance(card, ChildCard):
+                    current_player.add_card_to_played(card)
+                    player.remove_card_from_hand(card)
+                    nb_children += 1
+            for _ in range(nb_children):
+                player.add_card_to_hand(game.get_card_from_deck())
+        return True
+    
+class CoupDeFoudreCard(SpecialCard):
+    def __init__(self, image_path: str):
+        super().__init__("coup de foudre", image_path)
+        self.selection_event: Event = Event()
+        self.target_player_id: int = None
+        self.target_player: Player = None
+
+    def get_card_rule(self):
+        return "Nous avons une carte Coup de Foudre\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- vole un marriage a un joueur"
+    
+    def can_be_played(self, current_player, game):
+        for player in game.players:
+            if player == current_player and player.is_married():
+                return False, "le joueur est déja marrié"
+            else:
+                if player.is_married():
+                    return True, ""
+        return False, "aucun joueur n'est marrié"
+    
+    def confirm_selection(self, data):
+        """confirmation de la sélection des salaires"""
+        print("[appel] : confirm_target_selection")
+        self.target_player_id = data.get('target_player_id')
+        self.selection_event.set()  # Déclencher l'événement
+
+    def discard_selection(self, data):
+        """annulation de la sélection des salaires"""
+        print("[appel] : discard_target_selection")
+        self.target_player = None
+        self.target_player_id = None
+        self.selection_event.set()  # Déclencher l'événement
+    
+    def get_available_targets(self, game: 'Game', current_player: 'Player') -> list[dict]:
+        targets = []
+        for player in game.players:
+            values = player.to_dict()
+            values["immune"] = False
+            if player == current_player:
+                values["immune"] = True
+            if not player.is_married():
+                values["immune"] = True
+            targets.append(values)
+        return targets
+
+    def apply_card_effect(self, game, current_player):
+        targets = self.get_available_targets(game, current_player)
+  
+        print("[appel] : select_coup_de_foudre_target")
+        emit('select_coup_de_foudre_target', {
+            'card_id': self.id,
+            'available_targets': targets
+        })
+        
+        print("[EVENT] : Wait for selection")
+        self.selection_event.wait()
+        self.selection_event.clear()
+        print("[EVENT] : trigger selection")
+        
+        self.target_player = game.players[self.target_player_id]
+        marriage = self.target_player.get_marriage()
+        self.target_player.remove_card_from_played(marriage)
+        current_player.add_card_to_vie_perso(marriage)
+        return True
+
+class ErreurDetiquetageCard(SpecialCard):
+    def __init__(self, image_path: str):
+        super().__init__("erreur etiquetage", image_path)
+        self.selection_event: Event = Event()
+        self.target_player_id: int = None
+        self.current_child_id: int = None
+        self.target_child_id: int = None
 
     
+    def get_card_rule(self):
+        return "Nous avons une carte erreur d'étiquetage\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + "\nREGLES\n" \
+        + "- echange un de vos enfants posé avec un autre joueur\n" 
+    
+    def confirm_children_selection(self, data):
+        """confirmation de la sélection de la cible"""
+        print("[confirm_children_selection]", end=" ")
+        self.current_child_id = data.get('current_child_id', None)
+        self.target_child_id = data.get('target_child_id', None)
+        print(self.current_child_id, self.target_child_id)
+        self.selection_event.set()  # Déclencher l'événement
+
+    def confirm_target_selection(self, data):
+        """confirmation de la sélection de la cible"""
+        print("[confirm_target_selection]")
+        self.target_player_id = int(data.get('target_id', None))
+        self.selection_event.set()  # Déclencher l'événement
+
+    def discard_selection(self, data):
+        """annulation de la sélection de la cible"""
+        print("[discard_selection]")
+        self.selection_event.set()  # Déclencher l'événement
+
+    def can_be_played(self, current_player, game):
+        for player in game.players:
+            if player != current_player:
+                if any(isinstance(card, ChildCard) for card in player.get_played_vie_perso()):
+                    return True, ""
+        return False, "pas de cible disponibles ou pas de cartes recus"
+    
+    def get_available_targets(self, game: 'Game', current_player: 'Player') -> list[dict]:
+        targets = []
+        for player in game.players:
+            values = player.to_dict()
+            values["immune"] = False
+            if player == current_player:
+                values["immune"] = True
+            if not any(isinstance(card, ChildCard) for card in player.get_played_vie_perso()):  
+                values["immune"] = True
+            targets.append(values)
+        return targets
+    
+    def apply_card_effect(self, game, current_player):
+        print("[START] : ErreurDetiquetageCard.apply_card_effect")
+        targets = self.get_available_targets(game, current_player)
+
+        print("[APPEL] : select_etiquetage_target")
+        emit('select_etiquetage_target', {
+            'card_id' : self.id,
+            "targets" : targets
+        }, room=current_player.session_id)
+
+        print("[EVENT] : Wait for selection 1")
+        self.selection_event.wait()
+        self.selection_event.clear()  # Réinitialiser l'événement
+        print("[EVENT] : trigger selection 1")
+
+        if self.target_player_id is None:
+            return False
+
+        target_player = game.players[self.target_player_id]
+        print(f"le joueur target : {target_player}")
+        target_children: list[ChildCard] = [card.to_dict() for card in target_player.get_played_vie_perso() if isinstance(card, ChildCard)]
+        current_children: list[ChildCard] = [card.to_dict() for card in current_player.get_played_vie_perso() if isinstance(card, ChildCard)]
+        # print(f"les enfants possible {target_children}")
+        # print(f"tes enfants possible {current_children}")
+
+        print("[APPEL] : select_etiquetage_children")
+        emit('select_etiquetage_children', {
+            'card_id' : self.id,
+            "target_children" : target_children,
+            "current_children" : current_children
+        }, room=current_player.session_id)
+
+        print("[EVENT] : Wait for selection 2")
+        self.selection_event.wait()
+        self.selection_event.clear()  # Réinitialiser l'événement
+        print("[EVENT] : trigger selection 2")
+
+        print(f"target id : {self.target_child_id}")
+        if not self.target_child_id:
+            return False
+
+
+        target_child = target_player.get_played_vie_perso_by_id(self.target_child_id)
+        current_child = current_player.get_played_vie_perso_by_id(self.current_child_id)
+
+        print(f"les enfants : {target_child} {current_child}")
+        target_player.remove_card_from_played(target_child)
+        target_player.add_card_to_vie_perso(current_child)
+
+        current_player.remove_card_from_played(current_child)
+        current_player.add_card_to_vie_perso(target_child)
+        return True
+
 class TrocCard(SpecialCard):
     def __init__(self, image_path: str):
         super().__init__("troc", image_path)
@@ -877,6 +1294,7 @@ class TrocCard(SpecialCard):
         self.target_player.hand.remove(card_player2)
         self.target_player.hand.append(card_player1)
         print(f"Inversion des cartes {str(card_player1)} et {str(card_player2)}")
+        return True
         
 class TsunamiCard(SpecialCard):
     def __init__(self, image_path: str):
@@ -910,6 +1328,7 @@ class TsunamiCard(SpecialCard):
             player.hand = new_hand
         
         current_player.hand.append(self)
+        return True
 
 class HeritageCard(SpecialCard):
     def __init__(self, image_path: str, heritage_value):
@@ -929,6 +1348,7 @@ class HeritageCard(SpecialCard):
     
     def apply_card_effect(self, game, current_player):
         current_player.heritage += self.value
+        return True
 
 class PistonCard(SpecialCard):
     def __init__(self, image_path: str):
@@ -979,11 +1399,11 @@ class PistonCard(SpecialCard):
         
         pick_card = game.deck.pop()
         current_player.hand.append(pick_card)
+        return True
 
 class VengeanceCard(SpecialCard):
     def __init__(self, image_path: str):
         super().__init__("vengeance", image_path)
-        self.smiles = 0
         self.selection_event: Event = Event()
         self.target_player_id: int = None
         self.target_player: Player = None
@@ -1035,7 +1455,7 @@ class VengeanceCard(SpecialCard):
                 current_player.received_hardships.remove(card)
                 card.apply_effect(game, self.target_player, current_player)
                 self.target_player.received_hardships.append(card)
-                break
+        return True
             
 class ChanceCard(SpecialCard):
     def __init__(self, image_path: str):
@@ -1087,6 +1507,7 @@ class ChanceCard(SpecialCard):
             else:
                 game.discard.append(card)
         self.next_cards = []
+        return True
 
 class EtoileFilanteCard(SpecialCard):
     def __init__(self, image_path: str):
@@ -1134,7 +1555,8 @@ class EtoileFilanteCard(SpecialCard):
 
         game.discard.remove(card)
         current_player.hand.append(card)
-        card.play_card(game, current_player)     
+        card.play_card(game, current_player)  
+        return True   
                 
 class CasinoCard(SpecialCard):
     def __init__(self, image_path: str):
@@ -1228,6 +1650,7 @@ class CasinoCard(SpecialCard):
 
     def apply_card_effect(self, game, current_player):
         self.bet_on_casino(game, current_player, True)
+        return True
 
     def play_card(self, game: 'Game', current_player: 'Player'):
         self.is_open = True
@@ -1294,6 +1717,7 @@ class AnniversaireCard(SpecialCard):
         emit('close_birthday_waiting', {
             'card_id': self.id
         })
+        return True
 
 
     def give_salary_to_player(self, data):
@@ -1327,6 +1751,7 @@ class ArcEnCielCard(SpecialCard):
     def apply_card_effect(self, game, current_player):
         game.arcEnCielMode = True
         game.arcEnCielCard = self
+        return True
 
     def end_arc_en_ciel(self, game: 'Game', current_player: 'Player'):
         game.arcEnCielMode = False
@@ -1354,6 +1779,11 @@ class MuguetCard(SpecialCard):
     
     def apply_card_effect(self, game: 'Game', current_player):
         game.phase = "draw"
+        return True
+
+
+
+
 
 
 class HardshipCard(Card):
@@ -1445,7 +1875,6 @@ class HardshipCard(Card):
 class ChargeMentalHardhip(HardshipCard):
     def __init__(self, image_path: str):
         super().__init__(image_path)
-    
     def __str__(self):
         return f"ChargeMentalHardhip"
     
@@ -1531,6 +1960,116 @@ class TachesMenageresHardship(HardshipCard):
             if isinstance(house, HouseCard):
                 target_player.skip_turns += house.smiles
 
+class GynocratieHardship(HardshipCard, PermanentEffet):
+    def __init__(self, image_path):
+        super().__init__(image_path)
+    def __str__(self):
+        return f"smile : {self.smiles} - HardshipCard"
+    def to_dict(self) -> Dict[str, Any]:
+        base = super().to_dict()
+        base.update({
+            'subtype': 'GynocratieHardship'
+        })
+        return base
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Gynocratie\n" \
+        + "\nREGLES\n" \
+        + "- s'applique a quelqu'un d'autre\n" \
+        + "- chaque enfant Femme valent 1 smile de moins\n" \
+        + "- ne peux pas etre cumuler avec Phalocratie"
+
+    def other_rules(self, game: 'Game', current_player: 'Player', player: 'Player'):
+        effets_permanent = player.get_played_effet_permanent()
+        for card in effets_permanent:
+            if isinstance(card, (PhalocratieHardship, GynocratieHardship)):
+                return True
+        return False
+
+class PhalocratieHardship(HardshipCard, PermanentEffet):
+    def __init__(self, image_path):
+        super().__init__(image_path)
+    def __str__(self):
+        return f"smile : {self.smiles} - HardshipCard"
+    def to_dict(self) -> Dict[str, Any]:
+        base = super().to_dict()
+        base.update({
+            'subtype': 'PhalocratieHardship'
+        })
+        return base
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Phalocratie\n" \
+        + "\nREGLES\n" \
+        + "- s'applique a quelqu'un d'autre\n" \
+        + "- chaque enfant Homme valent 1 smile de moins\n" \
+        + "- ne peux pas etre cumuler avec Gynocratie"
+    
+    def other_rules(self, game: 'Game', current_player: 'Player', player: 'Player'):
+        effets_permanent = player.get_played_effet_permanent()
+        for card in effets_permanent:
+            if isinstance(card, (PhalocratieHardship, GynocratieHardship)):
+                return True
+        return False
+
+class PlafondDeVerreHardship(HardshipCard, PermanentEffet):
+    def __init__(self, image_path):
+        super().__init__(image_path)
+    def __str__(self):
+        return f"smile : {self.smiles} - HardshipCard"
+    def to_dict(self) -> Dict[str, Any]:
+        base = super().to_dict()
+        base.update({
+            'subtype': 'PlafondDeVerreHardship'
+        })
+        return base
+    
+    def get_card_rule(self):
+        return "Nous avons une carte Plafond de Verre\n" \
+        + "\nREGLES\n" \
+        + "- s'applique a quelqu'un d'autre\n" \
+        + "- ne peux pas avoir de métier qui demande un niveau d'étude de 5 ou 6\n" \
+        + "- l'effet est valide sur tous les nouveaux métiers"
+    
+    def get_power(self):
+        return ["no_job_with_study_5", "no_job_with_study_6"]
+    
+class PorcHardship(HardshipCard):
+    def __init__(self, image_path):
+        super().__init__(image_path)
+
+    def confirm_target_selection(self, data):
+        """confirmation de la sélection des salaires"""
+        print("[appel] : confirm_target_selection")
+        self.target_player_id = data.get('target_player_id')
+        self.selection_event.set()  # Déclencher l'événement
+
+    def discard_target_selection(self, data):
+        """annulation de la sélection des salaires"""
+        print("[appel] : discard_target_selection")
+        self.target_player = None
+        self.target_player_id = None
+        self.selection_event.set()  # Déclencher l'événement
+
+    def get_card_rule(self):
+        return "Nous avons une carte Balance Ton Porc\n" \
+        + "\nREGLES\n" \
+        + "- s'applique a un autre joueur\n" \
+        + "- défausse le mariage et le métier du joueur\n"
+    
+    def other_rules(self, game: 'Game', current_player: 'Player', player: 'Player'):
+        if not player.is_married():
+            return True
+        if not player.has_job():
+            return True
+        return False
+    
+    def apply_effect(self, game: 'Game', target_player: 'Player', current_player: 'Player'):
+        # Supprime le marriage
+        DivorceCard("").apply_effect(game, target_player, current_player)
+        # licenciement
+        LicenciementCard("").apply_effect(game, target_player, current_player)
+
 class TaxCard(HardshipCard):
     def __init__(self, image_path: str):
         super().__init__(image_path)
@@ -1557,7 +2096,7 @@ class TaxCard(HardshipCard):
             print(f"[DEBUG] : {player.name} pas de métier")
             return True
         # si le métier n'est pas imunisé au tax
-        if "no_tax" in player.get_job().power:
+        if "no_tax" in player.get_power():
             print(f"[DEBUG] : {player.name} un pouvoir no_tax")
             return True
         # si il a pas de salaires
@@ -1600,7 +2139,7 @@ class MaladieCard(HardshipCard):
         return base
     
     def other_rules(self, game: 'Game', current_player: 'Player', player: 'Player'):
-        return player.has_job() and "no_maladie" in player.get_job().power
+        return player.has_job() and "no_maladie" in player.get_power()
              
     def can_be_played(self, current_player, game):
         return super().can_be_played(current_player, game)
@@ -1632,7 +2171,8 @@ class AccidentCard(HardshipCard):
         return base
     
     def other_rules(self, game: 'Game', current_player: 'Player', player: 'Player'):
-        return player.has_job() and "no_accident" in player.get_job().power
+        print("[START] : accidentCard.other_rules")
+        return "no_accident" in player.get_power()
 
     def can_be_played(self, current_player, game):
         return super().can_be_played(current_player, game)
@@ -1666,7 +2206,7 @@ class AttentatCard(HardshipCard):
     
     def can_be_played(self, current_player, game):
         for player in game.players:
-            if player.has_job() and "no_attentat" in player.get_job().power:
+            if player.has_job() and "no_attentat" in player.get_power():
                 return False, ""
         return True, ""
     
@@ -1712,7 +2252,7 @@ class DivorceCard(HardshipCard):
     def other_rules(self, game: 'Game', current_player: 'Player', player: 'Player'):
         if not player.is_married():
             return True
-        if player.has_job() and "no_divorce" in player.get_job().power:
+        if player.has_job() and "no_divorce" in player.get_power():
             return True
         return False
 
@@ -1836,8 +2376,13 @@ class PrisonCard(HardshipCard):
         + "- seul les joueurs qui ont le métier de bandit peuvent subir ce coup dur"
     
     def other_rules(self, game: 'Game', current_player: 'Player', player: 'Player'):
-        return not (player.has_job() and player.get_job().job_name == "bandit")
-
+        if player.has_job():
+            jobs: list[JobCard] = player.get_job()
+            for job in jobs:
+                if isinstance(job, BanditJob):
+                    return False
+        return True
+        
     def can_be_played(self, current_player, game):
         return super().can_be_played(current_player, game)
 
@@ -1856,14 +2401,13 @@ class PrisonCard(HardshipCard):
             pick_card = game.deck.pop()
             target_player.hand.append(pick_card)
         # perte du métier
-        job = target_player.get_job()
-        target_player.remove_card_from_played(job)
-        game.discard.append(job)
+        LicenciementCard("").apply_effect(game, target_player, current_player)
 
 class LicenciementCard(HardshipCard):
     def __init__(self, image_path: str):
         super().__init__(image_path)
-    
+        self.targeted_job_id = None
+
     def __str__(self):
         return f"LicenciementCard"
     
@@ -1883,9 +2427,7 @@ class LicenciementCard(HardshipCard):
     def other_rules(self, game: 'Game', current_player: 'Player', player: 'Player'):
         if not player.has_job():
             return True
-        if "no_fire" in player.get_job().power:
-            return True
-        if player.get_job().status == "fonctionnaire":
+        if "no_fire" in player.get_power():
             return True
         return False
 
@@ -1895,9 +2437,45 @@ class LicenciementCard(HardshipCard):
     def play_card(self, game, current_player):
         super().play_card(game, current_player)
 
+    def confirm_select_job_licenciement(self, data):
+        """confirmation de la sélection des salaires"""
+        print("[appel] : confirm_target_selection")
+        self.targeted_job_id = data.get("target_job_id", None)
+        self.selection_event.set()  # Déclencher l'événement
+
+    def discard_select_job_licenciement(self, data):
+        """annulation de la sélection des salaires"""
+        print("[appel] : discard_target_selection")
+        self.selection_event.set()  # Déclencher l'événement
+    
+    def other_rules(self, game: 'Game', current_player: 'Player', player: 'Player'):
+        return False
     def apply_effect(self, game, target_player, current_player):
-        job_card = target_player.get_job() 
-        job_card.discard_play_card(game, target_player)
+        target_jobs = target_player.get_job() 
+        if len(target_jobs) == 1:
+            target_jobs[0].discard_play_card(game, target_player)
+        else:
+            print("A FAIRE, AFFICHAGE POUR SELECTIONNER UN JOB PARMIS LA LISTE")
+            print("[appel] : select_job_licenciement")
+            emit('select_job_licenciement', {
+                'card': self.to_dict(),
+                'jobs': [job.to_dict() for job in target_jobs]
+            })
+            
+            print("[EVENT] : Wait for selection")
+            self.selection_event.wait()
+            self.selection_event.clear()
+            print("[EVENT] : trigger selection")
+            
+            if self.targeted_job_id is None:
+                job = random.choice(target_jobs)
+            else:
+                for j in target_jobs:
+                    if j.id == self.targeted_job_id:
+                        job = j
+            job.discard_play_card(game, target_player)
+
+
 
 
 
@@ -1925,13 +2503,6 @@ class OtherCard(Card):
         return base
     
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
-        if self.card_type == 'prix':
-            job = current_player.get_job()
-            if not job:
-                return False, "Vous devez avoir un métier"
-            if job.power not in ['prix_possible', 'see_hands_prix_possible']:
-                return False, "Votre métier ne permet pas de recevoir un prix"
-        
         return True, ""
     
     def play_card(self, game: 'Game', current_player: 'Player'):
@@ -1973,12 +2544,13 @@ class PriceCard(OtherCard):
     
     def can_be_played(self, current_player: 'Player', game: 'Game') -> tuple[bool, str]:
         print("tentative de link de Prix", end=" ")
-        job = current_player.get_job()
-        if not job:
-            return False, "Vous devez avoir un métier"
-        if "prix_possible" not in job.power:
+        
+        if "prix_possible" not in current_player.get_power():
             return False, "Votre métier ne permet pas de recevoir un prix"
-        self.job_link = job.id
+        for job in current_player.get_job():
+            if "prix_possible" in job.get_power():
+                self.job_link = job.id
+                job.is_link = True
         print("le link est : ", self.job_link)
 
         return True, ""
@@ -2000,10 +2572,18 @@ class JobCard(Card):
         self.salary = salary
         self.studies = studies
         self.status = ""
-        self.power = ""
+        self.power = []
         self.smiles = 2
     
+    def get_power(self):
+        power = self.power
+        if self.status == "fonctionnaire":
+            power += ["no_fire"]
+        return power
     
+    def get_salary(self):
+        return self.salary
+
     def __str__(self):
         return f"{self.job_name} - smile : {self.smiles} - JobCard"
     
@@ -2036,15 +2616,23 @@ class JobCard(Card):
     
     def can_be_played(self, player: 'Player', game: 'Game') -> tuple[bool, str]:
         # Vérifier si le joueur a déjà un métier
-        if player.has_job():
-            print(f"debug : {game.to_dict()}")
-            return False, "Vous avez déjà un métier"
+        max_jobs = 1
+        if "2_jobs" in player.get_power():
+            max_jobs = 2
         
+        if player.has_job():
+            jobs = player.get_job()
+            if len(jobs) == max_jobs:
+                return False, "Vous avez déjà un métier"
+                
         # Vérifier si le joueur a les études nécessaires
         if isinstance(self.studies, int) and self.studies > 0:
             if player.count_studies() < self.studies:
                 return False, f"Vous avez besoin de {self.studies} études"
         
+        if f"no_job_with_study_{self.studies}" in player.get_power():
+            return False, f"Vous ne pouvez pas avoir de métier qui demande {self.studies} études"
+
         return True, ""
     
     def loosing_continuous_power(self, game: 'Game', effected_player: 'Player'):
@@ -2057,12 +2645,18 @@ class JobCard(Card):
         self.apply_instant_power(game, current_player)
         super().play_card(game, current_player)
 
-
 class ChercheurJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = "prix_possible"
+        self.power = ["prix_possible"]
+        self.is_link = False
+
+    def get_salary(self):
+        if self.is_link:
+            return 4
+        return self.salary
+
 
 
     def get_card_rule(self):
@@ -2087,7 +2681,7 @@ class AstronauteJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = ""
+        self.power = []
         self.selection_event: Event = Event()
         self.selected_card_id = None
 
@@ -2148,7 +2742,7 @@ class BanditJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = "no_tax__no_fire"
+        self.power = ["no_tax","no_fire"]
         
     def get_card_rule(self):
         return "Nous avons une carte métier Bandit\n" \
@@ -2161,7 +2755,7 @@ class BanditJob(JobCard):
 
     def can_be_played(self, current_player: 'Player', game: 'Game'):
         for player in game.players:
-            if player.has_job() and "no_bandit" in player.get_job().power:
+            if player.has_job() and "no_bandit" in player.get_power():
                 return False, "il y a un job qui empeche le bandit"
         return super().can_be_played(current_player, game)
 
@@ -2175,7 +2769,7 @@ class MediumJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = ""
+        self.power = []
         self.selection_event: Event = Event()
         
     def get_card_rule(self):
@@ -2214,8 +2808,14 @@ class JournalisteJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = "prix_possible"
+        self.power = ["prix_possible"]
         self.selection_event: Event = Event()
+        self.is_link = False
+    
+    def get_salary(self):
+        if self.is_link:
+            return 4
+        return self.salary
     
     def confirm_selection(self, data):
         """confirmation de la sélection des salaires"""
@@ -2254,7 +2854,7 @@ class ChefDesAchatsJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = ""
+        self.power = []
         self.selection_event: Event = Event()
         self.selected_card_id = None
 
@@ -2304,7 +2904,7 @@ class ChefDesVentesJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = ""
+        self.power = []
         self.selection_event: Event = Event()
         self.selected_card_id = None
 
@@ -2355,7 +2955,7 @@ class ProfJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = "fonctionnaire"
-        self.power = ""
+        self.power = []
 
     
     def get_card_rule(self):
@@ -2371,7 +2971,7 @@ class GrandProfJob(JobCard):
     def __init__(self, job_name: str, salary: int, image_path: str):
         super().__init__(job_name, salary, 0, image_path)
         self.status = "fonctionnaire"
-        self.power = ""
+        self.power = []
         
     def get_card_rule(self):
         return "Nous avons une carte métier Grand Prof\n" \
@@ -2386,20 +2986,26 @@ class GrandProfJob(JobCard):
         
 
     def can_be_played(self, player, game):
-        if player.has_job() and isinstance(player.get_job(), ProfJob):
-            return True, ""
+        if not player.has_job():
+            return False, "vous devez avoir un métier"
+        jobs = player.get_job()
+        for job in jobs:
+            if isinstance(job, ProfJob):
+                return True, ""
         return False, "Vous devez être professeur pour devenir grand prof"
 
     def apply_instant_power(self, game: 'Game', current_player: 'Player'):
-        job = current_player.get_job()
-        current_player.remove_card_from_played(job)
-        game.discard.append(job)
+        jobs = current_player.get_job()
+        for job in jobs:
+            if isinstance(job, ProfJob):
+                current_player.remove_card_from_played(job)
+                game.discard.append(job)
 
 class GourouJob(JobCard):
     def __init__(self, job_name, salary, studies, image_path):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = ""
+        self.power = []
     
     def get_card_rule(self):
         return "Nous avons une carte métier Gourou\n" \
@@ -2411,7 +3017,7 @@ class GourouJob(JobCard):
     
     def can_be_played(self, player, game):
         for player in game.players:
-            if player.has_job() and "no_gourou" in player.get_job().power:
+            if player.has_job() and "no_gourou" in player.get_power():
                 return False, "il y a un job qui empeche le bandit"
         return super().can_be_played(player, game)
 
@@ -2419,7 +3025,7 @@ class PolicierJob(JobCard):
     def __init__(self, job_name, salary, studies, image_path):
         super().__init__(job_name, salary, studies, image_path)
         self.status = "fonctionnaire"
-        self.power = "no_bandit__no_gourou"
+        self.power = ["no_bandit","no_gourou"]
     
     def get_card_rule(self):
         return "Nous avons une carte métier Gourou\n" \
@@ -2432,14 +3038,17 @@ class PolicierJob(JobCard):
     
     def apply_instant_power(self, game, current_player):
         for player in game.players:
-            if player.has_job() and isinstance(player.get_job(), (GourouJob, BanditJob)):
-                player.get_job().discard_play_card(game, player)
+            if player.has_job():
+                jobs: list[JobCard] = player.get_job()
+                for job in jobs:
+                    if isinstance(job, (GourouJob, BanditJob)):
+                        job.discard_play_card(game, player)
 
 class ArchitecteJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = "house_free"
+        self.power = ["house_free"]
         
     def get_card_rule(self):
         return "Nous avons une carte métier Architecte\n" \
@@ -2459,7 +3068,7 @@ class AvocatJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = "no_divorce"
+        self.power = ["no_divorce"]
     
     def get_card_rule(self):
         return "Nous avons une carte métier Avocat\n" \
@@ -2473,7 +3082,7 @@ class BarmanJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = "intérimaire"
-        self.power = "unlimited_flirt"
+        self.power = ["unlimited_flirt"]
     
     
     def get_card_rule(self):
@@ -2489,7 +3098,7 @@ class ChirurgienJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = "no_illness__extra_study"
+        self.power = ["no_illness","extra_study"]
     
     def get_card_rule(self):
         return "Nous avons une carte métier Chirurgien\n" \
@@ -2504,7 +3113,7 @@ class DesignerJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = ""
+        self.power = []
     
     def get_card_rule(self):
         return "Nous avons une carte métier Designer\n" \
@@ -2518,7 +3127,7 @@ class GaragisteJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = "no_accident"
+        self.power = ["no_accident"]
     
     def get_card_rule(self):
         return "Nous avons une carte métier Garagiste\n" \
@@ -2532,7 +3141,7 @@ class JardinierJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = ""
+        self.power = []
     
     def get_card_rule(self):
         return "Nous avons une carte métier Jardinier\n" \
@@ -2546,7 +3155,7 @@ class MedecinJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = "no_maladie__extra_study"
+        self.power = ["no_maladie","extra_study"]
     
     def get_card_rule(self):
         return "Nous avons une carte métier Médecin\n" \
@@ -2561,7 +3170,7 @@ class MilitaireJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = "fonctionnaire"
-        self.power = "no_attentat"
+        self.power = ["no_attentat"]
     
     def get_card_rule(self):
         return "Nous avons une carte métier Jardinier\n" \
@@ -2576,7 +3185,7 @@ class PharmacienJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = "no_maladie"
+        self.power = ["no_maladie"]
     
     
     def get_card_rule(self):
@@ -2591,7 +3200,7 @@ class PiloteDeLigneJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = "travel_free"
+        self.power = ["travel_free"]
 
     
     def get_card_rule(self):
@@ -2606,7 +3215,7 @@ class PizzaioloJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = ""
+        self.power = []
     
     def get_card_rule(self):
         return "Nous avons une carte métier Pizzaiolo\n" \
@@ -2620,7 +3229,7 @@ class PlombierJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = "intérimaire"
-        self.power = ""
+        self.power = []
     
     def get_card_rule(self):
         return "Nous avons une carte métier Plombier\n" \
@@ -2634,7 +3243,7 @@ class ServeurJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = "intérimaire"
-        self.power = ""
+        self.power = []
     
     def get_card_rule(self):
         return "Nous avons une carte métier Serveur\n" \
@@ -2648,7 +3257,7 @@ class StripTeaserJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = "intérimaire"
-        self.power = ""
+        self.power = []
     
     def get_card_rule(self):
         return "Nous avons une carte métier StripTeaser\n" \
@@ -2662,7 +3271,13 @@ class EcrivainJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = "prix_possible"
+        self.power = ["prix_possible"]
+        self.is_link = False
+
+    def get_salary(self):
+        if self.is_link:
+            return 4
+        return self.salary
     
     def get_card_rule(self):
         return "Nous avons une carte métier Ecrivain\n" \
@@ -2676,7 +3291,7 @@ class YoutuberJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = ""
+        self.power = []
     
     def get_card_rule(self):
         return "Nous avons une carte métier Youtubeur\n" \
@@ -2690,7 +3305,7 @@ class CoiffeurJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = ""
-        self.power = ""
+        self.power = []
     
     def get_card_rule(self):
         return "Nous avons une carte métier Coiffeur\n" \
@@ -2704,7 +3319,7 @@ class DeejayJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = "intérimaire"
-        self.power = ""
+        self.power = []
     
     def get_card_rule(self):
         return "Nous avons une carte métier Plombier\n" \
@@ -2740,7 +3355,8 @@ class Player:
             "vie personnelle": [],      # flirts, mariage, adultère, enfants, animaux
             "acquisitions": [],         # maisons, voyages
             "salaire dépensé": [],      # salaires utilisés pour acheter
-            "cartes spéciales": []      # cartes spéciales, autres, et flirts avec adultère
+            "cartes spéciales": [],      # cartes spéciales, autres, et flirts avec adultère
+            "effet permanent": []
         }
         self.skip_turns = 0
         self.has_been_bandit = False
@@ -2749,23 +3365,100 @@ class Player:
         self.connected = True
         self.session_id = None
     
+    def get_marriage(self):
+        for card in self.played["vie personnelle"]:
+            if isinstance(card, MarriageCard):
+                return card
+        return None
+    
+    # EFFET PERMANENT
+    def get_played_effet_permanent(self):
+        return self.played["effet permanent"]
+    def add_card_to_effet_permanent(self, card: Card):
+        self.played["effet permanent"].append(card)
+    def get_played_effet_permanent_by_id(self, card_id):
+        for card in self.played["effet permanent"]:
+            if card.id == card_id:
+                return card
+        return None
+    
+    # VIE PROFESSIONNELLE
     def get_played_vie_pro(self):
         return self.played["vie professionnelle"]
+    def add_card_to_vie_pro(self, card: Card):
+        self.played["vie professionnelle"].append(card)
+    def get_played_vie_pro_by_id(self, card_id):
+        for card in self.played["vie professionnelle"]:
+            if card.id == card_id:
+                return card
+        return None
     
+    # VIE PERSONNELLE
     def get_played_vie_perso(self):
         return self.played["vie personnelle"]
-
+    def add_card_to_vie_perso(self, card: Card):
+        self.played["vie personnelle"].append(card)
+    def get_played_vie_perso_by_id(self, card_id):
+        for card in self.played["vie personnelle"]:
+            if card.id == card_id:
+                return card
+        return None
+    
+    # AQUISITIONS
     def get_played_acquisitions(self):
         return self.played["acquisitions"]
+    def add_card_to_acquisitions(self, card: Card):
+        self.played["acquisitions"].append(card)
+    def get_played_acquisitions_by_id(self, card_id):
+        for card in self.played["acquisitions"]:
+            if card.id == card_id:
+                return card
+        return None
     
+    # SALAIRE DEPENSE
     def get_played_salaire_depense(self):
         return self.played["salaire dépensé"]
+    def add_card_to_salaire_depense(self, card: Card):
+        self.played["salaire dépensé"].append(card)
+    def get_played_salaire_depense_by_id(self, card_id):
+        for card in self.played["salaire dépensé"]:
+            if card.id == card_id:
+                return card
+        return None
     
+    # CARTES SPECIALES
     def get_played_carte_speciale(self):
         return self.played["cartes spéciales"]
+    def add_card_to_carte_speciale(self, card: Card):
+        self.played["cartes spéciales"].append(card)
+    def get_played_carte_speciale_by_id(self, card_id):
+        for card in self.played["cartes spéciales"]:
+            if card.id == card_id:
+                return card
+        return None
+
+    # MAIN
+    def get_card_from_hand(self):
+        return self.hand
+    def remove_card_from_hand(self, card: Card):
+        """retire une carte a la main du joueur"""
+        self.hand.remove(card)
+    def add_card_to_hand(self, card: Card):
+        """ajoute une carte a la main du joueur"""
+        self.hand.append(card)
+
+    # JOBS
+    def has_job(self) -> bool:
+        return any(isinstance(card, JobCard) for card in self.played["vie professionnelle"])
+    def get_job(self) -> List[JobCard]:
+        jobs = []
+        for card in self.played["vie professionnelle"]:
+            if isinstance(card, JobCard):
+                jobs.append(card)
+        return jobs
 
     def __str__(self):
-        return "Player YOUSK"
+        return self.name
     
     def get_last_flirt(self) -> FlirtCard:
         print("[START] : Player.get_last_flirt()")
@@ -2779,15 +3472,18 @@ class Player:
             i -= 1
         return None
     
-    def get_played_card_vie_perso(self):
-        return self.played["vie personnelle"]
-    
-    def get_played_card_vie_pro(self):
-        return self.played["vie professionnelle"]
-    
-    def get_played_card_special(self):
-        return self.played["cartes speciales"]
+    def get_power(self) -> list[str]:
+        powers = []
+        if self.has_job():
+            for job in self.get_job():
+                powers += job.get_power()
+        for card in self.get_all_played_cards():
+            if isinstance(card, PermanentEffet):
+                powers += card.get_power()
+        print(f"[FONCTION] get power : {powers}")
+        return powers
 
+    
     def get_all_played_cards(self) -> List[Card]:
         """Retourne toutes les cartes jouées (toutes catégories)"""
         all_cards = []
@@ -2797,7 +3493,9 @@ class Player:
     
     def add_card_to_played(self, card: Card):
         """Ajoute une carte à la bonne catégorie"""
-        if isinstance(card, (StudyCard, JobCard, SalaryCard)):
+        if isinstance(card, PermanentEffet):
+            self.add_card_to_effet_permanent(card)
+        elif isinstance(card, (StudyCard, JobCard, SalaryCard)):
             self.played["vie professionnelle"].append(card)
         elif isinstance(card, (MarriageCard, ChildCard, AnimalCard, AdulteryCard)):
             self.played["vie personnelle"].append(card)
@@ -2807,12 +3505,14 @@ class Player:
                 self.played["cartes spéciales"].append(card)
             else:
                 self.played["vie personnelle"].append(card)
-        elif isinstance(card, (HouseCard, TravelCard)):
+        elif isinstance(card, (AquisitionCard)):
             self.played["acquisitions"].append(card)
         elif isinstance(card, (SpecialCard, OtherCard)):
             self.played["cartes spéciales"].append(card)
         elif isinstance(card, (HardshipCard)):
             self.received_hardships.append(card)
+        else:
+            print("[ERROR] add_card_to_played CARTE INCONNUE", card)
         
     
     def remove_card_from_played(self, card: Card) -> bool:
@@ -2869,10 +3569,6 @@ class Player:
     def get_available_salary_sum(self) -> int:
         """Retourne la somme des salaires disponibles (non dépensés)"""
         return sum(c.level for c in self.played["vie professionnelle"] if isinstance(c, SalaryCard))
-    
-    def has_job(self) -> bool:
-        return any(isinstance(card, JobCard) for card in self.played["vie professionnelle"])
-    
     def has_any_flirt(self) -> bool:
         """Vérifie si le joueur a au moins un flirt"""
         # Chercher dans vie personnelle ET cartes spéciales (flirts avec adultère)
@@ -2885,12 +3581,10 @@ class Player:
         print(f"[DEBUG] : {self.played}, {self.name}\n\n")
         return any(isinstance(card, AdulteryCard) for card in self.played["vie personnelle"])
     
-    def get_job(self) -> JobCard:
-        for card in self.played["vie professionnelle"]:
-            if isinstance(card, JobCard):
-                return card
-        return None
     
+  
+    
+
     def count_studies(self) -> int:
         total = 0
         for card in self.played["vie professionnelle"]:
@@ -2915,13 +3609,27 @@ class Player:
         
         # Bonus licorne + arc-en-ciel + étoile filante
         all_cards = self.get_all_played_cards()
-        has_licorne = any(isinstance(c, LicorneAnimal) for c in all_cards)
-        has_arc = any(isinstance(c, SpecialCard) and c.special_type == 'arc en ciel' for c in all_cards)
-        has_etoile = any(isinstance(c, SpecialCard) and c.special_type == 'etoile filante' for c in all_cards)
         
+        # Gestion de la licorne
+        has_licorne = any(isinstance(c, LicorneAnimal) for c in all_cards)
+        has_arc = any(isinstance(c, ArcEnCielCard) for c in all_cards)
+        has_etoile = any(isinstance(c, EtoileFilanteCard) for c in all_cards)
         if has_licorne and has_arc and has_etoile:
             total += 3
         
+        # Gestion de gynocratie et phalocratie
+        has_gynocratie = any(isinstance(c, GynocratieHardship) for c in all_cards)
+        has_phalocratie = any(isinstance(c, PhalocratieHardship) for c in all_cards)
+        
+        if has_gynocratie:
+            nb_female = sum(1 for card in all_cards if isinstance(card, FemaleChild))
+            total -= nb_female
+        if has_phalocratie:
+            nb_male = sum(1 for card in all_cards if isinstance(card, MaleChild))
+            total -= nb_male
+        
+
+
         return total
     
     def to_dict(self, hide_hand: bool = False) -> Dict[str, Any]:
@@ -2968,6 +3676,12 @@ class Game:
         self.arcEnCielMode = False
         self.arcEnCielCard: ArcEnCielCard = None
 
+    def get_card_from_deck(self):
+        """retire une carte de la pioche et retourne la"""
+        return self.deck.pop()
+    
+    def add_to_discard(self, card: Card):
+        self.discard.append(card)
 
     def add_player(self, player: Player):
         """Ajoute un joueur à la partie"""

@@ -136,3 +136,7 @@ amélioration futur :
 
 
 
+trucs a tester :
+- sabre : ajouter l'effet quand on pose child_beatrix
+- girl power : tests
+- porc : tests

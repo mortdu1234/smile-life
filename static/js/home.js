@@ -16,9 +16,27 @@ const presetDecks = {
         name: "deck exemple",
         description: "desciption exemple",
         config: {
-          "child_daenerys": 10,
-          "animal_dragon": 10,
-          "flirt_child_hotel": 10
+          "chance": 0,
+          "salary_4": 10,
+          "flirt_child_camping": 0,
+          "mariage_corps_nuds": 0,
+
+
+          "redistribution_des_taches": 10, 
+          "egalite_de_salaire": 10,
+
+          "cliche_metier": 0,
+          "cliche_flirt": 0,
+          "cliche_accident": 0,
+          "accident": 0,
+          "bandit": 10,
+          "licenciement": 0,
+          "pizzaiolo": 10,
+          "barman": 0,
+          "prison": 0,
+          "girl_power": 0,
+          "child_lara": 0,
+          "porc": 0
         }
     }
 };
@@ -298,10 +316,10 @@ const cardCategories = {
         { id: "pizzaiola", name: "Pizzaiola", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/pizzaiola.png" },
         { id: "plombiere", name: "Plombière", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/plombiere.png" },
         { id: "policiere", name: "Policière", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/policiere.png" },
-        { id: "prof_chimie", name: "Prof de chimie", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/prof_chimie.png" },
-        { id: "prof_geo", name: "Prof de geo", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/prof_geo.png" },
-        { id: "prof_musique", name: "Prof de musique", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/prof_musique.png" },
-        { id: "prof_philo", name: "Prof de philo", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/prof_philo.png" },
+        { id: "prof_de_chimie", name: "Prof de chimie", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/prof_de_chimie.png" },
+        { id: "prof_de_geo", name: "Prof de geo", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/prof_de_geo.png" },
+        { id: "prof_de_musique", name: "Prof de musique", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/prof_de_musique.png" },
+        { id: "prof_de_philo", name: "Prof de philo", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/prof_de_philo.png" },
         { id: "serveuse", name: "Serveuse", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/serveuse.png" },
         { id: "stripteaseuse", name: "Strip-teaseuse", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/stripteaseuse.png" },
         { id: "grand_prof_f", name: "Grand Prof", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/grand_prof_f.png" },
@@ -321,7 +339,6 @@ const cardCategories = {
         // --- ADULTÈRE ---
 
         // --- ENFANTS ---
-
         { id: "child_angela", name: "Angela", defaultCount: 0, image: "personnal_life/children/angela.png" },
         { id: "child_beatrix", name: "Beatrix", defaultCount: 0, image: "personnal_life/children/beatrix.png" },
         { id: "child_daenerys", name: "Daenerys", defaultCount: 0, image: "personnal_life/children/daenerys.png" },
@@ -333,20 +350,29 @@ const cardCategories = {
         { id: "animal_crapaud", name: "Crapaud", defaultCount: 0, image: "aquisition_cards/animals/crapaud.png" },
         { id: "animal_dragon", name: "Dragon", defaultCount: 0, image: "aquisition_cards/animals/dragon.png" },
         
-        // --- MAISONS ---
-
-        // --- VOYAGES ---
+        // --- AQUISITION ---
+        { id: "ticket_concert", name: "Ticket de Concert", defaultCount: 0, image: "aquisition_cards/other/place_de_concert.png" },
+        { id: "sabre", name: "Sabre", defaultCount: 0, image: "aquisition_cards/other/sabre.png" },
+        { id: "nounou", name: "Sabre", defaultCount: 0, image: "aquisition_cards/other/nounou.png" },
 
         // --- CARTES SPÉCIALES ---
         { id: "girl_power", name: "Girl Power", defaultCount: 0, image: "special_cards/girl_power.png" },
-        
+        { id: "soiree_entre_filles", name: "Soirée en Filles", defaultCount: 0, image: "special_cards/soiree_entre_filles.png" },
+        { id: "coup_de_foudre", name: "Coup de Foudre", defaultCount: 0, image: "special_cards/coup_de_foudre.png" },
+        { id: "erreur_detiquetage", name: "Erreur D'étiquetage", defaultCount: 0, image: "special_cards/erreur_detiquetage.png" },
+        { id: "cliche_metier", name: "Cliché Métier", defaultCount: 0, image: "special_cards/cliche_metier.png" },
+        { id: "cliche_flirt", name: "Cliché Flirt", defaultCount: 0, image: "special_cards/cliche_flirt.png" },
+        { id: "cliche_accident", name: "Cliché Accident", defaultCount: 0, image: "special_cards/cliche_accident.png" },
+        { id: "egalite_de_salaire", name: "Egalité de Salaire", defaultCount: 0, image: "special_cards/egalite_de_salaire.png" },
+        { id: "redistribution_des_taches", name: "Redistribution des taches", defaultCount: 0, image: "special_cards/redistribution_des_taches.png" },
+
         // --- COUPS DURS ---
-        { id: "charge_mentale", name: "Charge Mentale", defaultCount: 5, image: "hardship_cards/charge_mentale.png" },
-        { id: "gynocratie", name: "Gynocratie", defaultCount: 5, image: "hardship_cards/gynocratie.png" },
-        { id: "phallocratie", name: "Phallocratie", defaultCount: 5, image: "hardship_cards/phallocratie.png" },
-        { id: "plafond_de_verre", name: "Plafond de verre", defaultCount: 5, image: "hardship_cards/plafond_de_verre.png" },
-        { id: "porc", name: "Porc", defaultCount: 5, image: "hardship_cards/porc.png" },
-        { id: "taches_menageres", name: "Tâches Menagères", defaultCount: 5, image: "hardship_cards/taches_menageres.png" },
+        { id: "charge_mentale", name: "Charge Mentale", defaultCount: 0, image: "hardship_cards/charge_mentale.png" },
+        { id: "gynocratie", name: "Gynocratie", defaultCount: 0, image: "hardship_cards/gynocratie.png" },
+        { id: "phallocratie", name: "Phallocratie", defaultCount: 0, image: "hardship_cards/phallocratie.png" },
+        { id: "plafond_de_verre", name: "Plafond de verre", defaultCount: 0, image: "hardship_cards/plafond_de_verre.png" },
+        { id: "porc", name: "Balance ton Porc", defaultCount: 0, image: "hardship_cards/porc.png" },
+        { id: "taches_menageres", name: "Tâches Menagères", defaultCount: 0, image: "hardship_cards/taches_menageres.png" },
         // --- AUTRES ---
     
     ],
@@ -546,19 +572,18 @@ function renderCardSelector() {
 
 // Nouvelle fonction pour afficher les infos de carte dans le config du deck
 async function showCardInfoInDeckConfig(cardId, cardName) {
-  try {
-    const response = await fetch(`/api/card_rule/${cardId}`);
-    const data = await response.json();
-    
-    if (data.success) {
-      showCardRules(cardName, data.rule);
-    } else {
-      alert('Impossible de charger les informations de cette carte');
+    try {
+        const response = await fetch(`/api/card_rule/${cardId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            showCardRules(cardName, data.rule, data.image);  // ✅ AJOUT du paramètre image
+        } else {
+            alert('Impossible de charger les informations de cette carte');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
     }
-  } catch (error) {
-    console.error('Erreur lors du chargement des règles:', error);
-    alert('Erreur de connexion au serveur');
-  }
 }
 
 
@@ -627,7 +652,7 @@ function validateDeckConfigFromLobby() {
     document.getElementById('card-selector-screen').classList.add('hidden');
     document.getElementById('lobby-screen').classList.remove('hidden');
     
-    alert(`Deck mis à jour ! ${totalCards} cartes au total.`);
+    //alert(`Deck mis à jour ! ${totalCards} cartes au total.`);
   } else {
     // Création initiale (non utilisé maintenant)
     confirmDeckAndCreateGame(cardCounts);
@@ -664,7 +689,7 @@ function loadPresetDeck(presetKey) {
     
     // Message de confirmation
     const totalCards = getTotalCards();
-    alert(`Deck "${preset.name}" chargé ! ${totalCards} cartes au total.\n\n${preset.description}`);
+    //alert(`Deck "${preset.name}" chargé ! ${totalCards} cartes au total.\n\n${preset.description}`);
 }
 
 // Afficher le sélecteur de presets dans l'UI

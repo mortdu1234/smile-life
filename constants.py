@@ -202,10 +202,10 @@ card_builders = {
     "pizzaiola": lambda: PizzaioloJob("pizzaiola", 2, 0, "personnal_life/professionnal_life/JobCards/pizzaiola.png"),
     "plombiere": lambda: PlombierJob("plombiere", 1, 1, "personnal_life/professionnal_life/JobCards/plombiere.png"),
     "policiere": lambda: PolicierJob("policiere", 1, 1, "personnal_life/professionnal_life/JobCards/policiere.png"),
-    "prof_chimie": lambda: ProfJob("prof de chimie", 2, 2, "personnal_life/professionnal_life/JobCards/prof_chimie.png"),
-    "prof_geo": lambda: ProfJob("prof de geo", 2, 2, "personnal_life/professionnal_life/JobCards/prof_geo.png"),
-    "prof_musique": lambda: ProfJob("prof musique", 2, 2, "personnal_life/professionnal_life/JobCards/prof_musique.png"),
-    "prof_philo": lambda: ProfJob("prof philo", 2, 2, "personnal_life/professionnal_life/JobCards/prof_philo.png"),
+    "prof_de_chimie": lambda: ProfJob("prof de chimie", 2, 2, "personnal_life/professionnal_life/JobCards/prof_de_chimie.png"),
+    "prof_de_geo": lambda: ProfJob("prof de geo", 2, 2, "personnal_life/professionnal_life/JobCards/prof_de_geo.png"),
+    "prof_de_musique": lambda: ProfJob("prof musique", 2, 2, "personnal_life/professionnal_life/JobCards/prof_de_musique.png"),
+    "prof_de_philo": lambda: ProfJob("prof philo", 2, 2, "personnal_life/professionnal_life/JobCards/prof_de_philo.png"),
     "serveuse": lambda: ServeurJob("serveuse", 1, 0, "personnal_life/professionnal_life/JobCards/serveuse.png"),
     "stripteaseuse": lambda: StripTeaserJob("stripteaseuse", 1, 0, "personnal_life/professionnal_life/JobCards/stripteaseuse.png"),
     "grand_prof_f": lambda: GrandProfJob("grand prof", 3, "personnal_life/professionnal_life/JobCards/grand_prof_f.png"),
@@ -234,20 +234,29 @@ card_builders = {
     # --- ANIMAUX ---
     "animal_crapaud": lambda: AnimalCard("crapaud", 1, "aquisition_cards/animals/crapaud.png"),
     "animal_dragon": lambda: DragonAnimal("dragon", 1, "aquisition_cards/animals/dragon.png"),
-    # --- MAISONS ---
-
-    # --- VOYAGES ---
+    # --- AQUISITION ---
+    "ticket_concert": lambda: ConcertTicket(1, 1, "aquisition_cards/other/place_de_concert.png"),
+    "sabre": lambda: SabreCard(1, 1, "aquisition_cards/other/sabre.png"),
+    "nounou": lambda: NounouCard(4, 1, "aquisition_cards/other/nounou.png"),
 
     # --- CARTES SPÉCIALES ---
-    "girl_power": lambda: ArcEnCielCard("special_cards/girl_power.png"),
-    
+    "girl_power": lambda: GirlPowerCard("special_cards/girl_power.png"),
+    "soiree_entre_filles": lambda: SoireeEntreFilleCard("special_cards/soiree_entre_filles.png"),
+    "coup_de_foudre": lambda: CoupDeFoudreCard("special_cards/coup_de_foudre.png"),
+    "erreur_detiquetage": lambda: ErreurDetiquetageCard("special_cards/erreur_detiquetage.png"),
+    "cliche_metier": lambda: ClicheMetier("special_cards/cliche_metier.png"),
+    "cliche_flirt": lambda: ClicheFlirt("special_cards/cliche_flirt.png"),
+    "cliche_accident": lambda: ClicheAccident("special_cards/cliche_accident.png"),
+    "egalite_de_salaire": lambda: EgaliteDesSalaireCard("special_cards/egalite_de_salaire.png"),
+    "redistribution_des_taches": lambda: RedistributionDesTachesCard("special_cards/redistribution_des_taches.png"),
+
     # --- COUPS DURS ---
     "charge_mentale": lambda: ChargeMentalHardhip("hardship_cards/charge_mentale.png"),
-    "gynocratie": lambda: AccidentCard("hardship_cards/gynocratie.png"),
-    "phallocratie": lambda: AccidentCard("hardship_cards/phallocratie.png"),
-    "plafond_de_verre": lambda: AccidentCard("hardship_cards/plafond_de_verre.png"),
-    "porc": lambda: AccidentCard("hardship_cards/porc.png"),
-    "taches_menageres": lambda: AccidentCard("hardship_cards/taches_menageres.png"),
+    "gynocratie": lambda: GynocratieHardship("hardship_cards/gynocratie.png"),
+    "phallocratie": lambda: PhalocratieHardship("hardship_cards/phallocratie.png"),
+    "plafond_de_verre": lambda: PlafondDeVerreHardship("hardship_cards/plafond_de_verre.png"),
+    "porc": lambda: PorcHardship("hardship_cards/porc.png"),
+    "taches_menageres": lambda: TachesMenageresHardship("hardship_cards/taches_menageres.png"),
 
     # --- AUTRES ---
 
@@ -474,7 +483,7 @@ class CardFactory:
         
         # Enfants
         for name in cls.CHILDREN_NAMES:
-            deck.append(ChildCard(name, "f", f"personnal_life/children/{name}.png"))
+            deck.append(ChildCard(name, f"personnal_life/children/{name}.png"))
         
         # Animaux
         for animal in cls.ANIMALS:
@@ -523,22 +532,6 @@ class CardFactory:
         deck.append(PriceCard(4, "personnal_life/professionnal_life/price.png"))
         deck.append(PriceCard(4, "personnal_life/professionnal_life/price.png"))
         
-
-        # EXTENTIONS
-        # cartes spéciales supplémentaires
-        deck.append(HeritageCard("special_cards/super_heritage.png", 5))
-        deck.append(MuguetCard("special_cards/muguet.png"))
-
-        # metiers supplementaires
-        deck.append(ProfJob("prof education sexuelle", 2, 2, "personnal_life/professionnal_life/JobCards/prof_education_sexuelle.png"))
-        deck.append(YoutuberJob("youtubeur", 4, 0, "personnal_life/professionnal_life/JobCards/youtubeur.png"))
-        deck.append(CoiffeurJob("coiffeur", 1, 1, "personnal_life/professionnal_life/JobCards/coiffeur.png"))
-        deck.append(DeejayJob("deejay", 2, 0, "personnal_life/professionnal_life/JobCards/deejay.png"))
-        
-
-
-
-
 
 
         return deck

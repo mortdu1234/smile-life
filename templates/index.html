@@ -53,7 +53,7 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-400 to-pink-500 min-h-screen">
-    <!-- Modal Brûler une carte posée Girl POWER EXTENTION -->
+    <!-- Modal Brûler une carte posée GIRL POWER EXTENTION -->
     <div id="burn-card-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">
@@ -78,17 +78,189 @@
             </button>
         </div>
     </div>
+    <!-- Modal Sabre - Choix de l'attaque et de la cible GIRL POWER EXTENTION -->
+    <div id="sabre-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">
+                ⚔️ Sabre
+            </h2>
+            <p class="text-center mb-4 text-gray-600">
+                Choisissez une attaque reçue à renvoyer à <span id="sabre-target-name" class="font-bold text-red-600"></span>
+            </p>
+            <div class="mb-6">
+                <h3 class="font-semibold mb-3 text-gray-700">Vos attaques reçues :</h3>
+                <div id="sabre-hardships-list" class="space-y-2 mb-4"></div>
+            </div>
+            <button onclick="discardSabre()" class="mt-4 w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+                Annuler
+            </button>
+        </div>
+    </div>
 
-    <!-- Modal des règles -->
-    <div id="rules-modal" class="modal-backdrop hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-start mb-4">
-                <h2 class="text-2xl font-bold text-gray-800" id="rule-title">Titre de la carte</h2>
-                <button onclick="closeRulesModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+    <!-- Modal Erreur d'Étiquetage - Sélection du joueur cible -->
+    <div id="etiquetage-target-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">
+                🏷️ Erreur d'Étiquetage
+            </h2>
+            <p class="text-center mb-6 text-gray-600">Choisissez un joueur avec des enfants</p>
+            
+            <!-- Liste des joueurs cibles -->
+            <div class="mb-6">
+                <h3 class="font-semibold mb-3 text-gray-700">Joueurs disponibles :</h3>
+                <div id="etiquetage-targets-list" class="space-y-2">
+                    <!-- Généré dynamiquement -->
+                </div>
             </div>
             
-            <div id="rule-content" class="space-y-4">
-                <!-- Contenu dynamique -->
+            <!-- Bouton Annuler -->
+            <button onclick="discardEtiquetageTargetSelection()" 
+                    class="w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+                ❌ Annuler
+            </button>
+        </div>
+    </div>
+    <!-- Modal Erreur d'Étiquetage - Échange des enfants -->
+    <div id="etiquetage-children-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">
+                🏷️ Erreur d'Étiquetage - Échange d'enfants
+            </h2>
+            <p class="text-center mb-6 text-gray-600">Sélectionnez un enfant dans chaque liste à échanger</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Vos enfants -->
+                <div>
+                    <h3 class="font-semibold mb-3 text-blue-700">👶 Vos enfants :</h3>
+                    <div id="etiquetage-current-children-list" class="space-y-2">
+                        <!-- Généré dynamiquement -->
+                    </div>
+                </div>
+                
+                <!-- Enfants de la cible -->
+                <div>
+                    <h3 class="font-semibold mb-3 text-red-700">👶 Enfants de <span id="etiquetage-target-name">la cible</span> :</h3>
+                    <div id="etiquetage-target-children-list" class="space-y-2">
+                        <!-- Généré dynamiquement -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Message de validation -->
+            <div id="etiquetage-validation-message" class="mb-4 text-center text-sm">
+                <span class="text-orange-600">Sélectionnez un enfant dans chaque liste</span>
+            </div>
+            
+            <!-- Boutons d'action -->
+            <div class="flex gap-3">
+                <button onclick="confirmEtiquetageChildrenSelection()" 
+                        id="etiquetage-confirm-btn"
+                        class="flex-1 bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed" 
+                        disabled>
+                    ✅ Échanger les enfants
+                </button>
+                <button onclick="discardEtiquetageChildrenSelection()" 
+                        class="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+                    ❌ Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Coup de Foudre -->
+    <div id="coup-de-foudre-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full">
+            <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">
+                Choisir une victime du coup de foudre
+            </h2>
+            <div id="hardship-card-display" class="mb-6 p-4 bg-red-50 rounded-lg border-2 border-red-300"></div>
+            <div class="mb-6">
+                <h3 class="font-semibold mb-3 text-gray-700">Joueurs disponibles :</h3>
+                <div id="coup-de-foudre-targets-list" class="space-y-2"></div>
+            </div>
+            <button onclick="discardCoupDeFoudre()" class="w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold">
+                Annuler
+            </button>
+        </div>
+    </div>
+    <!-- Modal Girl Power - Sélection de carte spéciale -->
+    <div id="girl-power-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-2xl p-8 max-w-6xl w-full max-h-[90vh] overflow-y-auto border-4 border-purple-300">
+            <!-- Header avec icône et titre -->
+            <div class="text-center mb-6">
+                <div class="text-6xl mb-3">💜</div>
+                <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                    Girl Power !
+                </h2>
+                <p class="text-gray-600 mt-2">
+                    Choisissez une carte spéciale à rejouer grâce à vos filles
+                </p>
+            </div>
+            
+            <!-- Séparateur décoratif -->
+            <div class="w-full h-1 bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 rounded mb-6"></div>
+            
+            <!-- Liste des cartes spéciales disponibles -->
+            <div class="mb-6">
+                <h3 class="font-bold text-lg text-purple-800 mb-4 flex items-center gap-2">
+                    <span>⭐</span>
+                    <span>Cartes spéciales disponibles</span>
+                </h3>
+                <div id="girl-power-cards-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    <!-- Cartes générées dynamiquement -->
+                </div>
+            </div>
+            
+            <!-- Note informative -->
+            <div class="bg-purple-100 border-2 border-purple-300 rounded-lg p-4 mb-6">
+                <div class="flex items-start gap-3">
+                    <span class="text-2xl">ℹ️</span>
+                    <div class="text-sm text-purple-800">
+                        <p class="font-semibold mb-1">Comment ça marche ?</p>
+                        <p>Chaque fille que vous avez posée vous permet de rejouer une carte spéciale déjà utilisée. Sélectionnez celle que vous souhaitez réactiver !</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bouton Annuler -->
+            <button onclick="discardGirlPowerSelection()" 
+                    class="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 px-6 rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all font-semibold shadow-lg transform hover:scale-105">
+                ❌ Annuler
+            </button>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+    <!-- Modal des règles -->
+    <div id="rules-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-4">
+                <h2 class="text-2xl font-bold text-gray-800" id="rule-title">Titre</h2>
+                <button onclick="closeRulesModal()" class="text-gray-500 hover:text-gray-700 text-3xl font-bold leading-none">&times;</button>
+            </div>
+            
+            <!-- Nouveau conteneur flex pour image + texte -->
+            <div class="flex flex-col md:flex-row gap-6">
+                <!-- Image de la carte -->
+                <div class="flex-shrink-0">
+                    <img id="rule-card-image" 
+                        src="" 
+                        alt="Carte" 
+                        class="w-full md:w-64 h-auto rounded-lg shadow-lg border-2 border-gray-300"
+                        onerror="this.style.display='none'">
+                </div>
+                
+                <!-- Contenu des règles -->
+                <div id="rule-content" class="flex-1 space-y-3 overflow-y-auto max-h-[60vh]">
+                    <!-- Contenu dynamique -->
+                </div>
             </div>
         </div>
     </div>
@@ -517,6 +689,13 @@
             <div class="category-section bg-yellow-50">
                 <h4 class="font-semibold text-yellow-800 mb-2">⭐ Cartes spéciales</h4>
                 <div id="player-speciales" class="flex flex-wrap gap-2"></div>
+            </div>
+
+
+            <!-- Effets permanents -->
+            <div class="category-section bg-purple-50">
+                <h4 class="font-semibold text-purple-800 mb-2">🔮 Effets permanents</h4>
+                <div id="player-effet-permanent" class="flex flex-wrap gap-2"></div>
             </div>
         </div>
 

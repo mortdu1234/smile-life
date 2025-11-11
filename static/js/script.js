@@ -515,7 +515,8 @@ function displayPlayerCategories(player, canDiscard) {
         'vie personnelle': 'player-vie-perso',
         'acquisitions': 'player-acquisitions',
         'salaire dépensé': 'player-salaire-depense',
-        'cartes spéciales': 'player-speciales'
+        'cartes spéciales': 'player-speciales',
+        'effet permanent': 'player-effet-permanent'
     };
     
     // 🆕 Vérifier si c'est le tour du joueur
@@ -626,9 +627,14 @@ function createCardHTML(card, canPlay, isPlayed = false, canDiscard = false, isS
                                  .replace(/\r/g, '\\r')
                                  .replace(/'/g, "\\'");
     const escapedLabel = label.replace(/'/g, "\\'");
+    const escapedImage = card.image ? card.image.replace(/'/g, "\\'") : '';
+
     
     // ✅ Événement onclick pour afficher les règles (sauf si on clique sur un bouton)
-    const onClickEvent = cardRule ? `onclick="handleCardClick(event, '${escapedLabel}', '${escapedRule}')"` : '';
+    const onClickEvent = cardRule 
+        ? `onclick="handleCardClick(event, '${escapedLabel}', '${escapedRule}', '${escapedImage}')"` 
+        : '';
+
 
 
     // Construire le chemin de l'image
@@ -735,23 +741,22 @@ function createCardHTML(card, canPlay, isPlayed = false, canDiscard = false, isS
     `;
 
     return `
-        <div class="card ${color} border-2 rounded-lg ${sizeClass} ${cursor} overflow-hidden" style="height: 200px;" ${onClickEvent}>
+        <div class="card ${color} border-2 rounded-lg ${sizeClass} ${cursor} overflow-hidden" 
+            style="height: 200px;" 
+            data-image="${card.image || ''}"
+            ${onClickEvent}>
             ${cardContentHTML}
         </div>
     `;
 }
 
 // ✅ Nouvelle fonction pour gérer le clic sur la carte
-function handleCardClick(event, cardName, cardRule) {
-    console.log("[start] : handleCardClick")
-    // Ne pas afficher les règles si on a cliqué sur un bouton
+function handleCardClick(event, cardName, cardRule, imagePath) {
     if (event.target.tagName === 'BUTTON' || event.target.closest('button')) {
         return;
     }
-    
-    // Afficher la modal des règles
     if (cardRule && cardRule.trim() !== '') {
-        showCardRules(cardName, cardRule);
+        showCardRules(cardName, cardRule, imagePath);
     }
 }
 
@@ -760,13 +765,22 @@ function handleCardClick(event, cardName, cardRule) {
 // ########################################
 
 // Fonction simplifiée pour afficher la modal des règles
-function showCardRules(cardName, cardRule) {
+function showCardRules(cardName, cardRule, imagePath) {  // ✅ Ajouter imagePath en paramètre
     console.log("[showCardRules] lancer")
     const modal = document.getElementById('rules-modal');
     const titleEl = document.getElementById('rule-title');
     const contentEl = document.getElementById('rule-content');
+    const imageEl = document.getElementById('rule-card-image');
     
     titleEl.textContent = cardName || "Règles de la carte";
+    
+    // Gérer l'image
+    if (imagePath) {
+        imageEl.src = `/ressources/${imagePath}`;
+        imageEl.style.display = 'block';
+    } else {
+        imageEl.style.display = 'none';
+    }
     
     // Si pas de règle fournie
     if (!cardRule || cardRule.trim() === '') {
@@ -818,7 +832,6 @@ function showCardRules(cardName, cardRule) {
     contentEl.innerHTML = html;
     modal.classList.remove('hidden');
 }
-
 function closeRulesModal() {
     document.getElementById('rules-modal').classList.add('hidden');
 }
@@ -935,3 +948,130 @@ function showEndScreen(scores) {
     
     document.getElementById('final-scores').innerHTML = scoresHTML;
 }
+
+
+/**
+ * Affiche la modal de sélection du métier à licencier
+ */
+function showLicenciementModal(jobs) {
+    console.log("[showLicenciementModal]", jobs);
+    
+    const modal = document.createElement('div');
+    modal.id = 'licenciement-modal';
+    modal.className = 'modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    
+    const jobsHTML = jobs.map(job => `
+        <div onclick="selectJobForLicenciement('${job.id}')" 
+             class="cursor-pointer p-4 bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-blue-400 rounded-lg hover:from-blue-200 hover:to-blue-300 hover:scale-105 transition-all shadow-lg">
+            <div class="flex items-center gap-3 mb-3">
+                <span class="text-3xl">💼</span>
+                <div>
+                    <div class="font-bold text-lg text-blue-900">${job.subtype}</div>
+                    ${job.status ? `<div class="text-xs text-blue-700">📋 ${job.status}</div>` : ''}
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-sm text-gray-700">
+                <div class="flex items-center gap-1">
+                    <span>💰</span>
+                    <span>Salaire: ${job.salary}</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <span>📚</span>
+                    <span>Études: ${job.studies}</span>
+                </div>
+                ${job.smiles > 0 ? `
+                    <div class="flex items-center gap-1 col-span-2">
+                        <span>😊</span>
+                        <span>${job.smiles} smile(s)</span>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+    
+    const html = `
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 class="text-3xl font-bold text-center mb-2 text-red-700">
+                ⚠️ Licenciement
+            </h2>
+            <p class="text-center mb-6 text-gray-600">
+                Le joueur a plusieurs métiers. Choisissez celui à licencier :
+            </p>
+            
+            <!-- Liste des métiers -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                ${jobsHTML}
+            </div>
+            
+            <!-- Séparateur -->
+            <div class="w-full h-px bg-gray-300 my-6"></div>
+            
+            <!-- Message info -->
+            <div class="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 mb-4">
+                <div class="flex items-start gap-3">
+                    <span class="text-2xl">ℹ️</span>
+                    <div class="text-sm text-yellow-800">
+                        <p class="font-semibold mb-1">💡 Astuce</p>
+                        <p>Si vous ne souhaitez pas choisir, cliquez sur "Choisir aléatoirement" et le serveur sélectionnera un métier au hasard.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bouton aléatoire -->
+            <button onclick="randomLicenciementSelection()" 
+                    class="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 px-6 rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all font-semibold shadow-lg transform hover:scale-105">
+                🎲 Choisir aléatoirement
+            </button>
+        </div>
+    `;
+    
+    modal.innerHTML = html;
+    document.body.appendChild(modal);
+}
+
+/**
+ * Sélectionne un métier spécifique à licencier
+ */
+function selectJobForLicenciement(jobId) {
+    console.log("[selectJobForLicenciement]", jobId);
+    
+    socket.emit('handle_licenciement_select', {
+        card_id: cardId,
+        target_job_id: jobId
+    });
+    
+    closeLicenciementModal();
+}
+
+/**
+ * Laisse le serveur choisir aléatoirement
+ */
+function randomLicenciementSelection() {
+    console.log("[randomLicenciementSelection]");
+    
+    socket.emit('handle_cancel_licenciement_select', {
+        card_id: cardId
+    });
+    
+    closeLicenciementModal();
+}
+
+/**
+ * Ferme la modal de licenciement
+ */
+function closeLicenciementModal() {
+    const modal = document.getElementById('licenciement-modal');
+    if (modal) {
+        modal.remove();
+    }
+    cardId = null;
+}
+
+/**
+ * Réception de la demande de sélection du métier
+ */
+socket.on('select_job_licenciement', (data) => {
+    console.log('[select_job_licenciement]', data);
+    cardId = data.card.id;
+    showLicenciementModal(data.jobs);
+});
