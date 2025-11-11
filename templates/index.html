@@ -428,12 +428,21 @@
 
     <!-- Modal Chance - Choix parmi 3 cartes -->
     <div id="chance-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-3xl w-full">
-            <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-4xl w-full">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">
                 🍀 Chance
             </h2>
-            <p class="text-center mb-4 text-gray-600">Choisissez une carte parmi les 3 suivantes</p>
-            <div id="chance-cards-list" class="grid grid-cols-3 gap-4"></div>
+            <p class="text-center mb-6 text-gray-600">
+                Choisissez une carte parmi les 3 suivantes<br>
+                <span class="text-sm text-gray-500">💡 Cliquez sur la carte pour voir ses règles</span>
+            </p>
+            <div id="chance-cards-list" class="grid grid-cols-3 gap-4 mb-6"></div>
+            
+            <!-- Bouton annuler -->
+            <button onclick="discardChanceCard()" 
+                    class="w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all font-semibold shadow-lg">
+                ❌ Annuler
+            </button>
         </div>
     </div>
 

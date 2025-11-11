@@ -772,6 +772,8 @@ function showCardRules(cardName, cardRule, imagePath) {  // ✅ Ajouter imagePat
     const contentEl = document.getElementById('rule-content');
     const imageEl = document.getElementById('rule-card-image');
     
+    modal.style.zIndex = '9999';
+    
     titleEl.textContent = cardName || "Règles de la carte";
     
     // Gérer l'image

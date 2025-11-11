@@ -16,20 +16,20 @@ const presetDecks = {
         name: "deck exemple",
         description: "desciption exemple",
         config: {
-          "chance": 0,
+          "chance": 10,
           "salary_4": 10,
           "flirt_child_camping": 0,
           "mariage_corps_nuds": 0,
 
 
-          "redistribution_des_taches": 10, 
-          "egalite_de_salaire": 10,
+          "redistribution_des_taches": 0, 
+          "egalite_de_salaire": 0,
 
           "cliche_metier": 0,
           "cliche_flirt": 0,
           "cliche_accident": 0,
           "accident": 0,
-          "bandit": 10,
+          "bandit": 0,
           "licenciement": 0,
           "pizzaiolo": 10,
           "barman": 0,
