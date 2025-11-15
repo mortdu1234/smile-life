@@ -4,7 +4,7 @@ const presetDecks = {
         name: "Jeu Standard",
         description: "Configuration par défaut du jeu",
         config: {
-                    "architecte":1,
+          "architecte":1,
           "astronaute":1,
           "avocat":1,
           "bandit":1,
@@ -114,7 +114,7 @@ const presetDecks = {
         }
     },
     "test": {
-        name: "Version de test",
+        name: "Jeu Vide",
         description: "aucune carte",
         config: {
 
@@ -188,10 +188,10 @@ const cardCategories = {
         { id: "study_double", name: "Études doubles", defaultCount: 3, image: "personnal_life/professionnal_life/StudyCards/study2.png" },
 
         // --- SALAIRES ---
-        { id: "salary_1", name: "Salaire 1", defaultCount: 1, image: "personnal_life/professionnal_life/SalaryCards/salary1.png" },
-        { id: "salary_2", name: "Salaire 2", defaultCount: 1, image: "personnal_life/professionnal_life/SalaryCards/salary2.png" },
-        { id: "salary_3", name: "Salaire 3", defaultCount: 1, image: "personnal_life/professionnal_life/SalaryCards/salary3.png" },
-        { id: "salary_4", name: "Salaire 4", defaultCount: 1, image: "personnal_life/professionnal_life/SalaryCards/salary4.png" },
+        { id: "salary_1", name: "Salaire 1", defaultCount: 10, image: "personnal_life/professionnal_life/SalaryCards/salary1.png" },
+        { id: "salary_2", name: "Salaire 2", defaultCount: 10, image: "personnal_life/professionnal_life/SalaryCards/salary2.png" },
+        { id: "salary_3", name: "Salaire 3", defaultCount: 10, image: "personnal_life/professionnal_life/SalaryCards/salary3.png" },
+        { id: "salary_4", name: "Salaire 4", defaultCount: 10, image: "personnal_life/professionnal_life/SalaryCards/salary4.png" },
 
         // --- FLIRTS ---
         { id: "flirt_bar", name: "Flirt au bar", defaultCount: 2, image: "personnal_life/flirts/bar.png" },
@@ -956,22 +956,27 @@ function updateLobby() {
     document.getElementById('players-count').textContent = 
         `${connectedCount} / ${currentGame.num_players} joueurs connectés`;
     
-      if (isHost) {
-    document.getElementById('deck-config-button-container').classList.remove('hidden');
-    document.getElementById('start-button-container').classList.remove('hidden');
-    
-    if (connectedCount >= 2) {
-      document.querySelector('#start-button-container button').disabled = false;
+    if (isHost) {
+        document.getElementById('deck-config-button-container').classList.remove('hidden');
+        document.getElementById('start-button-container').classList.remove('hidden');
+        
+        const startButton = document.querySelector('#start-button-container button');
+        const deckCount = currentGame.deck_count || 0;
+        
+        // ✅ Vérifier à la fois le nombre de joueurs ET le deck
+        if (connectedCount >= 2 && deckCount > 0) {
+            startButton.disabled = false;
+            startButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        } else {
+            startButton.disabled = true;
+            startButton.classList.add('opacity-50', 'cursor-not-allowed');
+        }
     }
-  }
-};
+}
 
 socket.on('deck_updated', (data) => {
     log('Deck mis à jour', data);
+    currentGame = data.game;
     updateMessage(data.message);
-    
-    // Si on est dans le lobby, rafraîchir
-    if (!document.getElementById('lobby-screen').classList.contains('hidden')) {
-        updateLobby();
-    }
+    updateLobby();
 });

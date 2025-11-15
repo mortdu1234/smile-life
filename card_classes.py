@@ -3658,10 +3658,7 @@ class Game:
         self.id: str = game_id
         
         self.players: list[Player] = []
-        for i in range(num_players):
-            player = Player(i, 'En attente...')
-            player.connected = False
-            self.players.append(player)
+
         
         self.num_players: int = num_players
         self.deck: list[Card] = deck
@@ -3686,7 +3683,7 @@ class Game:
     def add_player(self, player: Player):
         """Ajoute un joueur à la partie"""
         if isinstance(player, Player):
-            self.players[self.players_joined] = player
+            self.players.append(player)
             if player.connected:
                 self.players_joined += 1
 
@@ -3709,6 +3706,7 @@ class Game:
             "id": self.id,
             "players": [p.to_dict() for p in self.players],
             "deck": [c.to_dict() for c in self.deck],
+            "deck_count": len(self.deck),
             "discard": [c.to_dict() for c in self.discard],
             "current_player": self.current_player,
             "phase": self.phase,

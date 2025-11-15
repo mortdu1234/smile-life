@@ -389,161 +389,12 @@ card_builders = {
 
 class CardFactory:
     """Factory pour créer les cartes"""
-    FLIRT_LOCATIONS = ['bar', 'boite de nuit', 'cinema', 
-                       'internet', 'parc', 'restaurant', 'theatre', 'zoo']
-    FLIRT_LOCATIONS_WITH_CHILD = ['camping', 'hotel']
-    MARRIAGE_LOCATIONS = ['corps-nuds', 'montcuq', 'monteton', 'sainte-vierge', 
-                          'fourqueux', 'fourqueux', 'fourqueux']
-    CHILDREN_NAMES = ['diana', 'harry', 'hermione', 'lara', 'leia', 'luigi', 
-                      'luke', 'mario', 'rocky', 'zelda']
-    ANIMALS = [
-        {'name': 'chat', 'smiles': 1},
-        {'name': 'chien', 'smiles': 1},
-        {'name': 'lapin', 'smiles': 1},
-        {'name': 'licorne', 'smiles': 3},
-        {'name': 'poussin', 'smiles': 1}
-    ]
-
-    TRIP_NAMES = ["le caire", "londres", "new york", "rio", "sydney"]
-
-    SPECIAL_CARDS = ['anniversaire', 'arc en ciel', 'casino', 'chance', 
-                       'etoile filante', 'heritage', 'piston', 'troc', 
-                       'tsunami', 'vengeance']
-
-    @classmethod
-    def create_deck(cls) -> List['Card']:
-        """Crée un deck complet de cartes"""
-        
-        deck = []
-        
-        # Métiers
-        deck.append(ArchitecteJob("architecte", 3, 4, "personnal_life/professionnal_life/JobCards/architecte.png"))
-        deck.append(AstronauteJob("astronaute", 4, 6, "personnal_life/professionnal_life/JobCards/astronaute.png"))
-        deck.append(AvocatJob("avocat", 3, 4, "personnal_life/professionnal_life/JobCards/avocat.png"))
-        deck.append(BanditJob("bandit", 4, 0, "personnal_life/professionnal_life/JobCards/bandit.png"))
-        deck.append(BarmanJob("barman", 1, 0, "personnal_life/professionnal_life/JobCards/barman.png"))
-        deck.append(ChefDesVentesJob("chef des ventes", 3, 3, "personnal_life/professionnal_life/JobCards/chef_des_ventes.png"))
-        deck.append(ChefDesAchatsJob("chef des achats", 3, 3, "personnal_life/professionnal_life/JobCards/chef_des_achats.png"))
-        deck.append(ChercheurJob("chercheur", 2, 6, "personnal_life/professionnal_life/JobCards/chercheur.png"))
-        deck.append(ChirurgienJob("chirurgien", 4, 6, "personnal_life/professionnal_life/JobCards/chirurgien.png"))
-        deck.append(DesignerJob("designer", 3, 4, "personnal_life/professionnal_life/JobCards/designer.png"))
-        deck.append(EcrivainJob("ecrivain", 1, 0, "personnal_life/professionnal_life/JobCards/ecrivain.png"))
-        deck.append(GaragisteJob("garagiste", 2, 1, "personnal_life/professionnal_life/JobCards/garagiste.png"))
-        deck.append(GourouJob("gourou", 3, 0, "personnal_life/professionnal_life/JobCards/gourou.png"))
-        deck.append(JardinierJob("jardinier", 1, 1, "personnal_life/professionnal_life/JobCards/jardinier.png"))
-        deck.append(JournalisteJob("journaliste", 2, 3, "personnal_life/professionnal_life/JobCards/journaliste.png"))
-        deck.append(MedecinJob("médecin", 4, 6, "personnal_life/professionnal_life/JobCards/medecin.png"))
-        deck.append(MediumJob("médium", 1, 0, "personnal_life/professionnal_life/JobCards/medium.png"))
-        deck.append(MilitaireJob("militaire", 1, 0, "personnal_life/professionnal_life/JobCards/militaire.png"))
-        deck.append(PharmacienJob("pharmacien", 3, 5, "personnal_life/professionnal_life/JobCards/pharmacien.png"))
-        deck.append(PiloteDeLigneJob("pilote de ligne", 4, 5, "personnal_life/professionnal_life/JobCards/pilote_de_ligne.png"))
-        deck.append(PizzaioloJob("pizzaiolo", 2, 0, "personnal_life/professionnal_life/JobCards/pizzaiolo.png"))
-        deck.append(PlombierJob("plombier", 1, 1, "personnal_life/professionnal_life/JobCards/plombier.png"))
-        deck.append(PolicierJob("policier", 1, 1, "personnal_life/professionnal_life/JobCards/policier.png"))
-        deck.append(ProfJob("prof anglais", 2, 2, "personnal_life/professionnal_life/JobCards/prof_anglais.png"))
-        deck.append(ProfJob("prof francais", 2, 2, "personnal_life/professionnal_life/JobCards/prof_francais.png"))
-        deck.append(ProfJob("prof histoire", 2, 2, "personnal_life/professionnal_life/JobCards/prof_histoire.png"))
-        deck.append(ProfJob("prof maths", 2, 2, "personnal_life/professionnal_life/JobCards/prof_maths.png"))
-        deck.append(ServeurJob("serveur", 1, 0, "personnal_life/professionnal_life/JobCards/serveur.png"))
-        deck.append(StripTeaserJob("stripteaser", 1, 0, "personnal_life/professionnal_life/JobCards/stripteaser.png"))
-        deck.append(GrandProfJob("grand prof", 3, "personnal_life/professionnal_life/JobCards/grand_prof.png"))
-
-
-        # Études
-        for _ in range(22):
-            deck.append(StudyCard('simple', 1, "personnal_life/professionnal_life/StudyCards/study1.png"))
-        for _ in range(3):
-            deck.append(StudyCard('double', 2, "personnal_life/professionnal_life/StudyCards/study2.png"))
-        
-        # Salaires
-        for level in range(1, 5):
-            for _ in range(10):
-                deck.append(SalaryCard(level, f"personnal_life/professionnal_life/SalaryCards/salary{level}.png"))
-        
-        # Flirts
-        for loc in cls.FLIRT_LOCATIONS:
-            l = loc.replace(" ", "_")
-            deck.append(FlirtCard(loc, f"personnal_life/flirts/{l}.png"))
-            deck.append(FlirtCard(loc, f"personnal_life/flirts/{l}.png"))
-
-            
-        for loc in cls.FLIRT_LOCATIONS_WITH_CHILD:
-            l = loc.replace(" ", "_")
-            deck.append(FlirtWithChildCard(loc, f"personnal_life/flirts/{l}.png"))
-            deck.append(FlirtWithChildCard(loc, f"personnal_life/flirts/{l}.png"))
-        
-        # Mariages
-        for loc in cls.MARRIAGE_LOCATIONS:
-            l = loc.replace(" ", "_").replace("-", "_")
-            deck.append(MarriageCard(loc, f"personnal_life/mariages/mariage_{l}.png"))
-        
-        # Adultères
-        for _ in range(3):
-            deck.append(AdulteryCard("personnal_life/mariages/adultere.png"))
-        
-        # Enfants
-        for name in cls.CHILDREN_NAMES:
-            deck.append(ChildCard(name, f"personnal_life/children/{name}.png"))
-        
-        # Animaux
-        for animal in cls.ANIMALS:
-            deck.append(AnimalCard(animal['name'], animal['smiles'], f"aquisition_cards/animals/{animal['name']}.png"))
-        
-        # Maisons
-        deck.append(HouseCard('petite', 6, 1, "aquisition_cards/houses/maison1.png"))
-        deck.append(HouseCard('petite', 6, 1, "aquisition_cards/houses/maison1.png"))
-        deck.append(HouseCard('moyenne', 8, 2, "aquisition_cards/houses/maison2.png"))
-        deck.append(HouseCard('moyenne', 8, 2, "aquisition_cards/houses/maison2.png"))
-        deck.append(HouseCard('grande', 10, 3, "aquisition_cards/houses/maison3.png"))
-        
-        # Voyages
-        for trip_name in cls.TRIP_NAMES:
-            t = trip_name.replace(" ", "_")
-            deck.append(TravelCard(f"aquisition_cards/trip/{t}.png"))
-        
-        # Cartes spéciales
-        deck.append(TrocCard("special_cards/troc.png"))
-        deck.append(TsunamiCard("special_cards/tsunami.png"))
-        deck.append(HeritageCard("special_cards/heritage.png", 3))
-        deck.append(PistonCard("special_cards/piston.png"))
-        deck.append(AnniversaireCard("special_cards/anniversaire.png"))
-        deck.append(CasinoCard("special_cards/casino.png"))
-        deck.append(ChanceCard("special_cards/chance.png"))
-        deck.append(EtoileFilanteCard("special_cards/etoile_filante.png"))
-        deck.append(VengeanceCard("special_cards/vengeance.png"))
-        deck.append(ArcEnCielCard("special_cards/arc_en_ciel.png"))
-        
-        # Coups durs
-        for _ in range(5):
-            deck.append(AccidentCard("hardship_cards/accident.png"))
-            deck.append(BurnOutCard("hardship_cards/burnout.png"))
-            deck.append(DivorceCard("hardship_cards/divorce.png"))
-            deck.append(TaxCard("hardship_cards/tax.png"))
-            deck.append(LicenciementCard("hardship_cards/licenciement.png"))
-            deck.append(MaladieCard("hardship_cards/maladie.png"))
-            deck.append(RedoublementCard("hardship_cards/redoublement.png"))
-        
-        deck.append(PrisonCard("hardship_cards/prison.png"))
-        deck.append(AttentatCard("hardship_cards/attentat.png"))
-        
-        
-        # Autres
-        deck.append(LegionCard(3, "personnal_life/professionnal_life/legion.png"))
-        deck.append(PriceCard(4, "personnal_life/professionnal_life/price.png"))
-        deck.append(PriceCard(4, "personnal_life/professionnal_life/price.png"))
-        
-
-
-        return deck
-    
     @classmethod
     def create_custom_deck(cls, config: dict) -> List['Card']:
         """Crée un deck basé sur une configuration personnalisée"""
         deck = []
         
         # Mapping des IDs vers les fonctions de création
-        
-        
         for card_id, count in config.items():
             if card_id in card_builders:
                 for _ in range(count):
@@ -555,21 +406,7 @@ def get_game_state_for_player(game: 'Game' , player_id):
     """Retourne l'état du jeu adapté pour un joueur spécifique"""
     print("[start] : get_game_state_for_player")
     game_state = game.to_dict()
-    # Remplacer le deck complet par juste le nombre de cartes
-    game_state['deck_count'] = len(game.deck)
-    game_state.pop('deck', None)  # Retirer la liste complète du deck
-    
-    # ✅ FIX: Convertir la défausse en dictionnaires
-    if 'discard' in game_state and game_state['discard']:
-        game_state['discard'] = [card.to_dict() if hasattr(card, 'to_dict') else card 
-                                  for card in game.discard]
-    
-    # Ajouter la dernière carte défaussée si elle existe
-    if len(game.discard) > 0:
-        last_card = game.discard[-1]
-        game_state["last_discard"] = last_card.to_dict() if hasattr(last_card, 'to_dict') else last_card
-    else:
-        game_state['last_discard'] = None
+    print(game_state)
 
     return game_state
 

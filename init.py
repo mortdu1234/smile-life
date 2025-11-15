@@ -61,7 +61,7 @@ def handle_update_deck_config(data):
         emit('error', {'message': 'Partie non trouvée'})
         return
     
-    game = games[game_id]
+    game: 'Game' = games[game_id]
     session_info = player_sessions.get(request.sid)
     
     # ✨ Vérifier que c'est l'hôte
@@ -74,21 +74,8 @@ def handle_update_deck_config(data):
         emit('error', {'message': 'Le deck ne peut être modifié qu\'en phase d\'attente'})
         return
     
-    # ✨ Créer le nouveau deck
-    if deck_config:
-        new_deck = CardFactory.create_custom_deck(deck_config)
-    else:
-        new_deck = CardFactory.create_deck()
-    
+    new_deck = CardFactory.create_custom_deck(deck_config)
     random.shuffle(new_deck)
-    
-    # ✨ Redistribuer les cartes aux joueurs
-    for player in game.players:
-        if player.connected:
-            # Remettre les anciennes cartes dans le deck
-            game.deck.extend(player.hand)
-            # Donner 5 nouvelles cartes
-            player.hand = [new_deck.pop() for _ in range(5)]
     
     # ✨ Remplacer le deck
     game.deck = new_deck
@@ -98,16 +85,10 @@ def handle_update_deck_config(data):
     # ✨ Notifier tous les joueurs
     socketio.emit('deck_updated', {
         'message': 'Le deck a été mis à jour par l\'hôte',
-        'deck_count': len(game.deck)
+        'deck_count': len(game.deck),
+        'game' : game.to_dict()
     }, room=game_id)
-    
-    # ✨ Rafraîchir l'état du jeu pour tous
-    for player in game.players:
-        if player.connected:
-            socketio.emit('game_updated', {
-                'game': get_game_state_for_player(game, player.id),
-                'message': 'Configuration du deck mise à jour'
-            }, room=player.session_id)
+
 
 @app.route('/api/card_rule/<card_id>')
 def get_card_rule(card_id):
@@ -132,40 +113,19 @@ def handle_create_game(data):
     print("[start] : handle_create_game")
     num_players = data.get('num_players', 2)
     player_name = data.get('player_name', 'Joueur 1')
-    deck_config = data.get('deck_config')
     
     game_id = str(uuid.uuid4())[:8]
     
-    # Créer le deck selon la config ou utiliser le deck par défaut
-    if deck_config:
-        deck = CardFactory.create_custom_deck(deck_config)
-        print(f"Deck personnalisé créé avec {len(deck)} cartes")
-    else:
-        deck = CardFactory.create_deck()
-        print(f"Deck par défaut créé avec {len(deck)} cartes")
-    
-    random.shuffle(deck)
-    
-    ##################
-    # TESTS affichage des cartes
-    ##################
-    # cards_distribution = ""
-    # invert_deck = deck[::-1]
-    # for i in range(len(deck)):
-    #     cards_distribution += f"{i} : {str(invert_deck[i])} - {invert_deck[i].id}\n"
-    # with open("distribution.txt", 'w') as file:
-    #     file.write(cards_distribution)
-    #################
-
 
     player_0 = Player(0, player_name)
-    player_0.hand = [deck.pop() for _ in range(5)]
     player_0.session_id = request.sid
     
     
     
-    game = Game(game_id, deck, num_players)
+    game = Game(game_id, [], num_players)
     game.add_player(player_0)
+
+
     games[game_id] = game
     player_sessions[request.sid] = {'game_id': game_id, 'player_id': 0}
     
@@ -187,34 +147,11 @@ def handle_join_game(data):
     game_id = data.get('game_id')
     player_name = data.get('player_name', 'Joueur')
     
-    if game_id not in games:
-        emit('error', {'message': 'Partie non trouvée'})
-        return
-    
-    game = games[game_id]
-    
-    if game.phase != 'waiting':
-        emit('error', {'message': 'La partie a déjà commencé'})
-        return
-    
-    player_id = None
-    for i, player in enumerate(game.players):
-        if not player.connected:
-            player_id = i
-            break
-    
-    if player_id is None:
-        emit('error', {'message': 'La partie est complète'})
-        return
-    
-    player = game.players[player_id]
-    player.name = player_name
-    player.hand = [game.deck.pop() for _ in range(5)]
-    player.connected = True
-    player.session_id = request.sid
-    game.players_joined += 1
-    
+    game: 'Game' = games.get(game_id)
+    player_id = len(game.players)
+    game.add_player(Player(player_id, player_name))
     player_sessions[request.sid] = {'game_id': game_id, 'player_id': player_id}
+
     join_room(game_id)
     update_all_player(game, "")
 
@@ -243,7 +180,7 @@ def handle_start_game(data):
         emit('error', {'message': 'Partie non trouvée'})
         return
     
-    game = games[game_id]
+    game: 'Game' = games[game_id]
     session_info = player_sessions.get(request.sid)
     
     if not session_info or session_info['player_id'] != game.host_id:
@@ -255,10 +192,16 @@ def handle_start_game(data):
         return
     
     game.phase = 'draw'
-    
-    connected_players = [i for i, p in enumerate(game.players) if p.connected]
+    # distributions des 5 cartes par joueurs
+    for player in game.players:
+        if player.connected:
+            player.hand = [game.deck.pop() for _ in range(5)]
+
+
+    # choix du joueur qui commence
+    connected_players = game.players
     if connected_players:
-        game.current_player = random.choice(connected_players)
+        game.current_player = random.choice(connected_players).id
     
     print(f"Partie démarrée: {game_id}, joueur actuel: {game.current_player}")
     
