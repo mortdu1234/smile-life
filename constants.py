@@ -81,16 +81,16 @@ card_builders = {
     "adultere": lambda: AdulteryCard("personnal_life/mariages/adultere.png"),
 
     # --- ENFANTS ---
-    "child_diana": lambda: ChildCard("diana", "personnal_life/children/diana.png"),
-    "child_harry": lambda: ChildCard("harry", "personnal_life/children/harry.png"),
-    "child_hermione": lambda: ChildCard("hermione", "personnal_life/children/hermione.png"),
-    "child_lara": lambda: ChildCard("lara", "personnal_life/children/lara.png"),
-    "child_leia": lambda: ChildCard("leia", "personnal_life/children/leia.png"),
-    "child_luigi": lambda: ChildCard("luigi", "personnal_life/children/luigi.png"),
-    "child_luke": lambda: ChildCard("luke", "personnal_life/children/luke.png"),
-    "child_mario": lambda: ChildCard("mario", "personnal_life/children/mario.png"),
-    "child_rocky": lambda: ChildCard("rocky", "personnal_life/children/rocky.png"),
-    "child_zelda": lambda: ChildCard("zelda", "personnal_life/children/zelda.png"),
+    "child_diana": lambda: DianaChild("diana", "personnal_life/children/diana.png"),
+    "child_harry": lambda: HarryChild("harry", "personnal_life/children/harry.png"),
+    "child_hermione": lambda: HermioneChild("hermione", "personnal_life/children/hermione.png"),
+    "child_lara": lambda: LaraChild("lara", "personnal_life/children/lara.png"),
+    "child_leia": lambda: LeiaChild("leia", "personnal_life/children/leia.png"),
+    "child_luigi": lambda: LuigiChild("luigi", "personnal_life/children/luigi.png"),
+    "child_luke": lambda: LukeChild("luke", "personnal_life/children/luke.png"),
+    "child_mario": lambda: MarioChild("mario", "personnal_life/children/mario.png"),
+    "child_rocky": lambda: RockyChild("rocky", "personnal_life/children/rocky.png"),
+    "child_zelda": lambda: ZeldaChild("zelda", "personnal_life/children/zelda.png"),
 
     # --- ANIMAUX ---
     "animal_chat": lambda: AnimalCard("chat", 1, "aquisition_cards/animals/chat.png"),
@@ -179,30 +179,84 @@ card_builders = {
     # --- EXTENTIONS GRIL POWER ---            
     ###################################################################################
     # --- MÉTIERS ---
-
+    "architecte_f": lambda: ArchitecteJob("architecte", 3, 4, "personnal_life/professionnal_life/JobCards/architecte_f.png"),
+    "astronaute_f": lambda: AstronauteJob("astronaute", 4, 6, "personnal_life/professionnal_life/JobCards/astronaute_f.png"),
+    "avocate": lambda: AvocatJob("avocat", 3, 4, "personnal_life/professionnal_life/JobCards/avocate.png"),
+    "bandit_f": lambda: BanditJob("bandit", 4, 0, "personnal_life/professionnal_life/JobCards/bandit_f.png"),
+    "barmaid": lambda: BarmanJob("barmaid", 1, 0, "personnal_life/professionnal_life/JobCards/barmaid.png"),
+    "cheffe_des_ventes": lambda: ChefDesVentesJob("cheffe des ventes", 3, 3, "personnal_life/professionnal_life/JobCards/cheffe_des_ventes.png"),
+    "cheffe_des_achats": lambda: ChefDesAchatsJob("cheffe des achats", 3, 3, "personnal_life/professionnal_life/JobCards/cheffe_des_achats.png"),
+    "chercheuse": lambda: ChercheurJob("chercheuse", 2, 6, "personnal_life/professionnal_life/JobCards/chercheuse.png"),
+    "chirurgienne": lambda: ChirurgienJob("chirurgienne", 4, 6, "personnal_life/professionnal_life/JobCards/chirurgienne.png"),
+    "designeuse": lambda: DesignerJob("designeuse", 3, 4, "personnal_life/professionnal_life/JobCards/designeuse.png"),
+    "ecrivaine": lambda: EcrivainJob("ecrivaine", 1, 0, "personnal_life/professionnal_life/JobCards/ecrivaine.png"),
+    "garagiste_f": lambda: GaragisteJob("garagiste", 2, 1, "personnal_life/professionnal_life/JobCards/garagiste_f.png"),
+    "gourou_f": lambda: GourouJob("gourou", 3, 0, "personnal_life/professionnal_life/JobCards/gourou_f.png"),
+    "jardiniere": lambda: JardinierJob("jardiniere", 1, 1, "personnal_life/professionnal_life/JobCards/jardiniere.png"),
+    "journaliste_f": lambda: JournalisteJob("journaliste", 2, 3, "personnal_life/professionnal_life/JobCards/journaliste_f.png"),
+    "medecin_f": lambda: MedecinJob("médecin", 4, 6, "personnal_life/professionnal_life/JobCards/medecin_f.png"),
+    "voyante": lambda: MediumJob("voyante", 1, 0, "personnal_life/professionnal_life/JobCards/voyante.png"),
+    "militaire_f": lambda: MilitaireJob("militaire", 1, 0, "personnal_life/professionnal_life/JobCards/militaire_f.png"),
+    "pharmacienne": lambda: PharmacienJob("pharmacienne", 3, 5, "personnal_life/professionnal_life/JobCards/pharmacienne.png"),
+    "pilote_de_ligne_f": lambda: PiloteDeLigneJob("pilote de ligne", 4, 5, "personnal_life/professionnal_life/JobCards/pilote_de_ligne_f.png"),
+    "pizzaiola": lambda: PizzaioloJob("pizzaiola", 2, 0, "personnal_life/professionnal_life/JobCards/pizzaiola.png"),
+    "plombiere": lambda: PlombierJob("plombiere", 1, 1, "personnal_life/professionnal_life/JobCards/plombiere.png"),
+    "policiere": lambda: PolicierJob("policiere", 1, 1, "personnal_life/professionnal_life/JobCards/policiere.png"),
+    "prof_de_chimie": lambda: ProfJob("prof de chimie", 2, 2, "personnal_life/professionnal_life/JobCards/prof_de_chimie.png"),
+    "prof_de_geo": lambda: ProfJob("prof de geo", 2, 2, "personnal_life/professionnal_life/JobCards/prof_de_geo.png"),
+    "prof_de_musique": lambda: ProfJob("prof musique", 2, 2, "personnal_life/professionnal_life/JobCards/prof_de_musique.png"),
+    "prof_de_philo": lambda: ProfJob("prof philo", 2, 2, "personnal_life/professionnal_life/JobCards/prof_de_philo.png"),
+    "serveuse": lambda: ServeurJob("serveuse", 1, 0, "personnal_life/professionnal_life/JobCards/serveuse.png"),
+    "stripteaseuse": lambda: StripTeaserJob("stripteaseuse", 1, 0, "personnal_life/professionnal_life/JobCards/stripteaseuse.png"),
+    "grand_prof_f": lambda: GrandProfJob("grand prof", 3, "personnal_life/professionnal_life/JobCards/grand_prof_f.png"),
+    
     # --- ÉTUDES ---
 
     # --- SALAIRES ---
 
     # --- FLIRTS ---
+    "flirt_manif": lambda: FlirtCard("manif", "personnal_life/flirts/manif.png"),
 
     # --- FLIRTS AVEC ENFANT ---
-
+    "flirt_child_bibliotheque": lambda: FlirtWithChildCard("bibliotheque", "personnal_life/flirts/bibliotheque.png"),
     # --- MARIAGES ---
 
     # --- ADULTÈRE ---
 
     # --- ENFANTS ---
-
+    "child_angela": lambda: AngelaChild("angela", "personnal_life/children/angela.png"),
+    "child_beatrix": lambda: BeatrixChild("beatrix", "personnal_life/children/beatrix.png"),
+    "child_daenerys": lambda: DaenerysChild("daenerys", "personnal_life/children/daenerys.png"),
+    "child_louise": lambda: LouiseChild("louise", "personnal_life/children/louise.png"),
+    "child_olympe": lambda: OlympeChild("olympe", "personnal_life/children/olympe.png"),
+    "child_simone": lambda: SimoneChild("simone", "personnal_life/children/simone.png"),
+    
     # --- ANIMAUX ---
-
-    # --- MAISONS ---
-
-    # --- VOYAGES ---
+    "animal_crapaud": lambda: AnimalCard("crapaud", 1, "aquisition_cards/animals/crapaud.png"),
+    "animal_dragon": lambda: DragonAnimal("dragon", 1, "aquisition_cards/animals/dragon.png"),
+    # --- AQUISITION ---
+    "ticket_concert": lambda: ConcertTicket(1, 1, "aquisition_cards/other/place_de_concert.png"),
+    "sabre": lambda: SabreCard(1, 1, "aquisition_cards/other/sabre.png"),
+    "nounou": lambda: NounouCard(4, 1, "aquisition_cards/other/nounou.png"),
 
     # --- CARTES SPÉCIALES ---
-    
+    "girl_power": lambda: GirlPowerCard("special_cards/girl_power.png"),
+    "soiree_entre_filles": lambda: SoireeEntreFilleCard("special_cards/soiree_entre_filles.png"),
+    "coup_de_foudre": lambda: CoupDeFoudreCard("special_cards/coup_de_foudre.png"),
+    "erreur_detiquetage": lambda: ErreurDetiquetageCard("special_cards/erreur_detiquetage.png"),
+    "cliche_metier": lambda: ClicheMetier("special_cards/cliche_metier.png"),
+    "cliche_flirt": lambda: ClicheFlirt("special_cards/cliche_flirt.png"),
+    "cliche_accident": lambda: ClicheAccident("special_cards/cliche_accident.png"),
+    "egalite_de_salaire": lambda: EgaliteDesSalaireCard("special_cards/egalite_de_salaire.png"),
+    "redistribution_des_taches": lambda: RedistributionDesTachesCard("special_cards/redistribution_des_taches.png"),
+
     # --- COUPS DURS ---
+    "charge_mentale": lambda: ChargeMentalHardhip("hardship_cards/charge_mentale.png"),
+    "gynocratie": lambda: GynocratieHardship("hardship_cards/gynocratie.png"),
+    "phallocratie": lambda: PhalocratieHardship("hardship_cards/phallocratie.png"),
+    "plafond_de_verre": lambda: PlafondDeVerreHardship("hardship_cards/plafond_de_verre.png"),
+    "porc": lambda: PorcHardship("hardship_cards/porc.png"),
+    "taches_menageres": lambda: TachesMenageresHardship("hardship_cards/taches_menageres.png"),
 
     # --- AUTRES ---
 
@@ -335,177 +389,12 @@ card_builders = {
 
 class CardFactory:
     """Factory pour créer les cartes"""
-    FLIRT_LOCATIONS = ['bar', 'boite de nuit', 'cinema', 
-                       'internet', 'parc', 'restaurant', 'theatre', 'zoo']
-    FLIRT_LOCATIONS_WITH_CHILD = ['camping', 'hotel']
-    MARRIAGE_LOCATIONS = ['corps-nuds', 'montcuq', 'monteton', 'sainte-vierge', 
-                          'fourqueux', 'fourqueux', 'fourqueux']
-    CHILDREN_NAMES = ['diana', 'harry', 'hermione', 'lara', 'leia', 'luigi', 
-                      'luke', 'mario', 'rocky', 'zelda']
-    ANIMALS = [
-        {'name': 'chat', 'smiles': 1},
-        {'name': 'chien', 'smiles': 1},
-        {'name': 'lapin', 'smiles': 1},
-        {'name': 'licorne', 'smiles': 3},
-        {'name': 'poussin', 'smiles': 1}
-    ]
-
-    TRIP_NAMES = ["le caire", "londres", "new york", "rio", "sydney"]
-
-    SPECIAL_CARDS = ['anniversaire', 'arc en ciel', 'casino', 'chance', 
-                       'etoile filante', 'heritage', 'piston', 'troc', 
-                       'tsunami', 'vengeance']
-
     @classmethod
-    def create_deck(cls) -> List[Card]:
-        """Crée un deck complet de cartes"""
-        
-        deck = []
-        
-        # Métiers
-        deck.append(ArchitecteJob("architecte", 3, 4, "personnal_life/professionnal_life/JobCards/architecte.png"))
-        deck.append(AstronauteJob("astronaute", 4, 6, "personnal_life/professionnal_life/JobCards/astronaute.png"))
-        deck.append(AvocatJob("avocat", 3, 4, "personnal_life/professionnal_life/JobCards/avocat.png"))
-        deck.append(BanditJob("bandit", 4, 0, "personnal_life/professionnal_life/JobCards/bandit.png"))
-        deck.append(BarmanJob("barman", 1, 0, "personnal_life/professionnal_life/JobCards/barman.png"))
-        deck.append(ChefDesVentesJob("chef des ventes", 3, 3, "personnal_life/professionnal_life/JobCards/chef_des_ventes.png"))
-        deck.append(ChefDesAchatsJob("chef des achats", 3, 3, "personnal_life/professionnal_life/JobCards/chef_des_achats.png"))
-        deck.append(ChercheurJob("chercheur", 2, 6, "personnal_life/professionnal_life/JobCards/chercheur.png"))
-        deck.append(ChirurgienJob("chirurgien", 4, 6, "personnal_life/professionnal_life/JobCards/chirurgien.png"))
-        deck.append(DesignerJob("designer", 3, 4, "personnal_life/professionnal_life/JobCards/designer.png"))
-        deck.append(EcrivainJob("ecrivain", 1, 0, "personnal_life/professionnal_life/JobCards/ecrivain.png"))
-        deck.append(GaragisteJob("garagiste", 2, 1, "personnal_life/professionnal_life/JobCards/garagiste.png"))
-        deck.append(GourouJob("gourou", 3, 0, "personnal_life/professionnal_life/JobCards/gourou.png"))
-        deck.append(JardinierJob("jardinier", 1, 1, "personnal_life/professionnal_life/JobCards/jardinier.png"))
-        deck.append(JournalisteJob("journaliste", 2, 3, "personnal_life/professionnal_life/JobCards/journaliste.png"))
-        deck.append(MedecinJob("médecin", 4, 6, "personnal_life/professionnal_life/JobCards/medecin.png"))
-        deck.append(MediumJob("médium", 1, 0, "personnal_life/professionnal_life/JobCards/medium.png"))
-        deck.append(MilitaireJob("militaire", 1, 0, "personnal_life/professionnal_life/JobCards/militaire.png"))
-        deck.append(PharmacienJob("pharmacien", 3, 5, "personnal_life/professionnal_life/JobCards/pharmacien.png"))
-        deck.append(PiloteDeLigneJob("pilote de ligne", 4, 5, "personnal_life/professionnal_life/JobCards/pilote_de_ligne.png"))
-        deck.append(PizzaioloJob("pizzaiolo", 2, 0, "personnal_life/professionnal_life/JobCards/pizzaiolo.png"))
-        deck.append(PlombierJob("plombier", 1, 1, "personnal_life/professionnal_life/JobCards/plombier.png"))
-        deck.append(PolicierJob("policier", 1, 1, "personnal_life/professionnal_life/JobCards/policier.png"))
-        deck.append(ProfJob("prof anglais", 2, 2, "personnal_life/professionnal_life/JobCards/prof_anglais.png"))
-        deck.append(ProfJob("prof francais", 2, 2, "personnal_life/professionnal_life/JobCards/prof_francais.png"))
-        deck.append(ProfJob("prof histoire", 2, 2, "personnal_life/professionnal_life/JobCards/prof_histoire.png"))
-        deck.append(ProfJob("prof maths", 2, 2, "personnal_life/professionnal_life/JobCards/prof_maths.png"))
-        deck.append(ServeurJob("serveur", 1, 0, "personnal_life/professionnal_life/JobCards/serveur.png"))
-        deck.append(StripTeaserJob("stripteaser", 1, 0, "personnal_life/professionnal_life/JobCards/stripteaser.png"))
-        deck.append(GrandProfJob("grand prof", 3, "personnal_life/professionnal_life/JobCards/grand_prof.png"))
-
-
-        # Études
-        for _ in range(22):
-            deck.append(StudyCard('simple', 1, "personnal_life/professionnal_life/StudyCards/study1.png"))
-        for _ in range(3):
-            deck.append(StudyCard('double', 2, "personnal_life/professionnal_life/StudyCards/study2.png"))
-        
-        # Salaires
-        for level in range(1, 5):
-            for _ in range(10):
-                deck.append(SalaryCard(level, f"personnal_life/professionnal_life/SalaryCards/salary{level}.png"))
-        
-        # Flirts
-        for loc in cls.FLIRT_LOCATIONS:
-            l = loc.replace(" ", "_")
-            deck.append(FlirtCard(loc, f"personnal_life/flirts/{l}.png"))
-            deck.append(FlirtCard(loc, f"personnal_life/flirts/{l}.png"))
-
-            
-        for loc in cls.FLIRT_LOCATIONS_WITH_CHILD:
-            l = loc.replace(" ", "_")
-            deck.append(FlirtWithChildCard(loc, f"personnal_life/flirts/{l}.png"))
-            deck.append(FlirtWithChildCard(loc, f"personnal_life/flirts/{l}.png"))
-        
-        # Mariages
-        for loc in cls.MARRIAGE_LOCATIONS:
-            l = loc.replace(" ", "_").replace("-", "_")
-            deck.append(MarriageCard(loc, f"personnal_life/mariages/mariage_{l}.png"))
-        
-        # Adultères
-        for _ in range(3):
-            deck.append(AdulteryCard("personnal_life/mariages/adultere.png"))
-        
-        # Enfants
-        for name in cls.CHILDREN_NAMES:
-            deck.append(ChildCard(name, f"personnal_life/children/{name}.png"))
-        
-        # Animaux
-        for animal in cls.ANIMALS:
-            deck.append(AnimalCard(animal['name'], animal['smiles'], f"aquisition_cards/animals/{animal['name']}.png"))
-        
-        # Maisons
-        deck.append(HouseCard('petite', 6, 1, "aquisition_cards/houses/maison1.png"))
-        deck.append(HouseCard('petite', 6, 1, "aquisition_cards/houses/maison1.png"))
-        deck.append(HouseCard('moyenne', 8, 2, "aquisition_cards/houses/maison2.png"))
-        deck.append(HouseCard('moyenne', 8, 2, "aquisition_cards/houses/maison2.png"))
-        deck.append(HouseCard('grande', 10, 3, "aquisition_cards/houses/maison3.png"))
-        
-        # Voyages
-        for trip_name in cls.TRIP_NAMES:
-            t = trip_name.replace(" ", "_")
-            deck.append(TravelCard(f"aquisition_cards/trip/{t}.png"))
-        
-        # Cartes spéciales
-        deck.append(TrocCard("special_cards/troc.png"))
-        deck.append(TsunamiCard("special_cards/tsunami.png"))
-        deck.append(HeritageCard("special_cards/heritage.png", 3))
-        deck.append(PistonCard("special_cards/piston.png"))
-        deck.append(AnniversaireCard("special_cards/anniversaire.png"))
-        deck.append(CasinoCard("special_cards/casino.png"))
-        deck.append(ChanceCard("special_cards/chance.png"))
-        deck.append(EtoileFilanteCard("special_cards/etoile_filante.png"))
-        deck.append(VengeanceCard("special_cards/vengeance.png"))
-        deck.append(ArcEnCielCard("special_cards/arc_en_ciel.png"))
-        
-        # Coups durs
-        for _ in range(5):
-            deck.append(AccidentCard("hardship_cards/accident.png"))
-            deck.append(BurnOutCard("hardship_cards/burnout.png"))
-            deck.append(DivorceCard("hardship_cards/divorce.png"))
-            deck.append(TaxCard("hardship_cards/tax.png"))
-            deck.append(LicenciementCard("hardship_cards/licenciement.png"))
-            deck.append(MaladieCard("hardship_cards/maladie.png"))
-            deck.append(RedoublementCard("hardship_cards/redoublement.png"))
-        
-        deck.append(PrisonCard("hardship_cards/prison.png"))
-        deck.append(AttentatCard("hardship_cards/attentat.png"))
-        
-        
-        # Autres
-        deck.append(LegionCard(3, "personnal_life/professionnal_life/legion.png"))
-        deck.append(PriceCard(4, "personnal_life/professionnal_life/price.png"))
-        deck.append(PriceCard(4, "personnal_life/professionnal_life/price.png"))
-        
-
-        # EXTENTIONS
-        # cartes spéciales supplémentaires
-        deck.append(HeritageCard("special_cards/super_heritage.png", 5))
-        deck.append(MuguetCard("special_cards/muguet.png"))
-
-        # metiers supplementaires
-        deck.append(ProfJob("prof education sexuelle", 2, 2, "personnal_life/professionnal_life/JobCards/prof_education_sexuelle.png"))
-        deck.append(YoutuberJob("youtubeur", 4, 0, "personnal_life/professionnal_life/JobCards/youtubeur.png"))
-        deck.append(CoiffeurJob("coiffeur", 1, 1, "personnal_life/professionnal_life/JobCards/coiffeur.png"))
-        deck.append(DeejayJob("deejay", 2, 0, "personnal_life/professionnal_life/JobCards/deejay.png"))
-        
-
-
-
-
-
-
-        return deck
-    
-    @classmethod
-    def create_custom_deck(cls, config: dict) -> List[Card]:
+    def create_custom_deck(cls, config: dict) -> List['Card']:
         """Crée un deck basé sur une configuration personnalisée"""
         deck = []
         
         # Mapping des IDs vers les fonctions de création
-        
-        
         for card_id, count in config.items():
             if card_id in card_builders:
                 for _ in range(count):
@@ -513,25 +402,11 @@ class CardFactory:
         
         return deck
 
-def get_game_state_for_player(game: Game , player_id):
+def get_game_state_for_player(game: 'Game' , player_id):
     """Retourne l'état du jeu adapté pour un joueur spécifique"""
     print("[start] : get_game_state_for_player")
     game_state = game.to_dict()
-    # Remplacer le deck complet par juste le nombre de cartes
-    game_state['deck_count'] = len(game.deck)
-    game_state.pop('deck', None)  # Retirer la liste complète du deck
-    
-    # ✅ FIX: Convertir la défausse en dictionnaires
-    if 'discard' in game_state and game_state['discard']:
-        game_state['discard'] = [card.to_dict() if hasattr(card, 'to_dict') else card 
-                                  for card in game.discard]
-    
-    # Ajouter la dernière carte défaussée si elle existe
-    if len(game.discard) > 0:
-        last_card = game.discard[-1]
-        game_state["last_discard"] = last_card.to_dict() if hasattr(last_card, 'to_dict') else last_card
-    else:
-        game_state['last_discard'] = None
+    print(game_state)
 
     return game_state
 
@@ -550,16 +425,16 @@ def check_game():
         emit('error', {'message': 'Partie non trouvée'})
         return
     
-    game: Game = games[game_id]
+    game: 'Game' = games[game_id]
     return game.current_player, game, game_id
 
-def update_all_player(game: Game, message):
+def update_all_player(game: 'Game', message):
     """Fonction legacy - redirige vers la méthode de la classe Game"""
     print("[start]: update_all_player (legacy)")
     game.broadcast_update(message)
 
 
-def get_card_by_id(card_id, deck: list[Card]):
+def get_card_by_id(card_id, deck: list['Card']):
     """récupère une carte dans le deck par son id"""
     print("[start]: get_card_by_id")
     researched_card = None

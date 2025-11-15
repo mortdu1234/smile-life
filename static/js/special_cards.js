@@ -80,20 +80,159 @@ socket.on('select_star_card', (data) => {
 // ##########################
 // Chance
 // ##########################
+// ##########################
+// Chance
+// ##########################
 function showChanceModal(cards) {
     const modal = document.getElementById('chance-modal');
     const cardsList = document.getElementById('chance-cards-list');
     
-    cardsList.innerHTML = cards.map(card => `
-        <div onclick="selectChanceCard('${card.id}')" 
-                class="cursor-pointer transform hover:scale-105 transition-all">
-            ${createCardHTML(card, false)}
-        </div>
-    `).join('');
+    // Créer des cartes interactives avec boutons
+    cardsList.innerHTML = cards.map(card => {
+        const label = getCardLabel(card);
+        const imagePath = card.image ? `/ressources/${card.image}` : '';
+        
+        // Échapper les données pour les attributs
+        const cardRule = card.rule || '';
+        const escapedRule = cardRule.replace(/\\/g, '\\\\')
+                                     .replace(/`/g, '\\`')
+                                     .replace(/\$/g, '\\$')
+                                     .replace(/\n/g, '\\n')
+                                     .replace(/\r/g, '\\r')
+                                     .replace(/'/g, "\\'");
+        const escapedLabel = label.replace(/'/g, "\\'");
+        const escapedImage = card.image ? card.image.replace(/'/g, "\\'") : '';
+        
+        return `
+            <div class="relative transform hover:scale-105 transition-all">
+                <!-- Carte cliquable pour voir les règles -->
+                <div onclick="handleCardClick(event, '${escapedLabel}', '${escapedRule}', '${escapedImage}')" 
+                     class="cursor-pointer">
+                    ${createChanceCardHTML(card)}
+                </div>
+                
+                <!-- Bouton de sélection par-dessus -->
+                <div class="absolute bottom-2 left-2 right-2">
+                    <button onclick="event.stopPropagation(); selectChanceCard('${card.id}')" 
+                            class="w-full bg-green-500 hover:bg-green-600 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-lg transform hover:scale-105 transition-all">
+                        ✅ Choisir cette carte
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
     
     modal.classList.remove('hidden');
 }
 
+// Fonction auxiliaire pour créer le HTML d'une carte Chance (sans bouton intégré)
+function createChanceCardHTML(card) {
+    const colors = {
+        'job': 'bg-blue-100 border-blue-300',
+        'study': 'bg-blue-100 border-blue-300',
+        'salary': 'bg-blue-100 border-blue-300',
+        'flirt': 'bg-pink-100 border-pink-300',
+        'marriage': 'bg-pink-100 border-pink-300',
+        'child': 'bg-pink-100 border-pink-300',
+        'animal': 'bg-pink-100 border-pink-300',
+        'adultere': 'bg-pink-100 border-pink-300',
+        'house': 'bg-green-100 border-green-300',
+        'travel': 'bg-green-100 border-green-300',
+        'hardship': 'bg-red-100 border-red-300',
+        'special': 'bg-yellow-100 border-yellow-300',
+        'other': 'bg-purple-100 border-purple-300'
+    };
+
+    const icons = {
+        'job': '💼', 'study': '📚', 'salary': '💰',
+        'flirt': '💕', 'marriage': '💍', 'child': '👶',
+        'animal': '🐾', 'adultere': '💔', 'house': '🏠',
+        'travel': '✈️', 'hardship': '⚠️', 'special': '⭐', 'other': '🎖'
+    };
+
+    const label = getCardLabel(card);
+    const color = colors[card.type] || 'bg-gray-100 border-gray-300';
+    const icon = icons[card.type] || '🎴';
+    const imagePath = card.image ? `/ressources/${card.image}` : '';
+    
+    const cardElementId = `chance-card-${card.id}`;
+    
+    // HTML avec image prioritaire et fallback sur texte
+    if (imagePath) {
+        return `
+            <div id="${cardElementId}" class="card ${color} border-2 rounded-lg overflow-hidden" 
+                 style="height: 280px; width: 200px;">
+                <div class="card-content h-full w-full relative">
+                    <!-- Image (affichée par défaut) -->
+                    <div class="card-image-container h-full w-full flex flex-col relative">
+                        <img src="${imagePath}" 
+                             alt="${label}" 
+                             class="w-full h-full object-contain rounded"
+                             onerror="handleChanceImageError('${cardElementId}')">
+                        
+                        <!-- Indicateur de règles cliquable -->
+                        <div class="absolute top-2 right-2 bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">
+                            ℹ️
+                        </div>
+                    </div>
+                    
+                    <!-- Fallback texte (caché par défaut) -->
+                    <div class="card-text-fallback hidden h-full w-full flex flex-col justify-between p-3">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-2xl">${icon}</span>
+                                <span class="font-semibold text-sm">${label}</span>
+                            </div>
+                            ${card.smiles > 0 ? `
+                                <div class="flex items-center gap-1 text-yellow-600">
+                                    <span>😊</span>
+                                    <span class="text-sm">${card.smiles}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="text-xs text-gray-600 text-center italic">
+                            Cliquez pour voir les règles
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        // Pas d'image : afficher directement le texte
+        return `
+            <div class="card ${color} border-2 rounded-lg overflow-hidden p-3 h-full flex flex-col justify-between" 
+                 style="height: 280px; width: 200px;">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-2xl">${icon}</span>
+                        <span class="font-semibold text-sm">${label}</span>
+                    </div>
+                    ${card.smiles > 0 ? `
+                        <div class="flex items-center gap-1 text-yellow-600">
+                            <span>😊</span>
+                            <span class="text-sm">${card.smiles}</span>
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="text-xs text-gray-600 text-center italic">
+                    Cliquez pour voir les règles
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Gestion de l'erreur d'image pour les cartes Chance
+function handleChanceImageError(cardElementId) {
+    const cardElement = document.getElementById(cardElementId);
+    if (cardElement) {
+        const imageContainer = cardElement.querySelector('.card-image-container');
+        const textFallback = cardElement.querySelector('.card-text-fallback');
+        
+        if (imageContainer) imageContainer.classList.add('hidden');
+        if (textFallback) textFallback.classList.remove('hidden');
+    }
+}
 
 socket.on('select_chance_card', (data) => {
     log('Chance - sélection carte', data);
@@ -109,16 +248,16 @@ function selectChanceCard(cardId) {
     log('selectChanceCard', cardId);
     socket.emit('chance_card_selected', { 
         card_id: card_id,
-        selected_card_id: cardId });
+        selected_card_id: cardId 
+    });
     closeChanceModal();
 }
 
 function discardChanceCard() {
-
     socket.emit('discard_chance_card_selected', { 
-        card_id: card_id });
+        card_id: card_id 
+    });
     closeChanceModal();
-
 }
 // ##########################
 // VENGEANCE

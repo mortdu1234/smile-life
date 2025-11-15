@@ -3,20 +3,155 @@ const presetDecks = {
     "standard": {
         name: "Jeu Standard",
         description: "Configuration par défaut du jeu",
-        config: null  // null = utiliser les valeurs par défaut de cardCategories
+        config: {
+          "architecte":1,
+          "astronaute":1,
+          "avocat":1,
+          "bandit":1,
+          "barman":1,
+          "chef_des_ventes":1,
+          "chef_des_achats":1,
+          "chercheur":1,
+          "chirurgien":1,
+          "designer":1,
+          "ecrivain":1,
+          "garagiste":1,
+          "gourou":1,
+          "jardinier":1,
+          "journaliste":1,
+          "medecin":1,
+          "medium":1,
+          "militaire":1,
+          "pilote_de_ligne":1,
+          "pizzaiolo":1,
+          "plombier":1,
+          "policier":1,
+          "prof_anglais":1,
+          "prof_francais":1,
+          "prof_histoire":1,
+          "prof_maths":1,
+          "serveur":1,
+          "stripteaser":1,
+          "grand_prof":1,
+
+          "study_simple":22,
+          "study_double":3,
+
+          "salary_1":10,
+          "salary_2":10,
+          "salary_3":10,
+          "salary_4":10,
+
+          "flirt_bar":2,
+          "flirt_boite_de_nuit":2,
+          "flirt_cinema":2,
+          "flirt_internet":2,
+          "flirt_parc":2,
+          "flirt_restaurant":2,
+          "flirt_theatre":2,
+          "flirt_zoo":2,
+
+          "flirt_child_camping":2,
+          "flirt_child_hotel":2,
+
+          "mariage_corps_nuds":1,
+          "mariage_montcuq":1,
+          "mariage_monteton":1,
+          "mariage_sainte_vierge":1,
+          "mariage_fourqueux":1,
+          "adultere":1,
+
+          "child_diana":1,
+          "child_harry":1,
+          "child_hermione":1,
+          "child_lara":1,
+          "child_leia":1,
+          "child_luigi":1,
+          "child_luke":1,
+          "child_mario":1,
+          "child_rocky":1,
+          "child_zelda":1,
+
+          "animal_chat":1,
+          "animal_chien":1,
+          "animal_lapin":1,
+          "animal_licorne":1,
+          "animal_poussin":1,
+
+          "house_petite":2,
+          "house_moyenne":2,
+          "house_grande":1,
+
+          "trip_le_caire":1,
+          "trip_londres":1,
+          "trip_new_york":1,
+          "trip_rio":1,
+          "trip_sydney":1,
+
+          "troc":1,
+          "tsunami":1,
+          "heritage":1,
+          "piston":1,
+          "anniversaire":1,
+          "casino":1,
+          "chance":1,
+          "etoile_filante":1,
+          "vengeance":1,
+          "arc_en_ciel":1,
+
+          "accident":5,
+          "burnout":5,
+          "divorce":5,
+          "tax":5,
+          "licenciement":5,
+          "maladie":5,
+          "redoublement":5,
+          "prison":1,
+          "attentat":1,
+
+          "legion":1,
+          "price":2
+        }
     },
     "test": {
-        name: "Version de test",
+        name: "Jeu Vide",
         description: "aucune carte",
         config: {
 
+        }
+    },
+    "exemple":{
+        name: "deck exemple",
+        description: "desciption exemple",
+        config: {
+          "chance": 10,
+          "salary_4": 10,
+          "flirt_child_camping": 0,
+          "mariage_corps_nuds": 0,
+
+
+          "redistribution_des_taches": 0, 
+          "egalite_de_salaire": 0,
+
+          "cliche_metier": 0,
+          "cliche_flirt": 0,
+          "cliche_accident": 0,
+          "accident": 0,
+          "bandit": 0,
+          "licenciement": 0,
+          "pizzaiolo": 10,
+          "barman": 0,
+          "prison": 0,
+          "girl_power": 0,
+          "child_lara": 0,
+          "porc": 0
         }
     }
 };
 
 const cardCategories = {
     "Jeu Standards": [
-        // --- PROFESSIONS ---
+        // --- MÉTIERS ---
         { id: "architecte", name: "Architecte", defaultCount: 1, image: "personnal_life/professionnal_life/JobCards/architecte.png" },
         { id: "astronaute", name: "Astronaute", defaultCount: 1, image: "personnal_life/professionnal_life/JobCards/astronaute.png" },
         { id: "avocat", name: "Avocat", defaultCount: 1, image: "personnal_life/professionnal_life/JobCards/avocat.png" },
@@ -53,10 +188,10 @@ const cardCategories = {
         { id: "study_double", name: "Études doubles", defaultCount: 3, image: "personnal_life/professionnal_life/StudyCards/study2.png" },
 
         // --- SALAIRES ---
-        { id: "salary_1", name: "Salaire 1", defaultCount: 1, image: "personnal_life/professionnal_life/SalaryCards/salary1.png" },
-        { id: "salary_2", name: "Salaire 2", defaultCount: 1, image: "personnal_life/professionnal_life/SalaryCards/salary2.png" },
-        { id: "salary_3", name: "Salaire 3", defaultCount: 1, image: "personnal_life/professionnal_life/SalaryCards/salary3.png" },
-        { id: "salary_4", name: "Salaire 4", defaultCount: 1, image: "personnal_life/professionnal_life/SalaryCards/salary4.png" },
+        { id: "salary_1", name: "Salaire 1", defaultCount: 10, image: "personnal_life/professionnal_life/SalaryCards/salary1.png" },
+        { id: "salary_2", name: "Salaire 2", defaultCount: 10, image: "personnal_life/professionnal_life/SalaryCards/salary2.png" },
+        { id: "salary_3", name: "Salaire 3", defaultCount: 10, image: "personnal_life/professionnal_life/SalaryCards/salary3.png" },
+        { id: "salary_4", name: "Salaire 4", defaultCount: 10, image: "personnal_life/professionnal_life/SalaryCards/salary4.png" },
 
         // --- FLIRTS ---
         { id: "flirt_bar", name: "Flirt au bar", defaultCount: 2, image: "personnal_life/flirts/bar.png" },
@@ -266,31 +401,86 @@ const cardCategories = {
     ],
     "Extentions Girl Power": [
         // --- MÉTIERS ---
+        { id: "architecte_f", name: "Architecte", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/architecte_f.png" },
+        { id: "astronaute_f", name: "Astronaute", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/astronaute_f.png" },
+        { id: "avocate", name: "Avocate", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/avocate.png" },
+        { id: "bandit_f", name: "Bandit", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/bandit_f.png" },
+        { id: "barmaid", name: "Barmaid", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/barmaid.png" },
+        { id: "cheffe_des_ventes", name: "Cheffe des ventes", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/cheffe_des_ventes.png" },
+        { id: "cheffe_des_achats", name: "Cheffe des achats", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/cheffe_des_achats.png" },
+        { id: "chercheuse", name: "Chercheuse", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/chercheuse.png" },
+        { id: "chirurgienne", name: "Chirurgienne", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/chirurgienne.png" },
+        { id: "designeuse", name: "Designeuse", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/designeuse.png" },
+        { id: "ecrivaine", name: "Écrivaine", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/ecrivaine.png" },
+        { id: "garagiste_f", name: "Garagiste", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/garagiste_f.png" },
+        { id: "gourou_f", name: "Gourou", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/gourou_f.png" },
+        { id: "jardiniere", name: "Jardinière", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/jardiniere.png" },
+        { id: "journaliste_f", name: "Journaliste", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/journaliste_f.png" },
+        { id: "medecin_f", name: "Médecin", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/medecin_f.png" },
+        { id: "voyante", name: "Voyante", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/voyante.png" },
+        { id: "militaire_f", name: "Militaire", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/militaire_f.png" },
+        { id: "pharmacienne", name: "pharmacienne", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/pharmacienne.png" },
+        { id: "pilote_de_ligne_f", name: "Pilote de ligne", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/pilote_de_ligne_f.png" },
+        { id: "pizzaiola", name: "Pizzaiola", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/pizzaiola.png" },
+        { id: "plombiere", name: "Plombière", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/plombiere.png" },
+        { id: "policiere", name: "Policière", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/policiere.png" },
+        { id: "prof_de_chimie", name: "Prof de chimie", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/prof_de_chimie.png" },
+        { id: "prof_de_geo", name: "Prof de geo", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/prof_de_geo.png" },
+        { id: "prof_de_musique", name: "Prof de musique", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/prof_de_musique.png" },
+        { id: "prof_de_philo", name: "Prof de philo", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/prof_de_philo.png" },
+        { id: "serveuse", name: "Serveuse", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/serveuse.png" },
+        { id: "stripteaseuse", name: "Strip-teaseuse", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/stripteaseuse.png" },
+        { id: "grand_prof_f", name: "Grand Prof", defaultCount: 0, image: "personnal_life/professionnal_life/JobCards/grand_prof_f.png" },
 
         // --- ÉTUDES ---
 
         // --- SALAIRES ---
 
         // --- FLIRTS ---
+        { id: "flirt_manif", name: "Flirt à la manif", defaultCount: 0, image: "personnal_life/flirts/manif.png" },
 
         // --- FLIRTS AVEC ENFANT ---
-
+        { id: "flirt_child_bibliotheque", name: "Flirt à la bibliothèque (avec enfant)", defaultCount: 0, image: "personnal_life/flirts/bibliotheque.png" },
+        
         // --- MARIAGES ---
 
         // --- ADULTÈRE ---
 
         // --- ENFANTS ---
-
+        { id: "child_angela", name: "Angela", defaultCount: 0, image: "personnal_life/children/angela.png" },
+        { id: "child_beatrix", name: "Beatrix", defaultCount: 0, image: "personnal_life/children/beatrix.png" },
+        { id: "child_daenerys", name: "Daenerys", defaultCount: 0, image: "personnal_life/children/daenerys.png" },
+        { id: "child_louise", name: "Louise", defaultCount: 0, image: "personnal_life/children/louise.png" },
+        { id: "child_olympe", name: "Olympe", defaultCount: 0, image: "personnal_life/children/olympe.png" },
+        { id: "child_simone", name: "Simone", defaultCount: 0, image: "personnal_life/children/simone.png" },
+        
         // --- ANIMAUX ---
-
-        // --- MAISONS ---
-
-        // --- VOYAGES ---
+        { id: "animal_crapaud", name: "Crapaud", defaultCount: 0, image: "aquisition_cards/animals/crapaud.png" },
+        { id: "animal_dragon", name: "Dragon", defaultCount: 0, image: "aquisition_cards/animals/dragon.png" },
+        
+        // --- AQUISITION ---
+        { id: "ticket_concert", name: "Ticket de Concert", defaultCount: 0, image: "aquisition_cards/other/place_de_concert.png" },
+        { id: "sabre", name: "Sabre", defaultCount: 0, image: "aquisition_cards/other/sabre.png" },
+        { id: "nounou", name: "Sabre", defaultCount: 0, image: "aquisition_cards/other/nounou.png" },
 
         // --- CARTES SPÉCIALES ---
-        
-        // --- COUPS DURS ---
+        { id: "girl_power", name: "Girl Power", defaultCount: 0, image: "special_cards/girl_power.png" },
+        { id: "soiree_entre_filles", name: "Soirée en Filles", defaultCount: 0, image: "special_cards/soiree_entre_filles.png" },
+        { id: "coup_de_foudre", name: "Coup de Foudre", defaultCount: 0, image: "special_cards/coup_de_foudre.png" },
+        { id: "erreur_detiquetage", name: "Erreur D'étiquetage", defaultCount: 0, image: "special_cards/erreur_detiquetage.png" },
+        { id: "cliche_metier", name: "Cliché Métier", defaultCount: 0, image: "special_cards/cliche_metier.png" },
+        { id: "cliche_flirt", name: "Cliché Flirt", defaultCount: 0, image: "special_cards/cliche_flirt.png" },
+        { id: "cliche_accident", name: "Cliché Accident", defaultCount: 0, image: "special_cards/cliche_accident.png" },
+        { id: "egalite_de_salaire", name: "Egalité de Salaire", defaultCount: 0, image: "special_cards/egalite_de_salaire.png" },
+        { id: "redistribution_des_taches", name: "Redistribution des taches", defaultCount: 0, image: "special_cards/redistribution_des_taches.png" },
 
+        // --- COUPS DURS ---
+        { id: "charge_mentale", name: "Charge Mentale", defaultCount: 0, image: "hardship_cards/charge_mentale.png" },
+        { id: "gynocratie", name: "Gynocratie", defaultCount: 0, image: "hardship_cards/gynocratie.png" },
+        { id: "phallocratie", name: "Phallocratie", defaultCount: 0, image: "hardship_cards/phallocratie.png" },
+        { id: "plafond_de_verre", name: "Plafond de verre", defaultCount: 0, image: "hardship_cards/plafond_de_verre.png" },
+        { id: "porc", name: "Balance ton Porc", defaultCount: 0, image: "hardship_cards/porc.png" },
+        { id: "taches_menageres", name: "Tâches Menagères", defaultCount: 0, image: "hardship_cards/taches_menageres.png" },
         // --- AUTRES ---
     
     ],
@@ -490,19 +680,18 @@ function renderCardSelector() {
 
 // Nouvelle fonction pour afficher les infos de carte dans le config du deck
 async function showCardInfoInDeckConfig(cardId, cardName) {
-  try {
-    const response = await fetch(`/api/card_rule/${cardId}`);
-    const data = await response.json();
-    
-    if (data.success) {
-      showCardRules(cardName, data.rule);
-    } else {
-      alert('Impossible de charger les informations de cette carte');
+    try {
+        const response = await fetch(`/api/card_rule/${cardId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            showCardRules(cardName, data.rule, data.image);  // ✅ AJOUT du paramètre image
+        } else {
+            alert('Impossible de charger les informations de cette carte');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
     }
-  } catch (error) {
-    console.error('Erreur lors du chargement des règles:', error);
-    alert('Erreur de connexion au serveur');
-  }
 }
 
 
@@ -571,7 +760,7 @@ function validateDeckConfigFromLobby() {
     document.getElementById('card-selector-screen').classList.add('hidden');
     document.getElementById('lobby-screen').classList.remove('hidden');
     
-    alert(`Deck mis à jour ! ${totalCards} cartes au total.`);
+    //alert(`Deck mis à jour ! ${totalCards} cartes au total.`);
   } else {
     // Création initiale (non utilisé maintenant)
     confirmDeckAndCreateGame(cardCounts);
@@ -608,7 +797,7 @@ function loadPresetDeck(presetKey) {
     
     // Message de confirmation
     const totalCards = getTotalCards();
-    alert(`Deck "${preset.name}" chargé ! ${totalCards} cartes au total.\n\n${preset.description}`);
+    //alert(`Deck "${preset.name}" chargé ! ${totalCards} cartes au total.\n\n${preset.description}`);
 }
 
 // Afficher le sélecteur de presets dans l'UI
@@ -767,22 +956,27 @@ function updateLobby() {
     document.getElementById('players-count').textContent = 
         `${connectedCount} / ${currentGame.num_players} joueurs connectés`;
     
-      if (isHost) {
-    document.getElementById('deck-config-button-container').classList.remove('hidden');
-    document.getElementById('start-button-container').classList.remove('hidden');
-    
-    if (connectedCount >= 2) {
-      document.querySelector('#start-button-container button').disabled = false;
+    if (isHost) {
+        document.getElementById('deck-config-button-container').classList.remove('hidden');
+        document.getElementById('start-button-container').classList.remove('hidden');
+        
+        const startButton = document.querySelector('#start-button-container button');
+        const deckCount = currentGame.deck_count || 0;
+        
+        // ✅ Vérifier à la fois le nombre de joueurs ET le deck
+        if (connectedCount >= 2 && deckCount > 0) {
+            startButton.disabled = false;
+            startButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        } else {
+            startButton.disabled = true;
+            startButton.classList.add('opacity-50', 'cursor-not-allowed');
+        }
     }
-  }
-};
+}
 
 socket.on('deck_updated', (data) => {
     log('Deck mis à jour', data);
+    currentGame = data.game;
     updateMessage(data.message);
-    
-    // Si on est dans le lobby, rafraîchir
-    if (!document.getElementById('lobby-screen').classList.contains('hidden')) {
-        updateLobby();
-    }
+    updateLobby();
 });

@@ -3,7 +3,7 @@ from card_classes import *
 from constants import app, socketio, check_game, update_all_player
 from special_power import *
 import init # pour avoir la route initiale /  # noqa: F401
-
+from girl_power_extention import *
 
 #######################
 # Passer son tour / tour suivant
@@ -97,7 +97,30 @@ def handle_cancel_select_target(data):
     card = get_card_by_id(card_id, player.hand)
     if isinstance(card, HardshipCard):
         card.discard_target_selection(data)
-    
+
+#########################
+# Licenciement
+#########################
+@socketio.on('handle_licenciement_select')
+def handle_licenciement_select(data):
+    print("[start] : handle_licenciement_select")
+    card_id = data.get('card_id')
+    player_id, game, _ = check_game()
+    player = game.players[player_id]
+    card = get_card_by_id(card_id, player.hand)
+    if isinstance(card, LicenciementCard):
+        card.confirm_select_job_licenciement(data)
+
+@socketio.on('handle_cancel_licenciement_select')
+def handle_cancel_licenciement_select(data):
+    print("[start] : handle_cancel_licenciement_select")
+    card_id = data.get('card_id')
+    player_id, game, _ = check_game()
+    player = game.players[player_id]
+    card = get_card_by_id(card_id, player.hand)
+    if isinstance(card, LicenciementCard):
+        card.discard_select_job_licenciement(data)
+
 
 
 

@@ -50,45 +50,73 @@ echo Appuyez sur une touche pour quitter...
 pause >nul
 exit /b 0
 
-:public
-cls
-echo ========================================
-echo   MODE PUBLIC - Cloudflare Tunnel
-echo ========================================
+@echo off
+chcp 65001 >nul
+setlocal enabledelayedexpansion
+
+echo ================================================
+echo   🎮 JEU DE CARTES SMILE - MODE PUBLIC
+echo   (avec Cloudflare Tunnel)
+echo ================================================
 echo.
 
-REM Vérifier si cloudflared existe
-where cloudflared >nul 2>nul
-if %ERRORLEVEL% NEQ 0 (
-    echo [ERREUR] cloudflared n'est pas installe ou pas dans le PATH
-    echo Telechargez-le depuis: https://github.com/cloudflare/cloudflared/releases
+REM Vérifier Python
+python --version >nul 2>&1
+if errorlevel 1 (
+    echo ❌ Python n'est pas installé
+    pause
+    exit /b 1
+)
+
+REM Créer l'environnement virtuel si nécessaire
+if not exist ".venv" (
+    echo 📦 Installation initiale...
+    python -m venv .venv
+    call .venv\Scripts\activate.bat
+    pip install flask flask-socketio python-socketio eventlet
+) else (
+    call .venv\Scripts\activate.bat
+)
+
+REM Vérifier si cloudflared est installé
+where cloudflared >nul 2>&1
+if errorlevel 1 (
+    echo ❌ cloudflared n'est pas installé
+    echo.
+    echo 📦 Pour installer cloudflared :
+    echo    1. Allez sur https://github.com/cloudflare/cloudflared/releases
+    echo    2. Téléchargez cloudflared-windows-amd64.exe
+    echo    3. Renommez-le en cloudflared.exe
+    echo    4. Placez-le dans ce dossier ou dans votre PATH
     echo.
     pause
     exit /b 1
 )
 
-echo [1/2] Demarrage de l'application Flask dans un terminal separe...
+echo ✅ cloudflared détecté
 echo.
 
-REM Lancer Flask dans une nouvelle fenêtre
-start "Flask Application" cmd /k "title Flask Application (PUBLIC) && color 0E && echo ======================================== && echo    APPLICATION FLASK - MODE PUBLIC && echo ======================================== && echo. && python app.py"
+REM Lancer le serveur Flask en arrière-plan
+start /b python app.py
 
-REM Attendre que Flask démarre
-timeout /t 4 /nobreak >nul
+echo ⏳ Démarrage du serveur Flask...
+timeout /t 3 >nul
 
-echo [2/2] Creation du tunnel Cloudflare...
 echo.
-echo ========================================
-echo   VOTRE URL PUBLIQUE APPARAITRA ICI :
-echo ========================================
+echo 🚀 Lancement du tunnel Cloudflare...
+echo.
+echo ⚠️  IMPORTANT : L'URL sera affichée ci-dessous
+echo    Cherchez une ligne comme :
+echo    https://xxxx-xxxx-xxxx.trycloudflare.com
+echo.
+echo ⚠️  Partagez cette adresse HTTPS avec vos amis !
+echo.
+echo ⚠️  Pour arrêter, fermez cette fenêtre ou appuyez sur Ctrl+C
 echo.
 
 cloudflared tunnel --url http://localhost:5000
 
 echo.
-echo ========================================
-echo Tunnel ferme.
-echo FERMEZ MANUELLEMENT la fenetre Flask si necessaire.
-echo.
-echo Appuyez sur une touche pour quitter...
-pause >nul
+echo ⚠️  Le tunnel s'est arrêté
+pause
+endlocal
