@@ -1,7 +1,9 @@
 from flask import request
 from flask_socketio import emit
 from constants import check_game, get_card_by_id, socketio
-from card_classes import *
+from src.cartes import *
+from src.Game import Game
+from src.Player import Player
 
 #############################
 # BURN

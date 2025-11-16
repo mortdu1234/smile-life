@@ -1,6 +1,8 @@
 from flask import render_template, request, send_from_directory
 from flask_socketio import emit, join_room
-from card_classes import *
+from src.cartes import *
+from src.Game import Game
+from src.Player import Player
 from constants import app, socketio, games, player_sessions, get_game_state_for_player, update_all_player, CardFactory, card_builders
 import random
 import uuid

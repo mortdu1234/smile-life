@@ -1,5 +1,7 @@
 from flask_socketio import emit
-from card_classes import *
+from src.cartes import *
+from src.Game import Game
+from src.Player import Player
 from constants import app, socketio, check_game, update_all_player
 from special_power import *
 import init # pour avoir la route initiale /  # noqa: F401

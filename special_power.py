@@ -4,7 +4,9 @@ Extension pour gérer les pouvoirs spéciaux des métiers et cartes spéciales
 from flask import request
 from flask_socketio import emit
 from constants import *
-from card_classes import *
+from src.cartes import *
+from src.Game import Game
+from src.Player import Player
 
 
 

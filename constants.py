@@ -1,6 +1,8 @@
 from flask import Flask, request
 from flask_socketio import SocketIO, emit
-from card_classes import *
+from src.cartes import *
+from src.Game import Game
+from src.Player import Player
 import os
 
 app = Flask(__name__)
@@ -390,7 +392,7 @@ card_builders = {
 class CardFactory:
     """Factory pour créer les cartes"""
     @classmethod
-    def create_custom_deck(cls, config: dict) -> List['Card']:
+    def create_custom_deck(cls, config: dict) -> "List['Card']":
         """Crée un deck basé sur une configuration personnalisée"""
         deck = []
         
