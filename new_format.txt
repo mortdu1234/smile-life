@@ -1,0 +1,44 @@
+
+projet/
+├── backend/
+│   ├── app.py                 # Point d'entrée Flask
+│   ├── game/
+│   │   ├── __init__.py
+│   │   ├── game_manager.py    # Gestion des parties
+│   │   ├── player.py          # Classe Player
+│   │   ├── card_engine.py     # Moteur de jeu des cartes
+│   │   └── rules.py           # Règles du jeu
+│   ├── cards/
+│   │   ├── __init__.py
+│   │   ├── base.py            # Classes de base
+│   │   ├── jobs.py            # Cartes métiers
+│   │   ├── special.py         # Cartes spéciales
+│   │   ├── hardships.py       # Coups durs
+│   │   └── factory.py         # Factory des cartes
+│   ├── events/
+│   │   ├── __init__.py
+│   │   └── socket_handlers.py # Gestionnaires SocketIO
+│   └── config/
+│       ├── __init__.py
+│       └── constants.py       # Constantes du jeu
+│
+├── frontend/
+│   ├── index.html
+│   ├── css/
+│   │   └── styles.css
+│   └── js/
+│       ├── main.js            # Point d'entrée
+│       ├── game/
+│       │   ├── GameState.js   # État du jeu
+│       │   └── GameController.js
+│       ├── ui/
+│       │   ├── CardRenderer.js
+│       │   ├── PlayerBoard.js
+│       │   ├── Modals.js
+│       │   └── Lobby.js
+│       ├── network/
+│       │   └── SocketClient.js
+│       └── utils/
+│           └── helpers.js
+│
+└── ressources/                # Images
