@@ -365,11 +365,15 @@ class PistonCard(SpecialCard):
         job_id = data.get("job_id")
         job_card = next((c for c in current_player.hand if c.id == job_id), None)
         if job_card:
-            # Pose le métier sans vérifier les études (c'est l'effet du Piston)
             current_player.hand.remove(job_card)
             current_player.add_card_to_played(job_card)
-            # Pioche une carte bonus
-            if game.deck:
+            # Déclenche les pouvoirs instantanés du métier (Astronaute, Chef des Achats…)
+            job_card.apply_instant_power(game, current_player)
+            if game.pending_interaction is not None:
+                # Le métier a posé une interaction : la pioche bonus du Piston
+                # sera effectuée après sa résolution
+                game.pending_interaction["piston_draw_pending"] = True
+            elif game.deck:
                 current_player.hand.append(game.deck.pop())
 
 
@@ -531,34 +535,34 @@ class ChanceCard(SpecialCard):
 class EtoileFilanteCard(SpecialCard):
     def __init__(self, image_path: str):
         super().__init__("etoile filante", image_path)
+        self.selection_event: Event = Event()
+        self.selected_card_id: str | None = None
 
     def get_card_rule(self) -> str:
-        return "Étoile Filante — choisit une carte posable dans toute la défausse et la pose directement."
+        return "Étoile Filante — choisit une carte de la défausse et la pose directement."
 
-    def play_card(self, game: "Game", current_player: "Player") -> None:
-        """Étape 1 : émet toutes les cartes posables de la défausse et attend la sélection."""
+    def confirm_card_selection(self, data: dict) -> None:
+        self.selected_card_id = data.get("selected_card_id")
+        self.selection_event.set()
+
+    def discard_card_selection(self, data: dict) -> None:
+        self.selection_event.set()
+
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         playable = [c for c in game.discard if c.can_be_played(current_player, game)[0]]
         emit("select_star_card", {
             "card_id": self.id,
             "discard_cards": [c.to_dict() for c in playable],
-        }, room=current_player.session_id)
-        game.pending_interaction = {
-            "type": "star_card_selection",
-            "card_id": self.id,
-            "player_id": current_player.id,
-        }
-        # La carte Étoile Filante elle-même se pose immédiatement
-        current_player.hand.remove(self)
-        current_player.add_card_to_played(self)
+        })
+        self.selection_event.wait()
+        self.selection_event.clear()
 
-    def resolve(self, game: "Game", current_player: "Player", data: dict) -> None:
-        """Étape 2 : pose la carte choisie depuis la défausse."""
-        selected_id = data.get("selected_card_id")
-        card = next((c for c in game.discard if c.id == selected_id), None)
+        card = next((c for c in game.discard if c.id == self.selected_card_id), None)
         if card:
             game.discard.remove(card)
             current_player.hand.append(card)
             card.play_card(game, current_player)
+        return True
 
 
 class CasinoCard(SpecialCard):

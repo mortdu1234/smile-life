@@ -562,13 +562,13 @@
   </div>
 </div>
 
-<!-- Overlay chance / étoile filante / astronaute -->
+<!-- Overlay chance / étoile filante -->
 <div class="overlay" id="overlay-pick-card">
   <div class="overlay-box">
     <h3 id="overlay-pick-title">Choisir une carte</h3>
     <div class="overlay-cards" id="overlay-pick-list"></div>
     <div class="overlay-actions">
-      <button class="btn btn-secondary" onclick="cancelPickCard()">Annuler</button>
+      <button class="btn btn-secondary" id="btn-pick-cancel" onclick="cancelPickCard()">Annuler</button>
     </div>
   </div>
 </div>
@@ -1254,7 +1254,6 @@ socket.on('select_chance_card', ({ card_id, cards }) => {
   document.getElementById('overlay-pick-card').classList.add('active');
 });
 
-// cancelEvent est mis à jour par chaque listener avant d'ouvrir l'overlay
 let pendingCancelEvent = 'discard_chance_card';
 
 function cancelPickCard() {
@@ -1262,6 +1261,7 @@ function cancelPickCard() {
     socket.emit(pendingCancelEvent, { room_id: ROOM_ID, card_id: pendingPickCardId });
   }
   closeOverlay('overlay-pick-card');
+  document.getElementById('btn-pick-cancel').textContent = 'Annuler';
   pendingPickCardId = null;
 }
 

@@ -651,7 +651,8 @@ def on_confirm_piston(data: dict):
 
     game.pending_interaction = None
     card.resolve(game, player, data)
-    game.next_player()
+    if game.pending_interaction is None:
+        game.next_player()
     game.broadcast_update(f"{player.name} utilise le Piston !")
 
 
@@ -969,10 +970,14 @@ def on_confirm_astronaute(data: dict):
     if card is None:
         return
 
+    piston_draw = interaction.get("piston_draw_pending", False)
     game.pending_interaction = None
     card.resolve(game, player, data)
 
-    # Si la carte choisie déclenche elle-même une interaction, ne pas passer le tour
+    # Pioche bonus Piston différée (si le métier a lui-même déclenché une interaction, on attend)
+    if piston_draw and game.pending_interaction is None and game.deck:
+        player.hand.append(game.deck.pop())
+
     if game.pending_interaction is None:
         game.next_player()
     game.broadcast_update(f"{player.name} récupère une carte depuis la défausse !")
@@ -980,7 +985,7 @@ def on_confirm_astronaute(data: dict):
 
 @socketio.on("discard_astronaute")
 def on_discard_astronaute(data: dict):
-    """Annulation : l'Astronaute est déjà posé, on passe quand même le tour."""
+    """Annulation — l'Astronaute est posé, pioche bonus Piston quand même si applicable."""
     from flask import request
     game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
     if game is None or player is None:
@@ -992,9 +997,14 @@ def on_discard_astronaute(data: dict):
     if interaction["player_id"] != player.id:
         return
 
+    piston_draw = interaction.get("piston_draw_pending", False)
     game.pending_interaction = None
+
+    if piston_draw and game.deck:
+        player.hand.append(game.deck.pop())
+
     game.next_player()
-    game.broadcast_update(f"{player.name} pose l'Astronaute (sans piocher).")
+    game.broadcast_update(f"{player.name} pose l'Astronaute (sans piocher dans la défausse).")
 
 
 @socketio.on("confirm_chef_achats")
