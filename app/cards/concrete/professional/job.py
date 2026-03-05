@@ -288,7 +288,7 @@ class MilitaireJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = "fonctionnaire"
-        self.power = ["no_attentat"]
+        self.power = ["no_attentat", "no_fire"]
 
     def get_card_rule(self) -> str:
         return super().get_card_rule() + "- Fonctionnaire (non licenciable). Bloque les attentats.\n"
@@ -452,7 +452,7 @@ class GrandProfJob(JobCard):
     def __init__(self, job_name: str, salary: int, image_path: str):
         super().__init__(job_name, salary, 0, image_path)
         self.status = "fonctionnaire"
-        self.power = []
+        self.power = ["no_fire"]
         
     def get_card_rule(self):
         return "Nous avons une carte métier Grand Prof\n" \
@@ -487,7 +487,7 @@ class PolicierJob(JobCard):
     def __init__(self, job_name, salary, studies, image_path):
         super().__init__(job_name, salary, studies, image_path)
         self.status = "fonctionnaire"
-        self.power = ["no_bandit","no_gourou"]
+        self.power = ["no_bandit","no_gourou", "no_fire"]
     
     def get_card_rule(self):
         return "Nous avons une carte métier Gourou\n" \
@@ -511,6 +511,7 @@ class ProfJob(JobCard):
     def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
         super().__init__(job_name, salary, studies, image_path)
         self.status = "fonctionnaire"
+        self.power = ["no_fire"]
   
     def get_card_rule(self):
         return "Nous avons une carte métier Prof\n" \

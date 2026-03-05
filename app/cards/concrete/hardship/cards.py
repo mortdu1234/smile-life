@@ -142,27 +142,32 @@ class LicenciementCard(HardshipCard):
 
     def apply_effect(self, game, target_player, current_player):
         target_jobs = target_player.get_job()
-        if len(target_jobs) == 1:
-            target_jobs[0].discard_play_card(game, target_player)
+        # Ne jamais licencier un fonctionnaire (no_fire), même s'il a d'autres métiers
+        fireable_jobs = [j for j in target_jobs if "no_fire" not in j.get_power()]
+        if not fireable_jobs:
+            return
+        if len(fireable_jobs) == 1:
+            fireable_jobs[0].discard_play_card(game, target_player)
             return
         emit("select_job_licenciement", {
             "card_id": self.id,
-            "jobs": [j.to_dict() for j in target_jobs],
+            "jobs": [j.to_dict() for j in fireable_jobs],
         }, room=current_player.session_id)
         game.pending_interaction = {
             "type": "licenciement_job_selection",
             "card_id": self.id,
-            "player_id": current_player.id,   # c'est le joueur qui a joué le coup dur
+            "player_id": current_player.id,
             "target_player_id": target_player.id,
         }
 
     def resolve(self, game, current_player, data):
-        target_player_id = game.pending_interaction["target_player_id"]  # récupéré avant clear
+        target_player_id = game.pending_interaction["target_player_id"]
         target_player = game.players[target_player_id]
-        target_jobs = target_player.get_job()
+        fireable_jobs = [j for j in target_player.get_job() if "no_fire" not in j.get_power()]
         job_id = data.get("target_job_id")
-        job = next((j for j in target_jobs if j.id == job_id), None) or random.choice(target_jobs)
-        job.discard_play_card(game, target_player)
+        job = next((j for j in fireable_jobs if j.id == job_id), None) or (random.choice(fireable_jobs) if fireable_jobs else None)
+        if job:
+            job.discard_play_card(game, target_player)
 
 
 class RedoublementCard(HardshipCard):

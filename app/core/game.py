@@ -275,9 +275,10 @@ class Game:
 
         job.discard_play_card(self, player)
 
-        if self.phase == "draw":
-            # Défausser le métier en début de tour termine le tour
+        if self.phase == "draw" and job.status == "intérimaire":
+            # discard_play_card ne passe pas le tour pour les intérimaires → on le fait ici
             self.next_player()
+        # Non-intérimaire : discard_play_card a déjà appelé next_player()
         # En phase play + intérimaire : on reste en phase play, le joueur continue
 
         return True, ""
