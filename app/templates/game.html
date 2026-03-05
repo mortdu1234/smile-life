@@ -1,0 +1,1363 @@
+{% extends "base.html" %}
+
+{% block title %}Partie #{{ room.id }} — Card Game{% endblock %}
+
+{% block head %}
+<style>
+  /* ============================================================
+     LAYOUT
+  ============================================================ */
+  .game-layout {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  /* ============================================================
+     ADVERSAIRES (haut)
+  ============================================================ */
+  .opponents-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .opponent-panel {
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: .8rem 1rem;
+    flex: 1;
+    min-width: 160px;
+    transition: border-color .2s;
+  }
+  .opponent-panel h4 { color: #e94560; margin-bottom: .4rem; font-size: .9rem; }
+  .opponent-panel p  { font-size: .8rem; color: #aaa; }
+  .opponent-panel.active-player { border-color: #f5a623; box-shadow: 0 0 8px #f5a62366; }
+
+  /* ============================================================
+     ZONE CENTRALE
+  ============================================================ */
+  .game-center {
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 1rem;
+  }
+
+  /* Tableau joueur local */
+  .play-area {
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 10px;
+    padding: 1rem;
+  }
+  .play-area h3 { color: #e94560; margin-bottom: .8rem; font-size: .95rem; }
+  .categories { display: flex; flex-direction: column; gap: .6rem; }
+  .category-row { display: flex; gap: .5rem; align-items: flex-start; flex-wrap: wrap; }
+  .category-label {
+    font-size: .7rem;
+    color: #888;
+    min-width: 130px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    padding-top: .4rem;
+  }
+  .played-cards { display: flex; gap: .4rem; flex-wrap: wrap; }
+
+  /* Sidebar */
+  .sidebar { display: flex; flex-direction: column; gap: 1rem; }
+  .info-panel {
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  .info-panel h4 { color: #e94560; margin-bottom: .6rem; font-size: .9rem; }
+
+  /* Pioche */
+  .deck-btn {
+    width: 100%;
+    padding: 1.2rem;
+    background: #0f3460;
+    border: 2px dashed #e94560;
+    border-radius: 8px;
+    color: #eee;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .deck-btn:hover:not(:disabled) { background: #1a3a6e; }
+  .deck-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* Phase badge */
+  .phase-badge {
+    display: inline-block;
+    padding: .3rem .8rem;
+    border-radius: 12px;
+    font-size: .8rem;
+    font-weight: 700;
+    margin-bottom: .5rem;
+  }
+  .phase-draw  { background: #0f3460; color: #7ec8e3; }
+  .phase-play  { background: #2d6a2d; color: #90ee90; }
+  .phase-wait  { background: #555;    color: #bbb; }
+
+  /* Actions de début de tour */
+  .turn-actions {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    margin-top: .5rem;
+  }
+  .turn-actions .btn { font-size: .8rem; padding: .4rem .8rem; text-align: left; }
+
+  /* Défausse — la carte est rendue comme une .game-card via JS */
+  #discard-top-wrapper {
+    min-height: 110px;
+    display: flex;
+    align-items: flex-start;
+  }
+  #discard-top-wrapper .game-card.clickable {
+    cursor: pointer;
+    border-color: #f5a623;
+  }
+  #discard-top-wrapper .game-card.clickable:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 0 2px #f5a623;
+  }
+  #discard-top-wrapper .game-card.clickable::after {
+    content: "▶ Piocher";
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(245,166,35,.85);
+    color: #000;
+    font-size: .6rem;
+    font-weight: 700;
+    padding: .15rem 0;
+    text-align: center;
+    border-radius: 0 0 6px 6px;
+  }
+  #discard-top-wrapper .empty-discard {
+    width: 80px;
+    height: 110px;
+    background: #0f3460;
+    border: 2px dashed #333;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .75rem;
+    color: #555;
+  }
+
+  /* ============================================================
+     MAIN DU JOUEUR (bas)
+  ============================================================ */
+  .hand-area {
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 10px;
+    padding: 1rem;
+  }
+  .hand-area h3 { color: #e94560; margin-bottom: .8rem; font-size: .95rem; }
+  .hand-area .hint {
+    font-size: .75rem;
+    color: #666;
+    margin-bottom: .6rem;
+  }
+  .hand-cards { display: flex; gap: .6rem; flex-wrap: wrap; }
+
+  /* ============================================================
+     CARTES
+  ============================================================ */
+  .game-card {
+    width: 80px;
+    height: 110px;
+    background: #0f3460;
+    border: 2px solid #1a3a6e;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: .6rem;
+    text-align: center;
+    padding: .3rem;
+    cursor: default;
+    transition: transform .15s, border-color .15s;
+    position: relative;
+    user-select: none;
+    overflow: hidden;
+  }
+  .game-card img {
+    width: 62px;
+    height: 68px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: .2rem;
+    flex-shrink: 0;
+  }
+  .game-card .card-type {
+    font-size: .5rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .game-card .card-name {
+    font-weight: 700;
+    color: #eee;
+    font-size: .6rem;
+    line-height: 1.1;
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .game-card .card-smiles {
+    position: absolute;
+    bottom: 3px;
+    right: 5px;
+    font-size: .65rem;
+    color: #f5a623;
+  }
+
+  /* Carte jouable (en main, pendant phase play) */
+  .game-card.playable {
+    cursor: pointer;
+    border-color: #e94560;
+  }
+  .game-card.playable:hover {
+    transform: translateY(-8px);
+    border-color: #f5a623;
+    box-shadow: 0 6px 16px #00000055;
+  }
+
+  /* Carte défaussable (shift+hover) */
+  .game-card.discardable-active {
+    cursor: pointer;
+    border-color: #888;
+  }
+  .game-card.discardable-active:hover {
+    transform: translateY(4px);
+    border-color: #aaa;
+    opacity: .7;
+  }
+
+  /* Badge "Défausser" au survol en mode play */
+  .game-card .discard-hint {
+    display: none;
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,.75);
+    color: #aaa;
+    font-size: .6rem;
+    padding: .15rem 0;
+    text-align: center;
+    border-radius: 0 0 6px 6px;
+  }
+  .game-card.playable:hover .discard-hint-visible { display: block; }
+
+  /* Métier intérimaire — bouton licencier */
+  .interim-badge {
+    position: absolute;
+    top: 2px; left: 2px;
+    background: #e94560;
+    color: #fff;
+    font-size: .5rem;
+    padding: .1rem .3rem;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+  .interim-discard-btn {
+    width: 100%;
+    margin-top: 2px;
+    padding: .2rem;
+    background: #e94560;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-size: .55rem;
+    cursor: pointer;
+  }
+
+  /* Cartes posées adversaires */
+  .opponent-played-section {
+    display: none;
+    margin-top: .6rem;
+    border-top: 1px solid #0f3460;
+    padding-top: .6rem;
+  }
+  .opponent-panel.expanded .opponent-played-section { display: block; }
+  .opponent-toggle {
+    font-size: .7rem;
+    color: #7ec8e3;
+    margin-top: .5rem;
+    cursor: pointer;
+    user-select: none;
+    display: inline-block;
+    padding: .2rem .5rem;
+    border: 1px solid #0f3460;
+    border-radius: 4px;
+  }
+  .opponent-toggle:hover { border-color: #f5a623; color: #f5a623; }
+  .opponent-panel.expanded .opponent-toggle { color: #f5a623; border-color: #f5a623; }
+  .opp-category { margin-bottom: .4rem; }
+  .opp-category-label {
+    font-size: .6rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: .2rem;
+  }
+  .opp-cards { display: flex; gap: .3rem; flex-wrap: wrap; }
+  /* Carte adversaire — plus petite */
+  .game-card.opp-card {
+    width: 54px;
+    height: 76px;
+    font-size: .5rem;
+    padding: .2rem;
+  }
+  .game-card.opp-card img {
+    width: 42px;
+    height: 46px;
+  }
+  .game-card.opp-card .card-name { font-size: .5rem; max-width: 48px; }
+  .game-card.opp-card .card-smiles { font-size: .55rem; }
+
+  /* Dos de carte (adversaires) */
+  .card-back {
+    width: 36px; height: 52px;
+    background: linear-gradient(135deg, #0f3460, #e94560);
+    border-radius: 4px;
+    border: 1px solid #333;
+    flex-shrink: 0;
+  }
+
+  /* ============================================================
+     LOBBY (avant démarrage)
+  ============================================================ */
+  .lobby-waiting { text-align: center; padding: 3rem; }
+  .lobby-waiting h2 { color: #e94560; margin-bottom: 1rem; }
+  .player-list { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin: 1.5rem 0; }
+  .player-chip {
+    background: #0f3460;
+    border: 1px solid #e94560;
+    border-radius: 20px;
+    padding: .4rem 1rem;
+    font-size: .9rem;
+  }
+
+  /* ============================================================
+     OVERLAYS
+  ============================================================ */
+  .overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.8);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .overlay.active { display: flex; }
+  .overlay-box {
+    background: #16213e;
+    border: 2px solid #e94560;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 720px;
+    width: 92%;
+    max-height: 82vh;
+    overflow-y: auto;
+  }
+  .overlay-box h3 { color: #e94560; margin-bottom: 1rem; }
+  .overlay-cards { display: flex; gap: .6rem; flex-wrap: wrap; margin: 1rem 0; }
+  .overlay-actions { display: flex; gap: .8rem; justify-content: flex-end; margin-top: 1rem; }
+  .overlay-card-selected { border-color: #f5a623 !important; }
+
+  /* ============================================================
+     SMILES
+  ============================================================ */
+  .smiles-total { font-size: 1.1rem; color: #f5a623; font-weight: 700; }
+
+  /* ============================================================
+     MENU CONTEXTUEL CARTE (défausser)
+  ============================================================ */
+  #card-context-menu {
+    position: fixed;
+    background: #16213e;
+    border: 1px solid #e94560;
+    border-radius: 8px;
+    padding: .4rem 0;
+    z-index: 500;
+    display: none;
+    min-width: 140px;
+    box-shadow: 0 4px 16px #00000088;
+  }
+  #card-context-menu button {
+    display: block;
+    width: 100%;
+    padding: .5rem 1rem;
+    background: none;
+    border: none;
+    color: #eee;
+    text-align: left;
+    cursor: pointer;
+    font-size: .9rem;
+  }
+  #card-context-menu button:hover { background: #0f3460; }
+  #card-context-menu .separator { border-top: 1px solid #0f3460; margin: .2rem 0; }
+</style>
+{% endblock %}
+
+{% block nav %}
+  <span style="color:#aaa;font-size:.9rem">Salle #{{ room.id }}</span>
+  <span id="nav-phase" class="phase-badge phase-wait">En attente</span>
+  <span class="smiles-total" id="nav-smiles">😊 0</span>
+{% endblock %}
+
+{% block content %}
+
+<!-- ===================== LOBBY ===================== -->
+<div id="lobby-screen" class="lobby-waiting">
+  <h2>En attente des joueurs…</h2>
+  <p style="color:#aaa">Salle <strong>#{{ room.id }}</strong> — partagez ce code !</p>
+  <div class="player-list" id="player-list">
+    {% for p in room.players %}
+      <span class="player-chip">{{ p.name }}</span>
+    {% endfor %}
+  </div>
+  <p style="color:#555;font-size:.85rem" id="waiting-count">
+    {{ room.players | length }} / {{ room.num_players }} joueurs connectés
+  </p>
+  <button class="btn btn-primary" id="btn-start" style="margin-top:1.5rem;display:none">
+    🚀 Démarrer la partie
+  </button>
+</div>
+
+<!-- ===================== JEU ===================== -->
+<div id="game-screen" style="display:none" class="game-layout">
+
+  <!-- Adversaires -->
+  <div class="opponents-row" id="opponents-row"></div>
+
+  <!-- Centre -->
+  <div class="game-center">
+
+    <!-- Tableau joueur local -->
+    <div class="play-area">
+      <h3>🗂️ Mes cartes posées — <span id="my-smiles" class="smiles-total">😊 0</span></h3>
+      <div class="categories" id="my-played"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Phase / tour -->
+      <div class="info-panel">
+        <h4>État du jeu</h4>
+        <div id="phase-info" class="phase-badge phase-wait">En attente</div>
+        <p style="font-size:.8rem;color:#aaa;margin-top:.4rem">
+          Tour de : <strong id="current-player-name">—</strong>
+        </p>
+      </div>
+
+      <!-- Pioche -->
+      <div class="info-panel">
+        <h4>📦 Pioche</h4>
+        <button class="deck-btn" id="btn-draw" disabled>
+          🎴 Piocher<br/>
+          <span id="deck-count" style="font-size:.75rem;color:#aaa">— cartes</span>
+        </button>
+      </div>
+
+      <!-- Défausse -->
+      <div class="info-panel">
+        <h4>🗑️ Défausse</h4>
+        <div id="discard-top-wrapper"><div class="empty-discard">Vide</div></div>
+      </div>
+
+      <!-- Actions début de tour -->
+      <div class="info-panel" id="panel-turn-actions" style="display:none">
+        <h4>⚡ Actions de début de tour</h4>
+        <div class="turn-actions">
+          <button class="btn btn-secondary" id="btn-discard-job" style="display:none"
+                  onclick="onDiscardJob()">
+            🧳 Défausser mon métier
+          </button>
+          <button class="btn btn-secondary" id="btn-discard-marriage" style="display:none"
+                  onclick="onDiscardMarriage()">
+            💔 Divorcer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main du joueur -->
+  <div class="hand-area">
+    <h3>🤚 Ma main (<span id="hand-count">0</span> cartes)</h3>
+    <p class="hint" id="hand-hint"></p>
+    <div class="hand-cards" id="my-hand"></div>
+  </div>
+</div>
+
+<!-- ===================== OVERLAYS ===================== -->
+
+<!-- Sélection de cible (coups durs) -->
+<div class="overlay" id="overlay-target">
+  <div class="overlay-box">
+    <h3 id="overlay-target-title">Choisir une cible</h3>
+    <div class="overlay-cards" id="overlay-target-list"></div>
+    <div class="overlay-actions">
+      <button class="btn btn-secondary" onclick="closeOverlay('overlay-target')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sélection de salaires (acquisitions) -->
+<div class="overlay" id="overlay-salaries">
+  <div class="overlay-box">
+    <h3>Sélectionner les salaires à dépenser</h3>
+    <p style="color:#aaa;font-size:.85rem">Coût requis : <strong id="salary-cost">—</strong></p>
+    <p style="color:#aaa;font-size:.85rem">Héritage disponible : <strong id="heritage-amount">0</strong></p>
+    <p style="color:#666;font-size:.8rem">Cliquez sur les cartes salaire pour les sélectionner.</p>
+    <div class="overlay-cards" id="overlay-salary-list"></div>
+    <p style="color:#f5a623;font-size:.85rem">Total sélectionné : <strong id="salary-total-selected">0</strong></p>
+    <div class="overlay-actions">
+      <button class="btn btn-secondary" onclick="cancelSalarySelection()">Annuler</button>
+      <button class="btn btn-primary"   onclick="confirmSalarySelection()">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay générique (médium, journaliste…) -->
+<div class="overlay" id="overlay-generic">
+  <div class="overlay-box">
+    <h3 id="overlay-generic-title">Action requise</h3>
+    <div id="overlay-generic-content"></div>
+    <div class="overlay-actions">
+      <button class="btn btn-secondary" id="overlay-generic-close-btn"
+              onclick="closeOverlay('overlay-generic')">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay brûler une carte (Daenerys / Dragon) -->
+<div class="overlay" id="overlay-burn">
+  <div class="overlay-box">
+    <h3 id="overlay-burn-title">Choisir une carte à brûler</h3>
+    <div class="overlay-cards" id="overlay-burn-list"></div>
+    <div class="overlay-actions">
+      <button class="btn btn-secondary" onclick="cancelBurnSelection()">Passer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay chance / étoile filante -->
+<div class="overlay" id="overlay-pick-card">
+  <div class="overlay-box">
+    <h3 id="overlay-pick-title">Choisir une carte</h3>
+    <div class="overlay-cards" id="overlay-pick-list"></div>
+    <div class="overlay-actions">
+      <button class="btn btn-secondary" onclick="cancelPickCard()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay anniversaire (offrir un salaire) -->
+<div class="overlay" id="overlay-birthday">
+  <div class="overlay-box">
+    <h3 id="overlay-birthday-title">🎂 Anniversaire !</h3>
+    <p id="overlay-birthday-desc" style="color:#aaa;margin-bottom:1rem"></p>
+    <div class="overlay-cards" id="overlay-birthday-list"></div>
+    <div class="overlay-actions">
+      <!-- auto-close after confirm -->
+    </div>
+  </div>
+</div>
+
+<!-- Overlay sélection de cible Coup de Foudre -->
+<div class="overlay" id="overlay-coup-de-foudre">
+  <div class="overlay-box">
+    <h3>💘 Coup de Foudre — Choisir la cible</h3>
+    <div class="overlay-cards" id="overlay-coup-de-foudre-list"></div>
+    <div class="overlay-actions">
+      <button class="btn btn-secondary" onclick="cancelCoupDeFoudre()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- Menu contextuel carte (défausser) -->
+<div id="card-context-menu">
+  <button id="ctx-play">▶ Jouer cette carte</button>
+  <div class="separator"></div>
+  <button id="ctx-discard">🗑️ Défausser cette carte</button>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// =====================================================================
+// Configuration
+// =====================================================================
+const ROOM_ID   = "{{ room.id }}";
+const socket    = io();
+
+let myPlayerId      = null;
+let gameState       = null;
+let pendingCard     = null;
+let pendingBurnCardId = null;
+let pendingPickCardId = null;
+let pendingBirthdayCardId = null;
+let selectedSalaries = [];
+let contextCardData  = null;
+
+// =====================================================================
+// Connexion
+// =====================================================================
+const storedName = sessionStorage.getItem('playerName') || prompt("Votre nom ?") || "Anonyme";
+sessionStorage.setItem('playerName', storedName);
+
+socket.emit('join', { room_id: ROOM_ID, name: storedName });
+socket.on('connect', () => console.log('Connecté', socket.id));
+
+// =====================================================================
+// Lobby
+// =====================================================================
+socket.on('room_updated', (room) => {
+  const list = document.getElementById('player-list');
+  list.innerHTML = room.players.map(p => `<span class="player-chip">${p.name}</span>`).join('');
+  document.getElementById('waiting-count').textContent =
+    `${room.players.length} / ${room.num_players} joueurs connectés`;
+
+  const me = room.players.find(p => p.name === storedName);
+  if (me) myPlayerId = me.id;
+
+  const btnStart = document.getElementById('btn-start');
+  if (me && me.id === 0 && room.players.length >= room.num_players) {
+    btnStart.style.display = 'inline-block';
+  }
+});
+
+document.getElementById('btn-start').addEventListener('click', () => {
+  socket.emit('start_game', { room_id: ROOM_ID });
+});
+
+// =====================================================================
+// Mise à jour du jeu
+// =====================================================================
+socket.on('game_updated', ({ game, message }) => {
+  gameState = game;
+  renderGame(game);
+  if (message) flash(message, '#2d6a2d');
+});
+
+socket.on('error', ({ message }) => flash(message, '#e94560'));
+
+// =====================================================================
+// Rendu principal
+// =====================================================================
+function renderGame(game) {
+  document.getElementById('lobby-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display  = 'block';
+
+  const me = game.players.find(p => p.id === myPlayerId) || game.players[0];
+  myPlayerId = me.id;
+
+  const isMyTurn  = game.current_player === me.id;
+  const phaseEl   = document.getElementById('phase-info');
+  const navPhase  = document.getElementById('nav-phase');
+
+  let phaseLabel, phaseCls;
+  if (!isMyTurn) {
+    phaseLabel = "⏳ Tour adversaire";
+    phaseCls   = "phase-wait";
+  } else if (game.phase === 'draw') {
+    phaseLabel = "🎴 Piochez ou agissez";
+    phaseCls   = "phase-draw";
+  } else {
+    phaseLabel = "🃏 Jouez ou défaussez";
+    phaseCls   = "phase-play";
+  }
+
+  phaseEl.textContent  = phaseLabel;
+  navPhase.textContent = phaseLabel;
+  phaseEl.className    = `phase-badge ${phaseCls}`;
+  navPhase.className   = `phase-badge ${phaseCls}`;
+
+  document.getElementById('current-player-name').textContent =
+    (game.players[game.current_player] || {}).name || '—';
+
+  // Pioche
+  document.getElementById('deck-count').textContent = `${game.deck_count} cartes`;
+  const btnDraw = document.getElementById('btn-draw');
+  const canDraw = isMyTurn && game.phase === 'draw';
+  btnDraw.disabled = !canDraw;
+
+  // Défausse — cliquable pour piocher en phase draw
+  renderDiscardTop(game, isMyTurn && game.phase === 'draw');
+
+  // Smiles
+  const smiles = calcSmiles(me);
+  document.getElementById('my-smiles').textContent  = `😊 ${smiles}`;
+  document.getElementById('nav-smiles').textContent = `😊 ${smiles}`;
+
+  // Adversaires
+  renderOpponents(game, me.id);
+
+  // Cartes posées
+  renderPlayedCards(me, isMyTurn && game.phase === 'play');
+
+  // Main
+  renderHand(me, game, isMyTurn && game.phase === 'play');
+
+  // Hint main
+  const hint = document.getElementById('hand-hint');
+  if (isMyTurn && game.phase === 'play') {
+    hint.textContent = "Clic gauche → Jouer  |  Clic droit → Défausser";
+  } else if (isMyTurn && game.phase === 'draw') {
+    hint.textContent = "Piochez pour jouer une carte, ou effectuez une action ci-contre.";
+  } else {
+    hint.textContent = "";
+  }
+
+  // Boutons début de tour
+  renderTurnActions(game, me, isMyTurn && game.phase === 'draw');
+}
+
+// =====================================================================
+// Défausse top
+// =====================================================================
+function renderDiscardTop(game, canPickFromDiscard) {
+  const wrapper = document.getElementById('discard-top-wrapper');
+  const discard = game.discard;
+  if (discard && discard.length > 0) {
+    const top = discard[discard.length - 1];
+    const card = document.createElement('div');
+    card.className = 'game-card' + (canPickFromDiscard ? ' clickable' : '');
+    card.innerHTML = cardInnerHtml(top);
+    if (canPickFromDiscard) {
+      card.onclick = () => socket.emit('draw_from_discard', { room_id: ROOM_ID });
+    }
+    wrapper.innerHTML = '';
+    wrapper.appendChild(card);
+  } else {
+    wrapper.innerHTML = '<div class="empty-discard">Vide</div>';
+  }
+}
+
+// =====================================================================
+// Actions de début de tour (défausser métier / divorcer)
+// =====================================================================
+function renderTurnActions(game, me, show) {
+  const panel = document.getElementById('panel-turn-actions');
+  const btnJob = document.getElementById('btn-discard-job');
+  const btnMarriage = document.getElementById('btn-discard-marriage');
+
+  if (!show) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  const hasJob = me.played['vie professionnelle'] &&
+    me.played['vie professionnelle'].some(c => c.type === 'job');
+  const isMarried = me.played['vie personnelle'] &&
+    me.played['vie personnelle'].some(c => c.type === 'marriage');
+
+  btnJob.style.display     = hasJob      ? '' : 'none';
+  btnMarriage.style.display = isMarried  ? '' : 'none';
+
+  panel.style.display = (hasJob || isMarried) ? '' : 'none';
+}
+
+function onDiscardJob() {
+  const me = gameState ? gameState.players.find(p => p.id === myPlayerId) : null;
+  if (!me) return;
+  const jobs = (me.played['vie professionnelle'] || []).filter(c => c.type === 'job');
+  if (jobs.length <= 1) {
+    socket.emit('discard_job', { room_id: ROOM_ID, job_id: jobs[0]?.id });
+  } else {
+    // Plusieurs métiers — afficher un overlay de sélection
+    openJobDiscardOverlay(jobs);
+  }
+}
+
+function onDiscardMarriage() {
+  socket.emit('discard_marriage', { room_id: ROOM_ID });
+}
+
+// =====================================================================
+// Adversaires
+// =====================================================================
+const expandedOpponents = new Set();
+
+function renderOpponents(game, myId) {
+  const row = document.getElementById('opponents-row');
+  row.innerHTML = '';
+
+  const cats = [
+    ['vie professionnelle', '💼'],
+    ['vie personnelle',     '❤️'],
+    ['acquisitions',        '🏠'],
+    ['cartes spéciales',    '✨'],
+    ['effet permanent',     '🔒'],
+  ];
+
+  game.players.filter(p => p.id !== myId).forEach(p => {
+    const isActive   = p.id === game.current_player;
+    const smiles     = calcSmiles(p);
+    const isExpanded = expandedOpponents.has(p.id);
+
+    // Dos de cartes en main
+    const handBacks = Array(p.hand_count || 0)
+      .fill('<div class="card-back"></div>').join('');
+
+    // Cartes posées
+    let hasAnyCard = false;
+    const playedSection = document.createElement('div');
+    playedSection.className = 'opponent-played-section';
+    cats.forEach(([key, icon]) => {
+      const cards = (p.played || {})[key] || [];
+      if (cards.length === 0) return;
+      hasAnyCard = true;
+      const catDiv = document.createElement('div');
+      catDiv.className = 'opp-category';
+      catDiv.innerHTML = `<div class="opp-category-label">${icon} ${key}</div>`;
+      const cardsDiv = document.createElement('div');
+      cardsDiv.className = 'opp-cards';
+      cards.forEach(c => {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'game-card opp-card';
+        cardEl.innerHTML = cardInnerHtml(c);
+        cardsDiv.appendChild(cardEl);
+      });
+      catDiv.appendChild(cardsDiv);
+      playedSection.appendChild(catDiv);
+    });
+    if (!hasAnyCard) {
+      playedSection.innerHTML = '<p style="color:#555;font-size:.75rem;padding:.3rem 0">Aucune carte posée.</p>';
+    }
+
+    // Toggle bouton
+    const toggleBtn = document.createElement('div');
+    toggleBtn.className = 'opponent-toggle';
+    toggleBtn.textContent = isExpanded ? '📋 Masquer ▴' : '📋 Cartes posées ▾';
+
+    // Panel principal
+    const div = document.createElement('div');
+    div.className = 'opponent-panel' + (isActive ? ' active-player' : '') + (isExpanded ? ' expanded' : '');
+    div.dataset.pid = p.id;
+
+    const header = document.createElement('div');
+    header.innerHTML = `
+      <h4>${p.name} ${isActive ? '▶' : ''}</h4>
+      <p>😊 ${smiles} smiles &nbsp;|&nbsp; 🤚 ${p.hand_count || 0} cartes</p>
+      <div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.4rem">${handBacks}</div>`;
+
+    div.appendChild(header);
+    div.appendChild(toggleBtn);
+    div.appendChild(playedSection);
+
+    toggleBtn.addEventListener('click', () => {
+      const expanded = div.classList.toggle('expanded');
+      if (expanded) {
+        expandedOpponents.add(p.id);
+        toggleBtn.textContent = '📋 Masquer ▴';
+      } else {
+        expandedOpponents.delete(p.id);
+        toggleBtn.textContent = '📋 Cartes posées ▾';
+      }
+    });
+
+    row.appendChild(div);
+  });
+}
+
+// =====================================================================
+// Cartes posées (joueur local)
+// =====================================================================
+function renderPlayedCards(player, canDiscardInterim) {
+  const container = document.getElementById('my-played');
+  container.innerHTML = '';
+  const cats = [
+    ['vie professionnelle', '💼'],
+    ['vie personnelle',     '❤️'],
+    ['acquisitions',        '🏠'],
+    ['cartes spéciales',    '✨'],
+    ['effet permanent',     '🔒'],
+    ['salaire dépensé',     '💸'],
+  ];
+  cats.forEach(([key, icon]) => {
+    const cards = (player.played || {})[key] || [];
+    if (cards.length === 0) return;
+    const row = document.createElement('div');
+    row.className = 'category-row';
+    const cardEls = cards.map(c => {
+      const el = document.createElement('div');
+      el.className = 'game-card';
+      el.innerHTML = cardInnerHtml(c);
+      // Intérimaire : bouton défausser en cours de tour
+      if (canDiscardInterim && c.type === 'job' && c.status === 'intérimaire') {
+        const badge = document.createElement('span');
+        badge.className = 'interim-badge';
+        badge.textContent = 'INT';
+        el.appendChild(badge);
+        const btn = document.createElement('button');
+        btn.className = 'interim-discard-btn';
+        btn.textContent = '✕ Licencier';
+        btn.onclick = () => socket.emit('discard_job', { room_id: ROOM_ID, job_id: c.id });
+        el.appendChild(btn);
+      }
+      return el;
+    });
+    row.innerHTML = `<span class="category-label">${icon} ${key}</span>`;
+    const playedDiv = document.createElement('div');
+    playedDiv.className = 'played-cards';
+    cardEls.forEach(el => playedDiv.appendChild(el));
+    row.appendChild(playedDiv);
+    container.appendChild(row);
+  });
+  if (container.innerHTML === '') {
+    container.innerHTML = '<p style="color:#555;font-size:.85rem;padding:.5rem">Aucune carte posée.</p>';
+  }
+}
+
+// =====================================================================
+// Main du joueur
+// =====================================================================
+function renderHand(player, game, canPlay) {
+  const container = document.getElementById('my-hand');
+  document.getElementById('hand-count').textContent = player.hand.length;
+  container.innerHTML = '';
+  player.hand.forEach(card => {
+    const el = document.createElement('div');
+    el.className = `game-card${canPlay ? ' playable' : ''}`;
+    el.innerHTML = cardInnerHtml(card);
+
+    if (canPlay) {
+      // Clic gauche → jouer
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        onCardClick(card);
+      });
+      // Clic droit → menu contextuel
+      el.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        openContextMenu(e, card);
+      });
+    }
+    container.appendChild(el);
+  });
+}
+
+// =====================================================================
+// Menu contextuel (jouer / défausser)
+// =====================================================================
+function openContextMenu(e, card) {
+  contextCardData = card;
+  const menu = document.getElementById('card-context-menu');
+  menu.style.display = 'block';
+  menu.style.left = `${Math.min(e.clientX, window.innerWidth - 160)}px`;
+  menu.style.top  = `${Math.min(e.clientY, window.innerHeight - 100)}px`;
+}
+
+document.getElementById('ctx-play').addEventListener('click', () => {
+  if (contextCardData) onCardClick(contextCardData);
+  closeContextMenu();
+});
+
+document.getElementById('ctx-discard').addEventListener('click', () => {
+  if (contextCardData) {
+    socket.emit('discard_card', { room_id: ROOM_ID, card_id: contextCardData.id });
+  }
+  closeContextMenu();
+});
+
+function closeContextMenu() {
+  document.getElementById('card-context-menu').style.display = 'none';
+  contextCardData = null;
+}
+
+document.addEventListener('click', closeContextMenu);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeContextMenu(); });
+
+// =====================================================================
+// Clic sur carte (jouer)
+// =====================================================================
+function onCardClick(card) {
+  pendingCard = card;
+  if (card.type === 'hardship') {
+    openTargetOverlay(card);
+  } else if (['aquisition', 'house', 'travel'].includes(card.type)) {
+    // L'overlay sera ouvert via l'event select_salaries_for_acquisition
+    socket.emit('play_card', { room_id: ROOM_ID, card_id: card.id });
+  } else {
+    socket.emit('play_card', { room_id: ROOM_ID, card_id: card.id });
+    pendingCard = null;
+  }
+}
+
+// =====================================================================
+// Pioche (bouton)
+// =====================================================================
+document.getElementById('btn-draw').addEventListener('click', () => {
+  socket.emit('draw_card', { room_id: ROOM_ID });
+});
+
+// =====================================================================
+// Overlay — Cible coups durs
+// =====================================================================
+socket.on('select_hardship_target', ({ card, available_targets }) => {
+  pendingCard = card;
+  openTargetOverlay(card, available_targets);
+});
+
+function openTargetOverlay(card, targets) {
+  const tgts = targets || (gameState ? gameState.players.filter(p => p.id !== myPlayerId) : []);
+  document.getElementById('overlay-target-title').textContent =
+    `Choisir une cible pour : ${card.subtype || card.type}`;
+  const list = document.getElementById('overlay-target-list');
+  list.innerHTML = '';
+  tgts.forEach(t => {
+    if (t.immune) return;
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-secondary';
+    btn.style.cssText = 'padding:1rem 1.4rem;border-radius:8px;font-size:.9rem';
+    btn.textContent = `🎯 ${t.name}`;
+    btn.addEventListener('click', () => {
+      socket.emit('confirm_hardship_target', {
+        room_id: ROOM_ID, card_id: pendingCard.id, target_player_id: t.id
+      });
+      closeOverlay('overlay-target');
+      pendingCard = null;
+    });
+    list.appendChild(btn);
+  });
+  document.getElementById('overlay-target').classList.add('active');
+}
+
+// =====================================================================
+// Overlay — Sélection de salaires (acquisitions)
+// =====================================================================
+socket.on('select_salaries_for_acquisition', ({ card, required_cost, available_salaries, heritage_available }) => {
+  pendingCard = card;
+  document.getElementById('salary-cost').textContent     = required_cost;
+  document.getElementById('heritage-amount').textContent = heritage_available;
+  selectedSalaries = [];
+  updateSalaryTotal();
+  const list = document.getElementById('overlay-salary-list');
+  list.innerHTML = '';
+  available_salaries.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'game-card';
+    el.style.cursor = 'pointer';
+    el.innerHTML = cardInnerHtml(s);
+    el.addEventListener('click', () => {
+      if (selectedSalaries.includes(s.id)) {
+        selectedSalaries = selectedSalaries.filter(id => id !== s.id);
+        el.classList.remove('overlay-card-selected');
+      } else {
+        selectedSalaries.push(s.id);
+        el.classList.add('overlay-card-selected');
+      }
+      updateSalaryTotal();
+    });
+    list.appendChild(el);
+  });
+  document.getElementById('overlay-salaries').classList.add('active');
+});
+
+function updateSalaryTotal() {
+  if (!gameState) return;
+  const me = gameState.players.find(p => p.id === myPlayerId);
+  if (!me) return;
+  const total = selectedSalaries.reduce((sum, id) => {
+    const card = (me.played['vie professionnelle'] || []).find(c => c.id === id);
+    return sum + (card ? (card.subtype || 0) : 0);
+  }, 0);
+  document.getElementById('salary-total-selected').textContent = total;
+}
+
+function confirmSalarySelection() {
+  socket.emit('confirm_salary_selection', {
+    room_id: ROOM_ID,
+    card_id: pendingCard.id,
+    salary_ids: selectedSalaries,
+    use_heritage: 0
+  });
+  closeOverlay('overlay-salaries');
+  pendingCard = null;
+}
+
+function cancelSalarySelection() {
+  socket.emit('discard_salary_selection', { room_id: ROOM_ID, card_id: pendingCard?.id });
+  closeOverlay('overlay-salaries');
+  pendingCard = null;
+}
+
+// =====================================================================
+// Overlay — Médium (voir cartes pioche)
+// =====================================================================
+socket.on('medium_show_cards', ({ card_id, cards, total }) => {
+  document.getElementById('overlay-generic-title').textContent =
+    `🔮 Médium — ${cards.length} prochaines cartes (sur ${total})`;
+  document.getElementById('overlay-generic-content').innerHTML =
+    `<div style="display:flex;gap:.5rem;flex-wrap:wrap">${cards.map(c => cardHtml(c)).join('')}</div>`;
+  const closeBtn = document.getElementById('overlay-generic-close-btn');
+  closeBtn.onclick = () => {
+    socket.emit('confirm_medium', { room_id: ROOM_ID, card_id });
+    closeOverlay('overlay-generic');
+  };
+  document.getElementById('overlay-generic').classList.add('active');
+});
+
+// =====================================================================
+// Overlay — Journaliste (voir mains des joueurs)
+// =====================================================================
+socket.on('show_all_hands', ({ card_id, hands }) => {
+  let html = '';
+  for (const [name, cards] of Object.entries(hands)) {
+    html += `<p style="margin:.5rem 0 .3rem;color:#e94560;font-weight:700">${name}</p>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem">
+        ${cards.map(c => cardHtml(c)).join('')}
+      </div>`;
+  }
+  document.getElementById('overlay-generic-title').textContent = '📰 Journaliste — Mains des joueurs';
+  document.getElementById('overlay-generic-content').innerHTML = html;
+  const closeBtn = document.getElementById('overlay-generic-close-btn');
+  closeBtn.onclick = () => {
+    socket.emit('confirm_journalist', { room_id: ROOM_ID, card_id });
+    closeOverlay('overlay-generic');
+  };
+  document.getElementById('overlay-generic').classList.add('active');
+});
+
+// =====================================================================
+// Overlay — Chance (choisir une carte parmi 3)
+// =====================================================================
+socket.on('select_chance_card', ({ card_id, cards }) => {
+  pendingPickCardId = card_id;
+  document.getElementById('overlay-pick-title').textContent = '🍀 Chance — Choisir une carte';
+  const list = document.getElementById('overlay-pick-list');
+  list.innerHTML = '';
+  cards.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'game-card playable';
+    el.innerHTML = cardInnerHtml(c);
+    el.addEventListener('click', () => {
+      socket.emit('confirm_chance_card', { room_id: ROOM_ID, card_id, selected_card_id: c.id });
+      closeOverlay('overlay-pick-card');
+    });
+    list.appendChild(el);
+  });
+  document.getElementById('overlay-pick-card').classList.add('active');
+});
+
+function cancelPickCard() {
+  if (pendingPickCardId) {
+    socket.emit('discard_chance_card', { room_id: ROOM_ID, card_id: pendingPickCardId });
+  }
+  closeOverlay('overlay-pick-card');
+  pendingPickCardId = null;
+}
+
+// =====================================================================
+// Overlay — Étoile Filante (choisir dans la défausse)
+// =====================================================================
+socket.on('select_star_card', ({ card_id, discard_cards }) => {
+  pendingPickCardId = card_id;
+  document.getElementById('overlay-pick-title').textContent = '🌠 Étoile Filante — Choisir dans la défausse';
+  const list = document.getElementById('overlay-pick-list');
+  list.innerHTML = '';
+  discard_cards.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'game-card playable';
+    el.innerHTML = cardInnerHtml(c);
+    el.addEventListener('click', () => {
+      socket.emit('confirm_star_card', { room_id: ROOM_ID, card_id, selected_card_id: c.id });
+      closeOverlay('overlay-pick-card');
+    });
+    list.appendChild(el);
+  });
+  document.getElementById('overlay-pick-card').classList.add('active');
+});
+
+// =====================================================================
+// Overlay — Brûler une carte (Daenerys / Dragon)
+// =====================================================================
+socket.on('select_burn_card', ({ card_id, player_name, available_targets }) => {
+  pendingBurnCardId = card_id;
+  document.getElementById('overlay-burn-title').textContent =
+    `🔥 Brûler une carte de ${player_name}`;
+  const list = document.getElementById('overlay-burn-list');
+  list.innerHTML = '';
+  available_targets.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'game-card playable';
+    el.innerHTML = cardInnerHtml(c);
+    el.addEventListener('click', () => {
+      socket.emit('confirm_burn_card', { room_id: ROOM_ID, card_id, target_card_id: c.id });
+      closeOverlay('overlay-burn');
+    });
+    list.appendChild(el);
+  });
+  document.getElementById('overlay-burn').classList.add('active');
+});
+
+function cancelBurnSelection() {
+  if (pendingBurnCardId) {
+    socket.emit('discard_burn_card', { room_id: ROOM_ID, card_id: pendingBurnCardId });
+  }
+  closeOverlay('overlay-burn');
+  pendingBurnCardId = null;
+}
+
+// =====================================================================
+// Overlay — Anniversaire
+// =====================================================================
+socket.on('select_birthday_gift', ({ card_id, birthday_player_name, available_salaries }) => {
+  pendingBirthdayCardId = card_id;
+  document.getElementById('overlay-birthday-title').textContent = '🎂 Anniversaire !';
+  document.getElementById('overlay-birthday-desc').textContent =
+    `Offrez un salaire à ${birthday_player_name}.`;
+  const list = document.getElementById('overlay-birthday-list');
+  list.innerHTML = '';
+  available_salaries.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'game-card playable';
+    el.innerHTML = cardInnerHtml(s);
+    el.addEventListener('click', () => {
+      socket.emit('give_birthday_salary', { room_id: ROOM_ID, card_id, salary_id: s.id });
+      closeOverlay('overlay-birthday');
+    });
+    list.appendChild(el);
+  });
+  document.getElementById('overlay-birthday').classList.add('active');
+});
+
+socket.on('close_birthday_waiting', () => closeOverlay('overlay-birthday'));
+
+// =====================================================================
+// Overlay — Coup de Foudre
+// =====================================================================
+socket.on('select_coup_de_foudre_target', ({ card_id, available_targets }) => {
+  const list = document.getElementById('overlay-coup-de-foudre-list');
+  list.innerHTML = '';
+  available_targets.filter(t => !t.immune).forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-secondary';
+    btn.style.cssText = 'padding:1rem 1.4rem;border-radius:8px;font-size:.9rem';
+    btn.textContent = `💘 ${t.name}`;
+    btn.addEventListener('click', () => {
+      socket.emit('confirm_coup_de_foudre', { room_id: ROOM_ID, card_id, target_player_id: t.id });
+      closeOverlay('overlay-coup-de-foudre');
+    });
+    list.appendChild(btn);
+  });
+  document.getElementById('overlay-coup-de-foudre').classList.add('active');
+});
+
+function cancelCoupDeFoudre() {
+  const card_id = pendingCard?.id;
+  socket.emit('discard_coup_de_foudre', { room_id: ROOM_ID, card_id });
+  closeOverlay('overlay-coup-de-foudre');
+}
+
+// =====================================================================
+// Sélection métier pour défausse (plusieurs métiers)
+// =====================================================================
+function openJobDiscardOverlay(jobs) {
+  document.getElementById('overlay-generic-title').textContent = '🧳 Choisir un métier à défausser';
+  const content = document.getElementById('overlay-generic-content');
+  content.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.style.display = 'flex';
+  wrap.style.gap = '.6rem';
+  wrap.style.flexWrap = 'wrap';
+  jobs.forEach(j => {
+    const el = document.createElement('div');
+    el.className = 'game-card playable';
+    el.innerHTML = cardInnerHtml(j);
+    el.addEventListener('click', () => {
+      socket.emit('discard_job', { room_id: ROOM_ID, job_id: j.id });
+      closeOverlay('overlay-generic');
+    });
+    wrap.appendChild(el);
+  });
+  content.appendChild(wrap);
+  const closeBtn = document.getElementById('overlay-generic-close-btn');
+  closeBtn.onclick = () => closeOverlay('overlay-generic');
+  document.getElementById('overlay-generic').classList.add('active');
+}
+
+// =====================================================================
+// Casino
+// =====================================================================
+socket.on('select_casino_bet', ({ card_id, available_salaries }) => {
+  document.getElementById('overlay-pick-title').textContent = '🎰 Casino — Misez un salaire';
+  const list = document.getElementById('overlay-pick-list');
+  list.innerHTML = '';
+  available_salaries.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'game-card playable';
+    el.innerHTML = cardInnerHtml(s);
+    el.addEventListener('click', () => {
+      socket.emit('confirm_casino_bet', { room_id: ROOM_ID, card_id, bet_card_id: s.id });
+      closeOverlay('overlay-pick-card');
+    });
+    list.appendChild(el);
+  });
+  document.getElementById('overlay-pick-card').classList.add('active');
+});
+
+// =====================================================================
+// Utilitaires
+// =====================================================================
+function closeOverlay(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+function cardInnerHtml(card) {
+  const name   = card.subtype || card.type || '?';
+  const smiles = card.smiles || 0;
+  const imgSrc = card.image || '';
+  let extra = '';
+  if (card.type === 'job') {
+    extra = `<div class="card-type">Sal.${card.salary || '?'} | Et.${card.studies || 0}</div>`;
+  } else if (card.type === 'salary') {
+    extra = `<div class="card-type">💰 ${card.subtype}</div>`;
+  }
+  if (imgSrc) {
+    return `
+      <div class="card-type">${card.type || ''}</div>
+      <img src="/${imgSrc}" alt="${name}"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+           style="display:block" />
+      <div style="display:none;font-size:.7rem;color:#e94560;padding:.2rem">[img manquante]</div>
+      <div class="card-name">${name}</div>
+      ${extra}
+      <div class="card-smiles">😊${smiles}</div>`;
+  }
+  return `
+    <div class="card-type">${card.type || ''}</div>
+    <div class="card-name" style="font-size:.75rem;margin-top:.5rem">${name}</div>
+    ${extra}
+    <div class="card-smiles">😊${smiles}</div>`;
+}
+
+function cardHtml(card, playable = false) {
+  const el = document.createElement('div');
+  el.className = `game-card${playable ? ' playable' : ''}`;
+  el.innerHTML = cardInnerHtml(card);
+  return el.outerHTML;
+}
+
+function calcSmiles(player) {
+  let total = 0;
+  Object.values(player.played || {}).forEach(cards => {
+    cards.forEach(c => { total += (c.smiles || 0); });
+  });
+  return total;
+}
+</script>
+{% endblock %}

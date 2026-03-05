@@ -1,0 +1,24 @@
+{
+  "id": "standard",
+  "label": "⭐ Standard",
+  "description": "Base + Extension Pro",
+  "deck": {
+    "flirt": 24, "flirt_with_child": 4, "marriage": 5, "adultery": 3,
+    "angela": 1, "beatrix": 1, "diana": 1, "harry": 1, "hermione": 1,
+    "lara": 1, "leia": 1, "louise": 1, "luigi": 1, "luke": 1,
+    "mario": 1, "olympe": 1, "rocky": 1, "simone": 1, "zelda": 1,
+    "study": 16, "salary": 31,
+    "pizzaiolo": 1, "serveur": 1, "stripteaser": 1, "coiffeur": 1,
+    "jardinier": 1, "garagiste": 1, "plombier": 1, "deejay": 1,
+    "youtubeur": 1, "designer": 1, "bandit": 1,
+    "travel": 5, "concert": 5, "house": 7,
+    "licorne": 1, "dragon": 1, "animal": 6,
+    "accident": 4, "maladie": 4, "tax": 4, "burnout": 3,
+    "divorce": 3, "licenciement": 3, "redoublement": 3, "prison": 2,
+    "legion": 2, "prix": 3, "heritage": 2,
+    "infirmier": 1, "ecrivain": 1, "pharmacien": 1, "architecte": 1,
+    "militaire": 1, "medium": 1, "journaliste": 1, "chef_achats": 1,
+    "medecin": 1, "chirurgien": 1, "pilote": 1, "astronaute": 1,
+    "sabre": 2, "nounou": 2, "piston": 2, "coup_de_foudre": 2, "plafond_verre": 2
+  }
+}
