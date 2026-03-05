@@ -44,8 +44,10 @@ def load_cards(deck_config: Dict[str, int] | None = None) -> List:
     cards = []
 
     for card_id, entries in variants.items():
-        cls = CARD_REGISTRY.get(card_id)
+        print(f"######## TESTING######### : ", card_id.split("__")[0])
+        cls = _resolve_class(CARD_REGISTRY, card_id.split("__")[0])
         if cls is None:
+            print(f"[loader] ⚠️  card_id sans correspondance dans le registre : '{card_id}' — ignoré")
             continue
 
         # Déterminer le count total à utiliser
@@ -74,32 +76,55 @@ def load_cards(deck_config: Dict[str, int] | None = None) -> List:
 
             try:
                 cards.append(cls(**kwargs))
-            except TypeError:
-                # Ignorer les paramètres inconnus
-                import inspect
+            except TypeError as e:
+                # Filtrer les paramètres non reconnus par le constructeur
                 sig = inspect.signature(cls.__init__)
                 valid = set(sig.parameters.keys()) - {"self"}
                 filtered = {k: v for k, v in kwargs.items() if k in valid}
-                cards.append(cls(**filtered))
+                try:
+                    cards.append(cls(**filtered))
+                except TypeError as e2:
+                    print(f"[loader] ❌ Impossible d'instancier '{card_id}' ({cls.__name__}) : {e2}")
 
     return cards
 
 
-def _instantiate(cls: type, entry: dict) -> Card:
-    """
-    Instancie une carte en passant les paramètres du JSON au constructeur.
-    - "image" est automatiquement renommé en "image_path"
-    - Les clés non reconnues dans le constructeur sont ignorées silencieusement.
-    """
-    normalized = dict(entry)
+# Note : la fonction _instantiate ci-dessous est conservée uniquement comme référence.
+# Le chargement réel utilise la logique inline dans load_cards().
 
-    # Renommage image → image_path (convention des constructeurs)
-    if "image" in normalized and "image_path" not in normalized:
-        normalized["image_path"] = normalized.pop("image")
 
-    sig = inspect.signature(cls.__init__)
-    params = {
-        k: v for k, v in normalized.items()
-        if k in sig.parameters and k != "self"
-    }
-    return cls(**params)
+def _resolve_class(registry: dict, card_id: str):
+    """
+    Résout la classe correspondant à un card_id en essayant plusieurs formes :
+
+    1. Correspondance exacte           : "flirt_bar"    → registry["flirt_bar"]
+    2. Sans chiffres finaux            : "study1"       → registry["study"]
+    3. Préfixe avant le premier "_"    : "flirt_bar"    → registry["flirt"]
+    4. Préfixe avant le deuxième "_"   : "flirt_with_child_hotel" → registry["flirt_with"]
+       (pour les cas comme flirt_with_child_*)
+
+    Retourne None si aucune forme ne correspond.
+    """
+    # 1. Exact
+    if card_id in registry:
+        return registry[card_id]
+
+    # 2. Strip trailing digits  (study1 → study, salary4 → salary, house2 → house)
+    base_no_digits = re.sub(r"\d+$", "", card_id)
+    if base_no_digits and base_no_digits != card_id and base_no_digits in registry:
+        return registry[base_no_digits]
+
+    # 3. Préfixe avant le 1er underscore  (flirt_bar → flirt, travel_rio → travel)
+    if "_" in card_id:
+        prefix1 = card_id.split("_")[0]
+        if prefix1 in registry:
+            return registry[prefix1]
+
+    # 4. Préfixe avant le 2ème underscore  (flirt_with_child_hotel → flirt_with)
+    parts = card_id.split("_")
+    if len(parts) >= 3:
+        prefix2 = "_".join(parts[:2])
+        if prefix2 in registry:
+            return registry[prefix2]
+
+    return None

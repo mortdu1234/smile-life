@@ -20,11 +20,16 @@ from app.cards.concrete.professional.job import (
     DesignerJob, GaragisteJob, JardinierJob, MedecinJob, MilitaireJob,
     PharmacienJob, PiloteDeLigneJob, PizzaioloJob, PlombierJob,
     ServeurJob, StripTeaserJob, EcrivainJob, YoutuberJob, CoiffeurJob, DeejayJob,
+    AvocatJob, BarmanJob, ChefDesVentesJob, ChercheurJob, GourouJob, GrandProfJob,
+    PolicierJob, ProfJob
 )
 from app.cards.concrete.acquisitions.cards import (
     AquisitionCard, HouseCard, TravelCard, ConcertTicket, SabreCard, NounouCard,
 )
-from app.cards.concrete.animals.cards import AnimalCard, LicorneAnimal, DragonAnimal
+from app.cards.concrete.animals.cards import (
+    LicorneAnimal, DragonAnimal, Chien, Chat, Lapin, Crapaud, Poussin
+                                              
+)
 from app.cards.concrete.hardship.cards import (
     AccidentCard, MaladieCard, TaxCard, BurnOutCard, DivorceCard,
     LicenciementCard, RedoublementCard, PrisonCard, AttentatCard,
@@ -36,7 +41,7 @@ from app.cards.concrete.special.cards import (
     GirlPowerCard, RedistributionDesTachesCard, SoireeEntreFilleCard,
     CoupDeFoudreCard, ErreurDetiquetageCard, TsunamiCard, HeritageCard,
     PistonCard, VengeanceCard, ChanceCard, EtoileFilanteCard,
-    CasinoCard, AnniversaireCard, ArcEnCielCard, MuguetCard,
+    CasinoCard, AnniversaireCard, ArcEnCielCard, MuguetCard, Troc
 )
 from app.cards.concrete.other.cards import OtherCard, LegionCard, PriceCard
 
@@ -77,7 +82,7 @@ CARD_REGISTRY: dict[str, type] = {
     "bandit":               BanditJob,
     "medium":               MediumJob,
     "journaliste":          JournalisteJob,
-    "chef_achats":          ChefDesAchatsJob,
+    "chef_des_achats":      ChefDesAchatsJob,
     "architecte":           ArchitecteJob,
     "infirmier":            InfirmierJob,
     "chirurgien":           ChirurgienJob,
@@ -96,6 +101,14 @@ CARD_REGISTRY: dict[str, type] = {
     "youtubeur":            YoutuberJob,
     "coiffeur":             CoiffeurJob,
     "deejay":               DeejayJob,
+    "avocat":               AvocatJob,
+    "policier":             PolicierJob,
+    "chef_des_ventes":      ChefDesVentesJob,
+    "chercheur":            ChercheurJob,
+    "gourou":               GourouJob,
+    "prof":                 ProfJob,
+    "grand_prof":           GrandProfJob,
+    "barman":               BarmanJob,
 
     # Acquisitions
     "acquisition":          AquisitionCard,
@@ -106,7 +119,11 @@ CARD_REGISTRY: dict[str, type] = {
     "nounou":               NounouCard,
 
     # Animaux
-    "animal":               AnimalCard,
+    "chien":                Chien,
+    "chat":                 Chat,
+    "lapin":                Lapin,
+    "poussin":              Poussin,
+    "crapaud":              Crapaud,
     "licorne":              LicorneAnimal,
     "dragon":               DragonAnimal,
 
@@ -146,6 +163,7 @@ CARD_REGISTRY: dict[str, type] = {
     "anniversaire":             AnniversaireCard,
     "arc_en_ciel":              ArcEnCielCard,
     "muguet":                   MuguetCard,
+    "troc":                     Troc,
 
     # Autres
     "legion":               LegionCard,

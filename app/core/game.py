@@ -203,12 +203,13 @@ class Game:
 
         self.discard.pop()
         player.add_card_to_hand(card)
+        was_arc_mode = self.arcEnCielMode
         card.play_card(self, player)
 
-        if self.arcEnCielMode and self.arcEnCielCard:
+        if was_arc_mode and self.arcEnCielMode and self.arcEnCielCard:
             self.arcEnCielCard.add_card_played(self, player)
 
-        if self.pending_interaction is None:
+        if self.pending_interaction is None and not self.arcEnCielMode:
             self.next_player()
 
         self.broadcast_update(f"{player.name} pioche depuis la défausse.")
@@ -217,11 +218,14 @@ class Game:
     def discard_card_from_hand(self, player_id: int, card_id: str) -> tuple[bool, str]:
         """
         Phase play : défausse une carte de sa main pour terminer son tour.
+        Interdit pendant l'arc-en-ciel (utiliser stop_arc_en_ciel à la place).
         """
         if self.current_player != player_id:
             return False, "Ce n'est pas votre tour"
         if self.phase != "play":
             return False, "Vous devez d'abord piocher"
+        if self.arcEnCielMode:
+            return False, "Arc-en-ciel actif — utilisez 'Arrêter mon tour' pour terminer"
 
         player = self.players[player_id]
         card = next((c for c in player.hand if c.id == card_id), None)
@@ -298,6 +302,22 @@ class Game:
         self.next_player()
         return True, ""
 
+    def stop_arc_en_ciel(self, player_id: int) -> tuple[bool, str]:
+        """
+        Le joueur arrête volontairement son tour Arc-en-Ciel.
+        Repioche autant de cartes qu'il en a posées (nb_cards_played).
+        """
+        if self.current_player != player_id:
+            return False, "Ce n'est pas votre tour"
+        if not self.arcEnCielMode or not self.arcEnCielCard:
+            return False, "L'arc-en-ciel n'est pas actif"
+
+        player = self.players[player_id]
+        self.arcEnCielCard.end_arc_en_ciel(self, player)
+        self.next_player()
+        self.broadcast_update(f"{player.name} termine son arc-en-ciel !")
+        return True, ""
+
     # ------------------------------------------------------------------ #
     #  Logique de jeu                                                      #
     # ------------------------------------------------------------------ #
@@ -318,15 +338,17 @@ class Game:
         if not can_play:
             return False, reason
 
+        # Mémoriser si l'arc-en-ciel était déjà actif AVANT ce coup
+        was_arc_mode = self.arcEnCielMode
+
         card.play_card(self, player)
 
-        # Gestion Arc-en-Ciel
-        if self.arcEnCielMode and self.arcEnCielCard:
+        # Compter uniquement les cartes SUPPLÉMENTAIRES (pas l'arc-en-ciel elle-même)
+        if was_arc_mode and self.arcEnCielMode and self.arcEnCielCard:
             self.arcEnCielCard.add_card_played(self, player)
 
-        # Si la carte a mis une interaction en attente,
-        # on ne passe PAS le tour — events.py s'en charge après résolution
-        if self.pending_interaction is None:
+        # Ne passer le tour que si : pas d'interaction en attente ET arc-en-ciel terminé/inactif
+        if self.pending_interaction is None and not self.arcEnCielMode:
             self.next_player()
 
         self.broadcast_update()

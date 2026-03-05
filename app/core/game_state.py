@@ -25,6 +25,7 @@ class GameState:
     arc_en_ciel: bool
     arc_en_ciel_card: dict[str, Any]
     last_discard: Any = None
+    pending_interaction_type: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -42,4 +43,5 @@ class GameState:
             "arc_en_ciel": self.arc_en_ciel,
             "arc_en_ciel_card": self.arc_en_ciel_card,
             "last_discard": self.last_discard,
+            "pending_interaction_type": self.pending_interaction_type,
         }

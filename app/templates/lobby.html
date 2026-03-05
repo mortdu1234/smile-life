@@ -112,16 +112,6 @@
       <div class="deck-selector">
         <h3>🎴 Composition du deck</h3>
 
-        <!-- Sélecteur de présets chargés depuis /api/presets -->
-        <div class="preset-loader">
-          <div class="preset-loader-title">Présets</div>
-          <div class="preset-list" id="preset-list">
-            <span style="font-size:.75rem;color:#444;font-style:italic">Chargement…</span>
-          </div>
-          <div class="preset-description" id="preset-description"></div>
-          <div class="preset-modified-badge" id="preset-modified-badge">✏️ Préset modifié</div>
-        </div>
-
         <div id="deck-selector-lobby"></div>
       </div>
 
@@ -162,102 +152,6 @@
 
 <script src="/static/js/deck_selector.js"></script>
 <script>
-  DeckSelector.init('deck-selector-lobby', { defaultPreset: null });
-
-  // ── Préset loader ─────────────────────────────────────────────────
-  const PresetLoader = (() => {
-    let _activePresetId  = null;
-    let _activePresetDeck = null;  // deck original du préset sélectionné
-
-    function _renderButtons(presets) {
-      const list = document.getElementById('preset-list');
-      if (!presets.length) {
-        list.innerHTML = '<span style="font-size:.75rem;color:#555;font-style:italic">Aucun préset disponible</span>';
-        return;
-      }
-      list.innerHTML = '';
-      presets.forEach(p => {
-        const btn = document.createElement('button');
-        btn.type        = 'button';
-        btn.className   = 'preset-pill';
-        btn.dataset.id  = p.id;
-        btn.dataset.desc = p.description || '';
-        btn.textContent = p.label;
-        btn.addEventListener('click', () => _selectPreset(p.id, p.description));
-        list.appendChild(btn);
-      });
-    }
-
-    async function _selectPreset(id, description) {
-      // Marquer actif visuellement
-      document.querySelectorAll('.preset-pill').forEach(b => b.classList.remove('active'));
-      const activeBtn = document.querySelector(`.preset-pill[data-id="${id}"]`);
-      if (activeBtn) {
-        activeBtn.classList.add('active', 'loading');
-      }
-      document.getElementById('preset-description').textContent = description || '';
-      document.getElementById('preset-modified-badge').classList.remove('visible');
-
-      try {
-        const res = await fetch(`/api/presets/${encodeURIComponent(id)}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-
-        _activePresetId   = id;
-        _activePresetDeck = { ...data.deck };
-
-        // Charger dans DeckSelector s'il expose loadPreset()
-        if (typeof DeckSelector.loadPreset === 'function') {
-          DeckSelector.loadPreset(data.deck);
-        }
-      } catch (err) {
-        console.error('Erreur chargement préset:', err);
-        document.getElementById('preset-description').textContent = '⚠️ Impossible de charger ce préset.';
-      } finally {
-        if (activeBtn) activeBtn.classList.remove('loading');
-      }
-    }
-
-    async function init() {
-      try {
-        const res = await fetch('/api/presets');
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const presets = await res.json();
-        _renderButtons(presets);
-
-        // Sélectionner automatiquement le premier préset
-        if (presets.length) {
-          await _selectPreset(presets[0].id, presets[0].description);
-        }
-      } catch (err) {
-        console.error('Erreur chargement liste présets:', err);
-        document.getElementById('preset-list').innerHTML =
-          '<span style="font-size:.75rem;color:#e94560">Erreur de chargement</span>';
-      }
-    }
-
-    // Détecte si le DeckSelector a été modifié par rapport au préset d'origine
-    function _checkModified() {
-      if (!_activePresetDeck) return;
-      const current = DeckSelector.getState();
-      const isModified = Object.keys({ ..._activePresetDeck, ...current }).some(k =>
-        (current[k] || 0) !== (_activePresetDeck[k] || 0)
-      );
-      document.getElementById('preset-modified-badge').classList.toggle('visible', isModified);
-    }
-
-    // Observe les changements dans le DeckSelector (délégation sur le conteneur)
-    document.addEventListener('DOMContentLoaded', () => {
-      const container = document.getElementById('deck-selector-lobby');
-      if (container) {
-        container.addEventListener('change', _checkModified);
-        container.addEventListener('click',  _checkModified);
-      }
-    });
-
-    return { init };
-  })();
-
-  document.addEventListener('DOMContentLoaded', () => PresetLoader.init());
+  DeckSelector.init('deck-selector-lobby', {});
 </script>
 {% endblock %}

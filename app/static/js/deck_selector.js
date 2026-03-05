@@ -11,115 +11,198 @@
 const DeckSelector = (() => {
 
   const EXTENSIONS = [
-    {
-      id: 'base', label: '🎴 Base',
-      cards: [
-        { id:'flirt',            label:'Flirt',                default:24 },
-        { id:'flirt_with_child', label:'Flirt (avec enfant)',  default:4  },
-        { id:'marriage',         label:'Mariage',              default:5  },
-        { id:'adultery',         label:'Adultère',             default:3  },
-        { id:'angela',           label:'Angela',               default:1  },
-        { id:'beatrix',          label:'Beatrix',              default:1  },
-        { id:'diana',            label:'Diana',                default:1  },
-        { id:'harry',            label:'Harry',                default:1  },
-        { id:'hermione',         label:'Hermione',             default:1  },
-        { id:'lara',             label:'Lara',                 default:1  },
-        { id:'leia',             label:'Leia',                 default:1  },
-        { id:'louise',           label:'Louise',               default:1  },
-        { id:'luigi',            label:'Luigi',                default:1  },
-        { id:'luke',             label:'Luke',                 default:1  },
-        { id:'mario',            label:'Mario',                default:1  },
-        { id:'olympe',           label:'Olympe',               default:1  },
-        { id:'rocky',            label:'Rocky',                default:1  },
-        { id:'simone',           label:'Simone',               default:1  },
-        { id:'zelda',            label:'Zelda',                default:1  },
-        { id:'study',            label:'Études',               default:16 },
-        { id:'salary',           label:'Salaire',              default:31 },
-        { id:'pizzaiolo',        label:'Pizzaiolo',            default:1  },
-        { id:'serveur',          label:'Serveur',              default:1  },
-        { id:'stripteaser',      label:'Stripteaser',          default:1  },
-        { id:'coiffeur',         label:'Coiffeur',             default:1  },
-        { id:'jardinier',        label:'Jardinier',            default:1  },
-        { id:'garagiste',        label:'Garagiste',            default:1  },
-        { id:'plombier',         label:'Plombier',             default:1  },
-        { id:'deejay',           label:'Deejay',               default:1  },
-        { id:'youtubeur',        label:'Youtubeur',            default:1  },
-        { id:'designer',         label:'Designer',             default:1  },
-        { id:'bandit',           label:'Bandit',               default:1  },
-        { id:'travel',           label:'Voyage',               default:5  },
-        { id:'concert',          label:'Concert',              default:5  },
-        { id:'house',            label:'Maison',               default:7  },
-        { id:'licorne',          label:'Licorne',              default:1  },
-        { id:'dragon',           label:'Dragon',               default:1  },
-        { id:'animal',           label:'Animal',               default:6  },
-        { id:'accident',         label:'Accident',             default:4  },
-        { id:'maladie',          label:'Maladie',              default:4  },
-        { id:'tax',              label:'Impôts',               default:4  },
-        { id:'burnout',          label:'Burn-Out',             default:3  },
-        { id:'divorce',          label:'Divorce',              default:3  },
-        { id:'licenciement',     label:'Licenciement',         default:3  },
-        { id:'redoublement',     label:'Redoublement',         default:3  },
-        { id:'prison',           label:'Prison',               default:2  },
-        { id:'legion',           label:"Légion d'honneur",     default:2  },
-        { id:'prix',             label:'Grand Prix',           default:3  },
-        { id:'heritage',         label:'Héritage',             default:2  },
-      ]
-    },
-    {
-      id: 'pro', label: '💼 Extension Pro',
-      cards: [
-        { id:'infirmier',      label:'Infirmier',        default:1 },
-        { id:'ecrivain',       label:'Écrivain',         default:1 },
-        { id:'pharmacien',     label:'Pharmacien',       default:1 },
-        { id:'architecte',     label:'Architecte',       default:1 },
-        { id:'militaire',      label:'Militaire',        default:1 },
-        { id:'medium',         label:'Médium',           default:1 },
-        { id:'journaliste',    label:'Journaliste',      default:1 },
-        { id:'chef_achats',    label:'Chef des Achats',  default:1 },
-        { id:'medecin',        label:'Médecin',          default:1 },
-        { id:'chirurgien',     label:'Chirurgien',       default:1 },
-        { id:'pilote',         label:'Pilote',           default:1 },
-        { id:'astronaute',     label:'Astronaute',       default:1 },
-        { id:'sabre',          label:'Sabre',            default:2 },
-        { id:'nounou',         label:'Nounou',           default:2 },
-        { id:'piston',         label:'Piston',           default:2 },
-        { id:'coup_de_foudre', label:'Coup de Foudre',   default:2 },
-        { id:'plafond_verre',  label:'Plafond de Verre', default:2 },
-      ]
-    },
-    {
-      id: 'special', label: '⚡ Extension Spéciale',
-      cards: [
-        { id:'casino',                label:'Casino',              default:1 },
-        { id:'arc_en_ciel',           label:'Arc-en-Ciel',         default:2 },
-        { id:'chance',                label:'Chance',              default:3 },
-        { id:'etoile_filante',        label:'Étoile Filante',      default:2 },
-        { id:'anniversaire',          label:'Anniversaire',        default:2 },
-        { id:'tsunami',               label:'Tsunami',             default:2 },
-        { id:'vengeance',             label:'Vengeance',           default:2 },
-        { id:'muguet',                label:'Muguet',              default:3 },
-        { id:'girl_power',            label:'Girl Power',          default:2 },
-        { id:'egalite_salaire',       label:'Égalité Salariale',   default:2 },
-        { id:'redistribution_taches', label:'Redistribution',      default:1 },
-        { id:'soiree_entre_fille',    label:'Soirée entre filles', default:2 },
-        { id:'erreur_etiquetage',     label:'Erreur Étiquetage',   default:2 },
-        { id:'cliche_accident',       label:'Cliché Accident',     default:2 },
-        { id:'cliche_flirt',          label:'Cliché Flirt',        default:2 },
-        { id:'cliche_metier',         label:'Cliché Métier',       default:2 },
-      ]
-    },
-    {
-      id: 'hardship_plus', label: '💥 Coups Durs+',
-      cards: [
-        { id:'attentat',      label:'Attentat',         default:2 },
-        { id:'charge_mental', label:'Charge Mentale',   default:3 },
-        { id:'gynocratie',    label:'Gynocratie',       default:2 },
-        { id:'phalocratie',   label:'Phalocratie',      default:2 },
-        { id:'porc',          label:'Balance Ton Porc', default:2 },
-        { id:'daenerys',      label:'Daenerys',         default:1 },
-      ]
-    },
-  ];
+  {
+    id: 'base', label: '🎴 Jeu de Base',
+    cards: [
+      // Métiers
+      { id:'architecte',       label:'Architecte',           default:1  },
+      { id:'astronaute',       label:'Astronaute',           default:1  },
+      { id:'avocat',           label:'Avocat',               default:1  },
+      { id:'bandit',           label:'Bandit',               default:1  },
+      { id:'barman',           label:'Barman',               default:1  },
+      { id:'chef_des_ventes',  label:'Chef des ventes',      default:1  },
+      { id:'chef_achats',      label:'Chef des achats',      default:1  },
+      { id:'chercheur',        label:'Chercheur',            default:1  },
+      { id:'chirurgien',       label:'Chirurgien',           default:1  },
+      { id:'designer',         label:'Designer',             default:1  },
+      { id:'ecrivain',         label:'Écrivain',             default:1  },
+      { id:'garagiste',        label:'Garagiste',            default:1  },
+      { id:'gourou',           label:'Gourou',               default:1  },
+      { id:'grand_prof',       label:'Grand Prof',           default:1  },
+      { id:'jardinier',        label:'Jardinier',            default:1  },
+      { id:'journaliste',      label:'Journaliste',          default:1  },
+      { id:'medecin',          label:'Médecin',              default:1  },
+      { id:'medium',           label:'Médium',               default:1  },
+      { id:'militaire',        label:'Militaire',            default:1  },
+      { id:'pharmacien',       label:'Pharmacien',           default:1  },
+      { id:'pilote',           label:'Pilote de ligne',      default:1  },
+      { id:'pizzaiolo',        label:'Pizzaiolo',            default:1  },
+      { id:'plombier',         label:'Plombier',             default:1  },
+      { id:'policier',         label:'Policier',             default:1  },
+      { id:'prof_anglais',     label:"Prof d'anglais",       default:1  },
+      { id:'prof_francais',    label:'Prof de français',     default:1  },
+      { id:'prof_geo',         label:"Prof d'histoire-géo",  default:1  },
+      { id:'prof_maths',       label:'Prof de maths',        default:1  },
+      { id:'serveur',          label:'Serveur',              default:1  },
+      { id:'stripteaser',      label:'Strip-teaseur',        default:1  },
+      // Études
+      { id:'study1',           label:'Études simples',       default:22 },
+      { id:'study2',           label:'Études doubles',       default:3  },
+      // Salaires
+      { id:'salary1',          label:'Salaire 1',            default:10 },
+      { id:'salary2',          label:'Salaire 2',            default:10 },
+      { id:'salary3',          label:'Salaire 3',            default:10 },
+      { id:'salary4',          label:'Salaire 4',            default:10 },
+      // Flirts
+      { id:'flirt_bar',              label:'Flirt au bar',             default:2 },
+      { id:'flirt_bibliotheque',     label:'Flirt à la bibliothèque',  default:2 },
+      { id:'flirt_boite_de_nuit',    label:'Flirt en boîte de nuit',   default:2 },
+      { id:'flirt_cinema',           label:'Flirt au cinéma',          default:2 },
+      { id:'flirt_internet',         label:'Flirt sur internet',       default:2 },
+      { id:'flirt_manif',            label:'Flirt à la manif',         default:2 },
+      { id:'flirt_parc',             label:'Flirt au parc',            default:2 },
+      { id:'flirt_restaurant',       label:'Flirt au restaurant',      default:2 },
+      { id:'flirt_theatre',          label:'Flirt au théâtre',         default:2 },
+      { id:'flirt_zoo',              label:'Flirt au zoo',             default:2 },
+      { id:'flirt_with_child_camping', label:'Flirt camping (enfant)', default:2 },
+      { id:'flirt_with_child_hotel',   label:"Flirt hôtel (enfant)",   default:2 },
+      // Mariages & adultère
+      { id:'marriage_corps_nuds',    label:'Mariage Corps-Nuds',       default:1 },
+      { id:'marriage_fourqueux',     label:'Mariage Fourqueux',        default:1 },
+      { id:'marriage_montcuq',       label:'Mariage Montcuq',          default:1 },
+      { id:'marriage_monteton',      label:'Mariage Monteton',         default:1 },
+      { id:'marriage_sainte_vierge', label:'Mariage Sainte-Vierge',    default:1 },
+      { id:'adultery',               label:'Adultère',                 default:3 },
+      // Enfants
+      { id:'diana',    label:'Diana',    default:1 },
+      { id:'harry',    label:'Harry',    default:1 },
+      { id:'hermione', label:'Hermione', default:1 },
+      { id:'lara',     label:'Lara',     default:1 },
+      { id:'leia',     label:'Leia',     default:1 },
+      { id:'luigi',    label:'Luigi',    default:1 },
+      { id:'luke',     label:'Luke',     default:1 },
+      { id:'mario',    label:'Mario',    default:1 },
+      { id:'rocky',    label:'Rocky',    default:1 },
+      { id:'zelda',    label:'Zelda',    default:1 },
+      // Animaux
+      { id:'chat',    label:'Chat',    default:1 },
+      { id:'chien',   label:'Chien',   default:1 },
+      { id:'lapin',   label:'Lapin',   default:1 },
+      { id:'poussin', label:'Poussin', default:1 },
+      { id:'licorne', label:'Licorne', default:1 },
+      // Maisons
+      { id:'house1',  label:'Studio',      default:2 },
+      { id:'house2',  label:'Appartement', default:2 },
+      { id:'house3',  label:'Villa',       default:1 },
+      // Voyages
+      { id:'travel_le_caire',  label:'Voyage au Caire',   default:1 },
+      { id:'travel_londre',    label:'Voyage à Londres',  default:1 },
+      { id:'travel_new_york',  label:'Voyage à New York', default:1 },
+      { id:'travel_rio',       label:'Voyage à Rio',      default:1 },
+      { id:'travel_sydney',    label:'Voyage à Sydney',   default:1 },
+      // Cartes spéciales
+      { id:'anniversaire',   label:'Anniversaire',   default:1 },
+      { id:'arc_en_ciel',    label:'Arc-en-ciel',    default:1 },
+      { id:'casino',         label:'Casino',         default:1 },
+      { id:'chance',         label:'Chance',         default:1 },
+      { id:'etoile_filante', label:'Étoile filante', default:1 },
+      { id:'heritage',       label:'Héritage',       default:1 },
+      { id:'piston',         label:'Piston',         default:1 },
+      { id:'troc',           label:'Troc',           default:1 },
+      { id:'tsunami',        label:'Tsunami',        default:1 },
+      { id:'vengeance',      label:'Vengeance',      default:1 },
+      // Coups durs
+      { id:'accident',       label:'Accident',      default:5 },
+      { id:'burnout',        label:'Burn-out',       default:5 },
+      { id:'divorce',        label:'Divorce',        default:5 },
+      { id:'tax',            label:'Impôts',         default:5 },
+      { id:'licenciement',   label:'Licenciement',   default:5 },
+      { id:'maladie',        label:'Maladie',        default:5 },
+      { id:'redoublement',   label:'Redoublement',   default:5 },
+      { id:'prison',         label:'Prison',         default:1 },
+      { id:'attentat',       label:'Attentat',       default:1 },
+      // Autres
+      { id:'legion', label:"Légion d'honneur",         default:1 },
+      { id:'prix',   label:"Grand Prix d'Excellence",  default:2 },
+    ]
+  },
+  {
+    id: 'extensions', label: '📦 Extensions Standards',
+    cards: [
+      { id:'youtubeur',      label:'Youtubeur',      default:0 },
+      { id:'coiffeur',       label:'Coiffeur',       default:0 },
+      { id:'deejay',         label:'Deejay',         default:0 },
+      { id:'infirmier',      label:'Infirmier',      default:0 },
+      { id:'super_heritage', label:'Super héritage', default:0 },
+      { id:'muguet',         label:'Muguet',         default:0 },
+      { id:'dragon',         label:'Dragon',         default:0 },
+      { id:'crapaud',        label:'Crapaud',        default:0 },
+      { id:'concert',        label:'Concert',        default:0 },
+      { id:'sabre',          label:'Sabre',          default:0 },
+      { id:'nounou',         label:'Nounou',         default:0 },
+    ]
+  },
+  {
+    id: 'girl_power', label: '💅 Girl Power',
+    cards: [
+      // Métiers féminins (à venir)
+      { id:'architecte_f',      label:'Architecte',       default:0 },
+      { id:'astronaute_f',      label:'Astronaute',        default:0 },
+      { id:'avocate',           label:'Avocate',           default:0 },
+      { id:'bandit_f',          label:'Bandit',            default:0 },
+      { id:'barmaid',           label:'Barmaid',           default:0 },
+      { id:'cheffe_des_ventes', label:'Cheffe des ventes', default:0 },
+      { id:'cheffe_des_achats', label:'Cheffe des achats', default:0 },
+      { id:'chercheuse',        label:'Chercheuse',        default:0 },
+      { id:'chirurgienne',      label:'Chirurgienne',      default:0 },
+      { id:'designeuse',        label:'Designeuse',        default:0 },
+      { id:'ecrivaine',         label:'Écrivaine',         default:0 },
+      { id:'garagiste_f',       label:'Garagiste',         default:0 },
+      { id:'gourou_f',          label:'Gourou',            default:0 },
+      { id:'jardiniere',        label:'Jardinière',        default:0 },
+      { id:'journaliste_f',     label:'Journaliste',       default:0 },
+      { id:'medecin_f',         label:'Médecin',           default:0 },
+      { id:'voyante',           label:'Voyante',           default:0 },
+      { id:'militaire_f',       label:'Militaire',         default:0 },
+      { id:'pharmacienne',      label:'Pharmacienne',      default:0 },
+      { id:'pilote_de_ligne_f', label:'Pilote de ligne',   default:0 },
+      { id:'pizzaiola',         label:'Pizzaiola',         default:0 },
+      { id:'plombiere',         label:'Plombière',         default:0 },
+      { id:'policiere',         label:'Policière',         default:0 },
+      { id:'prof_de_chimie',    label:'Prof de chimie',    default:0 },
+      { id:'prof_de_musique',   label:'Prof de musique',   default:0 },
+      { id:'prof_de_philo',     label:'Prof de philo',     default:0 },
+      { id:'serveuse',          label:'Serveuse',          default:0 },
+      { id:'stripteaseuse',     label:'Strip-teaseuse',    default:0 },
+      { id:'grand_prof_f',      label:'Grand Prof',        default:0 },
+      // Enfants
+      { id:'angela',   label:'Angela',   default:0 },
+      { id:'beatrix',  label:'Beatrix',  default:0 },
+      { id:'daenerys', label:'Daenerys', default:0 },
+      { id:'louise',   label:'Louise',   default:0 },
+      { id:'olympe',   label:'Olympe',   default:0 },
+      { id:'simone',   label:'Simone',   default:0 },
+      // Cartes spéciales
+      { id:'girl_power',            label:'Girl Power',                default:0 },
+      { id:'soiree_entre_fille',    label:'Soirée entre filles',       default:0 },
+      { id:'coup_de_foudre',        label:'Coup de foudre',            default:0 },
+      { id:'erreur_etiquetage',     label:"Erreur d'étiquetage",       default:0 },
+      { id:'cliche_metier',         label:'Cliché métier',             default:0 },
+      { id:'cliche_flirt',          label:'Cliché flirt',              default:0 },
+      { id:'cliche_accident',       label:'Cliché accident',           default:0 },
+      { id:'egalite_salaire',       label:'Égalité de salaire',        default:0 },
+      { id:'redistribution_taches', label:'Redistribution des tâches', default:0 },
+      // Coups durs
+      { id:'charge_mental',  label:'Charge mentale',   default:0 },
+      { id:'gynocratie',     label:'Gynocratie',       default:0 },
+      { id:'phalocratie',    label:'Phallocratie',     default:0 },
+      { id:'plafond_verre',  label:'Plafond de verre', default:0 },
+      { id:'porc',           label:'Balance ton porc', default:0 },
+    ]
+  },
+];
+
+
 
   // Chargé depuis /api/presets
   let PRESETS = [];
@@ -193,20 +276,28 @@ const DeckSelector = (() => {
   //  Presets                                                             //
   // ------------------------------------------------------------------ //
 
-  function applyPreset(presetId) {
-    const preset = PRESETS.find(p => p.id === presetId);
-    if (!preset) return;
-
-    EXTENSIONS.forEach(ext => ext.cards.forEach(c => { deckState[c.id] = 0; }));
-    Object.entries(preset.deck).forEach(([id, count]) => { deckState[id] = count; });
-    EXTENSIONS.forEach(ext => ext.cards.forEach(c => _refreshRow(c.id)));
-    _updateTotal();
-
+  async function applyPreset(presetId) {
     document.querySelectorAll(`#${_containerId} .preset-btn`).forEach(b => b.classList.remove('active'));
     const btn = document.getElementById(`${_containerId}-preset-${presetId}`);
-    if (btn) btn.classList.add('active');
+    if (btn) { btn.classList.add('active'); btn.disabled = true; }
 
-    _notify();
+    try {
+      const res = await fetch(`/api/presets/${encodeURIComponent(presetId)}`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const preset = await res.json();
+      if (!preset.deck) throw new Error('deck manquant dans la réponse');
+
+      EXTENSIONS.forEach(ext => ext.cards.forEach(c => { deckState[c.id] = 0; }));
+      Object.entries(preset.deck).forEach(([id, count]) => { deckState[id] = count; });
+      EXTENSIONS.forEach(ext => ext.cards.forEach(c => _refreshRow(c.id)));
+      _updateTotal();
+      _notify();
+    } catch (e) {
+      console.error('DeckSelector: échec chargement préset', presetId, '—', e.message);
+      if (btn) btn.classList.remove('active');
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   }
 
   function _clearActivePreset() {

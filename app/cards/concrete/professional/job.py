@@ -377,3 +377,38 @@ class DeejayJob(JobCard):
         for player in game.players:
             nb = len(player.hand)
             player.hand = [all_cards.pop() for _ in range(nb)]
+
+class AvocatJob(JobCard):
+    def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
+        super().__init__(job_name, salary, studies, image_path)
+        self.power = ["no_divorce"]
+        
+    def get_card_rule(self) -> str:
+        return super().get_card_rule() + "- Intérimaire. Mélange les mains à la pose.\n"
+
+class BarmanJob(JobCard):
+    def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
+        super().__init__(job_name, salary, studies, image_path)
+        self.status = "intérimaire"
+        self.power = ["infinite_flirt"]
+    
+class ChefDesVentesJob(JobCard):
+    pass
+
+class ChercheurJob(JobCard):
+    pass
+
+class GourouJob(JobCard):
+    pass
+
+class GrandProfJob(JobCard):
+    pass
+
+class PolicierJob(JobCard):
+    pass
+
+class ProfJob(JobCard):
+    pass
+
+
+    

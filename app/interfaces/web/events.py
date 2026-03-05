@@ -227,6 +227,19 @@ def on_skip_turn(data: dict):
         _emit_error(request.sid, reason)
 
 
+@socketio.on("stop_arc_en_ciel")
+def on_stop_arc_en_ciel(data: dict):
+    """Le joueur arrête volontairement son tour Arc-en-Ciel."""
+    from flask import request
+    game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
+    if game is None or player is None:
+        return
+
+    success, reason = game.stop_arc_en_ciel(player.id)
+    if not success:
+        _emit_error(request.sid, reason)
+
+
 @socketio.on("draw_from_discard")
 def on_draw_from_discard(data: dict):
     """Un joueur pioche la dernière carte de la défausse et la joue directement."""
@@ -254,6 +267,8 @@ def on_play_card(data: dict):
     success, reason = game.play_card(player.id, card_id)
     if not success:
         _emit_error(request.sid, reason)
+    # game.play_card() gère déjà next_player() et broadcast_update() en interne.
+    # Les handlers confirm_* gèrent les cartes interactives (pending_interaction).
 
 
 @socketio.on("discard_card")
@@ -453,6 +468,8 @@ def on_confirm_medium(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "confirm_selection"):
         card.confirm_selection(data)
+    game.next_player()
+    game.broadcast_update(f"{player.name} consulte la pioche.")
 
 
 @socketio.on("confirm_journalist")
@@ -464,6 +481,8 @@ def on_confirm_journalist(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "confirm_selection"):
         card.confirm_selection(data)
+    game.next_player()
+    game.broadcast_update(f"{player.name} observe les mains.")
 
 
 # ------------------------------------------------------------------ #
@@ -472,24 +491,54 @@ def on_confirm_journalist(data: dict):
 
 @socketio.on("confirm_chance_card")
 def on_confirm_chance(data: dict):
+    """Joueur choisit une carte parmi les 3 proposées par la Chance."""
     from flask import request
     game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
     if game is None or player is None:
         return
-    card = game.find_card_by_id(data.get("card_id", ""))
-    if card and hasattr(card, "confirm_card_selection"):
-        card.confirm_card_selection(data)
+
+    interaction = game.pending_interaction
+    if not interaction or interaction["type"] != "chance_selection":
+        return
+    if interaction["player_id"] != player.id:
+        _emit_error(request.sid, "Ce n'est pas votre interaction")
+        return
+
+    card = game.find_card_by_id(interaction["card_id"])
+    if card is None:
+        return
+
+    # Sauvegarder les cartes proposées AVANT d'effacer pending_interaction
+    data["offered_cards_objects"] = interaction.get("offered_cards", [])
+    game.pending_interaction = None
+    card.resolve(game, player, data)
+    # Le joueur continue de jouer (phase play) — on ne passe PAS le tour
+    game.phase = "play"
+    game.broadcast_update(f"{player.name} pioche une carte via la Chance !")
 
 
 @socketio.on("discard_chance_card")
 def on_discard_chance(data: dict):
+    """Le joueur annule la Chance — la carte reste en main, phase play continue."""
     from flask import request
     game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
     if game is None or player is None:
         return
-    card = game.find_card_by_id(data.get("card_id", ""))
-    if card and hasattr(card, "discard_card_selection"):
-        card.discard_card_selection(data)
+
+    interaction = game.pending_interaction
+    if not interaction or interaction["type"] != "chance_selection":
+        return
+    if interaction["player_id"] != player.id:
+        return
+
+    # Remettre les 3 cartes au sommet de la pioche
+    offered = interaction.get("offered_cards", [])
+    for c in reversed(offered):
+        game.deck.append(c)
+
+    game.pending_interaction = None
+    game.phase = "play"
+    game.broadcast_update()
 
 
 @socketio.on("confirm_star_card")
@@ -501,6 +550,8 @@ def on_confirm_star(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "confirm_card_selection"):
         card.confirm_card_selection(data)
+    game.next_player()
+    game.broadcast_update(f"{player.name} récupère une carte de la défausse.")
 
 
 @socketio.on("discard_star_card")
@@ -512,6 +563,8 @@ def on_discard_star(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "discard_card_selection"):
         card.discard_card_selection(data)
+    game.next_player()
+    game.broadcast_update()
 
 
 # ------------------------------------------------------------------ #
@@ -527,6 +580,8 @@ def on_confirm_burn(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "confirm_player_selection"):
         card.confirm_player_selection(data)
+    game.next_player()
+    game.broadcast_update(f"{player.name} brûle une carte !")
 
 
 @socketio.on("discard_burn_card")
@@ -538,6 +593,8 @@ def on_discard_burn(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "discard_player_selection"):
         card.discard_player_selection(data)
+    game.next_player()
+    game.broadcast_update()
 
 
 # ------------------------------------------------------------------ #
@@ -553,6 +610,8 @@ def on_confirm_girl_power(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "confirm_selection"):
         card.confirm_selection(data)
+    game.next_player()
+    game.broadcast_update(f"{player.name} utilise Girl Power !")
 
 
 @socketio.on("discard_girl_power")
@@ -564,6 +623,8 @@ def on_discard_girl_power(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "discard_selection"):
         card.discard_selection(data)
+    game.next_player()
+    game.broadcast_update()
 
 
 # ------------------------------------------------------------------ #
@@ -576,20 +637,47 @@ def on_confirm_piston(data: dict):
     game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
     if game is None or player is None:
         return
-    card = game.find_card_by_id(data.get("card_id", ""))
-    if card and hasattr(card, "confirm_job_selection"):
-        card.confirm_job_selection(data)
+
+    interaction = game.pending_interaction
+    if not interaction or interaction["type"] != "piston_job_selection":
+        return
+    if interaction["player_id"] != player.id:
+        _emit_error(request.sid, "Ce n'est pas votre interaction")
+        return
+
+    card = game.find_card_by_id(interaction["card_id"])
+    if card is None:
+        return
+
+    game.pending_interaction = None
+    card.resolve(game, player, data)
+    game.next_player()
+    game.broadcast_update(f"{player.name} utilise le Piston !")
 
 
 @socketio.on("discard_piston_job")
 def on_discard_piston(data: dict):
+    """Annulation : la carte Piston reste en main, tour inchangé."""
     from flask import request
     game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
     if game is None or player is None:
         return
-    card = game.find_card_by_id(data.get("card_id", ""))
-    if card and hasattr(card, "discard_job_selection"):
-        card.discard_job_selection(data)
+
+    interaction = game.pending_interaction
+    if not interaction or interaction["type"] != "piston_job_selection":
+        return
+    if interaction["player_id"] != player.id:
+        return
+
+    # Remettre la carte Piston en main (elle avait été déplacée dans played)
+    piston_card = game.find_card_by_id(interaction["card_id"])
+    if piston_card:
+        player.remove_card_from_played(piston_card)
+        player.hand.append(piston_card)
+
+    game.pending_interaction = None
+    # Pas de next_player() : le joueur peut encore jouer/défausser
+    game.broadcast_update()
 
 
 # ------------------------------------------------------------------ #
@@ -605,6 +693,8 @@ def on_confirm_coup_de_foudre(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "confirm_selection"):
         card.confirm_selection(data)
+    game.next_player()
+    game.broadcast_update(f"{player.name} a un Coup de Foudre !")
 
 
 @socketio.on("discard_coup_de_foudre")
@@ -616,6 +706,8 @@ def on_discard_coup_de_foudre(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "discard_selection"):
         card.discard_selection(data)
+    game.next_player()
+    game.broadcast_update()
 
 
 # ------------------------------------------------------------------ #
@@ -631,6 +723,8 @@ def on_confirm_troc(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "confirm_player_selection"):
         card.confirm_player_selection(data)
+    game.next_player()
+    game.broadcast_update(f"{player.name} fait un Troc !")
 
 
 @socketio.on("discard_troc")
@@ -642,6 +736,8 @@ def on_discard_troc(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "discard_player_selection"):
         card.discard_player_selection(data)
+    game.next_player()
+    game.broadcast_update()
 
 
 @socketio.on("confirm_redistribution")
@@ -653,6 +749,8 @@ def on_confirm_redistribution(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "confirm_selection"):
         card.confirm_selection(data)
+    game.next_player()
+    game.broadcast_update(f"{player.name} redistribue des cartes.")
 
 
 @socketio.on("confirm_sabre")
@@ -716,26 +814,82 @@ def on_give_birthday_salary(data: dict):
 #  Cartes interactives — Vengeance                                     #
 # ------------------------------------------------------------------ #
 
-@socketio.on("confirm_vengeance")
-def on_confirm_vengeance(data: dict):
+@socketio.on("confirm_vengeance_hardship")
+def on_confirm_vengeance_hardship(data: dict):
+    """Étape 1 : le joueur a choisi quel coup dur rejouer."""
     from flask import request
     game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
     if game is None or player is None:
         return
-    card = game.find_card_by_id(data.get("card_id", ""))
-    if card and hasattr(card, "confirm_vengeance_selection"):
-        card.confirm_vengeance_selection(data)
+
+    interaction = game.pending_interaction
+    if not interaction or interaction["type"] != "vengeance_hardship_selection":
+        return
+    if interaction["player_id"] != player.id:
+        _emit_error(request.sid, "Ce n'est pas votre interaction")
+        return
+
+    card = game.find_card_by_id(interaction["card_id"])
+    if card is None:
+        return
+
+    game.pending_interaction = None
+    card.resolve_hardship(game, player, data)
+    # resolve_hardship pose un nouveau pending_interaction (vengeance_target_selection)
+    # OU appelle next_player()+broadcast si cible unique → on ne broadcast pas ici
+
+
+@socketio.on("confirm_vengeance_target")
+def on_confirm_vengeance_target(data: dict):
+    """Étape 2 : le joueur a choisi la cible du coup dur."""
+    from flask import request
+    game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
+    if game is None or player is None:
+        return
+
+    interaction = game.pending_interaction
+    if not interaction or interaction["type"] != "vengeance_target_selection":
+        return
+    if interaction["player_id"] != player.id:
+        _emit_error(request.sid, "Ce n'est pas votre interaction")
+        return
+
+    card = game.find_card_by_id(interaction["card_id"])
+    if card is None:
+        return
+
+    # Injecter hardship_id depuis l'interaction si pas dans data
+    data.setdefault("hardship_id", interaction.get("hardship_id"))
+    game.pending_interaction = None
+    card.resolve_target(game, player, data)
+    game.next_player()
+    game.broadcast_update(f"{player.name} se venge !")
 
 
 @socketio.on("discard_vengeance")
 def on_discard_vengeance(data: dict):
+    """Annulation à n'importe quelle étape : la carte Vengeance reste en main."""
     from flask import request
     game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
     if game is None or player is None:
         return
-    card = game.find_card_by_id(data.get("card_id", ""))
-    if card and hasattr(card, "discard_vengeance_selection"):
-        card.discard_vengeance_selection(data)
+
+    interaction = game.pending_interaction
+    if not interaction or interaction["type"] not in (
+        "vengeance_hardship_selection", "vengeance_target_selection"
+    ):
+        return
+    if interaction["player_id"] != player.id:
+        return
+
+    # Remettre la carte Vengeance en main
+    vengeance_card = game.find_card_by_id(interaction["card_id"])
+    if vengeance_card:
+        player.remove_card_from_played(vengeance_card)
+        player.hand.append(vengeance_card)
+
+    game.pending_interaction = None
+    game.broadcast_update()
 
 
 # ------------------------------------------------------------------ #
@@ -748,20 +902,49 @@ def on_confirm_licenciement(data: dict):
     game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
     if game is None or player is None:
         return
-    card = game.find_card_by_id(data.get("card_id", ""))
-    if card and hasattr(card, "confirm_select_job_licenciement"):
-        card.confirm_select_job_licenciement(data)
+
+    interaction = game.pending_interaction
+    if not interaction or interaction["type"] != "licenciement_job_selection":
+        return
+    # C'est le joueur actif (celui qui a joué le coup dur) qui répond
+    if interaction["player_id"] != player.id:
+        _emit_error(request.sid, "Ce n'est pas votre interaction")
+        return
+
+    card = game.find_card_by_id(interaction["card_id"])
+    if card is None:
+        return
+
+    game.pending_interaction = None
+    card.resolve(game, player, data)
+    game.next_player()
+    game.broadcast_update(f"{player.name} licencie un métier !")
 
 
 @socketio.on("discard_licenciement_job")
 def on_discard_licenciement(data: dict):
+    """Annulation : on passe quand même le tour (le coup dur était déjà déclenché)."""
     from flask import request
     game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
     if game is None or player is None:
         return
-    card = game.find_card_by_id(data.get("card_id", ""))
-    if card and hasattr(card, "discard_select_job_licenciement"):
-        card.discard_select_job_licenciement(data)
+
+    interaction = game.pending_interaction
+    if not interaction or interaction["type"] != "licenciement_job_selection":
+        return
+    if interaction["player_id"] != player.id:
+        return
+
+    # Choisir un métier au hasard plutôt que d'annuler (la carte est déjà jouée)
+    import random
+    target_player = game.players[interaction["target_player_id"]]
+    target_jobs = target_player.get_job()
+    if target_jobs:
+        random.choice(target_jobs).discard_play_card(game, target_player)
+
+    game.pending_interaction = None
+    game.next_player()
+    game.broadcast_update()
 
 
 # ------------------------------------------------------------------ #
@@ -777,6 +960,8 @@ def on_confirm_astronaute(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "confirm_selection"):
         card.confirm_selection(data)
+    game.next_player()
+    game.broadcast_update(f"{player.name} décolle en mission !")
 
 
 @socketio.on("discard_astronaute")
@@ -788,6 +973,8 @@ def on_discard_astronaute(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "discard_selection"):
         card.discard_selection(data)
+    game.next_player()
+    game.broadcast_update()
 
 
 @socketio.on("confirm_chef_achats")
@@ -799,6 +986,8 @@ def on_confirm_chef_achats(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "confirm_selection"):
         card.confirm_selection(data)
+    game.next_player()
+    game.broadcast_update(f"{player.name} utilise le Chef des Achats !")
 
 
 @socketio.on("discard_chef_achats")
@@ -810,6 +999,8 @@ def on_discard_chef_achats(data: dict):
     card = game.find_card_by_id(data.get("card_id", ""))
     if card and hasattr(card, "discard_selection"):
         card.discard_selection(data)
+    game.next_player()
+    game.broadcast_update()
 
 
 # ------------------------------------------------------------------ #

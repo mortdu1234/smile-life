@@ -80,3 +80,18 @@ class DragonAnimal(AnimalCard):
             if card:
                 target.remove_card_from_played(card)
                 game.discard.append(card)
+
+class Chien(AnimalCard):
+    pass
+
+class Chat(AnimalCard):
+    pass
+
+class Crapaud(AnimalCard):
+    pass
+
+class Lapin(AnimalCard):
+    pass
+
+class Poussin(AnimalCard):
+    pass

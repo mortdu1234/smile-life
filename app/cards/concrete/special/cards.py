@@ -333,120 +333,199 @@ class HeritageCard(SpecialCard):
 class PistonCard(SpecialCard):
     def __init__(self, image_path: str):
         super().__init__("piston", image_path)
-        self.selection_event: Event = Event()
-        self.job_id: str | None = None
 
     def get_card_rule(self) -> str:
-        return "Piston — pose un métier sans les études requises."
+        return "Piston — pose un métier sans les études requises, puis pioche une carte."
 
     def can_be_played(self, current_player, game) -> tuple[bool, str]:
-        return not current_player.has_job(), ""
-
-    def confirm_job_selection(self, data: dict) -> None:
-        self.job_id = data.get("job_id")
-        self.selection_event.set()
-
-    def discard_job_selection(self, data: dict) -> None:
-        self.selection_event.set()
+        from app.cards.concrete.professional.job import JobCard
+        has_job_in_hand = any(isinstance(c, JobCard) for c in current_player.hand)
+        if not has_job_in_hand:
+            return False, "Vous n'avez aucun métier en main"
+        return True, ""
 
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         from app.cards.concrete.professional.job import JobCard
         jobs_in_hand = [c for c in current_player.hand if isinstance(c, JobCard)]
+
         emit("select_piston_job", {
             "card_id": self.id,
             "available_jobs": [j.to_dict() for j in jobs_in_hand],
-        })
-        self.selection_event.wait()
-        self.selection_event.clear()
+        }, room=current_player.session_id)
 
-        job_card = next((c for c in current_player.hand if c.id == self.job_id), None)
+        game.pending_interaction = {
+            "type": "piston_job_selection",
+            "card_id": self.id,
+            "player_id": current_player.id,
+        }
+        return True
+
+    def resolve(self, game: "Game", current_player: "Player", data: dict) -> None:
+        """Appelé par events.py après confirm_piston_job."""
+        job_id = data.get("job_id")
+        job_card = next((c for c in current_player.hand if c.id == job_id), None)
         if job_card:
-            job_card.play_card(game, current_player)
+            # Pose le métier sans vérifier les études (c'est l'effet du Piston)
+            current_player.hand.remove(job_card)
+            current_player.add_card_to_played(job_card)
+            # Pioche une carte bonus
             if game.deck:
                 current_player.hand.append(game.deck.pop())
-        return True
 
 
 class VengeanceCard(SpecialCard):
     def __init__(self, image_path: str):
         super().__init__("vengeance", image_path)
-        self.selection_event: Event = Event()
-        self.target_player_id: int | None = None
-        self.hardship_id: str | None = None
 
     def get_card_rule(self) -> str:
-        return "Vengeance — attaque quelqu'un avec un coup dur reçu."
+        return "Vengeance — rejoue un coup dur reçu contre un adversaire."
 
     def can_be_played(self, current_player, game) -> tuple[bool, str]:
-        for card in current_player.received_hardships:
-            if card.can_be_played(current_player, game)[0]:
-                return True, ""
-        return False, "Aucun coup dur disponible"
-
-    def confirm_vengeance_selection(self, data: dict) -> None:
-        self.target_player_id = int(data.get("target_id"))
-        self.hardship_id = data.get("hardship_id")
-        self.selection_event.set()
-
-    def discard_vengeance_selection(self, data: dict) -> None:
-        self.selection_event.set()
+        playable = [
+            h for h in current_player.received_hardships
+            if h.can_be_played(current_player, game)[0]
+        ]
+        if not playable:
+            return False, "Aucun coup dur disponible à rejouer"
+        return True, ""
 
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
-        receivable = [h.to_dict() for h in current_player.received_hardships if h.can_be_played(current_player, game)[0]]
-        others = [p.to_dict() for p in game.players if p != current_player]
-        emit("select_vengeance", {
+        """Étape 1 : choisir quel coup dur rejouer."""
+        playable = [
+            h for h in current_player.received_hardships
+            if h.can_be_played(current_player, game)[0]
+        ]
+        emit("select_vengeance_hardship", {
             "card_id": self.id,
-            "received_hardships": receivable,
-            "available_targets": others,
-        })
-        self.selection_event.wait()
-        self.selection_event.clear()
+            "received_hardships": [h.to_dict() for h in playable],
+        }, room=current_player.session_id)
 
-        if self.target_player_id is not None and self.hardship_id:
-            target = game.players[self.target_player_id]
-            for card in current_player.received_hardships:
-                if card.id == self.hardship_id:
-                    current_player.received_hardships.remove(card)
-                    card.apply_effect(game, target, current_player)
-                    target.received_hardships.append(card)
-                    break
+        game.pending_interaction = {
+            "type": "vengeance_hardship_selection",
+            "card_id": self.id,
+            "player_id": current_player.id,
+        }
         return True
+
+    def resolve_hardship(self, game: "Game", current_player: "Player", data: dict) -> None:
+        """Étape 2 : le coup dur est choisi, ouvrir la sélection de cible."""
+        hardship_id = data.get("hardship_id")
+        hardship = next(
+            (h for h in current_player.received_hardships if h.id == hardship_id), None
+        )
+        if hardship is None:
+            # Coup dur introuvable, annulation propre
+            game.next_player()
+            game.broadcast_update()
+            return
+
+        targets = hardship.get_available_targets(game, current_player)
+        non_immune = [t for t in targets if not t["immune"]]
+
+        # Cible unique → appliquer directement sans overlay
+        if len(non_immune) == 1:
+            target = game.players[non_immune[0]["id"]]
+            self._apply_hardship(game, current_player, hardship, target)
+            game.next_player()
+            game.broadcast_update(f"{current_player.name} se venge !")
+            return
+
+        emit("select_vengeance_target", {
+            "card_id": self.id,
+            "hardship_id": hardship_id,
+            "available_targets": targets,
+        }, room=current_player.session_id)
+
+        game.pending_interaction = {
+            "type": "vengeance_target_selection",
+            "card_id": self.id,
+            "player_id": current_player.id,
+            "hardship_id": hardship_id,
+        }
+
+    def resolve_target(self, game: "Game", current_player: "Player", data: dict) -> None:
+        """Étape 3 : la cible est choisie, appliquer le coup dur."""
+        hardship_id = data.get("hardship_id") or game.pending_interaction.get("hardship_id")
+        target_id = data.get("target_player_id")
+        hardship = next(
+            (h for h in current_player.received_hardships if h.id == hardship_id), None
+        )
+        target = game.players.get(target_id) if hasattr(game.players, "get") else (
+            game.players[target_id] if target_id is not None else None
+        )
+        if hardship and target:
+            self._apply_hardship(game, current_player, hardship, target)
+
+    @staticmethod
+    def _apply_hardship(game, current_player, hardship, target):
+        """Retire le coup dur de received_hardships, applique l'effet, le pose chez la cible."""
+        current_player.received_hardships.remove(hardship)
+        hardship.apply_effect(game, target, current_player)
+        target.received_hardships.append(hardship)
+
+
 
 
 class ChanceCard(SpecialCard):
+
     def __init__(self, image_path: str):
         super().__init__("chance", image_path)
-        self.next_cards: list = []
-        self.selection_event: Event = Event()
-        self.selected_card_id: str | None = None
+        self._offered_cards: list = []  # stockage temporaire entre apply et resolve
 
     def get_card_rule(self) -> str:
         return "Chance — pioche 3 cartes, en sélectionne 1, joue normalement."
 
-    def confirm_card_selection(self, data: dict) -> None:
-        self.selected_card_id = data.get("selected_card_id")
-        self.selection_event.set()
-
-    def discard_card_selection(self, data: dict) -> None:
-        self.selection_event.set()
+    def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
+        if game.phase != "play":
+            return False, "Vous devez d'abord piocher"
+        if not game.deck:
+            return False, "La pioche est vide"
+        return True, ""
 
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
-        for _ in range(min(3, len(game.deck))):
-            self.next_cards.append(game.deck.pop())
-        emit("select_chance_card", {
-            "card_id": self.id,
-            "cards": [c.to_dict() for c in self.next_cards],
-        }, room=current_player.session_id)
-        self.selection_event.wait()
-        self.selection_event.clear()
+        # Prélever jusqu'à 3 cartes du dessus de la pioche
+        nb = min(3, len(game.deck))
+        self._offered_cards = [game.deck.pop() for _ in range(nb)]
 
-        for card in self.next_cards:
-            if card.id == self.selected_card_id:
-                current_player.hand.append(card)
+        # Poser l'interaction en attente (empêche next_player dans game.play_card)
+        game.pending_interaction = {
+            "type":      "chance_selection",
+            "card_id":   self.id,
+            "player_id": current_player.id,
+            "offered_cards": self._offered_cards,
+        }
+
+        from app.core.io_context import emit
+        emit(
+            "select_chance_card",
+            {
+                "card_id": self.id,
+                "cards":   [c.to_dict() for c in self._offered_cards],
+            },
+            room=current_player.session_id,
+        )
+
+        # True → SpecialCard.play_card() retire la carte de la main et la place sur le plateau
+        return True
+
+    def resolve(self, game: "Game", player: "Player", data: dict) -> None:
+        """
+        Appelé par events.py après que le joueur a choisi.
+        data["selected_card_id"]      : UUID de la carte choisie.
+        data["offered_cards_objects"] : liste des Card prélevées (injectée par events.py).
+        """
+        offered = data.get("offered_cards_objects") or self._offered_cards
+        selected_id = data.get("selected_card_id")
+
+        for card in offered:
+            if card.id == selected_id:
+                player.hand.append(card)   # ajout direct comme dans le code original
             else:
                 game.discard.append(card)
-        self.next_cards = []
-        return True
+                game.last_discard = card.to_dict()
+
+        self._offered_cards = []
+
 
 
 class EtoileFilanteCard(SpecialCard):
@@ -609,29 +688,36 @@ class AnniversaireCard(SpecialCard):
 class ArcEnCielCard(SpecialCard):
     def __init__(self, image_path: str):
         super().__init__("arc en ciel", image_path)
-        self.nb_cards_played: int = 0
+        self.nb_cards_played: int = 0  # cartes SUPPLÉMENTAIRES posées (0 à 3)
 
     def get_card_rule(self) -> str:
-        return "Arc-en-Ciel — jouez jusqu'à 3 cartes supplémentaires, puis repiochez."
+        return "Arc-en-Ciel — posez jusqu'à 3 cartes supplémentaires, puis repiochez autant."
 
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
-        base["count"] = 4 - self.nb_cards_played
+        base["nb_cards_played"] = self.nb_cards_played
+        base["max_extra"]       = 3
         return base
 
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
-        game.arcEnCielMode = True
-        game.arcEnCielCard = self
+        self.nb_cards_played = 0
+        game.arcEnCielMode  = True
+        game.arcEnCielCard  = self
         return True
 
     def add_card_played(self, game: "Game", current_player: "Player") -> None:
+        """Appelé par game.py pour chaque carte SUPPLÉMENTAIRE posée."""
         self.nb_cards_played += 1
-        if self.nb_cards_played >= 4:
+        if self.nb_cards_played >= 3:
             self.end_arc_en_ciel(game, current_player)
 
     def end_arc_en_ciel(self, game: "Game", current_player: "Player") -> None:
-        game.arcEnCielMode = False
-        for _ in range(1, self.nb_cards_played):
+        """Termine l'arc-en-ciel et repioche autant de cartes que posées."""
+        nb = self.nb_cards_played
+        game.arcEnCielMode  = False
+        game.arcEnCielCard  = None
+        self.nb_cards_played = 0
+        for _ in range(nb):
             if game.deck:
                 current_player.hand.append(game.deck.pop())
 
@@ -647,3 +733,7 @@ class MuguetCard(SpecialCard):
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         game.phase = "draw"
         return True
+    
+class Troc(SpecialCard):
+    def __init__(self, image_path: str):
+        super().__init__("troc", image_path)
