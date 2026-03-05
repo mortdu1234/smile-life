@@ -461,14 +461,11 @@ def on_discard_casino_bet(data: dict):
 
 @socketio.on("confirm_medium")
 def on_confirm_medium(data: dict):
+    """Le joueur ferme la fenêtre Médium — le tour a déjà passé lors de la pose."""
     from flask import request
     game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
     if game is None or player is None:
         return
-    card = game.find_card_by_id(data.get("card_id", ""))
-    if card and hasattr(card, "confirm_selection"):
-        card.confirm_selection(data)
-    game.next_player()
     game.broadcast_update(f"{player.name} consulte la pioche.")
 
 
@@ -651,8 +648,7 @@ def on_confirm_piston(data: dict):
 
     game.pending_interaction = None
     card.resolve(game, player, data)
-    if game.pending_interaction is None:
-        game.next_player()
+    game.next_player()
     game.broadcast_update(f"{player.name} utilise le Piston !")
 
 
@@ -958,53 +954,24 @@ def on_confirm_astronaute(data: dict):
     game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
     if game is None or player is None:
         return
-
-    interaction = game.pending_interaction
-    if not interaction or interaction["type"] != "astronaute_selection":
-        return
-    if interaction["player_id"] != player.id:
-        _emit_error(request.sid, "Ce n'est pas votre interaction")
-        return
-
-    card = game.find_card_by_id(interaction["card_id"])
-    if card is None:
-        return
-
-    piston_draw = interaction.get("piston_draw_pending", False)
-    game.pending_interaction = None
-    card.resolve(game, player, data)
-
-    # Pioche bonus Piston différée (si le métier a lui-même déclenché une interaction, on attend)
-    if piston_draw and game.pending_interaction is None and game.deck:
-        player.hand.append(game.deck.pop())
-
-    if game.pending_interaction is None:
-        game.next_player()
-    game.broadcast_update(f"{player.name} récupère une carte depuis la défausse !")
+    card = game.find_card_by_id(data.get("card_id", ""))
+    if card and hasattr(card, "confirm_selection"):
+        card.confirm_selection(data)
+    game.next_player()
+    game.broadcast_update(f"{player.name} décolle en mission !")
 
 
 @socketio.on("discard_astronaute")
 def on_discard_astronaute(data: dict):
-    """Annulation — l'Astronaute est posé, pioche bonus Piston quand même si applicable."""
     from flask import request
     game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
     if game is None or player is None:
         return
-
-    interaction = game.pending_interaction
-    if not interaction or interaction["type"] != "astronaute_selection":
-        return
-    if interaction["player_id"] != player.id:
-        return
-
-    piston_draw = interaction.get("piston_draw_pending", False)
-    game.pending_interaction = None
-
-    if piston_draw and game.deck:
-        player.hand.append(game.deck.pop())
-
+    card = game.find_card_by_id(data.get("card_id", ""))
+    if card and hasattr(card, "discard_selection"):
+        card.discard_selection(data)
     game.next_player()
-    game.broadcast_update(f"{player.name} pose l'Astronaute (sans piocher dans la défausse).")
+    game.broadcast_update()
 
 
 @socketio.on("confirm_chef_achats")
