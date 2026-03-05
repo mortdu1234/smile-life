@@ -395,20 +395,131 @@ class BarmanJob(JobCard):
 class ChefDesVentesJob(JobCard):
     pass
 
+
 class ChercheurJob(JobCard):
-    pass
+    def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
+        super().__init__(job_name, salary, studies, image_path)
+        self.status = ""
+        self.power = ["prix_possible"]
+        self.is_link = False
+
+    def get_salary(self):
+        if self.is_link:
+            return 4
+        return self.salary
+
+    def get_card_rule(self):
+        return "Nous avons une carte métier Chercheur\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- grand prix d'exelence possible\n" \
+        + "- jouer avec 6 cartes en mains\n"
+
+    def apply_instant_power(self, game: 'Game', current_player: 'Player'):
+        current_player.hand.append(game.deck.pop())
+
+    def loosing_continuous_power(self, game: 'Game', effected_player: 'Player'):
+        card = random.choice(effected_player.hand)
+        print(f"carte perdu : {card}")
+        effected_player.hand.remove(card)
+        game.discard.append(card)
+
 
 class GourouJob(JobCard):
-    pass
+    def __init__(self, job_name, salary, studies, image_path):
+        super().__init__(job_name, salary, studies, image_path)
+        self.status = ""
+        self.power = []
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Gourou\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + ""
+    
+    def can_be_played(self, player, game):
+        for player in game.players:
+            if player.has_job() and "no_gourou" in player.get_power():
+                return False, "il y a un job qui empeche le bandit"
+        return super().can_be_played(player, game)
+
 
 class GrandProfJob(JobCard):
-    pass
+    def __init__(self, job_name: str, salary: int, image_path: str):
+        super().__init__(job_name, salary, 0, image_path)
+        self.status = "fonctionnaire"
+        self.power = []
+        
+    def get_card_rule(self):
+        return "Nous avons une carte métier Grand Prof\n" \
+        + f"ce métier est un {self.status}\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- ne peux pas etre licencié\n" \
+        + "- remplace le métier de professeur\n" \
+        + "- necessite d'etre professeur avant de poser cette carte\n"
+        
+
+    def can_be_played(self, player, game):
+        if not player.has_job():
+            return False, "vous devez avoir un métier"
+        jobs = player.get_job()
+        for job in jobs:
+            if isinstance(job, ProfJob):
+                return True, ""
+        return False, "Vous devez être professeur pour devenir grand prof"
+
+    def apply_instant_power(self, game: 'Game', current_player: 'Player'):
+        jobs = current_player.get_job()
+        for job in jobs:
+            if isinstance(job, ProfJob):
+                current_player.remove_card_from_played(job)
+                game.discard.append(job)
+
 
 class PolicierJob(JobCard):
-    pass
+    def __init__(self, job_name, salary, studies, image_path):
+        super().__init__(job_name, salary, studies, image_path)
+        self.status = "fonctionnaire"
+        self.power = ["no_bandit","no_gourou"]
+    
+    def get_card_rule(self):
+        return "Nous avons une carte métier Gourou\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- ne peux pas etre licencié\n" \
+        + "- il ne peux pas y avoir de bandit ou de gourou avec un policier\n"
+    
+    def apply_instant_power(self, game, current_player):
+        for player in game.players:
+            if player.has_job():
+                jobs: list[JobCard] = player.get_job()
+                for job in jobs:
+                    if isinstance(job, (GourouJob, BanditJob)):
+                        job.discard_play_card(game, player)
+
 
 class ProfJob(JobCard):
-    pass
+    def __init__(self, job_name: str, salary: int, studies: int, image_path: str):
+        super().__init__(job_name, salary, studies, image_path)
+        self.status = "fonctionnaire"
+  
+    def get_card_rule(self):
+        return "Nous avons une carte métier Prof\n" \
+        + f"ce métier est un {self.status}\n" \
+        + f"il donne {self.smiles} smiles\n" \
+        + f"il necessite {self.studies} études\n" \
+        + f"il peut poser des salaire jusqu'à {self.salary}\n" \
+        + "\nREGLES\n" \
+        + "- ne peux pas etre licencié\n"
 
 
     

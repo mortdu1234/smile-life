@@ -3,9 +3,9 @@
   "label": "🧹 Vider tout",
   "description": "Deck vide — personnalisation manuelle",
   "deck": {
-    "study__1": 0, "study__2": 0,
+    "study__1": 0, "study__2": 10,
 
-    "salary__1": 0, "salary__2": 0, "salary__3": 0, "salary__4": 10,
+    "salary__1": 0, "salary__2": 0, "salary__3": 0, "salary__4": 0,
 
     "architecte": 0, "astronaute": 0, "avocat": 0, "bandit": 10, "barman": 0,
     "chef_achats": 0, "chef_des_ventes": 0, "chercheur": 0, "chirurgien": 0,
@@ -16,7 +16,7 @@
     "serveur": 0, "stripteaser": 0,
 
     "flirt__bar": 0, "flirt__parc": 0, "flirt__theatre": 0, "flirt__cinema": 0,
-    "flirt__boite_de_nuit": 0, "flirt_with_child__camping": 10, "flirt_with_child__hotel": 0,
+    "flirt__boite_de_nuit": 0, "flirt_with_child__camping": 0, "flirt_with_child__hotel": 0,
     "flirt__restaurant": 0, "flirt__zoo": 0, "flirt__internet": 0,
 
     "marriage__corps_nuds":0, "marriage__fourqueux":0, "marriage__montcuq":0,
@@ -41,6 +41,6 @@
 
     "licorne":0, "poussin":0, "lapin":0, "chien":0, "chat":0,
 
-    "prix": 0, "legion": 0
+    "prix": 0, "legion": 10
   }
 }

@@ -957,24 +957,44 @@ def on_confirm_astronaute(data: dict):
     game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
     if game is None or player is None:
         return
-    card = game.find_card_by_id(data.get("card_id", ""))
-    if card and hasattr(card, "confirm_selection"):
-        card.confirm_selection(data)
-    game.next_player()
-    game.broadcast_update(f"{player.name} décolle en mission !")
+
+    interaction = game.pending_interaction
+    if not interaction or interaction["type"] != "astronaute_selection":
+        return
+    if interaction["player_id"] != player.id:
+        _emit_error(request.sid, "Ce n'est pas votre interaction")
+        return
+
+    card = game.find_card_by_id(interaction["card_id"])
+    if card is None:
+        return
+
+    game.pending_interaction = None
+    card.resolve(game, player, data)
+
+    # Si la carte choisie déclenche elle-même une interaction, ne pas passer le tour
+    if game.pending_interaction is None:
+        game.next_player()
+    game.broadcast_update(f"{player.name} récupère une carte depuis la défausse !")
 
 
 @socketio.on("discard_astronaute")
 def on_discard_astronaute(data: dict):
+    """Annulation : l'Astronaute est déjà posé, on passe quand même le tour."""
     from flask import request
     game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
     if game is None or player is None:
         return
-    card = game.find_card_by_id(data.get("card_id", ""))
-    if card and hasattr(card, "discard_selection"):
-        card.discard_selection(data)
+
+    interaction = game.pending_interaction
+    if not interaction or interaction["type"] != "astronaute_selection":
+        return
+    if interaction["player_id"] != player.id:
+        return
+
+    game.pending_interaction = None
     game.next_player()
-    game.broadcast_update()
+    game.broadcast_update(f"{player.name} pose l'Astronaute (sans piocher).")
 
 
 @socketio.on("confirm_chef_achats")

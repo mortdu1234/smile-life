@@ -562,12 +562,14 @@
   </div>
 </div>
 
-<!-- Overlay chance / étoile filante -->
+<!-- Overlay chance / étoile filante / astronaute -->
 <div class="overlay" id="overlay-pick-card">
   <div class="overlay-box">
     <h3 id="overlay-pick-title">Choisir une carte</h3>
     <div class="overlay-cards" id="overlay-pick-list"></div>
-    <div class="overlay-actions"></div>
+    <div class="overlay-actions">
+      <button class="btn btn-secondary" onclick="cancelPickCard()">Annuler</button>
+    </div>
   </div>
 </div>
 
@@ -1252,9 +1254,12 @@ socket.on('select_chance_card', ({ card_id, cards }) => {
   document.getElementById('overlay-pick-card').classList.add('active');
 });
 
+// cancelEvent est mis à jour par chaque listener avant d'ouvrir l'overlay
+let pendingCancelEvent = 'discard_chance_card';
+
 function cancelPickCard() {
   if (pendingPickCardId) {
-    socket.emit('discard_chance_card', { room_id: ROOM_ID, card_id: pendingPickCardId });
+    socket.emit(pendingCancelEvent, { room_id: ROOM_ID, card_id: pendingPickCardId });
   }
   closeOverlay('overlay-pick-card');
   pendingPickCardId = null;
@@ -1265,6 +1270,7 @@ function cancelPickCard() {
 // =====================================================================
 socket.on('select_star_card', ({ card_id, discard_cards }) => {
   pendingPickCardId = card_id;
+  pendingCancelEvent = 'discard_star_card';
   document.getElementById('overlay-pick-title').textContent = '🌠 Étoile Filante — Choisir dans la défausse';
   const list = document.getElementById('overlay-pick-list');
   list.innerHTML = '';
@@ -1275,6 +1281,33 @@ socket.on('select_star_card', ({ card_id, discard_cards }) => {
     el.addEventListener('click', () => {
       socket.emit('confirm_star_card', { room_id: ROOM_ID, card_id, selected_card_id: c.id });
       closeOverlay('overlay-pick-card');
+      pendingPickCardId = null;
+    });
+    list.appendChild(el);
+  });
+  document.getElementById('overlay-pick-card').classList.add('active');
+});
+
+// =====================================================================
+// Overlay — Astronaute (choisir dans la défausse)
+// =====================================================================
+socket.on('select_astronaute_card', ({ card_id, cards }) => {
+  pendingPickCardId = card_id;
+  pendingCancelEvent = 'discard_astronaute';
+  document.getElementById('overlay-pick-title').textContent = '🚀 Astronaute — Choisir une carte dans la défausse';
+  const list = document.getElementById('overlay-pick-list');
+  list.innerHTML = '';
+  if (cards.length === 0) {
+    list.innerHTML = '<p style="color:#aaa;font-size:.85rem">Aucune carte jouable dans la défausse.</p>';
+  }
+  cards.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'game-card playable';
+    el.innerHTML = cardInnerHtml(c);
+    el.addEventListener('click', () => {
+      socket.emit('confirm_astronaute', { room_id: ROOM_ID, card_id, selected_card_id: c.id });
+      closeOverlay('overlay-pick-card');
+      pendingPickCardId = null;
     });
     list.appendChild(el);
   });
