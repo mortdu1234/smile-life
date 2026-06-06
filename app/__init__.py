@@ -27,6 +27,8 @@ def create_app(config_name: str = "development") -> Flask:
     socketio.init_app(app)
     from app.interfaces.web import events  # noqa: F401 — enregistre les handlers
 
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_prefix=1)
     app.config['APPLICATION_ROOT'] = '/game-smile-life'
 
     app.wsgi_app = ProxyFix(app.wsgi_app, x_prefix=1)
