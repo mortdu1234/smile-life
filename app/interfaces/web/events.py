@@ -114,6 +114,7 @@ def on_start_game(data: dict):
 
     from app.cards.loader import load_cards
     import random
+    print("la config de la room", room.deck_config)
     deck = load_cards(deck_config=room.deck_config)
     random.shuffle(deck)
 
