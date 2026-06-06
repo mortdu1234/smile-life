@@ -3,14 +3,14 @@
   "label": "🧹 Vider tout",
   "description": "Deck vide — personnalisation manuelle",
   "deck": {
-    "study__1": 0, "study__2": 10,
+    "study__1": 0, "study__2": 0,
 
     "salary__1": 10, "salary__2": 0, "salary__3": 0, "salary__4": 10,
 
-    "architecte": 0, "astronaute": 0, "avocat": 0, "bandit": 0, "barman": 0,
+    "architecte": 0, "astronaute": 0, "avocat": 0, "bandit": 10, "barman": 0,
     "chef_achats": 0, "chef_des_ventes": 0, "chercheur": 0, "chirurgien": 0,
     "designer": 0, "ecrivain": 0, "garagiste": 0, "gourou": 0, "grand_prof": 0,
-    "jardinier": 0, "journaliste": 0, "medecin": 0, "medium": 10, "militaire": 0,
+    "jardinier": 0, "journaliste": 0, "medecin": 0, "medium": 0, "militaire": 0,
     "pharmacien": 0, "pilote": 0, "pizzaiolo": 0, "plombier": 0, "policier": 0,
     "prof__maths": 0, "prof__francais": 0, "prof__anglais": 0, "prof__histoire_geo": 0,
     "serveur": 0, "stripteaser": 0,
@@ -30,7 +30,7 @@
     "accident": 0, "burnout": 0, "divorce": 0, "tax": 0, "licenciement": 0,
     "maladie": 0, "redoublement": 0, "prison": 0, "attentat": 0,
 
-    "anniversaire": 0, "arc_en_ciel": 10, "casino": 10, "chance": 10,
+    "anniversaire": 0, "arc_en_ciel": 0, "casino": 10, "chance": 10,
     "etoile_filante": 0, "heritage": 0, "piston": 10, "troc": 0,
     "tsunami": 0, "vengeance": 0,
 

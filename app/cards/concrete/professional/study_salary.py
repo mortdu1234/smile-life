@@ -69,12 +69,15 @@ class SalaryCard(Card):
             "- Peut être jouée au casino si ouvert.\n"
             "- Permet d'acheter des acquisitions.\n"
         )
-
-    def can_be_played(self, current_player: "Player", game: "Game") -> tuple[bool, str]:
+    def can_bet_card(self, current_player: "Player", game: "Game") -> tuple[bool, str]:
+        if game.casino_card and game.casino_card.first_player_id != current_player.id:
+            return True, ""
+        return False, "Vous etes l'ouvreur du casino ou le casino n'est pas ouvert"
+    
+    def can_place_card(self, current_player: "Player", game: "Game") -> tuple[bool, str]:
         jobs = current_player.get_job()
         if not jobs:
             return False, "Vous devez avoir un métier pour recevoir un salaire"
-
         max_salary = max(job.get_salary() for job in jobs)
 
         if "egalite_salaire" in current_player.get_power():
@@ -87,6 +90,52 @@ class SalaryCard(Card):
             return False, f"Votre salaire maximum est de {max_salary}"
 
         return True, ""
-
+        
+    def can_be_played(self, current_player: "Player", game: "Game") -> tuple[bool, str]:
+        can_place, reason = self.can_place_card(current_player, game)
+        can_bet, bet_reason = self.can_bet_card(current_player, game)
+        if can_place or can_bet:
+            return True, ""
+        return False, reason+" et "+bet_reason
+    
     def play_card(self, game: "Game", current_player: "Player") -> None:
-        super().play_card(game, current_player)
+        can_place, _ = self.can_place_card(current_player, game)
+        can_bet, _   = self.can_bet_card(current_player, game)
+
+        if can_place and can_bet:
+            # Les deux options → afficher le choix au joueur
+            from app.core.io_context import emit
+            emit("select_salary_placement", {
+                "card_id": self.id,
+                "casino_card_id": game.casino_card.id,
+                "first_bet": game.casino_card.first_bet.to_dict() if game.casino_card.first_bet else None,
+            }, room=current_player.session_id)
+            game.pending_interaction = {
+                "type": "salary_placement",
+                "card_id": self.id,
+                "player_id": current_player.id,
+            }
+            return
+
+        if can_bet and not can_place:
+            # Seulement casino
+            game.casino_card.resolve_second(game, current_player, {"bet_card_id": self.id})
+            return
+
+        if can_place and not can_bet:
+            # Seulement poser normalement
+            super().play_card(game, current_player)
+            return
+
+        # Rien de possible
+        from app.core.io_context import emit
+        emit("error", {"message": "Vous ne pouvez pas jouer cette carte"}, room=current_player.session_id)
+
+    def resolve_placement(self, game: "Game", player: "Player", choice: str) -> None:
+        """Appelé depuis events.py après le choix du joueur."""
+        if choice == "casino":
+            game.casino_card.resolve_second(game, player, {"bet_card_id": self.id})
+        elif choice == "normal":
+            super().play_card(game, player)
+            game.next_player()
+            game.broadcast_update(f"{player.name} pose un salaire.")

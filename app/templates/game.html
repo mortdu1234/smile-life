@@ -778,6 +778,9 @@ function renderGame(game) {
   // Main — jouable si mon tour, phase play, et pas d'interaction en attente
   const handPlayable = isMyTurn && game.phase === 'play' && !game.pending_interaction_type;
   renderHand(me, game, handPlayable);
+  
+  // render du casino (cartes spéciales)
+  renderCasino(game, me);
 
   // Hint main
   const hint = document.getElementById('hand-hint');
@@ -1468,6 +1471,136 @@ socket.on('select_casino_bet', ({ card_id, available_salaries }) => {
     list.appendChild(el);
   });
   document.getElementById('overlay-pick-card').classList.add('active');
+});
+// =====================================================================
+// Casino ouvert
+// =====================================================================
+function renderCasino(game, me) {
+  console.log('[Casino] current_player=', game.current_player, 'me.id=', me.id, 'isMyTurn=', game.current_player === me.id);
+  const existing = document.getElementById('casino-panel');
+  if (existing) existing.remove();
+
+  const casino = game.casino;
+  if (!casino || !casino.open) return;
+
+  // Seulement pendant mon tour, phase play, et je ne suis pas l'ouvreur sans mise
+  const isMyTurn = game.current_player === me.id;
+  if (!isMyTurn || game.phase !== 'play') return;
+  if (game.pending_interaction_type) return;
+
+  // Ne pas proposer si je suis l'ouvreur (first_player_id === me.id)
+  if (casino.first_player_id === me.id && casino.first_bet !== null) return;
+
+  const mySalaries = (me.hand || []).filter(c => c.type === 'salary');
+  if (mySalaries.length === 0) return;
+
+  const panel = document.createElement('div');
+  panel.id = 'casino-panel';
+  panel.style.cssText = `
+    position:fixed;bottom:2rem;right:2rem;
+    background:#16213e;border:2px solid #f5a623;
+    border-radius:12px;padding:1.2rem 1.6rem;
+    z-index:150;box-shadow:0 4px 20px #00000088;
+    color:#eee;max-width:300px;
+  `;
+
+  const firstBetInfo = casino.first_bet
+    ? `<p style="color:#aaa;font-size:.8rem;margin-bottom:.6rem">Mise en jeu : <strong>${casino.first_bet.subtype || casino.first_bet.type}</strong></p>`
+    : `<p style="color:#aaa;font-size:.8rem;margin-bottom:.6rem">Aucune mise pour l'instant.</p>`;
+
+  panel.innerHTML = `
+    <h4 style="color:#f5a623;margin-bottom:.5rem">🎰 Casino ouvert !</h4>
+    ${firstBetInfo}
+    <p style="font-size:.8rem;color:#aaa;margin-bottom:.8rem">Choisissez un salaire à miser :</p>
+    <div id="casino-bet-list" style="display:flex;gap:.5rem;flex-wrap:wrap"></div>
+    <button style="margin-top:.8rem;width:100%;padding:.4rem;background:none;border:1px solid #555;border-radius:6px;color:#888;cursor:pointer;font-size:.8rem"
+            id="casino-skip-btn">Passer (ne pas miser)</button>
+  `;
+
+  const list = panel.querySelector('#casino-bet-list');
+  mySalaries.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'game-card playable';
+    el.style.borderColor = '#f5a623';
+    el.innerHTML = cardInnerHtml(s);
+    el.addEventListener('click', () => {
+      socket.emit('bet_on_casino', { room_id: ROOM_ID, card_id: casino.id, bet_card_id: s.id });
+      panel.remove();
+    });
+    list.appendChild(el);
+  });
+
+  panel.querySelector('#casino-skip-btn').addEventListener('click', () => {
+    socket.emit('confirm_casino_bet', { room_id: ROOM_ID, card_id: casino.id });
+    panel.remove();
+    // Le joueur passe sans miser — il peut encore jouer/défausser normalement
+  });
+
+  document.body.appendChild(panel);
+}
+
+socket.on('select_salary_placement', ({ card_id, casino_card_id, first_bet }) => {
+  const overlay  = document.getElementById('overlay-generic');
+  const title    = document.getElementById('overlay-generic-title');
+  const content  = document.getElementById('overlay-generic-content');
+  const closeBtn = document.getElementById('overlay-generic-close-btn');
+
+  title.textContent      = '💰 Où poser ce salaire ?';
+  closeBtn.style.display = 'none';
+
+  const betInfo = first_bet
+    ? `<p style="color:#aaa;font-size:.85rem;margin-bottom:1.2rem">
+         Mise en jeu au casino : <strong style="color:#f5a623">
+           ${first_bet.subtype || first_bet.type}
+         </strong>
+       </p>`
+    : `<p style="color:#aaa;font-size:.85rem;margin-bottom:1.2rem">
+         Aucune mise en jeu pour l'instant.
+       </p>`;
+
+  content.innerHTML = `
+    ${betInfo}
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap" id="salary-placement-btns"></div>
+  `;
+
+  const btns = content.querySelector('#salary-placement-btns');
+
+  function choose(choice) {
+    btns.querySelectorAll('button').forEach(b => { b.disabled = true; b.style.opacity = '.5'; });
+    socket.emit('confirm_salary_placement', { room_id: ROOM_ID, card_id, casino_card_id, choice });
+    closeBtn.style.display = '';
+    closeOverlay('overlay-generic');
+  }
+
+  // Poser normalement
+  const normalBtn = document.createElement('button');
+  normalBtn.className = 'btn btn-secondary';
+  normalBtn.style.cssText = 'padding:1rem 1.5rem;font-size:.95rem';
+  normalBtn.textContent = '📋 Poser normalement';
+  normalBtn.addEventListener('click', () => choose('normal'));
+  btns.appendChild(normalBtn);
+
+  // Miser au casino
+  const casinoBtn = document.createElement('button');
+  casinoBtn.className = 'btn btn-secondary';
+  casinoBtn.style.cssText = 'padding:1rem 1.5rem;font-size:.95rem';
+  casinoBtn.textContent = '🎰 Miser au casino';
+  casinoBtn.addEventListener('click', () => choose('casino'));
+  btns.appendChild(casinoBtn);
+
+  // Annuler
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn btn-secondary';
+  cancelBtn.style.cssText = 'padding:1rem 1.5rem;font-size:.95rem';
+  cancelBtn.textContent = '✕ Annuler';
+  cancelBtn.addEventListener('click', () => {
+    socket.emit('cancel_salary_placement', { room_id: ROOM_ID, card_id });
+    closeBtn.style.display = '';
+    closeOverlay('overlay-generic');
+  });
+  btns.appendChild(cancelBtn);
+
+  overlay.classList.add('active');
 });
 
 // =====================================================================

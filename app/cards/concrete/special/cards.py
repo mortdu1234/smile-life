@@ -564,19 +564,17 @@ class EtoileFilanteCard(SpecialCard):
             card.play_card(game, current_player)
         return True
 
-
 class CasinoCard(SpecialCard):
     def __init__(self, image_path: str):
         super().__init__("casino", image_path)
-        self.selection_event: Event = Event()
-        self.bet_card_id: str | None = None
         self.is_open: bool = False
-        self.first_player_bet = None
+        self.first_player_id: int | None = None
         self.first_bet = None
 
     def get_card_rule(self) -> str:
         return (
-            "Casino — ouvre le casino. Deux joueurs misent un salaire :\n"
+            "Casino — ouvre le casino. Misez un salaire (optionnel).\n"
+            "Au tour suivant, un autre joueur peut miser.\n"
             "- Valeurs identiques → le second gagne les deux.\n"
             "- Valeurs différentes → le premier gagne les deux.\n"
         )
@@ -585,60 +583,92 @@ class CasinoCard(SpecialCard):
         base = super().to_dict()
         base.update({
             "open": self.is_open,
-            "first_bet": self.first_player_bet.to_dict() if self.first_bet else None,
-            "second_bet": None,
+            "first_bet": self.first_bet.to_dict() if self.first_bet else None,
+            "first_player_id": self.first_player_id,
         })
         return base
 
-    def confirm_bet_selection(self, data: dict) -> None:
-        self.bet_card_id = data.get("bet_card_id")
-        self.selection_event.set()
-
-    def discard_bet_selection(self, data: dict) -> None:
-        self.selection_event.set()
-
-    def bet_on_casino(self, game: "Game", current_player: "Player", is_opener: bool = False) -> None:
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+        """Ouvre le casino et propose à l'ouvreur de miser (optionnel)."""
         from app.cards.concrete.professional.study_salary import SalaryCard
         salary_cards = [s.to_dict() for s in current_player.hand if isinstance(s, SalaryCard)]
         emit("select_casino_bet", {
             "card_id": self.id,
             "available_salaries": salary_cards,
+            "can_skip": True,  # l'ouvreur peut passer sans miser
         })
-        self.selection_event.wait()
-        self.selection_event.clear()
-
-        if self.bet_card_id:
-            from app.cards.concrete.professional.study_salary import SalaryCard as SC
-            card = next((c for c in current_player.hand if c.id == self.bet_card_id), None)
-            if card:
-                if self.first_bet:
-                    current_player.hand.remove(card)
-                    if card.level == self.first_bet.level:
-                        current_player.add_card_to_played(card)
-                        current_player.add_card_to_played(self.first_bet)
-                    else:
-                        self.first_player_bet.add_card_to_played(card)
-                        self.first_player_bet.add_card_to_played(self.first_bet)
-                    self.first_bet = None
-                    self.first_player_bet = None
-                else:
-                    current_player.hand.remove(card)
-                    self.first_bet = card
-                    self.first_player_bet = current_player
-                    if is_opener and game.deck:
-                        current_player.hand.append(game.deck.pop())
-                game.broadcast_update()
-
-    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
-        self.bet_on_casino(game, current_player, True)
+        game.pending_interaction = {
+            "type": "casino_opener_bet",
+            "card_id": self.id,
+            "player_id": current_player.id,
+        }
         return True
+
+    def resolve_opener(self, game: "Game", current_player: "Player", data: dict) -> None:
+        bet_card_id = data.get("bet_card_id")
+        if bet_card_id:
+            card = next((c for c in current_player.hand if c.id == bet_card_id), None)
+            if card:
+                current_player.hand.remove(card)
+                self.first_bet = card
+                self.first_player_id = current_player.id
+                # Repioche une carte pour compenser la mise
+                if game.deck:
+                    current_player.hand.append(game.deck.pop())
+        game.pending_interaction = None
+        game.next_player()
+        game.broadcast_update(f"{current_player.name} ouvre le Casino !")
+
+    def resolve_second(self, game: "Game", current_player: "Player", data: dict) -> None:
+        """Un autre joueur mise — résolution si 2 mises, sinon on attend."""
+        from app.cards.concrete.professional.study_salary import SalaryCard
+        bet_card_id = data.get("bet_card_id")
+        card = next((c for c in current_player.hand if c.id == bet_card_id), None)
+        if not card:
+            return
+
+        current_player.hand.remove(card)
+
+        if self.first_bet is None:
+            # Premier à miser (l'ouvreur avait passé)
+            self.first_bet = card
+            self.first_player_id = current_player.id
+            game.broadcast_update(f"{current_player.name} mise au Casino.")
+        else:
+            # Deuxième mise → résolution
+            print(f"[DEBUG] first_player_id={self.first_player_id}, players ids={[p.id for p in game.players]}")
+            first_player = next((p for p in game.players if p.id == self.first_player_id), None)
+            print(f"[DEBUG] first_player trouvé: {first_player}")
+            if card.level == self.first_bet.level:
+                print("[DEBUG] Casino : valeurs egales, le 1er gagne")
+                # Valeurs identiques → le second gagne
+                current_player.add_card_to_played(card)
+                current_player.add_card_to_played(self.first_bet)
+                print(f"[DEBUG] salaire dépensé de {current_player.name}: {[c.to_dict() for c in current_player.played['salaire dépensé']]}")
+                print(f"[DEBUG] vie pro de {current_player.name}: {[c.to_dict() for c in current_player.played['vie professionnelle']]}")
+
+                winner_name = current_player.name
+            else:
+                # Valeurs différentes → le premier gagne
+                print("[DEBUG] Casino : valeurs différentes, l'autre gagne")
+                first_player.add_card_to_played(card)
+                first_player.add_card_to_played(self.first_bet)
+                print(f"[DEBUG] salaire dépensé de {current_player.name}: {[c.to_dict() for c in current_player.played['salaire dépensé']]}")
+                print(f"[DEBUG] vie pro de {current_player.name}: {[c.to_dict() for c in current_player.played['vie professionnelle']]}")
+   
+                winner_name = first_player.name
+
+            self.first_bet = None
+            self.first_player_id = None
+            game.next_player()
+            game.broadcast_update(f"🎰 Casino : {winner_name} remporte la mise !")
 
     def play_card(self, game: "Game", current_player: "Player") -> None:
         self.is_open = True
         game.casino_card = self
+        if self in current_player.hand:
+            current_player.hand.remove(self)
         self.apply_card_effect(game, current_player)
-        current_player.hand.remove(self)
-
 
 class AnniversaireCard(SpecialCard):
     def __init__(self, image_path: str):

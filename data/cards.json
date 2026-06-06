@@ -64,7 +64,7 @@
 {"card_id": "militaire",        "job_name": "Militaire",     "salary": 4, "studies": 3, "image": "static/img/personnal_life/professionnal_life/JobCards/militaire.png",    "count": 1},
 {"card_id": "medium",           "job_name": "Médium",        "salary": 4, "studies": 3, "image": "static/img/personnal_life/professionnal_life/JobCards/medium.png",       "count": 1},
 {"card_id": "journaliste",      "job_name": "Journaliste",   "salary": 3, "studies": 4, "image": "static/img/personnal_life/professionnal_life/JobCards/journaliste.png",  "count": 1},
-{"card_id": "chef_des_achats",      "job_name": "Chef Achats",   "salary": 4, "studies": 4, "image": "static/img/personnal_life/professionnal_life/JobCards/chef_des_achats.png",  "count": 1},
+{"card_id": "chef_des_achats",  "job_name": "Chef Achats",   "salary": 4, "studies": 4, "image": "static/img/personnal_life/professionnal_life/JobCards/chef_des_achats.png",  "count": 1},
 {"card_id": "medecin",          "job_name": "Médecin",       "salary": 5, "studies": 6, "image": "static/img/personnal_life/professionnal_life/JobCards/medecin.png",      "count": 1},
 {"card_id": "chirurgien",       "job_name": "Chirurgien",    "salary": 5, "studies": 6, "image": "static/img/personnal_life/professionnal_life/JobCards/chirurgien.png",   "count": 1},
 {"card_id": "pilote",           "job_name": "Pilote ligne",  "salary": 5, "studies": 5, "image": "static/img/personnal_life/professionnal_life/JobCards/pilote_de_ligne.png",       "count": 1},
@@ -82,7 +82,7 @@
 {"card_id": "prof__anglais",     "job_name": "Prof Anglais",     "salary": 2, "studies": 0, "image": "static/img/personnal_life/professionnal_life/JobCards/prof_anglais.png", "count": 1},
 
 {"card_id": "travel__le_caire",           "image": "static/img/aquisition_cards/trip/le_caire.png", "count": 1},
-{"card_id": "travel__londre",           "image": "static/img/aquisition_cards/trip/londre.png", "count": 1},
+{"card_id": "travel__londre",           "image": "static/img/aquisition_cards/trip/londres.png", "count": 1},
 {"card_id": "travel__new_york",           "image": "static/img/aquisition_cards/trip/new_york.png", "count": 1},
 {"card_id": "travel__rio",           "image": "static/img/aquisition_cards/trip/rio.png", "count": 1},
 {"card_id": "travel__sydney",           "image": "static/img/aquisition_cards/trip/sydney.png", "count": 1},

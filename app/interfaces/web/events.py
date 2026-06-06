@@ -6,7 +6,12 @@ from flask_socketio import join_room
 from app import socketio
 from app.session.room_manager import room_manager
 from app.core.player import Player
+import traceback
 
+@socketio.on_error_default
+def handle_error(e):
+    traceback.print_exc()
+    print(f"[SOCKETIO ERROR] {e}")
 
 # ------------------------------------------------------------------ #
 #  Helpers                                                             #
@@ -415,45 +420,122 @@ def on_discard_salary_selection(data: dict):
     game.pending_interaction = None
     game.broadcast_update(f"{player.name} annule l'acquisition.")
 
-
 # ------------------------------------------------------------------ #
 #  Cartes interactives — Casino                                        #
 # ------------------------------------------------------------------ #
 
-@socketio.on("bet_on_casino")
-def on_bet_on_casino(data: dict):
-    """Un joueur mise au casino."""
-    from flask import request
-    game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
-    if game is None or player is None:
-        return
-
-    if game.casino_card and game.casino_card.is_open:
-        game.casino_card.bet_on_casino(game, player)
-        game.broadcast_update()
-
-
 @socketio.on("confirm_casino_bet")
 def on_confirm_casino_bet(data: dict):
+    """L'ouvreur mise (ou passe via bet_card_id=None)."""
     from flask import request
     game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
     if game is None or player is None:
         return
-    card = game.find_card_by_id(data.get("card_id", ""))
-    if card and hasattr(card, "confirm_bet_selection"):
-        card.confirm_bet_selection(data)
-
+    interaction = game.pending_interaction
+    if not interaction or interaction["type"] != "casino_opener_bet":
+        return
+    if interaction["player_id"] != player.id:
+        return
+    card = game.find_card_by_id(interaction["card_id"])
+    if card is None:
+        return
+    card.resolve_opener(game, player, data)
 
 @socketio.on("discard_casino_bet")
 def on_discard_casino_bet(data: dict):
+    """L'ouvreur annule — le casino ne s'ouvre pas."""
+    from flask import request
+    print(f"[DEBUG] discard_casino_bet reçu : {data}")
+    game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
+    if game is None or player is None:
+        return
+
+    interaction = game.pending_interaction
+    if not interaction or interaction["type"] != "casino_opener_bet":
+        return
+    if interaction["player_id"] != player.id:
+        return
+
+    # Annuler : remettre la carte casino en main, fermer le casino
+    casino_card = game.find_card_by_id(interaction["card_id"])
+    if casino_card:
+        casino_card.is_open = False
+        game.casino_card = None
+        player.hand.append(casino_card)
+
+    game.pending_interaction = None
+    game.broadcast_update()
+
+
+@socketio.on("bet_on_casino")
+def on_bet_on_casino(data: dict):
+    """Un joueur (non-ouvreur) mise pendant son propre tour."""
     from flask import request
     game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
     if game is None or player is None:
         return
-    card = game.find_card_by_id(data.get("card_id", ""))
-    if card and hasattr(card, "discard_bet_selection"):
-        card.discard_bet_selection(data)
+    # Doit être son tour et en phase play
+    if game.current_player != player.id:
+        _emit_error(request.sid, "Ce n'est pas votre tour")
+        return
+    if game.phase != "play":
+        _emit_error(request.sid, "Piochez d'abord")
+        return
+    if not game.casino_card or not game.casino_card.is_open:
+        return
+    game.casino_card.resolve_second(game, player, data)
 
+
+# ------------------------------------------------------------------ #
+#  POSER UN SALAIRE                          #
+# ------------------------------------------------------------------ #
+
+@socketio.on("confirm_salary_placement")
+def on_confirm_salary_placement(data: dict):
+    """Le joueur a choisi où poser son salaire (normal ou casino)."""
+    from flask import request
+    game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
+    if game is None or player is None:
+        return
+
+    interaction = game.pending_interaction
+    if not interaction or interaction["type"] != "salary_placement":
+        _emit_error(request.sid, "Aucune interaction en cours")
+        return
+    if interaction["player_id"] != player.id:
+        _emit_error(request.sid, "Ce n'est pas votre interaction")
+        return
+
+    card = game.find_card_by_id(interaction["card_id"])
+    if card is None:
+        _emit_error(request.sid, "Carte introuvable")
+        return
+
+    choice = data.get("choice")  # "normal" ou "casino"
+    if choice not in ("normal", "casino"):
+        _emit_error(request.sid, "Choix invalide")
+        return
+
+    game.pending_interaction = None
+    card.resolve_placement(game, player, choice)
+
+
+@socketio.on("cancel_salary_placement")
+def on_cancel_salary_placement(data: dict):
+    """Le joueur annule — la carte est encore en main, rien à faire."""
+    from flask import request
+    game, player = _get_game_and_player(data.get("room_id", ""), request.sid)
+    if game is None or player is None:
+        return
+
+    interaction = game.pending_interaction
+    if not interaction or interaction["type"] != "salary_placement":
+        return
+    if interaction["player_id"] != player.id:
+        return
+
+    game.pending_interaction = None
+    game.broadcast_update()
 
 # ------------------------------------------------------------------ #
 #  Cartes interactives — Médium / Journaliste                          #
