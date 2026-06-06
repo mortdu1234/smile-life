@@ -3,24 +3,24 @@
   "label": "🎮 Base",
   "description": "Uniquement les cartes de base (sans cartes spéciales ni extensions)",
   "deck": {
-    "study1": 22, "study2": 3,
+    "study__1": 22, "study__2": 3,
 
-    "salary1": 10, "salary2": 10, "salary3": 10, "salary4": 10,
+    "salary__1": 10, "salary__2": 10, "salary__3": 10, "salary__4": 10,
 
     "architecte": 1, "astronaute": 1, "avocat": 1, "bandit": 1, "barman": 1,
-    "chef_achats": 1, "chef_des_ventes": 1, "chercheur": 1, "chirurgien": 1,
+    "chef_des_achats": 1, "chef_des_ventes": 1, "chercheur": 1, "chirurgien": 1,
     "designer": 1, "ecrivain": 1, "garagiste": 1, "gourou": 1, "grand_prof": 1,
     "jardinier": 1, "journaliste": 1, "medecin": 1, "medium": 1, "militaire": 1,
     "pharmacien": 1, "pilote": 1, "pizzaiolo": 1, "plombier": 1, "policier": 1,
-    "prof_maths": 1, "prof_francais": 1, "prof_anglais": 1, "prof_geo": 1,
+    "prof__maths": 1, "prof__francais": 1, "prof__anglais": 1, "prof__geo": 1,
     "serveur": 1, "stripteaser": 1,
 
-    "flirt_bar": 2, "flirt_parc": 2, "flirt_theatre": 2, "flirt_cinema": 2,
-    "flirt_boite_de_nuit": 2, "flirt_with_child_camping": 2, "flirt_with_child_hotel": 2,
-    "flirt_restaurant": 2, "flirt_zoo": 2, "flirt_internet": 2,
+    "flirt__bar": 2, "flirt__parc": 2, "flirt__theatre": 2, "flirt__cinema": 2,
+    "flirt__boite_de_nuit": 2, "flirt_with_child__camping": 2, "flirt_with_child__hotel": 2,
+    "flirt__restaurant": 2, "flirt__zoo": 2, "flirt__internet": 2,
 
-    "marriage_corps_nuds": 1, "marriage_fourqueux": 1, "marriage_montcuq": 1,
-    "marriage_monteton": 1, "marriage_sainte_vierge": 1,
+    "marriage__corps_nuds": 1, "marriage__fourqueux": 1, "marriage__montcuq": 1,
+    "marriage__monteton": 1, "marriage__sainte_vierge": 1,
 
     "adultery": 3,
 
@@ -34,10 +34,10 @@
     "etoile_filante": 1, "heritage": 1, "piston": 1, "troc": 1,
     "tsunami": 1, "vengeance": 1,
 
-    "house1": 2, "house2": 2, "house3": 1,
+    "house__1": 2, "house__2": 2, "house__3": 1,
 
-    "travel_le_caire": 1, "travel_londre": 1, "travel_new_york": 1,
-    "travel_rio": 1, "travel_sydney": 1,
+    "travel__le_caire": 1, "travel__londre": 1, "travel__new_york": 1,
+    "travel__rio": 1, "travel__sydney": 1,
 
     "licorne": 1, "poussin": 1, "lapin": 1, "chien": 1, "chat": 1,
 

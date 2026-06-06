@@ -3,24 +3,24 @@
   "label": "🧹 Vider tout",
   "description": "Deck vide — personnalisation manuelle",
   "deck": {
-    "study1": 0, "study2": 0,
+    "study__1": 0, "study__2": 0,
 
-    "salary1": 0, "salary2": 0, "salary3": 0, "salary4": 0,
+    "salary__1": 0, "salary__2": 0, "salary__3": 0, "salary__4": 0,
 
     "architecte": 0, "astronaute": 0, "avocat": 0, "bandit": 0, "barman": 0,
-    "chef_achats": 0, "chef_des_ventes": 0, "chercheur": 0, "chirurgien": 0,
+    "chef_des_achats": 0, "chef_des_ventes": 0, "chercheur": 0, "chirurgien": 0,
     "designer": 0, "ecrivain": 0, "garagiste": 0, "gourou": 0, "grand_prof": 0,
     "jardinier": 0, "journaliste": 0, "medecin": 0, "medium": 0, "militaire": 0,
     "pharmacien": 0, "pilote": 0, "pizzaiolo": 0, "plombier": 0, "policier": 0,
-    "prof_maths": 0, "prof_francais": 0, "prof_anglais": 0, "prof_geo": 0,
+    "prof__maths": 0, "prof__francais": 0, "prof__anglais": 0, "prof__geo": 0,
     "serveur": 0, "stripteaser": 0,
 
-    "flirt_bar": 0, "flirt_parc": 0, "flirt_theatre": 0, "flirt_cinema": 0,
-    "flirt_boite_de_nuit": 0, "flirt_with_child_camping": 0, "flirt_with_child_hotel": 0,
-    "flirt_restaurant": 0, "flirt_zoo": 0, "flirt_internet": 0,
+    "flirt__bar": 0, "flirt__parc": 0, "flirt__theatre": 0, "flirt__cinema": 0,
+    "flirt__boite_de_nuit": 0, "flirt_with_child__camping": 0, "flirt_with_child__hotel": 0,
+    "flirt__restaurant": 0, "flirt__zoo": 0, "flirt__internet": 0,
 
-    "marriage_corps_nuds": 0, "marriage_fourqueux": 0, "marriage_montcuq": 0,
-    "marriage_monteton": 0, "marriage_sainte_vierge": 0,
+    "marriage__corps_nuds": 0, "marriage__fourqueux": 0, "marriage__montcuq": 0,
+    "marriage__monteton": 0, "marriage__sainte_vierge": 0,
 
     "adultery": 0,
 
@@ -34,10 +34,10 @@
     "etoile_filante": 0, "heritage": 0, "piston": 0, "troc": 0,
     "tsunami": 0, "vengeance": 0,
 
-    "house1": 0, "house2": 0, "house3": 0,
+    "house__1": 0, "house__2": 0, "house__3": 0,
 
-    "travel_le_caire": 0, "travel_londre": 0, "travel_new_york": 0,
-    "travel_rio": 0, "travel_sydney": 0,
+    "travel__le_caire": 0, "travel__londre": 0, "travel__new_york": 0,
+    "travel__rio": 0, "travel__sydney": 0,
 
     "licorne": 0, "poussin": 0, "lapin": 0, "chien": 0, "chat": 0,
 
