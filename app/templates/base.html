@@ -60,6 +60,10 @@
       font-weight: 600;
     }
   </style>
+  <script>
+  const APP_ROOT = "{{ request.script_root }}";
+  const url = path => APP_ROOT + path;
+  </script>
   {% block head %}{% endblock %}
 </head>
 <body>

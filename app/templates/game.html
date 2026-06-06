@@ -1732,7 +1732,7 @@ function cardInnerHtml(card) {
   if (imgSrc) {
     return `
       <div class="card-type">${card.type || ''}</div>
-      <img src="/${imgSrc}" alt="${name}"
+      <img src="{{ url_for('static', filename='${imgSrc}') }}" alt="${name}"
            onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
            style="display:block" />
       <div style="display:none;font-size:.7rem;color:#e94560;padding:.2rem">[img manquante]</div>

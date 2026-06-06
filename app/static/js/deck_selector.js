@@ -219,7 +219,7 @@ const DeckSelector = (() => {
 
     // Charger les presets depuis le serveur
     try {
-      const res = await fetch('/api/presets');
+      const res = await fetch(url('/api/presets'));
       if (!res.ok) throw new Error('HTTP ' + res.status);
       PRESETS = await res.json();
       if (!Array.isArray(PRESETS) || PRESETS.length === 0)
@@ -282,7 +282,7 @@ const DeckSelector = (() => {
     if (btn) { btn.classList.add('active'); btn.disabled = true; }
 
     try {
-      const res = await fetch(`/api/presets/${encodeURIComponent(presetId)}`);
+      const res = await fetch(url(`/api/presets/${encodeURIComponent(presetId)}`));
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const preset = await res.json();
       if (!preset.deck) throw new Error('deck manquant dans la réponse');

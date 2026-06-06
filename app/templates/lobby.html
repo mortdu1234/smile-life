@@ -136,7 +136,7 @@
   <!-- ── Créer une partie ── -->
   <div class="card">
     <h2>Créer une partie</h2>
-    <form action="/room/create" method="POST" id="create-form">
+    <form action="{{ url_for('create_room') }}" method="POST">
 
       <!-- Nom injecté depuis la zone globale -->
       <input type="hidden" name="name" id="form-name" />
@@ -195,7 +195,7 @@
 
 </div>
 
-<script src="/static/js/deck_selector.js"></script>
+<script src="{{ url_for('static', filename='js/deck_selector.js') }}"></script>
 <script>
   DeckSelector.init('deck-selector-lobby', {});
 
@@ -250,7 +250,7 @@
       if (valid) {
         // Ajouter le nom en query param pour que game.html le récupère
         const room = btn.dataset.room;
-        btn.href = `/room/${room}?name=${encodeURIComponent(val)}`;
+        btn.href = url(`/room/${room}?name=${encodeURIComponent(val)}`);
       }
     });
   }
