@@ -44,7 +44,7 @@ def load_cards(deck_config: Dict[str, int] | None = None) -> List:
     cards = []
 
     for card_id, entries in variants.items():
-        print(f"######## TESTING######### : ", card_id.split("__")[0])
+        # print(f"######## TESTING######### : ", card_id.split("__")[0])
         cls = _resolve_class(CARD_REGISTRY, card_id.split("__")[0])
         if cls is None:
             print(f"[loader] ⚠️  card_id sans correspondance dans le registre : '{card_id}' — ignoré")
