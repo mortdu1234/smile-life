@@ -23,6 +23,7 @@ class RoomManager:
         room = Room(room_id, host_id, num_players)
         room.deck_config = deck_config
         self._rooms[room_id] = room
+        print(f"[RoomManager] Created room {room_id} with host {host_id} and deck_config {deck_config}")
         return room
 
     def get_room(self, room_id: str) -> Room | None:

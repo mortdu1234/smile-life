@@ -25,6 +25,7 @@ def create_room():
     # Lire la config deck envoyée par le lobby (JSON { card_id: count })
     deck_config = None
     deck_config_raw = request.form.get("deck_config", "")
+    print("Raw deck_config from form:", deck_config_raw)
     if deck_config_raw:
         try:
             raw = json.loads(deck_config_raw)
