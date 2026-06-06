@@ -41,7 +41,6 @@ const DeckSelector = (() => {
       { id:'policier',         label:'Policier',             default:1  },
       { id:'prof_anglais',     label:"Prof d'anglais",       default:1  },
       { id:'prof_francais',    label:'Prof de français',     default:1  },
-      { id:'prof_geo',         label:"Prof d'histoire-géo",  default:1  },
       { id:'prof_maths',       label:'Prof de maths',        default:1  },
       { id:'serveur',          label:'Serveur',              default:1  },
       { id:'stripteaser',      label:'Strip-teaseur',        default:1  },
@@ -55,11 +54,9 @@ const DeckSelector = (() => {
       { id:'salary4',          label:'Salaire 4',            default:10 },
       // Flirts
       { id:'flirt_bar',              label:'Flirt au bar',             default:2 },
-      { id:'flirt_bibliotheque',     label:'Flirt à la bibliothèque',  default:2 },
       { id:'flirt_boite_de_nuit',    label:'Flirt en boîte de nuit',   default:2 },
       { id:'flirt_cinema',           label:'Flirt au cinéma',          default:2 },
       { id:'flirt_internet',         label:'Flirt sur internet',       default:2 },
-      { id:'flirt_manif',            label:'Flirt à la manif',         default:2 },
       { id:'flirt_parc',             label:'Flirt au parc',            default:2 },
       { id:'flirt_restaurant',       label:'Flirt au restaurant',      default:2 },
       { id:'flirt_theatre',          label:'Flirt au théâtre',         default:2 },
@@ -198,6 +195,9 @@ const DeckSelector = (() => {
       { id:'phalocratie',    label:'Phallocratie',     default:0 },
       { id:'plafond_verre',  label:'Plafond de verre', default:0 },
       { id:'porc',           label:'Balance ton porc', default:0 },
+      // Flirts
+      { id:'flirt_manif',            label:'Flirt à la manif',         default:0 },
+      { id:'flirt_bibliotheque',     label:'Flirt à la bibliothèque',  default:0 },
     ]
   },
 ];

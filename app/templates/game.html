@@ -642,7 +642,9 @@
 
 {% block scripts %}
 <script>
-const STATIC_URL = "{{ url_for('static', filename='') }}";
+  if (typeof STATIC_URL === 'undefined') {
+    var STATIC_URL = "{{ url_for('static', filename='') }}";
+  }
 </script>
 <script>
 // =====================================================================
