@@ -646,7 +646,7 @@
 // Configuration
 // =====================================================================
 const ROOM_ID   = "{{ room.id }}";
-const socket    = io();
+const socket = io({ path: '/game-smile-life/socket.io' });
 
 let myPlayerId      = null;
 let gameState       = null;
