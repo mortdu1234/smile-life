@@ -642,6 +642,9 @@
 
 {% block scripts %}
 <script>
+const STATIC_URL = "{{ url_for('static', filename='') }}";
+</script>
+<script>
 // =====================================================================
 // Configuration
 // =====================================================================
@@ -1719,7 +1722,6 @@ function closeOverlay(id) {
   document.getElementById(id).classList.remove('active');
 }
 
-const STATIC_URL = "{{ url_for('static', filename='') }}";
 
 function cardInnerHtml(card) {
   const name   = card.subtype || card.type || '?';
