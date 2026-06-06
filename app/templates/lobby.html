@@ -136,7 +136,7 @@
   <!-- ── Créer une partie ── -->
   <div class="card">
     <h2>Créer une partie</h2>
-    <form action="{{ url_for('web.create_room') }}" method="POST">
+    <form action="{{ url_for('web.create_room') }}" method="POST" id="create-form">
 
       <!-- Nom injecté depuis la zone globale -->
       <input type="hidden" name="name" id="form-name" />
@@ -263,6 +263,7 @@
       nameInput.focus();
       return;
     }
+    // ✅ Remplir AVANT la soumission
     document.getElementById('deck-config-input').value = JSON.stringify(DeckSelector.getState());
     formName.value = val;
   });
