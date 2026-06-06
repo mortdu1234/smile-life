@@ -1530,6 +1530,13 @@ function renderCasino(game, me) {
     list.appendChild(el);
   });
 
+  socket.on('room_closed', ({ room_id }) => {
+  if (room_id === ROOM_ID) {
+    flash('La salle a été fermée — plus aucun joueur connecté.', '#e94560');
+    setTimeout(() => window.location.href = '/', 2500);
+  }
+});
+
   panel.querySelector('#casino-skip-btn').addEventListener('click', () => {
     socket.emit('confirm_casino_bet', { room_id: ROOM_ID, card_id: casino.id });
     panel.remove();

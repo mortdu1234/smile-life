@@ -139,13 +139,33 @@ def on_disconnect():
         for player in room.players:
             if player.session_id == request.sid:
                 player.connected = False
+
+                all_disconnected = all(not p.connected for p in room.players)
+
+                if all_disconnected:
+                    # Délai de grâce de 30s avant de fermer
+                    # (reconnexion possible après refresh)
+                    import threading
+                    room_id = room.id
+
+                    def _close_if_still_empty():
+                        r = room_manager.get_room(room_id)
+                        if r is None:
+                            return
+                        if all(not p.connected for p in r.players):
+                            room_manager.delete_room(room_id)
+                            socketio.emit("room_closed", {"room_id": room_id})
+
+                    t = threading.Timer(30.0, _close_if_still_empty)
+                    t.daemon = True
+                    t.start()
+                    return
+
                 if room.game:
                     room.game.broadcast_update(f"{player.name} s'est déconnecté.")
                 else:
-                    # Salle d'attente : mettre à jour la liste
                     socketio.emit("room_updated", _room_state(room), room=room.id)
                 return
-
 
 # ------------------------------------------------------------------ #
 #  Salle d'attente — Deck config                                       #

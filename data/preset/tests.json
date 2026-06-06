@@ -1,7 +1,7 @@
 {
-  "id": "vide",
-  "label": "🧹 Vider tout",
-  "description": "Deck vide — personnalisation manuelle",
+  "id": "tests",
+  "label": "preset de test",
+  "description": "Deck test — version de test pour les développeurs",
   "deck": {
     "study1": 0, "study2": 0,
 
