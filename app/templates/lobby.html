@@ -267,5 +267,23 @@
     document.getElementById('deck-config-input').value = JSON.stringify(DeckSelector.getState());
     formName.value = val;
   });
+
+  DeckSelector.onChange((state) => {
+    document.getElementById('deck-config-input').value = JSON.stringify(state);
+  });
+
+  DeckSelector.init('deck-selector-lobby', {});
+
+  document.getElementById('create-form').addEventListener('submit', (e) => {
+    const val = nameInput.value.trim();
+    if (val.length < 2) {
+      e.preventDefault();
+      nameInput.focus();
+      return;
+    }
+    // ✅ Sécurité : remplir aussi au submit au cas où
+    document.getElementById('deck-config-input').value = JSON.stringify(DeckSelector.getState());
+    formName.value = val;
+  });
 </script>
 {% endblock %}
