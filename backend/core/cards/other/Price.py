@@ -1,3 +1,4 @@
+from ....userIo.interface import UserIO
 from ...Game import Game
 from ...Player import Player
 from ...Power import Power
@@ -15,6 +16,6 @@ class Price(OtherCard):
             return False, "il te faut un métier qui puisse etre priced"
         return super().can_be_played(player, game)
 
-    def apply_card_effect(self, game: Game, current_player: Player) -> bool:
+    def apply_card_effect(self, game: Game, current_player: Player, interface: UserIO) -> bool:
         current_player.remove_power(Power.CAN_BE_PRICED)
-        return super().apply_card_effect(game, current_player)
+        return super().apply_card_effect(game, current_player, interface)

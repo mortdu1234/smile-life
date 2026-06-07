@@ -155,6 +155,7 @@ def draw_discard(game_id):
     return _action_response(success, reason, game_id)
 
 
+
 # ── Pose / défausse depuis la main ─────────────────────────────────────────────
 
 @game_bp.route("/<game_id>/place", methods=["POST"])
@@ -213,3 +214,32 @@ def skip(game_id):
     pseudo = _require_pseudo()
     success, reason = skip_turn(game_id, pseudo)
     return _action_response(success, reason, game_id)
+
+# ── UserIO ───────────────────────────────────────────────────────────────────────
+
+@game_bp.route("/<game_id>/pending")
+def pending(game_id):
+    game = get_game(game_id)
+    if not game:
+        return jsonify({"pending": None})
+    pseudo = session.get("pseudo")
+    player = next((p for p in game.players if p.name == pseudo), None)
+    if not player:
+        return jsonify({"pending": None})
+    return jsonify({"pending": player.get_interface().pending})
+
+
+@game_bp.route("/<game_id>/submit-indices", methods=["POST"])
+def submit_indices(game_id):
+    game = get_game(game_id)
+    if not game:
+        return jsonify({"ok": False, "error": "Partie introuvable."}), 404
+    pseudo = session.get("pseudo")
+    player = next((p for p in game.players if p.name == pseudo), None)
+    if not player:
+        return jsonify({"ok": False, "error": "Joueur introuvable."}), 404
+    indices = (request.get_json() or {}).get("indices")
+    if not isinstance(indices, list):
+        return jsonify({"ok": False, "error": "indices manquants."}), 400
+    player.get_interface().submit_indices(indices)
+    return jsonify({"ok": True})

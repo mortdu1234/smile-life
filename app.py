@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, jsonify
+from flask import Flask, redirect, request, url_for, jsonify
 from flask_socketio import SocketIO
 from backend.webSocket import init_socketio
 import logging
@@ -28,10 +28,6 @@ def create_app(secret_key: str = 'change-me-in-production') -> Flask:
     @app.route('/')
     def root():
         return redirect(url_for('hub.index'))
-
-    @app.route("/pending")
-    def pending():
-        return jsonify({"pending": None})
 
     return app
 

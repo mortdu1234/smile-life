@@ -52,6 +52,11 @@ class Game:
         self.center_cards_played = []
         self.historique = []
         self.game_state = GameState.PIOCHE
+        # Donne les mains des joueurs
+        for _ in range(5):
+            for player in self.players:
+                player.add_card_to_hand(deck.pop())
+        
         
 
     def to_dict(self, viewer: str | None = None) -> dict:
@@ -134,7 +139,7 @@ class Game:
             return False, reason
         player.add_card_to_hand(card)
         self.game_state = GameState.POSE
-        card.play_card(self, player)
+        card.play_card(self, player, player.get_interface())
         self.next_turn()
         return True, ""
         
@@ -211,7 +216,7 @@ class Game:
         if not success:
             return False, reason
 
-        card.play_card(self, player)
+        card.play_card(self, player, player.get_interface())
         self.next_turn()
         return True, ""
 

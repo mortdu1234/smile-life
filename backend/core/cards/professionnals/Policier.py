@@ -3,7 +3,9 @@ from ...Game import Game
 from ...Player import Player
 from ...Power import Power
 from .JobCard import JobCard
-
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ....userIo.interface import UserIO
 class Policier(JobCard):
     def __init__(self, id: int, image_path: str):
         super().__init__(id, image_path)
@@ -13,7 +15,7 @@ class Policier(JobCard):
         self.study = 1
         self.salary = 1
 
-    def apply_card_effect(self, game: Game, current_player: Player) -> bool:
+    def apply_card_effect(self, game: Game, current_player: Player, interface: "UserIO") -> bool:
         """supprimer tous les bandit et gourous sur le terrain"""
         print("[DEBUG] TODO")
-        return super().apply_card_effect(game, current_player)
+        return super().apply_card_effect(game, current_player, interface)

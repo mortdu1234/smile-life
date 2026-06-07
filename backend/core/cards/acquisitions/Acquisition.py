@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ...Game import Game
     from ...Player import Player
+    from ....userIo.interface import UserIO
 
 from ..Card import Card
 
@@ -20,8 +21,14 @@ class Acquisition(Card):
         sum = 0
         cost = self.calcul_cost(player, game)
         for salary in salaries:
-            sum = salary.get_value()
+            sum += salary.get_value()
         if sum < cost:
             return False, "pas assez de salaire"
         return super().can_be_played(player, game)
+
+    def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
+        """effectue la selection des salaires pour l'acquisition"""
+        available_salaries = current_player.get_available_salary()
+        interface.ask_salaries(self, available_salaries, self.calcul_cost(current_player, game))
+        return super().apply_card_effect(game, current_player, interface)
     

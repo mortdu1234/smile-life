@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from ...Game import Game
     from ...Player import Player
     from .Flirts import FlirtWithChild
-
+    from ....userIo.interface import UserIO
 from ..Card import Card
 
 # ------------------------------------------------------------------ #
@@ -38,10 +38,10 @@ class ChildCard(Card):
             return False, "il faut etre marriée ou avoir un flirt pour enfant en dernier"
         return super().can_be_played(player, game)
 
-    def apply_card_effect(self, game: 'Game', current_player: 'Player') -> bool:
+    def apply_card_effect(self, game: 'Game', current_player: 'Player', interface: 'UserIO') -> bool:
         if not current_player.is_wedding() and isinstance(current_player.get_last_flirt(), 'FlirtWithChild'):
             current_player.get_last_flirt().set_used() # type: ignore
-        return super().apply_card_effect(game, current_player)
+        return super().apply_card_effect(game, current_player, interface)
 
 # ------------------------------------------------------------------ #
 #  Enfants concrets                                                    #

@@ -22,7 +22,7 @@ class JobCard(Card):
 
     def get_power(self):
         """retourne les pouvoirs du métier"""
-        return self.jobPower + [Power.NO_FIRE] if self.status==JobStatus.FONCTIONNAIRE else []
+        return self.jobPower + [Power.NO_FIRE] if self.jobStatus==JobStatus.FONCTIONNAIRE else []
 
     def discard_job(self, current_player: "Player", game: "Game"):
         """Effectue les actions lors d'un discard du métier"""

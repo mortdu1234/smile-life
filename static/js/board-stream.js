@@ -11,7 +11,11 @@ socket.on('connect', () => {
 // Dans board-stream.js, remplace temporairement updateBoard(state) par :
 socket.on('game_update', (state) => {
     console.log('players[0]:', JSON.stringify(state.players[0], null, 2));
-    updateBoard(state);
+    if (typeof window.updateBoard === 'function') {
+        updateBoard(state);
+    } else {
+        console.error('updateBoard non défini');
+    }
 });
 
 socket.on('disconnect', () => {

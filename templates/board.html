@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Plateau — {{ game.id }}</title>
+  <script>
+    const GAME_ID = "{{ game.id }}";
+    const IS_MY_TURN = {{ 'true' if is_my_turn else 'false' }};
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">html
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -627,10 +632,8 @@
     </div>
   </div>
 
-  <script>
-    const GAME_ID = "{{ game.id }}";
-    const IS_MY_TURN = {{ 'true' if is_my_turn else 'false' }};
-  </script>
+  {% include "overlays/salary-selector.html" %}
+
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="/static/js/board-stream.js"></script>
   <script type="module" src="{{ url_for('static', filename='js/IO/io-core.js') }}"></script>
@@ -686,7 +689,7 @@
       const res = await fetch(`/game/${GAME_ID}/draw`, { method: 'POST' });
       const data = await res.json();
       if (!data.ok) { alert(data.error); return; }
-      // Le SSE déclenche updateBoard automatiquement
+      if (data.state) updateBoard(data.state);  // ← ajouter ça
     }
 
     // ── Jouer une carte ──────────────────────────────────────────────────────

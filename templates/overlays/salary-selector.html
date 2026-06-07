@@ -1,0 +1,60 @@
+{# templates/overlays/salary_selector.html #}
+{# Inclure ce template via {% include %} ou le rendre dynamiquement via JS #}
+<link rel="stylesheet" href="/static/css/salary-selector.css">
+
+<div id="salary-overlay" class="salary-overlay" aria-modal="true" role="dialog" aria-labelledby="salary-overlay-title" hidden>
+  <div class="salary-overlay__backdrop"></div>
+
+  <div class="salary-overlay__panel">
+
+    <div class="salary-overlay__header">
+      <div class="salary-overlay__header-top">
+        <span class="salary-overlay__tag">PAIEMENT</span>
+        <div class="salary-overlay__cost-badge">
+          <span class="salary-overlay__cost-label">COÛT</span>
+          <span class="salary-overlay__cost-value" id="salary-required-cost">0</span>
+        </div>
+      </div>
+      <h2 class="salary-overlay__title" id="salary-overlay-title">Sélectionner les salaires</h2>
+      <p class="salary-overlay__prompt" id="salary-prompt-text"></p>
+    </div>
+
+    <div class="salary-overlay__progress-bar-container">
+      <div class="salary-overlay__progress-bar" id="salary-progress-bar"></div>
+      <div class="salary-overlay__progress-markers" id="salary-progress-markers"></div>
+    </div>
+
+    <div class="salary-overlay__summary">
+      <span class="salary-overlay__summary-label">Sélectionné :</span>
+      <span class="salary-overlay__summary-value" id="salary-selected-total">0</span>
+      <span class="salary-overlay__summary-sep">/</span>
+      <span class="salary-overlay__summary-needed" id="salary-needed-total">0</span>
+    </div>
+
+    <div class="salary-overlay__cards-grid" id="salary-cards-grid" role="listbox" aria-multiselectable="true">
+      {# Cards injected dynamically via JS #}
+    </div>
+
+    <div class="salary-overlay__footer">
+      <button
+        class="salary-overlay__btn salary-overlay__btn--cancel"
+        id="salary-cancel-btn"
+        type="button"
+        aria-label="Annuler la sélection"
+      >Annuler</button>
+      <button
+        class="salary-overlay__btn salary-overlay__btn--confirm"
+        id="salary-confirm-btn"
+        type="button"
+        disabled
+        aria-label="Confirmer la sélection"
+      >
+        <span class="salary-overlay__btn-text">Confirmer</span>
+        <svg class="salary-overlay__btn-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+  </div>
+</div>

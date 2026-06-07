@@ -1,10 +1,8 @@
 import { getHandler } from "./io-registry.js";
 
 // Importer les handlers suffit à les enregistrer
-import "./handlers/player-selector.js";
-import "./handlers/card-grid.js";
-import "./handlers/hardship-target.js";
 import "./handlers/card-detail.js";
+import "./handlers/salary-selector.js";   // ← ajouté
 
 // ── Expose openCard globalement pour board.html ───────────────────────────────
 window.openCard = function(card, context) {
@@ -24,7 +22,7 @@ window.openCard = function(card, context) {
 
 // ── IO polling (pour les actions nécessitant un choix joueur) ────────────────
 async function submit(index) {
-  await fetch("/submit", {
+  await fetch(`/game/${window.GAME_ID}/submit`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ index }),
@@ -32,12 +30,20 @@ async function submit(index) {
   poll();
 }
 
+async function submitIndices(indices) {
+  await fetch(`/game/${window.GAME_ID}/submit-indices`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ indices }),
+  });
+  poll();
+}
+
 async function poll() {
   let pending = null;
   try {
-    const res = await fetch("/pending");
+    const res = await fetch(`/game/${window.GAME_ID}/pending`);
     if (!res.ok) {
-      // Route /pending pas encore implémentée — on reessaie plus tard
       setTimeout(poll, 2000);
       return;
     }
@@ -56,14 +62,19 @@ async function poll() {
   const render = getHandler(pending.ui_component);
   if (!render) {
     console.error(`Handler introuvable : ${pending.ui_component}`);
+    setTimeout(poll, 500);
     return;
   }
 
   const container = document.getElementById("io-container");
   if (container) {
     container.innerHTML = "";
-    container.appendChild(render({ ...pending, onSubmit: submit }));
+    const onSubmit = pending.ui_component === "salary-selector" ? submitIndices : submit;
+    container.appendChild(render({ ...pending, onSubmit }));
   }
+
+  // Continuer à poller — un nouveau pending peut arriver après la fermeture de l'overlay
+  setTimeout(poll, 500);
 }
 
 poll();

@@ -3,7 +3,9 @@ from ...Player import Player
 from ...Power import Power
 from ..Card import Card
 from .JobCard import JobCard
-
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ....userIo.interface import UserIO
 import random
 
 class Chercheur(JobCard):
@@ -13,10 +15,10 @@ class Chercheur(JobCard):
         self.study = 6
         self.salary = 2
 
-    def apply_card_effect(self, game: Game, current_player: Player) -> bool:
+    def apply_card_effect(self, game: Game, current_player: Player, interface: "UserIO") -> bool:
         """Pioche une carte en plus afin d'en avoir 6"""
         game.draw_card_from_deck(current_player.get_id())
-        return super().apply_card_effect(game, current_player)
+        return super().apply_card_effect(game, current_player, interface)
     
     def discard_job(self, current_player: Player, game: Game):
         """retire une carte aléatoire de sa main et la jette dans la défausse"""

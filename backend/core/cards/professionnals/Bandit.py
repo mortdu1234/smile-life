@@ -2,7 +2,9 @@ from ...Game import Game
 from ...Player import Player
 from ...Power import Power
 from .JobCard import JobCard
-
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ....userIo.interface import UserIO
 class Bandit(JobCard):
     def __init__(self, id: int, image_path: str):
         super().__init__(id, image_path)
@@ -16,7 +18,7 @@ class Bandit(JobCard):
                 return False, "Il y a une personne qui bloque les bandits"
         return super().can_be_played(player, game)
 
-    def apply_card_effect(self, game: Game, current_player: Player) -> bool:
+    def apply_card_effect(self, game: Game, current_player: Player, interface: "UserIO") -> bool:
         """ajoute au joueur courrant la caracteristique has_been_bandit"""
         current_player.power.append(Power.HAS_BEEN_BANDIT)
-        return super().apply_card_effect(game, current_player)
+        return super().apply_card_effect(game, current_player, interface)

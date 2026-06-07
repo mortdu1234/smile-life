@@ -15,6 +15,7 @@ import random
 from pathlib import Path
 
 from .webSocket import broadcast_game
+from .userIo.web import WebIO
 
 from .core.Game import Game
 from .core.Player import Player
@@ -113,7 +114,7 @@ def start_game(game_id: str, host_pseudo: str) -> tuple[Game | None, str | None]
         return None, f"Preset « {room['preset_id']} » introuvable."
 
     deck = _build_cards(preset)
-    players = [Player(pseudo, idx) for idx, pseudo in enumerate(room["players"])]
+    players = [Player(pseudo, idx, WebIO()) for idx, pseudo in enumerate(room["players"])]
 
     game = Game(id=game_id, players=players, deck=deck)
     game_save(game)

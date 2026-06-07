@@ -10,6 +10,10 @@ class SalaryCard(Card):
     def __init__(self, id: int, image_path: str, smiles: int, value: int):
         super().__init__(id, image_path, smiles)
         self.value = value
+    def to_dict(self) -> dict:
+        data = super().to_dict()
+        data["value"] = self.value
+        return data
 
     def get_value(self):
         return self.value
@@ -17,5 +21,7 @@ class SalaryCard(Card):
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         job=player.get_job()
         if not (job and job.get_salary() >= self.value):
-            return False, f"le métier ne permet pas de mettre des salaires de valeur {self.value}"  
+            if job:
+                return False, f"le métier ne permet pas de mettre des salaires de valeur {self.value}>{job.get_salary()}"  
+            return False, f"Vous n'avez pas de métiers0"
         return super().can_be_played(player, game)

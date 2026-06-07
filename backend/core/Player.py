@@ -1,4 +1,8 @@
 """représente un joueur dans la partie"""
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..userIo.interface import UserIO
+from ..userIo.web import WebIO
 from .cards.personnals.Wedding import Adultery, Wedding
 from .cards.professionnals.JobCard import JobCard
 from .cards.professionnals.SalaryCard import SalaryCard
@@ -21,14 +25,16 @@ class Player:
     # cartes jouées devant lui
     groupe: dict[PlayedCardGroup, list[Card]] # Toutes les cartes posés du joueurs rangées par groupe
     cards: dict[int, Card] # Toutes les cartes posées du joueurs
+    interface: "UserIO"
     
-    def __init__(self, name: str, id: int):
+    def __init__(self, name: str, id: int, interface: "UserIO"):
         self.name = name
         self.id = id
         self.hand = []
         self.power = []
         self.job = None
         self.skip_turn = 0
+        self.interface = interface
         self.groupe = {
             PlayedCardGroup.VIE_PROFESSIONNELLE: [],
             PlayedCardGroup.VIE_PERSONNELLE: [],
@@ -57,10 +63,15 @@ class Player:
     def groupe_str(self) -> dict:
         return PlayedCardGroup.groupe_to_dict(self.groupe)
 
+    def get_interface(self) -> "UserIO":
+        return self.interface
+
     def add_card_to_played(self, card: Card):
         """joue la carte du joueur et l'ajoute dans le groupe correspondant"""
         self.cards[card.get_id()] = card
         self.groupe[PlayedCardGroup.get_card_on_play_group(card)].append(card)
+        if isinstance(card, JobCard):
+            self.job = card
 
     def find_card_by_id(self, card_id: int) -> Card | None:
         """recherche une carte jouée par son id"""
@@ -75,6 +86,9 @@ class Player:
         groups: list[PlayedCardGroup] = PlayedCardGroup.get_card_groups(card)
         for group in groups:
             self.groupe[group].remove(card)
+        if isinstance(card, JobCard):
+            self.job = None
+        
 
     def remove_card_from_hand(self, card: Card) -> None:
         """retire une carte de la main du joueur"""
@@ -106,11 +120,11 @@ class Player:
         cards = self.get_card_from_group(PlayedCardGroup.VIE_PROFESSIONNELLE)
         for card in cards:
             if isinstance(card, SalaryCard):
-                result.append(cards)
+                result.append(card)
         cards = self.get_card_from_group(PlayedCardGroup.CARTES_SPECIALES)
         for card in cards:
             if isinstance(card, Heritage):
-                result.append(cards)
+                result.append(card)
         return result
 
     def is_wedding(self) -> bool:
