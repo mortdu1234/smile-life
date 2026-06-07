@@ -39,7 +39,7 @@
     "travel__le_caire": 0, "travel__londre": 0, "travel__new_york": 0,
     "travel__rio": 0, "travel__sydney": 0,
 
-    "licorne": 0, "poussin": 0, "lapin": 0, "chien": 0, "chat": 0,
+    "licorne": 10, "poussin": 10, "lapin": 10, "chien": 10, "chat": 10,
 
     "prix": 0, "legion": 0
   }

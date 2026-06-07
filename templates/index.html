@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hub — Salon des Jeux</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">Salon <span>&</span> Jeux</div>
+  </nav>
+
+  <main>
+    <div class="container">
+
+      <div class="page-header">
+        <h1>Bienvenue dans le <em>Salon</em></h1>
+        <p>Créez une partie ou rejoignez celle d'un ami.</p>
+      </div>
+
+      {% if error %}
+      <div class="error-msg">{{ error }}</div>
+      {% endif %}
+
+      <!-- PSEUDO -->
+      <div class="pseudo-block">
+        <div class="pseudo-label">Mon pseudo</div>
+        <input
+          type="text"
+          id="pseudoInput"
+          placeholder="Entrez votre pseudo…"
+          maxlength="20"
+          style="flex:1; margin:0;"
+        />
+      </div>
+
+      <!-- GRID -->
+      <div class="grid">
+
+        <!-- CRÉER UNE PARTIE -->
+        <div class="card">
+          <div class="card-title">Nouvelle partie</div>
+
+          <div class="field">
+            <label>Nombre de joueurs</label>
+            <div class="player-pips" id="pipRow">
+              <div class="pip active" data-n="2">2</div>
+              <div class="pip" data-n="3">3</div>
+              <div class="pip" data-n="4">4</div>
+              <div class="pip" data-n="5">5</div>
+            </div>
+            <input type="hidden" name="max_players" id="maxPlayersHidden" value="2" />
+          </div>
+
+          <form method="POST">
+            <input type="hidden" name="action" value="create" />
+            <input type="hidden" name="pseudo" id="pseudoCreate" />
+            <input type="hidden" name="max_players" id="maxPlayersField" value="2" />
+            <button type="submit" class="btn btn-primary" onclick="fillPseudo('pseudoCreate')">
+              ✦ Créer la partie
+            </button>
+          </form>
+        </div>
+
+        <!-- REJOINDRE UNE PARTIE -->
+        <div class="card">
+          <div class="card-title">Rejoindre</div>
+
+          {% if games %}
+          <div class="games-list">
+            {% for g in games %}
+            <div class="game-item">
+              <div class="game-info">
+                <div class="game-code">{{ g.id }}</div>
+                <div class="game-meta">Hôte : {{ g.host }}</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div class="game-slots">
+                  {% for i in range(g.max_players) %}
+                  <div class="slot-dot {% if i < g.players|length %}filled{% endif %}"></div>
+                  {% endfor %}
+                </div>
+                <form method="POST" style="margin:0;">
+                  <input type="hidden" name="action" value="join" />
+                  <input type="hidden" name="pseudo" id="pseudoJoin_{{ g.id }}" />
+                  <input type="hidden" name="game_id" value="{{ g.id }}" />
+                  <button
+                    type="submit"
+                    class="btn btn-outline join-btn"
+                    onclick="fillPseudo('pseudoJoin_{{ g.id }}')"
+                  >Rejoindre</button>
+                </form>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="empty">
+            <div class="empty-icon">♟</div>
+            <p>Aucune partie ouverte pour l'instant.</p>
+          </div>
+          {% endif %}
+
+          <!-- REJOINDRE VIA CODE -->
+          <form method="POST" class="manual-join">
+            <input type="hidden" name="action" value="join" />
+            <input type="hidden" name="pseudo" id="pseudoManual" />
+            <div class="field">
+              <label>Code de partie</label>
+              <input type="text" name="game_id" placeholder="Ex : AB3K7" maxlength="5" style="text-transform:uppercase;" />
+            </div>
+            <button
+              type="submit"
+              class="btn btn-outline"
+              onclick="fillPseudo('pseudoManual')"
+            >→</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Sync pseudo to hidden fields before submit
+    function fillPseudo(targetId) {
+      const val = document.getElementById('pseudoInput').value.trim();
+      document.getElementById(targetId).value = val;
+    }
+
+    // Player count pips
+    const pips = document.querySelectorAll('.pip');
+    const maxField = document.getElementById('maxPlayersField');
+
+    pips.forEach(pip => {
+      pip.addEventListener('click', () => {
+        pips.forEach(p => p.classList.remove('active'));
+        pip.classList.add('active');
+        maxField.value = pip.dataset.n;
+      });
+    });
+
+    // Restore pseudo from sessionStorage
+    const saved = sessionStorage.getItem('pseudo');
+    if (saved) document.getElementById('pseudoInput').value = saved;
+
+    document.getElementById('pseudoInput').addEventListener('input', e => {
+      sessionStorage.setItem('pseudo', e.target.value);
+    });
+  </script>
+
+</body>
+</html>

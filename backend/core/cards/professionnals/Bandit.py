@@ -1,0 +1,22 @@
+from ...Game import Game
+from ...Player import Player
+from ...Power import Power
+from .JobCard import JobCard
+
+class Bandit(JobCard):
+    def __init__(self, id: int, image_path: str):
+        super().__init__(id, image_path)
+        self.jobPower.append(Power.NO_TAX)
+        self.jobPower.append(Power.NO_FIRE)
+        self.study = 0
+        self.salary = 4
+    def can_be_played(self, player: Player, game: Game) -> tuple[bool, str]:
+        for player in game.players:
+            if Power.NO_BANDIT in player.get_power():
+                return False, "Il y a une personne qui bloque les bandits"
+        return super().can_be_played(player, game)
+
+    def apply_card_effect(self, game: Game, current_player: Player) -> bool:
+        """ajoute au joueur courrant la caracteristique has_been_bandit"""
+        current_player.power.append(Power.HAS_BEEN_BANDIT)
+        return super().apply_card_effect(game, current_player)

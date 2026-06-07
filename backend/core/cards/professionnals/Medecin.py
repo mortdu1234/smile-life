@@ -1,0 +1,10 @@
+from ...Power import Power
+from .JobCard import JobCard
+
+class Medecin(JobCard):
+    def __init__(self, id: int, image_path: str):
+        super().__init__(id, image_path)
+        self.jobPower.append(Power.INFINITE_STUDY)
+        self.jobPower.append(Power.NO_MALADIE)
+        self.study = 6
+        self.salary = 4

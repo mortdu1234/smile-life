@@ -1,0 +1,27 @@
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ...Game import Game
+    from ...Player import Player
+
+from ..Card import Card
+
+class Acquisition(Card):
+    original_price: int
+    def __init__(self, id: int, image_path: str, smiles: int, cost: int):
+        super().__init__(id, image_path, smiles)
+        self.original_price = cost
+
+    def calcul_cost(self, player: "Player", game: "Game") -> int:
+        """retourne le prix de l'acquisition"""
+        return self.original_price
+        
+    def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
+        salaries = player.get_available_salary()
+        sum = 0
+        cost = self.calcul_cost(player, game)
+        for salary in salaries:
+            sum = salary.get_value()
+        if sum < cost:
+            return False, "pas assez de salaire"
+        return super().can_be_played(player, game)
+    

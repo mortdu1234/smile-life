@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plateau — {{ game.id }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">html
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f2ee;
+      --surface: #ffffff;
+      --text: #1a1714;
+      --muted: #7a7168;
+      --accent: #3b3028;
+      --gold: #b89a6a;
+      --gold-light: #d4b98a;
+      --line: #e0d9d0;
+      --nav-h: 56px;
+      --radius: 4px;
+      --shadow: 0 2px 24px rgba(59,48,40,0.08);
+      --card-w: 72px;
+      --card-h: 100px;
+    }
+
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(184,154,106,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 90%, rgba(59,48,40,0.04) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 24px; z-index: 200;
+    }
+    .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 600; color: var(--accent); letter-spacing: 0.04em; }
+    .nav-logo span { color: var(--gold); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .nav-turn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.08em;
+    }
+    .nav-turn.my-turn { background: var(--accent); color: var(--bg); }
+    .nav-turn.other-turn { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+    .nav-code { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+    /* ── BOARD ── */
+    .board {
+      position: fixed;
+      inset: var(--nav-h) 0 0 0;
+      display: grid;
+      grid-template-columns: 1fr 210px;
+      grid-template-rows: auto 1fr;
+      grid-template-areas:
+        "my-hand  sidebar"
+        "play-area sidebar";
+      z-index: 1;
+    }
+
+    /* ── MA MAIN ── */
+    .my-hand {
+      grid-area: my-hand;
+      border-bottom: 1px solid var(--line);
+      padding: 10px 20px 12px;
+      background: var(--surface);
+      box-shadow: 0 2px 10px rgba(59,48,40,0.05);
+    }
+    .zone-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+    }
+    .zone-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.95rem; font-weight: 600; color: var(--accent); letter-spacing: 0.04em;
+    }
+    .zone-count {
+      font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 20px;
+      background: rgba(184,154,106,0.15); color: var(--gold);
+    }
+    .zone-hint { font-size: 0.72rem; color: var(--muted); margin-left: auto; font-style: italic; }
+    .hand-cards {
+      display: flex; gap: 8px; align-items: flex-end;
+      overflow-x: auto; padding-bottom: 2px;
+    }
+    .hand-empty { font-size: 0.78rem; color: var(--muted); font-style: italic; padding: 8px 0; }
+
+    /* ── GAME CARD ── */
+    .game-card {
+      width: var(--card-w); min-width: var(--card-w);
+      height: var(--card-h);
+      border-radius: 6px; border: 1.5px solid var(--line);
+      background: var(--surface);
+      position: relative; overflow: hidden; flex-shrink: 0;
+      transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+    }
+    .my-hand .game-card { cursor: pointer; }
+    .my-hand .game-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 8px 24px rgba(59,48,40,0.15);
+      border-color: var(--gold);
+    }
+    .game-card img {
+      width: 100%; height: 68%; object-fit: cover; display: block;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    }
+    .game-card .card-type {
+      position: absolute; top: 4px; left: 4px;
+      font-size: 0.58rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 2px 5px; border-radius: 3px;
+      background: rgba(26,23,20,0.72); color: var(--bg); backdrop-filter: blur(4px);
+    }
+    .game-card .card-footer {
+      padding: 4px 6px; height: 32%;
+      display: flex; align-items: center; justify-content: space-between; gap: 4px;
+    }
+    .game-card .card-name {
+      font-size: 0.62rem; font-weight: 500; color: var(--accent);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;
+    }
+    .game-card .card-smiles { font-size: 0.62rem; color: var(--gold); white-space: nowrap; }
+
+    /* face cachée */
+    .game-card.face-down {
+      background: linear-gradient(135deg, var(--accent) 0%, #4a3828 100%);
+      border-color: var(--accent); cursor: default;
+    }
+    .game-card.face-down::after {
+      content: ''; position: absolute; inset: 5px;
+      border: 1px solid rgba(184,154,106,0.22); border-radius: 3px;
+    }
+    .game-card.face-down:hover { transform: none; box-shadow: none; border-color: var(--accent); }
+
+    /* ── PLAY AREA ── */
+    .play-area {
+      grid-area: play-area;
+      overflow-y: auto;
+      padding: 0;
+    }
+
+    .col-headers {
+      display: grid;
+      grid-template-columns: 160px repeat(5, 1fr);
+      gap: 0;
+      position: sticky; top: 0;
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+      z-index: 10;
+    }
+    .col-header-player { padding: 10px 16px; }
+    .col-header {
+      padding: 10px 8px;
+      border-left: 1px solid var(--line);
+      text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .col-icon { font-size: 1rem; line-height: 1; }
+    .col-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.68rem; font-weight: 600;
+      color: var(--accent); letter-spacing: 0.05em; text-transform: uppercase;
+      line-height: 1.2;
+    }
+
+    .player-row {
+      display: grid;
+      grid-template-columns: 160px repeat(5, 1fr);
+      gap: 0;
+      border-bottom: 1px solid var(--line);
+      min-height: 130px;
+    }
+    .player-row.is-me { background: rgba(184,154,106,0.04); }
+
+    .player-info-col {
+      padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 8px;
+      border-right: 1px solid var(--line);
+    }
+    .player-badge { display: flex; align-items: center; gap: 8px; }
+    .player-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.85rem; font-weight: 600; color: var(--bg);
+      flex-shrink: 0;
+    }
+    .player-row.is-me .player-avatar { background: var(--gold); }
+    .player-name { font-size: 0.82rem; font-weight: 500; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .player-stats { font-size: 0.72rem; color: var(--muted); }
+    .me-tag {
+      font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 20px;
+      background: rgba(184,154,106,0.15); color: var(--gold);
+      align-self: flex-start;
+    }
+    .current-turn-tag {
+      font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 20px;
+      background: rgba(59,48,40,0.08); color: var(--accent);
+      align-self: flex-start;
+    }
+
+    .opponent-hand-mini { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 2px; }
+    .opponent-hand-mini .game-card {
+      --card-w: 26px; --card-h: 36px;
+      width: 26px; min-width: 26px; height: 36px; border-radius: 3px;
+    }
+    .opponent-hand-mini .game-card.face-down::after { inset: 2px; }
+
+    .category-cell {
+      padding: 8px;
+      border-left: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      align-content: start;
+    }
+    .category-cell .game-card {
+      --card-w: 68px; --card-h: 96px;
+      width: 68px; min-width: 68px; height: 96px;
+      cursor: pointer;
+    }
+    .category-cell .game-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 18px rgba(59,48,40,0.14);
+      border-color: var(--gold);
+    }
+    .cell-empty {
+      grid-column: 1 / -1;
+      font-size: 0.68rem; color: var(--muted); font-style: italic; text-align: center; margin: auto; opacity: 0.5;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      grid-area: sidebar;
+      border-left: 1px solid var(--line);
+      background: var(--surface);
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+    }
+    .sidebar-section { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+    .sidebar-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.82rem; font-weight: 600; color: var(--accent);
+      letter-spacing: 0.06em; text-transform: uppercase;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+    }
+    .status-badge {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 6px 12px; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 500; letter-spacing: 0.06em;
+      width: 100%; margin-bottom: 8px;
+    }
+    .status-badge.active { background: rgba(184,154,106,0.15); color: var(--gold); border: 1px solid rgba(184,154,106,0.3); }
+    .status-badge.waiting { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+    .turn-info { font-size: 0.75rem; color: var(--muted); text-align: center; }
+    .turn-info strong { color: var(--accent); }
+
+    .deck-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .deck-pile { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .deck-label { font-size: 0.65rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .deck-card {
+      width: 58px; height: 80px; border-radius: 5px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+      position: relative; overflow: hidden;
+    }
+    .deck-card.pioche {
+      background: linear-gradient(135deg, var(--accent) 0%, #5a4a3a 100%);
+      border: 1.5px solid var(--accent);
+      transition: transform 0.18s, box-shadow 0.18s;
+    }
+    .deck-card.pioche.clickable { cursor: pointer; }
+    .deck-card.pioche.clickable:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(59,48,40,0.25); }
+    .deck-card.pioche::after { content: ''; position: absolute; inset: 5px; border: 1px solid rgba(184,154,106,0.22); border-radius: 3px; }
+    .deck-icon { font-size: 1.1rem; position: relative; z-index: 1; }
+    .deck-count { font-size: 0.62rem; color: rgba(212,185,138,0.8); font-weight: 500; position: relative; z-index: 1; }
+    .deck-card.defausse { background: var(--bg); border: 1.5px dashed var(--line); border-radius: 5px; }
+    .deck-card.defausse img { width: 100%; height: 100%; object-fit: cover; }
+    .defausse-empty { font-size: 0.65rem; color: var(--muted); font-style: italic; }
+
+    .scores-list { display: flex; flex-direction: column; gap: 5px; }
+    .score-row {
+      display: flex; align-items: center; gap: 7px;
+      padding: 5px 8px; border-radius: var(--radius); background: var(--bg);
+    }
+    .score-row.me { background: rgba(184,154,106,0.08); border: 1px solid rgba(184,154,106,0.2); }
+    .score-avatar {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.68rem; font-weight: 600; color: var(--bg); flex-shrink: 0;
+    }
+    .score-row.me .score-avatar { background: var(--gold); }
+    .score-name { flex: 1; font-size: 0.75rem; color: var(--text); }
+    .score-val { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; font-weight: 600; color: var(--gold); }
+
+    /* ── OVERLAY ── */
+    #io-overlay {
+      position: fixed; inset: 0;
+      background: rgba(26,23,20,0.55);
+      backdrop-filter: blur(3px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 500; animation: overlayIn 0.2s ease;
+    }
+    #io-overlay.hidden { display: none; }
+    @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+    #io-modal {
+      background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+      padding: 30px; min-width: 340px; max-width: 520px;
+      box-shadow: 0 24px 64px rgba(59,48,40,0.2);
+      animation: modalIn 0.25s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-weight: 600; color: var(--accent); margin-bottom: 4px; }
+    .modal-prompt { font-size: 0.85rem; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+    #io-container { display: flex; flex-direction: column; gap: 8px; }
+
+    /* ── HISTORIQUE ── */
+    .history-list { display: flex; flex-direction: column; gap: 4px; }
+    .history-entry {
+      display: flex; align-items: flex-start; gap: 7px;
+      padding: 5px 8px; border-radius: var(--radius);
+      background: var(--bg); font-size: 0.7rem; line-height: 1.4;
+    }
+    .history-entry .h-icon { flex-shrink: 0; font-size: 0.8rem; margin-top: 1px; }
+    .history-entry .h-text { color: var(--muted); }
+    .history-entry .h-text strong { color: var(--accent); font-weight: 500; }
+    .history-entry.latest { border-left: 2px solid var(--gold); }
+    .history-empty { font-size: 0.72rem; color: var(--muted); font-style: italic; text-align: center; padding: 8px 0; }
+
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">La <span>Vie</span></div>
+    <div class="nav-right">
+      <span class="nav-code">Partie {{ game.id }}</span>
+      {% if is_my_turn %}
+        <div id="nav-turn" class="nav-turn my-turn">✦ Votre tour</div>
+      {% else %}
+        <div id="nav-turn" class="nav-turn other-turn">⏳ Tour de {{ current_player.name }}</div>
+      {% endif %}
+    </div>
+  </nav>
+
+  <!-- BOARD -->
+  <div class="board">
+
+    <!-- MA MAIN -->
+    <section class="my-hand">
+      <div class="zone-header">
+        <span class="zone-title">Ma main</span>
+        <span class="zone-count">{{ my_player.hand|length }} carte{{ 's' if my_player.hand|length != 1 }}</span>
+        {% if is_my_turn %}
+          <span class="zone-hint">Cliquez sur une carte pour la jouer</span>
+        {% else %}
+          <span class="zone-hint">En attente de votre tour…</span>
+        {% endif %}
+      </div>
+      <div class="hand-cards" id="my-hand-cards">
+        {% if my_player.hand %}
+          {% for card in my_player.hand %}
+          <div class="game-card clickable-card" data-card='{{ card.to_dict()|tojson }}' data-context="hand">
+            <span class="card-type">{{ card.__class__.__name__ }}</span>
+            <img src="{{ url_for('static', filename=card.image_path) }}" alt="{{ card.__class__.__name__ }}" onerror="this.style.display='none'">
+            <div class="card-footer">
+              <span class="card-name">{{ card.__class__.__name__ }}</span>
+              <span class="card-smiles">😊 {{ card.smiles }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <span class="hand-empty">Main vide</span>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- ZONE DE JEU -->
+    <section class="play-area">
+
+      <!-- En-têtes colonnes -->
+      <div class="col-headers">
+        <div class="col-header-player"></div>
+        <div class="col-header"><span class="col-icon">💼</span><span class="col-name">Vie pro</span></div>
+        <div class="col-header"><span class="col-icon">🏠</span><span class="col-name">Vie perso</span></div>
+        <div class="col-header"><span class="col-icon">🏡</span><span class="col-name">Acquisitions</span></div>
+        <div class="col-header"><span class="col-icon">💰</span><span class="col-name">Salaires / Dép.</span></div>
+        <div class="col-header"><span class="col-icon">✨</span><span class="col-name">Spéciales</span></div>
+      </div>
+
+      {% for player in game.players %}
+      {# Calcul des smiles totaux via les groupes de cartes posées #}
+      {% set total_smiles = namespace(val=0) %}
+      {% for category_cards in player.groupe.values() %}
+        {% for card in (category_cards or []) %}
+          {% set total_smiles.val = total_smiles.val + card.smiles %}
+        {% endfor %}
+      {% endfor %}
+
+      <div class="player-row {% if player.name == pseudo %}is-me{% endif %}" id="row-{{ player.name }}">
+
+        <!-- Infos joueur -->
+        <div class="player-info-col" id="info-{{ player.name }}">
+          <div class="player-badge">
+            <div class="player-avatar">{{ player.name[0]|upper }}</div>
+            <span class="player-name">{{ player.name }}</span>
+          </div>
+          <div class="player-stats">😊 {{ total_smiles.val }} smiles · {{ player.hand|length }} carte{{ 's' if player.hand|length != 1 }}</div>
+
+          {% if player.name == pseudo %}
+            <span class="me-tag">Moi</span>
+          {% elif player.name == current_player.name %}
+            <span class="current-turn-tag">✦ Son tour</span>
+          {% else %}
+            <!-- Main face cachée pour les adversaires -->
+            <div class="opponent-hand-mini">
+              {% for _ in player.hand %}
+              <div class="game-card face-down"></div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Vie professionnelle -->
+        <div class="category-cell" id="cell-{{ player.name }}-vie_professionnelle">
+          {% set cards = player.groupe_str.get('vie_professionnelle', []) or [] %}
+          {% if cards %}
+            {% for card in cards %}
+            <div class="game-card clickable-card" data-card='{{ card.to_dict()|tojson }}' data-context="played">
+              <span class="card-type">{{ card.__class__.__name__ }}</span>
+              <img src="{{ url_for('static', filename=card.image_path) }}" alt="{{ card.__class__.__name__ }}" onerror="this.style.display='none'">
+              <div class="card-footer">
+                <span class="card-name">{{ card.__class__.__name__ }}</span>
+                <span class="card-smiles">😊 {{ card.smiles }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <span class="cell-empty">—</span>
+          {% endif %}
+        </div>
+
+        <!-- Vie personnelle -->
+        <div class="category-cell" id="cell-{{ player.name }}-vie_personnelle">
+          {% set cards = player.groupe_str.get('vie_personnelle', []) or [] %}
+          {% if cards %}
+            {% for card in cards %}
+            <div class="game-card clickable-card" data-card='{{ card.to_dict()|tojson }}' data-context="played">
+              <span class="card-type">{{ card.__class__.__name__ }}</span>
+              <img src="{{ url_for('static', filename=card.image_path) }}" alt="{{ card.__class__.__name__ }}" onerror="this.style.display='none'">
+              <div class="card-footer">
+                <span class="card-name">{{ card.__class__.__name__ }}</span>
+                <span class="card-smiles">😊 {{ card.smiles }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <span class="cell-empty">—</span>
+          {% endif %}
+        </div>
+
+        <!-- Acquisitions -->
+        <div class="category-cell" id="cell-{{ player.name }}-acquisitions">
+          {% set cards = player.groupe_str.get('acquisitions', []) or [] %}
+          {% if cards %}
+            {% for card in cards %}
+            <div class="game-card clickable-card" data-card='{{ card.to_dict()|tojson }}' data-context="played">
+              <span class="card-type">{{ card.__class__.__name__ }}</span>
+              <img src="{{ url_for('static', filename=card.image_path) }}" alt="{{ card.__class__.__name__ }}" onerror="this.style.display='none'">
+              <div class="card-footer">
+                <span class="card-name">{{ card.__class__.__name__ }}</span>
+                <span class="card-smiles">😊 {{ card.smiles }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <span class="cell-empty">—</span>
+          {% endif %}
+        </div>
+
+        <!-- Salaires / Dépenses -->
+        <div class="category-cell" id="cell-{{ player.name }}-salaires_depenses">
+          {% set cards = player.groupe_str.get('salaires_depenses', []) or [] %}
+          {% if cards %}
+            {% for card in cards %}
+            <div class="game-card clickable-card" data-card='{{ card.to_dict()|tojson }}' data-context="played">
+              <span class="card-type">{{ card.__class__.__name__ }}</span>
+              <img src="{{ url_for('static', filename=card.image_path) }}" alt="{{ card.__class__.__name__ }}" onerror="this.style.display='none'">
+              <div class="card-footer">
+                <span class="card-name">{{ card.__class__.__name__ }}</span>
+                <span class="card-smiles">😊 {{ card.smiles }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <span class="cell-empty">—</span>
+          {% endif %}
+        </div>
+
+        <!-- Cartes spéciales -->
+        <div class="category-cell" id="cell-{{ player.name }}-cartes_speciales">
+          {% set cards = player.groupe_str.get('cartes_speciales', []) or [] %}
+          {% if cards %}
+            {% for card in cards %}
+            <div class="game-card clickable-card" data-card='{{ card.to_dict()|tojson }}' data-context="played">
+              <span class="card-type">{{ card.__class__.__name__ }}</span>
+              <img src="{{ url_for('static', filename=card.image_path) }}" alt="{{ card.__class__.__name__ }}" onerror="this.style.display='none'">
+              <div class="card-footer">
+                <span class="card-name">{{ card.__class__.__name__ }}</span>
+                <span class="card-smiles">😊 {{ card.smiles }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <span class="cell-empty">—</span>
+          {% endif %}
+        </div>
+
+      </div>
+      {% endfor %}
+
+    </section>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">⚡ État du jeu</div>
+        {% if is_my_turn %}
+          <div class="status-badge active">✦ Piochez ou agissez</div>
+          <div class="turn-info">C'est <strong>votre tour</strong></div>
+        {% else %}
+          <div class="status-badge waiting">⏳ En attente</div>
+          <div class="turn-info">Tour de <strong>{{ current_player.name }}</strong></div>
+        {% endif %}
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">🃏 Pioche &amp; Défausse</div>
+        <div class="deck-row">
+          <div class="deck-pile">
+            <span class="deck-label">Pioche</span>
+            <div class="deck-card pioche {% if is_my_turn %}clickable{% endif %}"
+                 {% if is_my_turn %}onclick="drawCard()"{% endif %}>
+              <span class="deck-icon">🂠</span>
+              <span class="deck-count">{{ deck_size }}</span>
+            </div>
+          </div>
+          <div class="deck-pile">
+            <span class="deck-label">Défausse</span>
+            <div class="deck-card defausse clickable-card" {% if discard_top %}data-card='{{ discard_top.to_dict()|tojson }}' data-context="discard" style="cursor:pointer"{% endif %}>
+              {% if discard_top %}
+                <img src="{{ url_for('static', filename=discard_top.image_path) }}" alt="Défausse" onerror="this.style.display='none'">
+              {% else %}
+                <span class="defausse-empty">Vide</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">😊 Scores</div>
+        <div class="scores-list" id="scores-list">
+          {% for player in game.players %}
+          {% set total_smiles = namespace(val=0) %}
+          {% for category_cards in player.groupe.values() %}
+            {% for card in (category_cards or []) %}
+              {% set total_smiles.val = total_smiles.val + card.smiles %}
+            {% endfor %}
+          {% endfor %}
+          <div class="score-row {% if player.name == pseudo %}me{% endif %}">
+            <div class="score-avatar">{{ player.name[0]|upper }}</div>
+            <span class="score-name">{{ player.name }}</span>
+            <span class="score-val">{{ total_smiles.val }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">📜 Historique</div>
+        <div class="history-list" id="history-list">
+          <span class="history-empty">Aucune action pour l'instant.</span>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <!-- OVERLAY I/O -->
+  <div id="io-overlay" class="hidden">
+    <div id="io-modal">
+      <div class="modal-title">Choisissez un joueur</div>
+      <div class="modal-prompt" id="io-prompt">Sélectionnez la cible de votre carte.</div>
+      <div id="io-container"></div>
+    </div>
+  </div>
+
+  <script>
+    const GAME_ID = "{{ game.id }}";
+    const IS_MY_TURN = {{ 'true' if is_my_turn else 'false' }};
+  </script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="/static/js/board-stream.js"></script>
+  <script type="module" src="{{ url_for('static', filename='js/IO/io-core.js') }}"></script>
+  <script>
+    // Exposé sur window pour que io-core.js puisse y accéder
+    window.GAME_ID = GAME_ID;
+    window.IS_MY_TURN = IS_MY_TURN;
+    window.PSEUDO = "{{ pseudo }}";
+
+    // ── Listener délégué pour toutes les cartes cliquables ───────────────────
+    document.addEventListener("click", function(e) {
+      const card_el = e.target.closest(".clickable-card");
+      if (!card_el) return;
+      const raw = card_el.dataset.card;
+      const context = card_el.dataset.context;
+      if (!raw || !context) return;
+      try {
+        const card = JSON.parse(raw);
+        if (typeof window.openCard === "function") {
+          window.openCard(card, context);
+        } else {
+          console.warn("openCard pas encore chargé");
+        }
+      } catch(err) {
+        console.error("Erreur parsing carte :", err, raw);
+      }
+    });
+
+    // ── Historique ───────────────────────────────────────────────────────────
+    const ACTION_ICONS = {
+      draw:    '🂠',
+      play:    '🃏',
+      discard: '🗑️',
+      turn:    '🔄',
+    };
+
+    function renderHistory(entries) {
+      const list = document.getElementById('history-list');
+      if (!entries || entries.length === 0) return;
+      list.innerHTML = '';
+      entries.slice(-10).reverse().forEach((entry, i) => {
+        const div = document.createElement('div');
+        div.className = 'history-entry' + (i === 0 ? ' latest' : '');
+        const icon = ACTION_ICONS[entry.action] ?? '▸';
+        div.innerHTML = `<span class="h-icon">${icon}</span><span class="h-text">${entry.text}</span>`;
+        list.appendChild(div);
+      });
+    }
+
+    // ── Piocher ──────────────────────────────────────────────────────────────
+    async function drawCard() {
+      if (!window.IS_MY_TURN) return;
+      const res = await fetch(`/game/${GAME_ID}/draw`, { method: 'POST' });
+      const data = await res.json();
+      if (!data.ok) { alert(data.error); return; }
+      // Le SSE déclenche updateBoard automatiquement
+    }
+
+    // ── Jouer une carte ──────────────────────────────────────────────────────
+    async function playCard(cardId) {
+      if (!window.IS_MY_TURN) return;
+      const res = await fetch(`/game/${GAME_ID}/place`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ card_id: cardId }),
+      });
+      const data = await res.json();
+      if (!data.ok) { alert(data.error); return; }
+    }
+    window.playCard = playCard;
+
+    // ── Défausser une carte ───────────────────────────────────────────────────
+    async function discardCard(cardId) {
+      if (!window.IS_MY_TURN) return;
+      const res = await fetch(`/game/${GAME_ID}/discard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ card_id: cardId }),
+      });
+      const data = await res.json();
+      if (!data.ok) { alert(data.error); return; }
+    }
+    window.discardCard = discardCard;
+
+    // ── updateBoard : met à jour le plateau sans recharger la page ───────────
+    window.updateBoard = function(state) {
+      console.log('Mise à jour plateau debut:', state.players.map(p => ({
+          name: p.name,
+          cartes_posees: Object.keys(p.cards).length,
+          hand: p.hand?.length ?? 'masquée'
+      })));
+      if (!state) return;
+
+      // Indicateur de tour (nav)
+      const isMyTurn = state.current_player?.name === "{{ pseudo }}";
+      window.IS_MY_TURN = isMyTurn;
+      const navTurn = document.getElementById("nav-turn");
+      if (navTurn) {
+        navTurn.className = "nav-turn " + (isMyTurn ? "my-turn" : "other-turn");
+        navTurn.textContent = isMyTurn ? "✦ Votre tour" : ("Tour de " + (state.current_player?.name ?? "…"));
+      }
+
+      // Historique
+      if (state.history) renderHistory(state.history);
+
+      // Scores
+      const scoresList = document.getElementById("scores-list");
+      if (scoresList && state.players) {
+        scoresList.innerHTML = state.players.map(p => {
+          const smiles = Object.values(p.groupe ?? {})
+            .flat().reduce((s, c) => s + (c.smiles ?? 0), 0);
+          const isMe = p.name === "{{ pseudo }}";
+          return `<div class="score-row ${isMe ? 'me' : ''}">
+            <div class="score-avatar">${p.name[0].toUpperCase()}</div>
+            <span class="score-name">${p.name}</span>
+            <span class="score-val">${smiles}</span>
+          </div>`;
+        }).join('');
+      }
+
+      // Mise à jour de la main (mes cartes)
+      const myPlayer = state.players?.find(p => p.name === "{{ pseudo }}");
+      const handEl = document.getElementById("my-hand-cards");
+      if (handEl && myPlayer) {
+        if (!myPlayer.hand || myPlayer.hand.length === 0) {
+          handEl.innerHTML = '<span class="hand-empty">Aucune carte en main.</span>';
+        } else {
+          handEl.innerHTML = myPlayer.hand.map(card => `
+            <div class="game-card clickable-card"
+                 data-card='${JSON.stringify(card)}'
+                 data-context="${isMyTurn ? 'hand' : 'view'}">
+              ${card.image_path
+                ? `<img src="/static/${card.image_path}" alt="${card.name}" onerror="this.style.display='none'">`
+                : ''}
+              <span class="card-type">${card.type ?? ''}</span>
+              <div class="card-footer">
+                <span class="card-name">${card.name}</span>
+                <span class="card-smiles">${card.smiles > 0 ? '+' + card.smiles : ''}</span>
+              </div>
+            </div>`).join('');
+        }
+      }
+
+      // Mise à jour du deck et de la défausse
+      const deckCount = document.querySelector(".deck-count");
+      if (deckCount) deckCount.textContent = state.deck_count ?? '?';
+
+      // Mise à jour du bouton pioche (cliquable seulement si mon tour)
+      const pileEl = document.querySelector(".deck-card.pioche");
+      if (pileEl) {
+        pileEl.classList.toggle("clickable", isMyTurn);
+        pileEl.onclick = isMyTurn ? drawCard : null;
+      }
+
+      // Mise à jour sidebar état du jeu
+      const statusBadge = document.querySelector(".status-badge");
+      const turnInfo = document.querySelector(".turn-info");
+      if (statusBadge && turnInfo) {
+        if (isMyTurn) {
+          statusBadge.className = "status-badge active";
+          statusBadge.textContent = "✦ Piochez ou agissez";
+          turnInfo.innerHTML = "C'est <strong>votre tour</strong>";
+        } else {
+          statusBadge.className = "status-badge waiting";
+          statusBadge.textContent = "⏳ En attente";
+          turnInfo.innerHTML = `Tour de <strong>${state.current_player?.name ?? '…'}</strong>`;
+        }
+      }
+      // ── Mise à jour du plateau (cartes posées) ──────────────────────────
+      const CATEGORIES = [
+        'vie_professionnelle',
+        'vie_personnelle',
+        'acquisitions',
+        'salaires_depenses',
+        'cartes_speciales',
+      ];
+
+      if (state.players) {
+        state.players.forEach(player => {
+          const isMe = player.name === "{{ pseudo }}";
+          const isCurrent = player.name === state.current_player?.name;
+
+          // Info col : smiles + main adversaire
+          const infoEl = document.getElementById(`info-${player.name}`);
+          if (infoEl) {
+            const smiles = Object.values(player.groupe ?? {})
+              .flat().reduce((s, c) => s + (c.smiles ?? 0), 0);
+            const handCount = player.hand_count ?? 0;
+            infoEl.querySelector('.player-stats').textContent =
+              `😊 ${smiles} smiles · ${handCount} carte${handCount !== 1 ? 's' : ''}`;
+
+            // Mini cartes adversaire
+            const miniEl = infoEl.querySelector('.opponent-hand-mini');
+            if (miniEl) {
+              miniEl.innerHTML = Array(handCount).fill(
+                '<div class="game-card face-down"></div>'
+              ).join('');
+            }
+
+            // Tag tour
+            const tagEl = infoEl.querySelector('.current-turn-tag');
+            if (tagEl) tagEl.style.display = isCurrent && !isMe ? '' : 'none';
+          }
+
+          // Cellules de catégories
+          CATEGORIES.forEach(cat => {
+            const cell = document.getElementById(`cell-${player.name}-${cat}`);
+            if (!cell) return;
+            const cards = player.groupe?.[cat] ?? [];
+            if (cards.length === 0) {
+              cell.innerHTML = '<span class="cell-empty">—</span>';
+            } else {
+              cell.innerHTML = cards.map(card => `
+                <div class="game-card clickable-card"
+                     data-card='${JSON.stringify(card).replace(/'/g, "&#39;")}'
+                     data-context="played">
+                  <span class="card-type">${card.type ?? ''}</span>
+                  ${card.image_path
+                    ? `<img src="/static/${card.image_path}" alt="${card.name}" onerror="this.style.display='none'">`
+                    : ''}
+                  <div class="card-footer">
+                    <span class="card-name">${card.name}</span>
+                    <span class="card-smiles">😊 ${card.smiles ?? 0}</span>
+                  </div>
+                </div>`).join('');
+            }
+          });
+        });
+      }
+    };
+
+    // ── Polling léger en fallback (si SSE non connecté) ──────────────────────
+    // Uniquement pour l'historique — le reload de tour est géré par updateBoard
+    (function pollHistory() {
+      setTimeout(async () => {
+        try {
+          const res = await fetch(`/game/${GAME_ID}/state`);
+          const state = await res.json();
+          if (state.history) renderHistory(state.history);
+        } catch (e) { /* silencieux */ }
+        pollHistory();
+      }, 5000);
+    })();
+  </script>
+  <script>
+  console.log('=== DEBUG WS ===');
+  console.log('GAME_ID:', window.GAME_ID);
+  console.log('PSEUDO:', window.PSEUDO);
+
+  const testSocket = io();
+
+  testSocket.on('connect', () => {
+    console.log('✅ Connecté SID:', testSocket.id);
+    const payload = { game_id: window.GAME_ID, pseudo: window.PSEUDO };
+    console.log('📤 Envoi join:', payload);
+    testSocket.emit('join', payload);
+  });
+
+  testSocket.on('connect_error', (err) => {
+    console.error('❌ Erreur connexion:', err.message);
+  });
+
+  testSocket.on('game_update', (state) => {
+    console.log('📦 game_update reçu !', state.current_player);
+  });
+</script>
+</body>
+</html>

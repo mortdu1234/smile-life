@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salle d'attente — {{ room.id }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/lobby.css') }}" />
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">Salon <span>&</span> Jeux</div>
+    <a href="{{ url_for('hub.leave', game_id=room.id) }}" class="nav-back">← Quitter</a>
+  </nav>
+
+  <main>
+    <div class="container">
+
+      {% if error %}
+      <div class="error-msg">{{ error }}</div>
+      {% endif %}
+
+      <!-- CODE BADGE -->
+      <div class="code-badge">
+        <div class="code-label">Code de la partie</div>
+        <div class="code-value">
+          {% for char in room.id %}
+            {% if loop.index == 3 %}<span>{{ char }}</span>{% else %}{{ char }}{% endif %}
+          {% endfor %}
+        </div>
+        <div class="code-hint">Partagez ce code pour inviter des joueurs</div>
+      </div>
+
+      <!-- PLAYERS CARD -->
+      <div class="card">
+        <div class="card-title">Joueurs</div>
+
+        <div class="slots">
+          {% for i in range(room.max_players) %}
+            {% if i < room.players|length %}
+              {% set player = room.players[i] %}
+              <div class="slot filled {% if player == pseudo %}me{% endif %}">
+                <div class="avatar">{{ player[0]|upper }}</div>
+                <div class="slot-name">{{ player }}</div>
+                {% if player == room.host %}
+                  <div class="slot-tag">Hôte</div>
+                {% elif player == pseudo %}
+                  <div class="slot-tag">Vous</div>
+                {% endif %}
+              </div>
+            {% else %}
+              <div class="slot empty">
+                <div class="avatar">?</div>
+                <div class="slot-name">En attente d'un joueur…</div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <!-- PROGRESS -->
+        <div class="progress-wrap">
+          <div class="progress-label">
+            <span>Joueurs présents</span>
+            <span>{{ room.players|length }} / {{ room.max_players }}</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ (room.players|length / room.max_players * 100)|int }}%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRESET SELECTOR (hôte uniquement) -->
+      {% if is_host %}
+      <div class="card">
+        <div class="card-title">Deck de cartes</div>
+        <div class="preset-grid">
+          {% for preset in presets %}
+          <input
+            class="preset-option"
+            type="radio"
+            name="preset_id"
+            id="preset_{{ preset.id }}"
+            value="{{ preset.id }}"
+            {% if room.preset_id == preset.id %}checked
+            {% elif loop.first and not room.preset_id %}checked{% endif %}
+          />
+          <label class="preset-label" for="preset_{{ preset.id }}">
+            <div class="preset-radio-indicator"></div>
+            <div class="preset-info">
+              <div class="preset-name">{{ preset.label }}</div>
+              <div class="preset-desc">{{ preset.description }}</div>
+            </div>
+            {% if preset.card_count > 0 %}
+            <div class="preset-count">{{ preset.card_count }} cartes</div>
+            {% endif %}
+          </label>
+          {% endfor %}
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="actions">
+          <button
+            class="btn btn-primary"
+            id="startBtn"
+            {% if room.players|length < 2 %}disabled{% endif %}
+            onclick="launchGame()"
+          >
+            ✦ Lancer la partie
+          </button>
+          <a href="{{ url_for('hub.leave', game_id=room.id) }}" class="btn btn-ghost">Quitter</a>
+        </div>
+      </div>
+
+      {% else %}
+
+      <!-- NON-HOST -->
+      <div class="actions" style="margin-top: 16px;">
+        <div class="btn btn-primary" style="opacity:0.4; cursor:default; flex:1;">
+          En attente de l'hôte…
+        </div>
+        <a href="{{ url_for('hub.leave', game_id=room.id) }}" class="btn btn-ghost" style="flex:1;">Quitter</a>
+      </div>
+
+      {% endif %}
+
+      <!-- WAITING -->
+      <div class="waiting">
+        <div>Salle d'attente</div>
+        <div class="dots">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    const ROOM_ID = "{{ room.id }}";
+    const IS_HOST = {{ 'true' if is_host else 'false' }};
+    const GAME_URL = "{{ url_for('game.play', game_id=room.id) }}";
+
+    // ── Lancer la partie (hôte uniquement) ──────────────────────────────────
+    function launchGame() {
+      const selected = document.querySelector('input[name="preset_id"]:checked');
+      if (!selected) return;
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '{{ url_for("game.start") }}';
+      const addField = (name, value) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+      };
+      addField('game_id', ROOM_ID);
+      addField('preset_id', selected.value);
+      document.body.appendChild(form);
+      form.submit();
+    }
+
+    // ── Polling ──────────────────────────────────────────────────────────────
+    // Tous les joueurs interrogent /hub/lobby/<id>/status toutes les 2s.
+    // - Si status == 'playing'  → redirect vers le plateau (tous les joueurs)
+    // - Si status == 'waiting'  → reload pour afficher les nouveaux arrivants
+    // - Si status == 'not_found'→ la salle a disparu, retour au hub
+
+    let _pollPaused = false;
+
+    {% if is_host %}
+    document.querySelectorAll('.preset-label, #startBtn').forEach(el => {
+      el.addEventListener('mouseenter', () => { _pollPaused = true; });
+      el.addEventListener('mouseleave', () => { _pollPaused = false; });
+    });
+    {% endif %}
+
+    (function poll() {
+      setTimeout(async () => {
+        try {
+          const res = await fetch(`/hub/lobby/${ROOM_ID}/status`);
+          const data = await res.json();
+
+          if (data.status === 'playing') {
+            window.location.href = GAME_URL;
+            return;
+          }
+          if (data.status === 'not_found') {
+            window.location.href = '/hub/';
+            return;
+          }
+          // Encore en attente
+          if (!_pollPaused) {
+            location.reload();
+          } else {
+            poll();
+          }
+        } catch (e) {
+          poll();
+        }
+      }, 2000);
+    })();
+  </script>
+
+</body>
+</html>

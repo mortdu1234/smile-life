@@ -1,0 +1,223 @@
+"""Contient l'ensemble des données d'une partie en cours"""
+from enum import Enum
+import functools
+
+from .PlayerCardGroup import PlayedCardGroup
+from .Player import Player
+from .cards.Card import Card
+
+class GameState(Enum):
+    PIOCHE = "pioche"
+    POSE = "pose"
+
+def validate_player(method):
+    @functools.wraps(method)
+    def wrapper(self, player_id, *args, **kwargs):
+        if self.player_turn != player_id:
+            return None, "Ce n'est pas votre tour."
+        return method(self, player_id, *args, **kwargs)
+    return wrapper
+
+def validate_phase(required_phase: GameState):
+    def decorator(method):
+        @functools.wraps(method)
+        def wrapper(self, *args, **kwargs):
+            if self.game_state != required_phase:
+                return None, f"Action impossible en phase '{self.game_state}' (attendu : '{required_phase}')."
+            return method(self, *args, **kwargs)
+        return wrapper
+    return decorator
+
+
+
+
+class Game:
+    # PARAMETRES DE BASE DE LA PARTIE
+    id: str # Identifiant de la partie (code à 5 lettres)
+    players: list[Player] # Liste des joueurs dans la partie
+    deck: list[Card] # Cartes restantes dans la pioche
+    discard: list[Card] # Cartes dans la défausse
+    player_turn: int # Index du joueur dont c'est le tour
+    center_cards_played: list[Card] # Cartes jouées au centre de la table
+    historique: list[str] # historique de la partie
+    game_state: GameState # etat du jeu
+    # PARAMETRE SUPPLEMENTAIRE POUR LE JEU
+
+    def __init__(self, id: str, players: list[Player], deck: list[Card]):
+        self.id = id
+        self.players = players
+        self.deck = deck
+        self.discard = []
+        self.player_turn = 0
+        self.center_cards_played = []
+        self.historique = []
+        self.game_state = GameState.PIOCHE
+        
+
+    def to_dict(self, viewer: str | None = None) -> dict:
+        """Sérialise l'état de la partie en un dictionnaire pour l'envoyer au client."""
+        return {
+            'id': self.id,
+            "players": [p.to_dict(reveal_hand=(p.name == viewer)) for p in self.players],
+            'deck_count': [c.to_dict() for c in self.deck],
+            'discard_count': [c.to_dict() for c in self.discard],
+            'current_player': self.get_current_player().to_dict(),
+            'center_cards_played': [c.to_dict() for c in self.center_cards_played],
+            'history': self.historique,
+        }
+
+    def get_last_discard(self) -> Card | None:
+        """Retourne la dernière carte de la défausse, ou None si la défausse est vide."""
+        return self.discard[-1] if self.discard else None
+
+    def get_current_player(self) -> Player:
+        """Retourne le joueur dont c'est le tour."""
+        return self.players[self.player_turn]
+
+    def next_turn(self):
+        """Passe au tour du joueur suivant."""
+        self.player_turn = (self.player_turn + 1) % len(self.players)
+        self.game_state = GameState.PIOCHE
+
+    # ------------------------------------------------------------------ #
+    #  Actions du tour - Actions                                         #
+    # ------------------------------------------------------------------ #    
+    @validate_player
+    def skip_turn(self, player_id: int) -> tuple[bool, str]:
+        """Le joueur courrant passe son tour
+        pre: uniquement si le joueur courrant a des tours a passer
+        """
+        player = self.get_current_player()
+        if player.skip_turn <= 0:
+            print("[ERROR] skip un tour alors que le joueur n'as pas de tours a skip")
+            return False, ""
+        
+        player.skip_turn -= 1
+        self.next_turn()
+        return True, ""
+
+    @validate_player
+    @validate_phase(GameState.PIOCHE)
+    def draw_card_from_deck(self, player_id: int) -> tuple[bool, str]:
+        """pioche une carte depuis la pioche"""
+        player = self.get_current_player()
+        if player.skip_turn > 0:
+            print("[ERROR] essaye de piocher alors que je joueurs dois skip un tour")
+            return False, ""
+
+        if not self.deck:
+            print("[ERROR] pioche vide")
+            return False, ""
+        
+        card: Card = self.deck.pop()
+        player.add_card_to_hand(card)
+        self.game_state = GameState.POSE
+        return True, ""
+
+    @validate_player
+    @validate_phase(GameState.PIOCHE)
+    def draw_card_from_discard(self, player_id: int) -> tuple[bool, str]:
+        """pioche une carte depuis la défausse"""
+        player = self.get_current_player()
+        if player.skip_turn > 0:
+            print("[ERROR] essaye de piocher alors que je joueurs dois skip un tour")
+            return False, ""
+
+        if not self.deck:
+            print("[ERROR] défausse vide")
+            return False, ""
+
+        card: Card = self.discard.pop()
+        success, reason = card.can_be_played(player, self)
+        if not success:
+            self.discard.append(card)
+            return False, reason
+        player.add_card_to_hand(card)
+        self.game_state = GameState.POSE
+        card.play_card(self, player)
+        self.next_turn()
+        return True, ""
+        
+
+    @validate_player
+    @validate_phase(GameState.POSE)
+    def discard_card_from_hand(self, player_id: int, card_id: int) -> tuple[bool, str]:
+        """se défausse d'une carte en main vers la défausse"""
+        player = self.get_current_player()
+        card = player.get_card_by_id_from_hand(card_id)
+        if card:
+            player.remove_card_from_hand(card)
+            self.discard.append(card)
+            self.next_turn()
+            return True, ""
+        else:
+            print("[ERROR] La carte n'est pas trouvée")
+            return False, ""
+
+    @validate_player
+    def discard_job_card(self, player_id: int, card_id: int) -> tuple[bool, str]:
+        """démissionne volontairement d'un métier"""
+        player = self.get_current_player()
+        card = player.find_card_by_id(card_id)
+        if card:
+            player.remove_card(card)
+            card.discard_job(player, self) # type: ignore
+            return True, ""
+        else:
+            print("[ERROR] La carte n'est pas trouvée")
+            return False, ""
+
+
+    @validate_player
+    @validate_phase(GameState.PIOCHE)
+    def discard_wedding_card(self, player_id: int, card_id: int) -> tuple[bool, str]:
+        """supprime son marriage volontairement"""
+        player = self.get_current_player()
+        card = player.find_card_by_id(card_id)
+        if card:
+            player.remove_card(card)
+            self.discard.append(card)
+            self.next_turn()
+            return True, ""
+        else:
+            print("[ERROR] La carte n'est pas trouvée")
+            return False, ""
+
+    @validate_player
+    @validate_phase(GameState.PIOCHE)
+    def discard_adultery_card(self, player_id: int, card_id: int) -> tuple[bool, str]:
+        """supprime son adultaire volontairement"""
+        player = self.get_current_player()
+        card = player.find_card_by_id(card_id)
+        if card:
+            player.remove_card(card)
+            self.discard.append(card)
+            return True, ""
+        else:
+            print("[ERROR] La carte n'est pas trouvée")
+            return False, ""
+
+
+    @validate_player
+    @validate_phase(GameState.POSE)
+    def place_card(self, player_id: int, card_id: int) -> tuple[bool, str]:
+        """pose une carte devant lui"""
+        player = self.get_current_player()
+        card = player.get_card_by_id_from_hand(card_id)
+        if not card:
+            print("[ERROR] la carte n'est pas trouvée")
+            return False, ""
+        success, reason = card.can_be_played(player, self)
+        if not success:
+            return False, reason
+
+        card.play_card(self, player)
+        self.next_turn()
+        return True, ""
+
+
+    
+
+    
+
+    
