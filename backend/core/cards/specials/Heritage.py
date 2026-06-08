@@ -1,5 +1,9 @@
 from .SpecialCard import SpecialCard
-
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ....userIo.interface import UserIO
+    from ...Game import Game
+    from ...Player import Player
 class Heritage(SpecialCard):
     value: int
     def __init__(self, id: int, image_path: str, smiles: int, value: int):
@@ -7,3 +11,9 @@ class Heritage(SpecialCard):
         self.value = value
     def get_value(self)->int:
         return self.value
+    
+    def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
+        return super().can_be_played(player, game)
+
+    def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:        
+        return super().apply_card_effect(game, current_player, interface)

@@ -1,12 +1,5 @@
 import { registerHandler } from "../io-registry.js";
-
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
+import { getHandler }      from "../io-registry.js";
 
 registerHandler("salary-selector", function render(pending) {
   const overlay = document.getElementById("salary-overlay");
@@ -15,18 +8,17 @@ registerHandler("salary-selector", function render(pending) {
     return document.createDocumentFragment();
   }
 
-  // ── Si déjà ouvert, ne rien faire ────────────────────────────────────
   if (overlay.classList.contains("salary-overlay--visible")) {
     return document.createDocumentFragment();
   }
 
   const { cards = [], cost = 0, prompt = "", onSubmit } = pending;
 
-  const selected = new Set();
-  const selectedTotal = () =>
-    [...selected].reduce((sum, i) => sum + (cards[i]?.value ?? 0), 0);
-  const isEnough = () => selectedTotal() >= cost;
+  const selected      = new Set();
+  const selectedTotal = () => [...selected].reduce((sum, i) => sum + (cards[i]?.value ?? 0), 0);
+  const isEnough      = () => selectedTotal() >= cost;
 
+  // ── Refs DOM ──────────────────────────────────────────────────────────
   const grid        = overlay.querySelector("#salary-cards-grid");
   const progressBar = overlay.querySelector("#salary-progress-bar");
   const promptText  = overlay.querySelector("#salary-prompt-text");
@@ -35,53 +27,100 @@ registerHandler("salary-selector", function render(pending) {
   const neededTot   = overlay.querySelector("#salary-needed-total");
   const confirmBtn  = overlay.querySelector("#salary-confirm-btn");
   const cancelBtn   = overlay.querySelector("#salary-cancel-btn");
+  const infoToggle  = overlay.querySelector("#salary-info-toggle");
 
   if (promptText) promptText.textContent = prompt;
   if (costEl)     costEl.textContent     = cost;
   if (neededTot)  neededTot.textContent  = cost;
 
+  // ── État du mode "plus d'info" ────────────────────────────────────────
+  let infoMode = false;
+
+  function setInfoMode(val) {
+    infoMode = val;
+    if (!infoToggle) return;
+    infoToggle.setAttribute("aria-pressed", String(val));
+    infoToggle.classList.toggle("salary-overlay__info-toggle--active", val);
+    // Curseur sur la grille : loupe si info, pointeur sinon
+    if (grid) grid.classList.toggle("salary-overlay__cards-grid--info-mode", val);
+  }
+
+  if (infoToggle) {
+    infoToggle.addEventListener("click", () => setInfoMode(!infoMode));
+  }
+
+  // ── Rendu des cartes ──────────────────────────────────────────────────
   function renderCards() {
     if (!grid) return;
     grid.innerHTML = "";
     cards.forEach((card, idx) => {
-      const btn = document.createElement("button");
-      btn.className = "salary-card";
-      btn.type = "button";
-      btn.dataset.index = idx;
-      btn.setAttribute("role", "option");
-      btn.setAttribute("aria-selected", "false");
-      btn.setAttribute("aria-label", `${card.name ?? "Carte"} — valeur ${card.value ?? 0}`);
-      btn.innerHTML = `
-        <div class="salary-card__check">
-          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M3 8l3.5 3.5L13 4.5" stroke="currentColor" stroke-width="2.2"
-                  stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="salary-card__name">${escHtml(card.name ?? "—")}</div>
-        <div class="salary-card__value">${card.value ?? 0}</div>
-        ${card.type ? `<div class="salary-card__type">${escHtml(card.type)}</div>` : ""}
-      `;
-      btn.addEventListener("click", () => toggleCard(idx));
-      grid.appendChild(btn);
+      const el = GameCard.create(card, {
+        context:    "other",
+        size:       "salary",
+        selectable: true,
+        clickable:  true,
+      });
+      el.dataset.index = idx;
+      el.setAttribute("role", "option");
+      el.setAttribute("aria-selected", "false");
+      el.setAttribute("aria-label", `${card.name ?? "Carte"} — valeur ${card.value ?? 0}`);
+      el.setAttribute("tabindex", "0");
+
+      el.addEventListener("card-click", () => {
+        if (infoMode) {
+          openCardDetail(card);
+        } else {
+          toggleCard(idx);
+        }
+      });
+
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          if (infoMode) openCardDetail(card);
+          else toggleCard(idx);
+        }
+      });
+
+      grid.appendChild(el);
     });
   }
 
+  // ── Ouvrir card-detail (lecture seule, pas d'actions) ─────────────────
+  function openCardDetail(card) {
+    const handler = getHandler("card-detail");
+    if (!handler) {
+      console.error("[salary-selector] Handler card-detail introuvable.");
+      return;
+    }
+    const detailOverlay = handler({
+      card,
+      context:    "other",   // pas de contexte jouable → aucun bouton d'action
+      is_my_turn: false,
+      game_id:    window.GAME_ID ?? "",
+    });
+    document.body.appendChild(detailOverlay);
+  }
+
+  // ── Refresh UI ────────────────────────────────────────────────────────
   function refreshUI() {
     const total = selectedTotal();
-    const pct = cost > 0 ? Math.min(100, (total / cost) * 100) : 100;
+    const pct   = cost > 0 ? Math.min(100, (total / cost) * 100) : 100;
+
     if (progressBar) {
       progressBar.style.width = pct + "%";
       progressBar.classList.toggle("salary-overlay__progress-bar--full", isEnough());
     }
     if (selectedTot) selectedTot.textContent = total;
     if (neededTot)   neededTot.textContent   = cost;
-    grid?.querySelectorAll(".salary-card").forEach((btn) => {
-      const idx = parseInt(btn.dataset.index, 10);
+
+    grid?.querySelectorAll("game-card").forEach((el) => {
+      const idx = parseInt(el.dataset.index, 10);
       const sel = selected.has(idx);
-      btn.classList.toggle("salary-card--selected", sel);
-      btn.setAttribute("aria-selected", String(sel));
+      el.toggleAttribute("selected", sel);
+      el.setAttribute("aria-selected", String(sel));
     });
+
     if (confirmBtn) {
       confirmBtn.disabled = !isEnough();
       confirmBtn.classList.toggle("salary-overlay__btn--ready", isEnough());
@@ -93,24 +132,23 @@ registerHandler("salary-selector", function render(pending) {
     refreshUI();
   }
 
+  // ── Fermeture ─────────────────────────────────────────────────────────
   function closeOverlay() {
     overlay.classList.remove("salary-overlay--visible");
     overlay.addEventListener("transitionend", () => overlay.setAttribute("hidden", ""), { once: true });
     document.removeEventListener("keydown", trapFocus);
+    setInfoMode(false); // reset pour la prochaine ouverture
   }
 
   function handleConfirm() {
     if (!isEnough()) return;
-    const indices = [...selected];
     closeOverlay();
-    if (typeof onSubmit === "function") {
-      onSubmit(indices);
-    }
+    if (typeof onSubmit === "function") onSubmit([...selected]);
   }
 
   function trapFocus(e) {
     if (!overlay.classList.contains("salary-overlay--visible")) return;
-    const focusable = [...overlay.querySelectorAll('button:not([disabled]), [tabindex]:not([tabindex="-1"])')];
+    const focusable = [...overlay.querySelectorAll("game-card[tabindex], button:not([disabled])")];
     if (!focusable.length) return;
     const first = focusable[0];
     const last  = focusable[focusable.length - 1];
@@ -127,15 +165,13 @@ registerHandler("salary-selector", function render(pending) {
   renderCards();
   refreshUI();
 
-  // Attacher les listeners directement (pas de cloneNode — on n'ouvre qu'une fois)
   if (confirmBtn) confirmBtn.addEventListener("click", handleConfirm);
   if (cancelBtn)  cancelBtn.addEventListener("click", closeOverlay);
   document.addEventListener("keydown", trapFocus);
 
-  // Ouvrir
   overlay.removeAttribute("hidden");
   requestAnimationFrame(() => overlay.classList.add("salary-overlay--visible"));
-  grid?.querySelector(".salary-card")?.focus();
+  grid?.querySelector("game-card")?.focus();
 
   return document.createDocumentFragment();
 });

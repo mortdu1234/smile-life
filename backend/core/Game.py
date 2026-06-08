@@ -2,6 +2,8 @@
 from enum import Enum
 import functools
 
+from backend.core.JobStatus import JobStatus
+
 from .PlayerCardGroup import PlayedCardGroup
 from .Player import Player
 from .cards.Card import Card
@@ -61,7 +63,7 @@ class Game:
 
     def to_dict(self, viewer: str | None = None) -> dict:
         """Sérialise l'état de la partie en un dictionnaire pour l'envoyer au client."""
-        return {
+        data = {
             'id': self.id,
             "players": [p.to_dict(reveal_hand=(p.name == viewer)) for p in self.players],
             'deck_count': [c.to_dict() for c in self.deck],
@@ -70,6 +72,10 @@ class Game:
             'center_cards_played': [c.to_dict() for c in self.center_cards_played],
             'history': self.historique,
         }
+        last_discard = self.get_last_discard()
+        if last_discard:
+            data["last_discard"] = last_discard.to_dict()
+        return data
 
     def get_last_discard(self) -> Card | None:
         """Retourne la dernière carte de la défausse, ou None si la défausse est vide."""
@@ -84,6 +90,29 @@ class Game:
         self.player_turn = (self.player_turn + 1) % len(self.players)
         self.game_state = GameState.PIOCHE
 
+    def _draw_card_from_deck(self) -> "Card":
+        """retourne la prochaine carte du deck SANS FAIRE DE TEST DE SECURITEE"""
+        return self.deck.pop()
+
+    def get_card_from_discard_by_id(self, card_id: int) -> "Card | None":
+        """retourne une carte de la défausse a partir de son ID"""
+        for card in self.discard:
+            if card.get_id() == card_id:
+                return card
+        return None
+
+    def remove_card_from_discard(self, card: "Card"):
+        """supprime une carte de la défausse"""
+        self.discard.remove(card)
+
+    def add_card_to_discard(self, card: "Card"):
+        """ajoute une carte a la défausse"""
+        self.discard.append(card)
+
+    def take_card_from_deck(self) -> "Card":
+        """prend une carte du deck"""
+        return self.deck.pop()
+    
     # ------------------------------------------------------------------ #
     #  Actions du tour - Actions                                         #
     # ------------------------------------------------------------------ #    
@@ -114,7 +143,7 @@ class Game:
             print("[ERROR] pioche vide")
             return False, ""
         
-        card: Card = self.deck.pop()
+        card: Card = self._draw_card_from_deck()
         player.add_card_to_hand(card)
         self.game_state = GameState.POSE
         return True, ""
@@ -132,7 +161,7 @@ class Game:
             print("[ERROR] défausse vide")
             return False, ""
 
-        card: Card = self.discard.pop()
+        card: Card = self.take_card_from_deck()
         success, reason = card.can_be_played(player, self)
         if not success:
             self.discard.append(card)
@@ -162,15 +191,27 @@ class Game:
     @validate_player
     def discard_job_card(self, player_id: int, card_id: int) -> tuple[bool, str]:
         """démissionne volontairement d'un métier"""
+        print("[DEBUG] discard JOB")
         player = self.get_current_player()
         card = player.find_card_by_id(card_id)
         if card:
-            player.remove_card(card)
-            card.discard_job(player, self) # type: ignore
-            return True, ""
+            from .cards.professionnals.JobCard import JobCard
+            if isinstance(card, JobCard):
+                success, reason = card.can_be_discard(player, self)
+                if not success:
+                    return False, reason
+                else:
+                    print("[DEBUG] demission du job reussi")
+                    player.remove_card(card)
+                    card.discard_job(player, self)
+                    if card.jobStatus != JobStatus.INTERIMERE:
+                        self.next_turn()    
+                    return True, ""
+            else:
+                return False, "[ERROR] la carte n'est pas un métier"
         else:
             print("[ERROR] La carte n'est pas trouvée")
-            return False, ""
+            return False, "[ERROR] La carte n'est pas trouvée"
 
 
     @validate_player
@@ -180,13 +221,20 @@ class Game:
         player = self.get_current_player()
         card = player.find_card_by_id(card_id)
         if card:
-            player.remove_card(card)
-            self.discard.append(card)
-            self.next_turn()
-            return True, ""
+            from .cards.personnals.Wedding import Wedding
+            if isinstance(card, Wedding):
+                success, reason = card.can_be_discard(player, self)
+                if success:
+                    player.remove_card(card)
+                    self.discard.append(card)
+                    self.next_turn()
+                    return True, ""
+                else:
+                    return False, reason
+            else:
+                return False, "[ERROR] la carte n'est pas un marriage"
         else:
-            print("[ERROR] La carte n'est pas trouvée")
-            return False, ""
+            return False, "[ERROR] La carte n'est pas trouvée"
 
     @validate_player
     @validate_phase(GameState.PIOCHE)
@@ -195,12 +243,20 @@ class Game:
         player = self.get_current_player()
         card = player.find_card_by_id(card_id)
         if card:
-            player.remove_card(card)
-            self.discard.append(card)
-            return True, ""
+            from .cards.personnals.Wedding import Adultery
+            if isinstance(card, Adultery):
+                success, reason = card.can_be_discard(player, self)
+                if success:
+                    player.remove_card(card)
+                    self.discard.append(card)
+                    self.next_turn()
+                    return True, ""
+                else:
+                    return False, reason
+            else:
+                return False, "[ERROR] la carte n'est pas un adultère"
         else:
-            print("[ERROR] La carte n'est pas trouvée")
-            return False, ""
+            return False, "[ERROR] La carte n'est pas trouvée"
 
 
     @validate_player

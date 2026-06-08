@@ -1,11 +1,13 @@
 """représente un joueur dans la partie"""
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from ..userIo.interface import UserIO
+    from .cards.professionnals.SalaryCard import SalaryCard
+    from .cards.professionnals.StudyCard import StudyCard
 from ..userIo.web import WebIO
 from .cards.personnals.Wedding import Adultery, Wedding
 from .cards.professionnals.JobCard import JobCard
-from .cards.professionnals.SalaryCard import SalaryCard
 from .cards.personnals.Flirts import Flirt
 from .cards.specials.Heritage import Heritage
 
@@ -41,6 +43,7 @@ class Player:
             PlayedCardGroup.ACQUISITIONS: [],
             PlayedCardGroup.SALAIRES_DEPENSES: [],
             PlayedCardGroup.CARTES_SPECIALES: [],
+            PlayedCardGroup.HARDSHIP: []
         }
         self.cards = {}
 
@@ -52,7 +55,8 @@ class Player:
             'groupe': {
                 group.value: [c.to_dict() for c in cards]
                 for group, cards in self.groupe.items()
-            }
+            }, 
+            "skip_turn": self.skip_turn
         }
         if reveal_hand:
             base["hand"] = [c.to_dict() for c in self.hand]
@@ -88,8 +92,16 @@ class Player:
             self.groupe[group].remove(card)
         if isinstance(card, JobCard):
             self.job = None
-        
 
+    def move_placed_cards(self,card: Card, groupFrom: PlayedCardGroup, groupTo: PlayedCardGroup) -> bool:
+        """déplace une carte et la change de groupe"""
+        try:
+            self.groupe[groupFrom].remove(card)
+            self.groupe[groupTo].append(card)
+            return True
+        except ValueError:
+            return False
+        
     def remove_card_from_hand(self, card: Card) -> None:
         """retire une carte de la main du joueur"""
         if card in self.hand:
@@ -100,8 +112,11 @@ class Player:
     def get_study_level(self) -> int:
         """Retourne le niveau d'étude de joueur"""
         total = 0
+
+        from .cards.professionnals.StudyCard import StudyCard
         for card in self.groupe.get(PlayedCardGroup.VIE_PROFESSIONNELLE, []):
-            if isinstance(card, SalaryCard):
+
+            if isinstance(card, StudyCard):
                 total += card.get_value()  # pyright: ignore[reportAttributeAccessIssue]
         return total
 
@@ -109,16 +124,21 @@ class Player:
         return self.id
 
     def get_power(self) -> list[Power]:
-        return self.power + self.job.get_power() if self.job else []
+        if self.job:
+            print(f"[DEBUG] get_power() : perso + job : {self.power + self.job.get_power()}")
+            return self.power + self.job.get_power()
+        print(f"[DEBUG] get_power() : perso : {self.power}")
+        return self.power
 
     def get_job(self) -> JobCard | None:
         return self.job
 
-    def get_available_salary(self) -> list[SalaryCard | Heritage]:
+    def get_available_salary(self) -> "list[SalaryCard | Heritage]":
         """renvois la lsite des salaire disponible pour un achat"""
         result = []
         cards = self.get_card_from_group(PlayedCardGroup.VIE_PROFESSIONNELLE)
         for card in cards:
+            from .cards.professionnals.SalaryCard import SalaryCard
             if isinstance(card, SalaryCard):
                 result.append(card)
         cards = self.get_card_from_group(PlayedCardGroup.CARTES_SPECIALES)
@@ -131,6 +151,7 @@ class Player:
         """renvois si le joueur est mariée ou non"""
         cards = self.get_card_from_group(PlayedCardGroup.VIE_PERSONNELLE)
         for card in cards:
+            from .cards.personnals.Wedding import Wedding
             if isinstance(card, Wedding):
                 return True
         return False
@@ -175,4 +196,49 @@ class Player:
             if card.get_id() == card_id:
                 return card
         return None
-        
+
+    def add_skip_turn(self, number: int):
+        self.skip_turn += number
+
+
+    # -------------------------------------
+    # GETTERS
+    # -------------------------------------
+    def get_last_salary_placed(self) -> "SalaryCard | None":
+        """Retourne le dernier salaire posé et non utilisé par un joueur"""
+        last_salary = None
+        for card in self.get_card_from_group(PlayedCardGroup.VIE_PROFESSIONNELLE):
+            from .cards.professionnals.SalaryCard import SalaryCard 
+            if isinstance(card, SalaryCard):
+                last_salary = card
+        return last_salary
+
+    def get_last_study_placed(self) -> "StudyCard | None":
+        """retourne la dernière carte étude posé"""
+        last_study = None
+        for card in self.get_card_from_group(PlayedCardGroup.VIE_PROFESSIONNELLE):
+            from .cards.professionnals.StudyCard import StudyCard
+            if isinstance(card, StudyCard):
+                last_study = card
+        return last_study
+
+    def get_hand(self) -> list["Card"]:
+        return self.hand
+
+    def get_wedding(self) -> "Wedding | None":
+        """retourne le marriage posé"""
+        wedding_card = None
+        for card in self.get_card_from_group(PlayedCardGroup.VIE_PROFESSIONNELLE):
+            from .cards.personnals.Wedding import Wedding
+            if isinstance(card, Wedding):
+                wedding_card = card
+        return wedding_card
+    
+    def get_adultery(self) -> "Adultery | None":
+        """retourne le marriage posé"""
+        adultery_card = None
+        for card in self.get_card_from_group(PlayedCardGroup.VIE_PROFESSIONNELLE):
+            from .cards.personnals.Wedding import Adultery
+            if isinstance(card, Adultery):
+                adultery_card = card
+        return adultery_card

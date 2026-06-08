@@ -1,0 +1,46 @@
+{# templates/overlays/show_hand.html #}
+{# Inclure via {% include 'overlays/show_hand.html' %} dans board.html #}
+<link rel="stylesheet" href="/static/css/show-hand.css">
+
+<div id="show-hand-overlay"
+     class="show-hand-overlay"
+     aria-modal="true"
+     role="dialog"
+     aria-labelledby="show-hand-title"
+     hidden>
+
+  <div class="show-hand-overlay__backdrop"></div>
+
+  <div class="show-hand-overlay__panel">
+
+    <!-- Header -->
+    <div class="show-hand-overlay__header">
+      <div class="show-hand-overlay__header-top">
+        <span class="show-hand-overlay__tag">MAINS DES JOUEURS</span>
+        <div class="show-hand-overlay__count-badge">
+          <span class="show-hand-overlay__count-value" id="show-hand-count">0</span>
+          <span class="show-hand-overlay__count-label">joueurs</span>
+        </div>
+      </div>
+      <h2 class="show-hand-overlay__title" id="show-hand-title">Mains révélées</h2>
+      <p class="show-hand-overlay__prompt" id="show-hand-prompt"></p>
+    </div>
+
+    <!-- Contenu par joueur -->
+    <div class="show-hand-overlay__body"
+         id="show-hand-body">
+      {# Players injected dynamically via JS #}
+    </div>
+
+    <!-- Footer -->
+    <div class="show-hand-overlay__footer">
+      <button
+        class="show-hand-overlay__btn show-hand-overlay__btn--close"
+        id="show-hand-close-btn"
+        type="button"
+        aria-label="Fermer"
+      >Fermer</button>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,49 @@
+{# templates/overlays/card_picker.html #}
+{# Inclure via {% include 'overlays/card_picker.html' %} dans board.html #}
+<link rel="stylesheet" href="/static/css/card-picker.css">
+
+<div id="card-picker-overlay"
+     class="card-picker-overlay"
+     aria-modal="true"
+     role="dialog"
+     aria-labelledby="card-picker-title"
+     hidden>
+
+  <div class="card-picker-overlay__backdrop"></div>
+
+  <div class="card-picker-overlay__panel">
+
+    <!-- Header -->
+    <div class="card-picker-overlay__header">
+      <div class="card-picker-overlay__header-top">
+        <span class="card-picker-overlay__tag">SÉLECTION</span>
+        <div class="card-picker-overlay__count-badge">
+          <span class="card-picker-overlay__count-value" id="card-picker-count">0</span>
+          <span class="card-picker-overlay__count-label">cartes</span>
+        </div>
+      </div>
+      <h2 class="card-picker-overlay__title" id="card-picker-title">Choisissez une carte</h2>
+      <p class="card-picker-overlay__prompt" id="card-picker-prompt"></p>
+      <p class="card-picker-overlay__hint">Cliquez sur une carte pour la sélectionner.</p>
+    </div>
+
+    <!-- Grille de cartes -->
+    <div class="card-picker-overlay__grid"
+         id="card-picker-grid"
+         role="listbox"
+         aria-label="Cartes disponibles">
+      {# Cards injected dynamically via JS #}
+    </div>
+
+    <!-- Footer -->
+    <div class="card-picker-overlay__footer">
+      <button
+        class="card-picker-overlay__btn card-picker-overlay__btn--confirm"
+        id="card-picker-confirm-btn"
+        type="button"
+        disabled
+      >Confirmer le choix</button>
+    </div>
+
+  </div>
+</div>

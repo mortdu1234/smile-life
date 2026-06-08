@@ -282,6 +282,29 @@
     .turn-info { font-size: 0.75rem; color: var(--muted); text-align: center; }
     .turn-info strong { color: var(--accent); }
 
+    .btn-skip {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; margin-top: 10px;
+      padding: 7px 12px; border-radius: var(--radius);
+      font-family: 'Outfit', sans-serif; font-size: 0.75rem; font-weight: 500;
+      letter-spacing: 0.06em; cursor: pointer;
+      border: 1px solid var(--line);
+      background: var(--bg); color: var(--muted);
+      transition: background 0.18s, border-color 0.18s, color 0.18s, opacity 0.18s;
+    }
+    .btn-skip:not(:disabled):hover {
+      background: rgba(59,48,40,0.06);
+      border-color: var(--accent); color: var(--accent);
+    }
+    .btn-skip:disabled { opacity: 0.38; cursor: not-allowed; }
+    .btn-skip .skip-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--accent); color: var(--bg);
+      font-size: 0.65rem; font-weight: 600; line-height: 1;
+    }
+    .btn-skip:not(:disabled) .skip-badge { background: var(--gold); }
+
     .deck-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .deck-pile { display: flex; flex-direction: column; align-items: center; gap: 5px; }
     .deck-label { font-size: 0.65rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
@@ -569,30 +592,38 @@
           <div class="turn-info">Tour de <strong>{{ current_player.name }}</strong></div>
         {% endif %}
       </div>
-
+      
       <div class="sidebar-section">
         <div class="sidebar-title">🃏 Pioche &amp; Défausse</div>
         <div class="deck-row">
           <div class="deck-pile">
             <span class="deck-label">Pioche</span>
-            <div class="deck-card pioche {% if is_my_turn %}clickable{% endif %}"
-                 {% if is_my_turn %}onclick="drawCard()"{% endif %}>
-              <span class="deck-icon">🂠</span>
-              <span class="deck-count">{{ deck_size }}</span>
-            </div>
+            <div class="deck-card pioche {% if is_my_turn and skip_count != 0 %}clickable{% endif %}"
+            {% if is_my_turn %}onclick="drawCard()"{% endif %}>
+            <span class="deck-icon">🂠</span>
+            <span class="deck-count">{{ deck_size }}</span>
           </div>
-          <div class="deck-pile">
-            <span class="deck-label">Défausse</span>
-            <div class="deck-card defausse clickable-card" {% if discard_top %}data-card='{{ discard_top.to_dict()|tojson }}' data-context="discard" style="cursor:pointer"{% endif %}>
-              {% if discard_top %}
-                <img src="{{ url_for('static', filename=discard_top.image_path) }}" alt="Défausse" onerror="this.style.display='none'">
-              {% else %}
-                <span class="defausse-empty">Vide</span>
-              {% endif %}
-            </div>
+        </div>
+        <div class="deck-pile">
+          <span class="deck-label">Défausse</span>
+          <div class="deck-card defausse clickable-card" {% if last_discard %}data-card='{{ last_discard }}' data-context="discard" style="cursor:pointer"{% endif %}>
+            {% if last_discard %}
+            <img src="{{ url_for('static', filename=last_discard.image_path) }}" alt="Défausse" onerror="this.style.display='none'">
+            {% else %}
+            <span class="defausse-empty">Vide</span>
+            {% endif %}
           </div>
         </div>
       </div>
+      {% set skip_count = my_player.skip_turn if my_player.skip_turn is defined else 0 %}
+      <button id="btn-skip"
+              class="btn-skip"
+              onclick="skipTurn()"
+              {% if not is_my_turn or skip_count == 0 %}disabled{% endif %}>
+        ⏭ Passer le tour
+        <span class="skip-badge" id="skip-badge">{{ skip_count }}</span>
+      </button>
+    </div>
 
       <div class="sidebar-section">
         <div class="sidebar-title">😊 Scores</div>
@@ -633,6 +664,10 @@
   </div>
 
   {% include "overlays/salary-selector.html" %}
+  {% include 'overlays/card-browser.html' %}
+  {% include 'overlays/show-hand.html' %}
+  {% include 'overlays/card-picker.html' %}
+  {% include 'overlays/player-picker.html' %}
 
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="/static/js/board-stream.js"></script>
@@ -643,23 +678,36 @@
     window.IS_MY_TURN = IS_MY_TURN;
     window.PSEUDO = "{{ pseudo }}";
 
-    // ── Listener délégué pour toutes les cartes cliquables ───────────────────
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    function dispatchOpenCard(card, context) {
+      if (typeof window.openCard === "function") {
+        window.openCard(card, context);
+      } else {
+        console.warn("openCard pas encore chargé");
+      }
+    }
+
+    // ── Listener délégué — cartes HTML classiques (.clickable-card) ──────────
+    // Couvre les cartes générées par Jinja au chargement initial
     document.addEventListener("click", function(e) {
       const card_el = e.target.closest(".clickable-card");
       if (!card_el) return;
-      const raw = card_el.dataset.card;
+      const raw     = card_el.dataset.card;
       const context = card_el.dataset.context;
       if (!raw || !context) return;
       try {
-        const card = JSON.parse(raw);
-        if (typeof window.openCard === "function") {
-          window.openCard(card, context);
-        } else {
-          console.warn("openCard pas encore chargé");
-        }
+        dispatchOpenCard(JSON.parse(raw), context);
       } catch(err) {
         console.error("Erreur parsing carte :", err, raw);
       }
+    });
+
+    // ── Listener délégué — composant <game-card> ──────────────────────────────
+    // Couvre les cartes injectées dynamiquement par updateBoard / GameCard.create()
+    document.addEventListener("card-click", function(e) {
+      const { raw, context } = e.detail ?? {};
+      if (!raw || !context) return;
+      dispatchOpenCard(raw, context);
     });
 
     // ── Historique ───────────────────────────────────────────────────────────
@@ -692,6 +740,18 @@
       if (data.state) updateBoard(data.state);  // ← ajouter ça
     }
 
+    // ── Passer le tour ───────────────────────────────────────────────────────
+    async function skipTurn() {
+      if (!window.IS_MY_TURN) return;
+      const btn = document.getElementById('btn-skip');
+      if (btn) btn.disabled = true;
+      const res = await fetch(`/game/${GAME_ID}/skip`, { method: 'POST' });
+      const data = await res.json();
+      if (!data.ok) { alert(data.error); if (btn) btn.disabled = false; return; }
+      if (data.state) updateBoard(data.state);
+    }
+    window.skipTurn = skipTurn;
+
     // ── Jouer une carte ──────────────────────────────────────────────────────
     async function playCard(cardId) {
       if (!window.IS_MY_TURN) return;
@@ -702,6 +762,10 @@
       });
       const data = await res.json();
       if (!data.ok) { alert(data.error); return; }
+      // Mise à jour immédiate du plateau sans attendre le prochain polling/reload
+      if (data.state) updateBoard(data.state);
+      // Si le serveur renvoie un message IO (ex: card-browser), on le dispatche immédiatement
+      if (data.io) window.dispatchEvent(new CustomEvent("io-message", { detail: data.io }));
     }
     window.playCard = playCard;
 
@@ -761,19 +825,12 @@
         if (!myPlayer.hand || myPlayer.hand.length === 0) {
           handEl.innerHTML = '<span class="hand-empty">Aucune carte en main.</span>';
         } else {
-          handEl.innerHTML = myPlayer.hand.map(card => `
-            <div class="game-card clickable-card"
-                 data-card='${JSON.stringify(card)}'
-                 data-context="${isMyTurn ? 'hand' : 'view'}">
-              ${card.image_path
-                ? `<img src="/static/${card.image_path}" alt="${card.name}" onerror="this.style.display='none'">`
-                : ''}
-              <span class="card-type">${card.type ?? ''}</span>
-              <div class="card-footer">
-                <span class="card-name">${card.name}</span>
-                <span class="card-smiles">${card.smiles > 0 ? '+' + card.smiles : ''}</span>
-              </div>
-            </div>`).join('');
+          handEl.innerHTML = "";
+          const context = isMyTurn ? "hand" : "view";
+          myPlayer.hand.forEach(card => {
+            const el = GameCard.create(card, { context, size: "md", clickable: true });
+            handEl.appendChild(el);
+          });
         }
       }
 
@@ -786,6 +843,16 @@
       if (pileEl) {
         pileEl.classList.toggle("clickable", isMyTurn);
         pileEl.onclick = isMyTurn ? drawCard : null;
+      }
+
+      // Mise à jour du bouton "Passer le tour"
+      const skipBtn   = document.getElementById('btn-skip');
+      const skipBadge = document.getElementById('skip-badge');
+      if (skipBtn && myPlayer) {
+        const skipCount = myPlayer.skip_turn ?? 0;
+        const canSkip   = isMyTurn && skipCount > 0;
+        skipBtn.disabled = !canSkip;
+        if (skipBadge) skipBadge.textContent = skipCount;
       }
 
       // Mise à jour sidebar état du jeu
@@ -846,19 +913,11 @@
             if (cards.length === 0) {
               cell.innerHTML = '<span class="cell-empty">—</span>';
             } else {
-              cell.innerHTML = cards.map(card => `
-                <div class="game-card clickable-card"
-                     data-card='${JSON.stringify(card).replace(/'/g, "&#39;")}'
-                     data-context="played">
-                  <span class="card-type">${card.type ?? ''}</span>
-                  ${card.image_path
-                    ? `<img src="/static/${card.image_path}" alt="${card.name}" onerror="this.style.display='none'">`
-                    : ''}
-                  <div class="card-footer">
-                    <span class="card-name">${card.name}</span>
-                    <span class="card-smiles">😊 ${card.smiles ?? 0}</span>
-                  </div>
-                </div>`).join('');
+              cell.innerHTML = "";
+              cards.forEach(card => {
+                const el = GameCard.create(card, { context: "played", size: "lg", clickable: true });
+                cell.appendChild(el);
+              });
             }
           });
         });

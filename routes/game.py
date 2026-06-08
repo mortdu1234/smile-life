@@ -4,14 +4,11 @@ Blueprint Flask /game
 from flask import Blueprint, request, redirect, url_for, session, render_template, jsonify, abort
 from backend.core.Game import Game
 from backend.game import (
-    start_game, get_game,
-    draw_from_deck, draw_from_discard,
-    place_card, discard_from_hand,
-    discard_job, discard_wedding, discard_adultery,
-    skip_turn, next_turn,
+    start_game, get_game
 )
 from backend.hub import set_preset
 from flask_socketio import join_room
+from backend.webSocket import broadcast_game
 
 game_bp = Blueprint(
     "game",
@@ -32,19 +29,21 @@ def _require_pseudo():
         abort(401, "Non connecté.")
     return pseudo
 
-def _card_id_from_body() -> tuple[int | None, str | None]:
+def _card_id_from_body() -> tuple[int | None, str]:
+    """Permet de récupérer l'Id de la carte depuis le body de la requete"""
     data = request.get_json(silent=True) or {}
     raw = data.get("card_id")
     if raw is None:
         return None, "card_id manquant."
     try:
-        return int(raw), None
+        return int(raw), ""
     except (TypeError, ValueError):
         return None, "card_id invalide."
 
 def _action_response(success: bool, reason: str, game_id: str):
     if success:
         game = get_game(game_id)
+        broadcast_game(game)
         pseudo = session.get("pseudo")
         state = game.to_dict(viewer=pseudo) if game else None
         return jsonify({"ok": True, "state": state})
@@ -144,15 +143,21 @@ def state(game_id):
 
 @game_bp.route("/<game_id>/draw", methods=["POST"])
 def draw(game_id):
-    pseudo = _require_pseudo()
-    success, reason = draw_from_deck(game_id, pseudo)
-    return _action_response(success, reason, game_id)
+    game = get_game(game_id)
+    if game:
+        player_id = game.get_current_player().get_id()
+        success, reason = game.draw_card_from_deck(player_id)
+        return _action_response(success, reason, game_id)
+    return _action_response(False, "[ERROR] Game non trouvée", game_id)
 
 @game_bp.route("/<game_id>/draw-discard", methods=["POST"])
 def draw_discard(game_id):
-    pseudo = _require_pseudo()
-    success, reason = draw_from_discard(game_id, pseudo)
-    return _action_response(success, reason, game_id)
+    game = get_game(game_id)
+    if game:
+        player_id = game.get_current_player().get_id()
+        success, reason = game.draw_card_from_discard(player_id)
+        return _action_response(success, reason, game_id)
+    return _action_response(False, "[ERROR] Game non trouvée", game_id)
 
 
 
@@ -160,50 +165,77 @@ def draw_discard(game_id):
 
 @game_bp.route("/<game_id>/place", methods=["POST"])
 def place(game_id):
-    pseudo = _require_pseudo()
-    card_id, err = _card_id_from_body()
-    if err:
-        return jsonify({"ok": False, "error": err}), 400
-    success, reason = place_card(game_id, pseudo, card_id)
-    return _action_response(success, reason, game_id)
+    game = get_game(game_id)
+    if game:
+        player_id = game.get_current_player().get_id()
+        card_id, reason = _card_id_from_body()
+        if not card_id:
+            return _action_response(False, reason, game_id)
+        success, reason = game.place_card(player_id, card_id)
+        return _action_response(success, reason, game_id)
+    return _action_response(False, "[ERROR] Game non trouvée", game_id)
+
 
 @game_bp.route("/<game_id>/discard", methods=["POST"])
 def discard(game_id):
-    pseudo = _require_pseudo()
-    card_id, err = _card_id_from_body()
-    if err:
-        return jsonify({"ok": False, "error": err}), 400
-    success, reason = discard_from_hand(game_id, pseudo, card_id)
-    return _action_response(success, reason, game_id)
+    """discard une carte depuis la main"""
+    game = get_game(game_id)
+    if game:
+        player_id = game.get_current_player().get_id()
+        card_id, reason = _card_id_from_body()
+        if not card_id:
+            return _action_response(False, reason, game_id)
+        success, reason = game.discard_card_from_hand(player_id, card_id)
+        return _action_response(success, reason, game_id)
+    return _action_response(False, "[ERROR] Game non trouvée", game_id)
+
 
 
 # ── Défausse de cartes posées ──────────────────────────────────────────────────
 
 @game_bp.route("/<game_id>/discard-job", methods=["POST"])
 def discard_job_route(game_id):
-    pseudo = _require_pseudo()
-    card_id, err = _card_id_from_body()
-    if err:
-        return jsonify({"ok": False, "error": err}), 400
-    success, reason = discard_job(game_id, pseudo, card_id)
+    """Permet d'effectuer une démission comme action"""
+    game = get_game(game_id)
+    if not game:
+        print("[ERROR] Game non trouvée")
+        return _action_response(False, "[ERROR] Game non trouvée", game_id)    
+    player_id = game.get_current_player().get_id()
+    card_id, reason = _card_id_from_body()
+    if not card_id:
+        print(reason)
+        return _action_response(False, reason, game_id)
+    success, reason = game.discard_job_card(player_id, card_id)
     return _action_response(success, reason, game_id)
 
 @game_bp.route("/<game_id>/discard-wedding", methods=["POST"])
 def discard_wedding_route(game_id):
-    pseudo = _require_pseudo()
-    card_id, err = _card_id_from_body()
-    if err:
-        return jsonify({"ok": False, "error": err}), 400
-    success, reason = discard_wedding(game_id, pseudo, card_id)
+    """Permet de divorcer volontairement"""
+    game = get_game(game_id)
+    if not game:
+        print("[ERROR] Game non trouvée")
+        return _action_response(False, "[ERROR] Game non trouvée", game_id)    
+    player_id = game.get_current_player().get_id()
+    card_id, reason = _card_id_from_body()
+    if not card_id:
+        print(reason)
+        return _action_response(False, reason, game_id)
+    success, reason = game.discard_wedding_card(player_id, card_id)
     return _action_response(success, reason, game_id)
 
 @game_bp.route("/<game_id>/discard-adultery", methods=["POST"])
 def discard_adultery_route(game_id):
-    pseudo = _require_pseudo()
-    card_id, err = _card_id_from_body()
-    if err:
-        return jsonify({"ok": False, "error": err}), 400
-    success, reason = discard_adultery(game_id, pseudo, card_id)
+    """Permet de supprimer volontairement son adultaire"""
+    game = get_game(game_id)
+    if not game:
+        print("[ERROR] Game non trouvée")
+        return _action_response(False, "[ERROR] Game non trouvée", game_id)    
+    player_id = game.get_current_player().get_id()
+    card_id, reason = _card_id_from_body()
+    if not card_id:
+        print(reason)
+        return _action_response(False, reason, game_id)
+    success, reason = game.discard_adultery_card(player_id, card_id)
     return _action_response(success, reason, game_id)
 
 
@@ -211,9 +243,13 @@ def discard_adultery_route(game_id):
 
 @game_bp.route("/<game_id>/skip", methods=["POST"])
 def skip(game_id):
-    pseudo = _require_pseudo()
-    success, reason = skip_turn(game_id, pseudo)
-    return _action_response(success, reason, game_id)
+    game = get_game(game_id)
+    if game:
+        player_id = game.get_current_player().get_id()
+        success, reason = game.skip_turn(player_id)
+        return _action_response(success, reason, game_id)
+    return _action_response(False, "[ERROR] Game non trouvée", game_id)
+
 
 # ── UserIO ───────────────────────────────────────────────────────────────────────
 
@@ -226,7 +262,7 @@ def pending(game_id):
     player = next((p for p in game.players if p.name == pseudo), None)
     if not player:
         return jsonify({"pending": None})
-    return jsonify({"pending": player.get_interface().pending})
+    return jsonify({"pending": player.get_interface().pending}) # type: ignore
 
 
 @game_bp.route("/<game_id>/submit-indices", methods=["POST"])
@@ -242,4 +278,31 @@ def submit_indices(game_id):
     if not isinstance(indices, list):
         return jsonify({"ok": False, "error": "indices manquants."}), 400
     player.get_interface().submit_indices(indices)
+    return jsonify({"ok": True})
+
+@game_bp.route("/<game_id>/dismiss", methods=["POST"])
+def dismiss(game_id):
+    game = get_game(game_id)
+    if not game:
+        return jsonify({"ok": False, "error": "Partie introuvable."}), 404
+    pseudo = session.get("pseudo")
+    player = next((p for p in game.players if p.name == pseudo), None)
+    if not player:
+        return jsonify({"ok": False, "error": "Joueur introuvable."}), 404
+    player.get_interface().submit_dismiss()
+    return jsonify({"ok": True})
+
+@game_bp.route("/<game_id>/submit", methods=["POST"])
+def submit(game_id):
+    game = get_game(game_id)
+    if not game:
+        return jsonify({"ok": False, "error": "Partie introuvable."}), 404
+    pseudo = session.get("pseudo")
+    player = next((p for p in game.players if p.name == pseudo), None)
+    if not player:
+        return jsonify({"ok": False, "error": "Joueur introuvable."}), 404
+    index = (request.get_json() or {}).get("index")
+    if index is None:
+        return jsonify({"ok": False, "error": "index manquant."}), 400
+    player.get_interface().submit(index)
     return jsonify({"ok": True})

@@ -36,12 +36,6 @@ class Card:
     # ------------------------------------------------------------------ #
     #  Méthodes avec comportement par défaut                             #
     # ------------------------------------------------------------------ #
-    def get_effect(self) -> None:
-        """
-        Décrit l'effet de la carte en données pures.
-        Retourne None si l'effet est entièrement géré par apply_card_effect().
-        """
-        return None
 
     def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
         """Applique l'effet de la carte. Retourne True si succès."""
@@ -55,12 +49,12 @@ class Card:
         else:
             print("[ERROR] : il y a une erreur lors du pouvoir")
 
-    def get_card_rule(self) -> str:
-        return f"Carte classique — donne {self.smiles} smile(s)."
-    
     # ------------------------------------------------------------------ #
     #  Méthodes à redéfinir                                              #
     # ------------------------------------------------------------------ #
+    def get_card_rule(self) -> str:
+        return f"Carte classique — donne {self.smiles} smile(s)."
+    
 
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         """Vérifie si la carte peut être jouée dans le contexte courant."""

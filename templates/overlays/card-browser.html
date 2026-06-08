@@ -1,0 +1,48 @@
+{# templates/overlays/card_browser.html #}
+{# Inclure via {% include 'overlays/card_browser.html' %} dans board.html #}
+<link rel="stylesheet" href="/static/css/card-browser.css">
+
+<div id="card-browser-overlay"
+     class="card-browser-overlay"
+     aria-modal="true"
+     role="dialog"
+     aria-labelledby="card-browser-title"
+     hidden>
+
+  <div class="card-browser-overlay__backdrop"></div>
+
+  <div class="card-browser-overlay__panel">
+
+    <!-- Header -->
+    <div class="card-browser-overlay__header">
+      <div class="card-browser-overlay__header-top">
+        <span class="card-browser-overlay__tag">CONSULTATION</span>
+        <div class="card-browser-overlay__count-badge">
+          <span class="card-browser-overlay__count-value" id="card-browser-count">0</span>
+          <span class="card-browser-overlay__count-label">cartes</span>
+        </div>
+      </div>
+      <h2 class="card-browser-overlay__title" id="card-browser-title">Cartes disponibles</h2>
+      <p class="card-browser-overlay__prompt" id="card-browser-prompt"></p>
+      <p class="card-browser-overlay__hint">Cliquez sur une carte pour en voir le détail.</p>
+    </div>
+
+    <!-- Grille de cartes -->
+    <div class="card-browser-overlay__grid"
+         id="card-browser-grid"
+         role="list">
+      {# Cards injected dynamically via JS #}
+    </div>
+
+    <!-- Footer -->
+    <div class="card-browser-overlay__footer">
+      <button
+        class="card-browser-overlay__btn card-browser-overlay__btn--close"
+        id="card-browser-close-btn"
+        type="button"
+        aria-label="Fermer"
+      >Fermer</button>
+    </div>
+
+  </div>
+</div>

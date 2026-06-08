@@ -164,7 +164,7 @@ if (!document.getElementById("cd-styles")) {
   style.textContent = `
     /* ── Overlay ── */
     .cd-overlay {
-      position: fixed; inset: 0; z-index: 600;
+      position: fixed; inset: 0; z-index: 1100;
       background: rgba(26,23,20,0.6);
       backdrop-filter: blur(4px);
       display: flex; align-items: center; justify-content: center;

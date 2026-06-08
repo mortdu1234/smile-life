@@ -13,5 +13,10 @@ class Journaliste(JobCard):
         self.salary = 2
     def apply_card_effect(self, game: Game, current_player: Player, interface:"UserIO") -> bool:
         """permet de voir la main de chaque joueur"""
-        print("[DEBUG] TODO")
+        current_player.remove_card_from_hand(self)
+        players = game.players
+        players_names = [player.name for player in players]
+        players_hands = [player.hand for player in players]
+        interface.show_players_hand(players_names, players_hands)
+        current_player.add_card_to_hand(self)
         return super().apply_card_effect(game, current_player, interface)

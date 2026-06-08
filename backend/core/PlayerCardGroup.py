@@ -1,4 +1,6 @@
 from enum import Enum
+
+from numpy import isin
 from .cards.Card import Card
 
 
@@ -9,6 +11,7 @@ class PlayedCardGroup(Enum):
     ACQUISITIONS = 'acquisitions'
     SALAIRES_DEPENSES = 'salaires_depenses'
     CARTES_SPECIALES = 'cartes_speciales'
+    HARDSHIP ="hardship"
 
     @staticmethod
     def get_card_on_play_group(card: Card) -> 'PlayedCardGroup':
@@ -23,14 +26,18 @@ class PlayedCardGroup(Enum):
         from .cards.professionnals.JobCard import JobCard
         from .cards.professionnals.SalaryCard import SalaryCard
         from .cards.professionnals.StudyCard import StudyCard
+        from .cards.hardships.HardshipCard import Hardship
+
         if isinstance(card, (Flirt, Wedding, Adultery, ChildCard, AnimalCard)):
-            return PlayedCardGroup.ACQUISITIONS
+            return PlayedCardGroup.VIE_PERSONNELLE
         if isinstance(card, (StudyCard, SalaryCard, JobCard)):
             return PlayedCardGroup.VIE_PROFESSIONNELLE
         if isinstance(card, Acquisition):
             return PlayedCardGroup.ACQUISITIONS
         if isinstance(card,  (SpecialCard, OtherCard)):
             return PlayedCardGroup.CARTES_SPECIALES
+        if isinstance(card, Hardship):
+            return PlayedCardGroup.HARDSHIP
         print(f"[WARNING] la carte {card.__class__.__name__} n'est pas bien rangée")
         return PlayedCardGroup.CARTES_SPECIALES
         
@@ -48,6 +55,7 @@ class PlayedCardGroup(Enum):
         from .cards.professionnals.JobCard import JobCard
         from .cards.professionnals.SalaryCard import SalaryCard
         from .cards.professionnals.StudyCard import StudyCard
+        from .cards.hardships.HardshipCard import Hardship
         result = []
         if isinstance(card, (Flirt, Wedding, Adultery, ChildCard, AnimalCard)):
             result.append(PlayedCardGroup.ACQUISITIONS)
@@ -57,6 +65,8 @@ class PlayedCardGroup(Enum):
             result.append(PlayedCardGroup.ACQUISITIONS)
         if isinstance(card,  (SpecialCard, OtherCard)):
             result.append(PlayedCardGroup.CARTES_SPECIALES)
+        if isinstance(card, Hardship):
+            result.append(PlayedCardGroup.HARDSHIP)
         return result
     @staticmethod
     def groupe_to_dict(groupe: dict) -> dict:

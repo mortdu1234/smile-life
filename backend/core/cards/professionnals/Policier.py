@@ -17,5 +17,14 @@ class Policier(JobCard):
 
     def apply_card_effect(self, game: Game, current_player: Player, interface: "UserIO") -> bool:
         """supprimer tous les bandit et gourous sur le terrain"""
-        print("[DEBUG] TODO")
+        for player in game.players:
+            job = player.get_job()
+            if job:
+                from .Bandit import Bandit
+                from .Gourou import Gourou
+                if isinstance(job, (Gourou, Bandit)):
+                    print("Perte d'un métier a cause du policier")
+                    job.discard_job(player, game)
+                    player.remove_card(job)
+                
         return super().apply_card_effect(game, current_player, interface)

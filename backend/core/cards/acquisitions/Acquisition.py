@@ -1,9 +1,12 @@
 from typing import TYPE_CHECKING
+
+
 if TYPE_CHECKING:
     from ...Game import Game
     from ...Player import Player
     from ....userIo.interface import UserIO
-
+    from ..professionnals.SalaryCard import SalaryCard
+    from ..specials.Heritage import Heritage
 from ..Card import Card
 
 class Acquisition(Card):
@@ -29,6 +32,13 @@ class Acquisition(Card):
     def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
         """effectue la selection des salaires pour l'acquisition"""
         available_salaries = current_player.get_available_salary()
-        interface.ask_salaries(self, available_salaries, self.calcul_cost(current_player, game))
+
+        selected_salaries: list[Card] = interface.ask_salaries(self, available_salaries, self.calcul_cost(current_player, game))
+        for card in selected_salaries:
+            from backend.core.PlayerCardGroup import PlayedCardGroup
+            success = current_player.move_placed_cards(card, PlayedCardGroup.VIE_PROFESSIONNELLE, PlayedCardGroup.SALAIRES_DEPENSES)
+            if not success:
+                print("[ERROR] déplace de carte échouée")
+                return False
         return super().apply_card_effect(game, current_player, interface)
     

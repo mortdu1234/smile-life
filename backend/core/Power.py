@@ -16,3 +16,5 @@ class Power(Enum):
     TRAVEL_FREE = "travel_free",
     NO_BANDIT = "no_bandit",
     INFINITE_FLIRT = "infinite_flirt"
+    NO_REDOUBLEMENT = "no_redoublement"
+    NO_BURNOUT  = "no_burnout"

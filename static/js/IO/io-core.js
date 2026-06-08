@@ -1,8 +1,13 @@
 import { getHandler } from "./io-registry.js";
 
+import "../components/card-game.js";
 // Importer les handlers suffit à les enregistrer
 import "./handlers/card-detail.js";
-import "./handlers/salary-selector.js";   // ← ajouté
+import "./handlers/salary-selector.js";
+import "./handlers/card-browser.js";
+import "./handlers/show-hand.js";
+import "./handlers/card-picker.js";
+import "./handlers/player-picker.js"
 
 // ── Expose openCard globalement pour board.html ───────────────────────────────
 window.openCard = function(card, context) {
@@ -39,6 +44,11 @@ async function submitIndices(indices) {
   poll();
 }
 
+async function submitDismiss() {
+  await fetch(`/game/${window.GAME_ID}/dismiss`, { method: "POST" });
+  poll();
+}
+
 async function poll() {
   let pending = null;
   try {
@@ -69,7 +79,11 @@ async function poll() {
   const container = document.getElementById("io-container");
   if (container) {
     container.innerHTML = "";
-    const onSubmit = pending.ui_component === "salary-selector" ? submitIndices : submit;
+    const onSubmit = 
+      pending.ui_component === "salary-selector" ? submitIndices : 
+      pending.ui_component === "card-browser"    ? submitDismiss :
+      pending.ui_component === "show-hand"       ? submitDismiss :
+      submit;
     container.appendChild(render({ ...pending, onSubmit }));
   }
 

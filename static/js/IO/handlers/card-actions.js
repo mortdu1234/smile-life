@@ -59,14 +59,14 @@ export const CARD_ACTIONS = {
   // Méthodes Game.py : place_card / discard_job_card
   JobCard: [
     {
-      label: "▶ Accepter ce métier",
+      label: "▶ Jouer",
       variant: "primary",
       context: ["hand"],
       endpoint: (card, game_id) => EP.place(game_id, card.id),
     },
     {
-      label: "🗑 Refuser",
-      variant: "ghost",
+      label: "🗑 Défausser",
+      variant: "danger",
       context: ["hand"],
       endpoint: (card, game_id) => EP.discard(game_id, card.id),
     },
@@ -83,14 +83,14 @@ export const CARD_ACTIONS = {
   // Méthodes Game.py : place_card / discard_wedding_card
   WeddingCard: [
     {
-      label: "💍 Se marier",
-      variant: "success",
+      label: "▶ Jouer",
+      variant: "primary",
       context: ["hand"],
       endpoint: (card, game_id) => EP.place(game_id, card.id),
     },
     {
-      label: "🗑 Ignorer",
-      variant: "ghost",
+      label: "🗑 Défausser",
+      variant: "danger",
       context: ["hand"],
       endpoint: (card, game_id) => EP.discard(game_id, card.id),
     },
@@ -107,14 +107,14 @@ export const CARD_ACTIONS = {
   // Méthodes Game.py : place_card / discard_adultery_card
   AdulteryCard: [
     {
-      label: "🔥 Jouer",
-      variant: "warning",
+      label: "▶ Jouer",
+      variant: "primary",
       context: ["hand"],
       endpoint: (card, game_id) => EP.place(game_id, card.id),
     },
     {
       label: "🗑 Défausser",
-      variant: "ghost",
+      variant: "danger",
       context: ["hand"],
       endpoint: (card, game_id) => EP.discard(game_id, card.id),
     },
@@ -124,55 +124,6 @@ export const CARD_ACTIONS = {
       context: ["played"],
       confirm: "Mettre fin à cette relation ?",
       endpoint: (card, game_id) => EP.discardAdultery(game_id, card.id),
-    },
-  ],
-
-  // ── Carte Événement / Hardship ─────────────────────────────────────────────
-  // Méthodes Game.py : place_card / discard_card_from_hand
-  HardshipCard: [
-    {
-      label: "⚡ Infliger",
-      variant: "warning",
-      context: ["hand"],
-      endpoint: (card, game_id) => EP.place(game_id, card.id),
-    },
-    {
-      label: "🗑 Défausser",
-      variant: "ghost",
-      context: ["hand"],
-      endpoint: (card, game_id) => EP.discard(game_id, card.id),
-    },
-  ],
-
-  // ── Carte Chance / Bonus ───────────────────────────────────────────────────
-  BonusCard: [
-    {
-      label: "✨ Utiliser",
-      variant: "success",
-      context: ["hand"],
-      endpoint: (card, game_id) => EP.place(game_id, card.id),
-    },
-    {
-      label: "🗑 Défausser",
-      variant: "ghost",
-      context: ["hand"],
-      endpoint: (card, game_id) => EP.discard(game_id, card.id),
-    },
-  ],
-
-  // ── Carte Enfant (Child) ───────────────────────────────────────────────────
-  ChildCard: [
-    {
-      label: "👶 Avoir un enfant",
-      variant: "success",
-      context: ["hand"],
-      endpoint: (card, game_id) => EP.place(game_id, card.id),
-    },
-    {
-      label: "🗑 Défausser",
-      variant: "ghost",
-      context: ["hand"],
-      endpoint: (card, game_id) => EP.discard(game_id, card.id),
     },
   ],
 };

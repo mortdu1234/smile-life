@@ -1,0 +1,47 @@
+{# templates/overlays/player_picker.html #}
+{# Inclure via {% include 'overlays/player_picker.html' %} dans board.html #}
+<link rel="stylesheet" href="/static/css/player-picker.css">
+
+<div id="player-picker-overlay"
+     class="player-picker-overlay"
+     aria-modal="true"
+     role="dialog"
+     aria-labelledby="player-picker-title"
+     hidden>
+
+  <div class="player-picker-overlay__backdrop"></div>
+
+  <div class="player-picker-overlay__panel">
+
+    <!-- Header -->
+    <div class="player-picker-overlay__header">
+      <div class="player-picker-overlay__header-top">
+        <span class="player-picker-overlay__tag">SÉLECTION</span>
+        <div class="player-picker-overlay__count-badge">
+          <span class="player-picker-overlay__count-value" id="player-picker-count">0</span>
+          <span class="player-picker-overlay__count-label">joueurs</span>
+        </div>
+      </div>
+      <h2 class="player-picker-overlay__title" id="player-picker-title">Choisissez un joueur</h2>
+      <p class="player-picker-overlay__prompt" id="player-picker-prompt"></p>
+    </div>
+
+    <!-- Liste des joueurs -->
+    <div class="player-picker-overlay__list"
+         id="player-picker-list"
+         role="listbox"
+         aria-label="Joueurs disponibles">
+    </div>
+
+    <!-- Footer -->
+    <div class="player-picker-overlay__footer">
+      <button
+        class="player-picker-overlay__btn player-picker-overlay__btn--confirm"
+        id="player-picker-confirm-btn"
+        type="button"
+        disabled
+      >Confirmer le choix</button>
+    </div>
+
+  </div>
+</div>

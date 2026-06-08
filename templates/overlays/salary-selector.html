@@ -10,9 +10,26 @@
     <div class="salary-overlay__header">
       <div class="salary-overlay__header-top">
         <span class="salary-overlay__tag">PAIEMENT</span>
-        <div class="salary-overlay__cost-badge">
-          <span class="salary-overlay__cost-label">COÛT</span>
-          <span class="salary-overlay__cost-value" id="salary-required-cost">0</span>
+        <div class="salary-overlay__header-right">
+          <!-- Toggle "Plus d'info" -->
+          <button
+            class="salary-overlay__info-toggle"
+            id="salary-info-toggle"
+            type="button"
+            aria-pressed="false"
+            aria-label="Mode plus d'info"
+            title="Activer pour voir le détail d'une carte au clic"
+          >
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M10 9v5M10 7v.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <span>Détail</span>
+          </button>
+          <div class="salary-overlay__cost-badge">
+            <span class="salary-overlay__cost-label">COÛT</span>
+            <span class="salary-overlay__cost-value" id="salary-required-cost">0</span>
+          </div>
         </div>
       </div>
       <h2 class="salary-overlay__title" id="salary-overlay-title">Sélectionner les salaires</h2>
