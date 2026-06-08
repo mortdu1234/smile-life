@@ -161,6 +161,7 @@ def draw_discard(game_id):
 
 
 
+
 # ── Pose / défausse depuis la main ─────────────────────────────────────────────
 
 @game_bp.route("/<game_id>/place", methods=["POST"])
@@ -306,3 +307,14 @@ def submit(game_id):
         return jsonify({"ok": False, "error": "index manquant."}), 400
     player.get_interface().submit(index)
     return jsonify({"ok": True})
+
+
+
+@game_bp.route("/<game_id>/stop-arc-en-ciel", methods=["POST"])
+def stop_arc_en_ciel(game_id):
+    game = get_game(game_id)
+    if game:
+        player_id = game.get_current_player().get_id()
+        success, reason = game.stop_arc_en_ciel(player_id)
+        return _action_response(success, reason, game_id)
+    return _action_response(False, "[ERROR] Game non trouvée", game_id)

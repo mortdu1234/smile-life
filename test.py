@@ -1,12 +1,12 @@
-class truc:
-    att1: list[int]
-    def __init__(self) -> None:
-        self.att1 = []
+from enum import Enum
 
-class trucPlus(truc):
-    def __init__(self) -> None:
-        super().__init__()
-        self.att1.append(10)
+class GameSpecificState(Enum):
+    ARC_EN_CIEL = "arc_en_ciel"
+    CHANCE = "chance"
 
-obj = trucPlus()
-print(obj.att1)
+    def set_ARC_EN_CIEL_value(value: int):
+        GameSpecificState.ARC_EN_CIEL = value
+
+    def reduce_ARC_EN_CIEL_value():
+        GameSpecificState.ARC_EN_CIEL -= 1
+                

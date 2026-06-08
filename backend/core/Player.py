@@ -33,7 +33,7 @@ class Player:
         self.name = name
         self.id = id
         self.hand = []
-        self.power = []
+        self.power = [Power.MAX_HAND_CARD_5]
         self.job = None
         self.skip_turn = 0
         self.interface = interface
@@ -41,7 +41,7 @@ class Player:
             PlayedCardGroup.VIE_PROFESSIONNELLE: [],
             PlayedCardGroup.VIE_PERSONNELLE: [],
             PlayedCardGroup.ACQUISITIONS: [],
-            PlayedCardGroup.SALAIRES_DEPENSES: [],
+            PlayedCardGroup.CARTES_PROTEGEES: [],
             PlayedCardGroup.CARTES_SPECIALES: [],
             PlayedCardGroup.HARDSHIP: []
         }
@@ -62,6 +62,13 @@ class Player:
             base["hand"] = [c.to_dict() for c in self.hand]
         return base
 
+    def get_max_hand_card(self):
+        maxCard = 0
+        for power in self.get_power():
+            if power.value.startswith("max_hand_card_"): 
+                value = int(power.value.split("_")[-1])  
+                maxCard = max(maxCard, value)
+        return maxCard
     
     @property
     def groupe_str(self) -> dict:
@@ -73,9 +80,26 @@ class Player:
     def add_card_to_played(self, card: Card):
         """joue la carte du joueur et l'ajoute dans le groupe correspondant"""
         self.cards[card.get_id()] = card
-        self.groupe[PlayedCardGroup.get_card_on_play_group(card)].append(card)
+
+        # ====================
+        # Selection du groupe
+        # ====================
+        from .cards.professionnals.JobCard import JobCard
         if isinstance(card, JobCard):
             self.job = card
+            self.groupe[PlayedCardGroup.get_card_on_play_group(card)].append(card)
+            return
+
+        from .cards.personnals.Flirts import Flirt
+        if isinstance(card, Flirt):
+            is_adultery = self.get_adultery()
+            if is_adultery:
+                self.groupe[PlayedCardGroup.CARTES_PROTEGEES].append(card)
+            else:
+                self.groupe[PlayedCardGroup.VIE_PERSONNELLE].append(card)
+            return
+    
+        self.groupe[PlayedCardGroup.get_card_on_play_group(card)].append(card)
 
     def find_card_by_id(self, card_id: int) -> Card | None:
         """recherche une carte jouée par son id"""
@@ -86,10 +110,13 @@ class Player:
         card_id = card.get_id()
         success = self.cards.pop(card_id, None)
         if not success:
-            raise ValueError(f"Card {card.get_id()} not found in player's played cards")
+            raise ValueError(f"Card {card.get_id()} not found in player ({self.name}) played cards")
         groups: list[PlayedCardGroup] = PlayedCardGroup.get_card_groups(card)
         for group in groups:
-            self.groupe[group].remove(card)
+            try:
+                self.groupe[group].remove(card)
+            except ValueError:
+                print(f"Erreur, player:{self.name} \nretirer carte:{card.id} de type {card.__class__}\ngroupe:{group} contient : {[carte.__class__ for carte in self.groupe[group]]}")
         if isinstance(card, JobCard):
             self.job = None
 
@@ -228,8 +255,7 @@ class Player:
     def get_wedding(self) -> "Wedding | None":
         """retourne le marriage posé"""
         wedding_card = None
-        for card in self.get_card_from_group(PlayedCardGroup.VIE_PROFESSIONNELLE):
-            from .cards.personnals.Wedding import Wedding
+        for card in self.get_card_from_group(PlayedCardGroup.VIE_PERSONNELLE):
             if isinstance(card, Wedding):
                 wedding_card = card
         return wedding_card
@@ -237,8 +263,7 @@ class Player:
     def get_adultery(self) -> "Adultery | None":
         """retourne le marriage posé"""
         adultery_card = None
-        for card in self.get_card_from_group(PlayedCardGroup.VIE_PROFESSIONNELLE):
-            from .cards.personnals.Wedding import Adultery
+        for card in self.get_card_from_group(PlayedCardGroup.VIE_PERSONNELLE):
             if isinstance(card, Adultery):
                 adultery_card = card
         return adultery_card

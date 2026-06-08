@@ -34,7 +34,9 @@ class JobCard(Card):
         player_level = player.get_study_level() 
         if player_level < self.study:
             return False, f"Pas assez d'étude, {player_level}<{self.study}"
+        print(f"essaye de poser un métier : {player.get_job()}")
         if player.get_job():
+            print(f"[DEBUG] {player.name} possède deja un metier {player.get_job().__class__} et cherche un nouveau")
             return False, "Vous avez déja un métier"
         return super().can_be_played(player, game)
 
@@ -42,7 +44,7 @@ class JobCard(Card):
         return self.salary
 
     def can_be_discard(self, player: 'Player', game: "Game") -> tuple[bool, str]:
-        from ...Game import GameState
-        if game.game_state == GameState.POSE and self.jobStatus != JobStatus.INTERIMERE:
+        from ...Game import TurnState
+        if game.turn_state == TurnState.POSE and self.jobStatus != JobStatus.INTERIMERE:
             return False, "Vous ne pouvez démissionner que en phase de pioche sauf si vous etes intérimère"
         return True, ""

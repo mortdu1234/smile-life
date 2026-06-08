@@ -36,7 +36,7 @@ class Acquisition(Card):
         selected_salaries: list[Card] = interface.ask_salaries(self, available_salaries, self.calcul_cost(current_player, game))
         for card in selected_salaries:
             from backend.core.PlayerCardGroup import PlayedCardGroup
-            success = current_player.move_placed_cards(card, PlayedCardGroup.VIE_PROFESSIONNELLE, PlayedCardGroup.SALAIRES_DEPENSES)
+            success = current_player.move_placed_cards(card, PlayedCardGroup.VIE_PROFESSIONNELLE, PlayedCardGroup.CARTES_PROTEGEES)
             if not success:
                 print("[ERROR] déplace de carte échouée")
                 return False

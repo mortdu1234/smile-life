@@ -305,6 +305,21 @@
     }
     .btn-skip:not(:disabled) .skip-badge { background: var(--gold); }
 
+    .btn-arc-en-ciel {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; margin-top: 8px;
+      padding: 7px 12px; border-radius: var(--radius);
+      font-family: 'Outfit', sans-serif; font-size: 0.75rem; font-weight: 500;
+      letter-spacing: 0.06em; cursor: pointer;
+      border: 1px solid rgba(99,60,180,0.35);
+      background: rgba(99,60,180,0.08); color: #7c4dcc;
+      transition: background 0.18s, border-color 0.18s, color 0.18s;
+    }
+    .btn-arc-en-ciel:hover {
+      background: rgba(99,60,180,0.15);
+      border-color: #7c4dcc;
+    }
+
     .deck-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .deck-pile { display: flex; flex-direction: column; align-items: center; gap: 5px; }
     .deck-label { font-size: 0.65rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
@@ -536,9 +551,9 @@
           {% endif %}
         </div>
 
-        <!-- Salaires / Dépenses -->
-        <div class="category-cell" id="cell-{{ player.name }}-salaires_depenses">
-          {% set cards = player.groupe_str.get('salaires_depenses', []) or [] %}
+        <!-- Cartes Protégées -->
+        <div class="category-cell" id="cell-{{ player.name }}-cartes_protegees">
+          {% set cards = player.groupe_str.get('cartes_protegees', []) or [] %}
           {% if cards %}
             {% for card in cards %}
             <div class="game-card clickable-card" data-card='{{ card.to_dict()|tojson }}' data-context="played">
@@ -606,11 +621,21 @@
         </div>
         <div class="deck-pile">
           <span class="deck-label">Défausse</span>
-          <div class="deck-card defausse clickable-card" {% if last_discard %}data-card='{{ last_discard }}' data-context="discard" style="cursor:pointer"{% endif %}>
+          <div id="discard-card-slot">
             {% if last_discard %}
-            <img src="{{ url_for('static', filename=last_discard.image_path) }}" alt="Défausse" onerror="this.style.display='none'">
+            <game-card
+              card-id="{{ last_discard.get_id() }}"
+              name="{{ last_discard.name }}"
+              type="{{ last_discard.__class__.__name__ }}"
+              image="{{ last_discard.image_path }}"
+              smiles="{{ last_discard.smiles }}"
+              value="{{ last_discard.value | default(0) }}"
+              context="discard"
+              size="md"
+              clickable
+              data-card='{{ last_discard.to_dict()|tojson }}'></game-card>
             {% else %}
-            <span class="defausse-empty">Vide</span>
+            <div class="deck-card defausse"><span class="defausse-empty">Vide</span></div>
             {% endif %}
           </div>
         </div>
@@ -622,6 +647,12 @@
               {% if not is_my_turn or skip_count == 0 %}disabled{% endif %}>
         ⏭ Passer le tour
         <span class="skip-badge" id="skip-badge">{{ skip_count }}</span>
+      </button>
+      <button id="btn-arc-en-ciel"
+              class="btn-arc-en-ciel"
+              onclick="stopArcEnCiel()"
+              style="display:none">
+        🌈 Arrêter l'arc-en-ciel
       </button>
     </div>
 
@@ -752,6 +783,17 @@
     }
     window.skipTurn = skipTurn;
 
+    async function stopArcEnCiel() {
+      if (!window.IS_MY_TURN) return;
+      const btn = document.getElementById('btn-arc-en-ciel');
+      if (btn) btn.disabled = true;
+      const res = await fetch(`/game/${GAME_ID}/stop-arc-en-ciel`, { method: 'POST' });
+      const data = await res.json();
+      if (!data.ok) { alert(data.error); if (btn) btn.disabled = false; return; }
+      if (data.state) updateBoard(data.state);
+    }
+    window.stopArcEnCiel = stopArcEnCiel;
+
     // ── Jouer une carte ──────────────────────────────────────────────────────
     async function playCard(cardId) {
       if (!window.IS_MY_TURN) return;
@@ -838,11 +880,31 @@
       const deckCount = document.querySelector(".deck-count");
       if (deckCount) deckCount.textContent = state.deck_count ?? '?';
 
+      // Mise à jour de la défausse
+      const discardSlot = document.getElementById("discard-card-slot");
+      if (discardSlot) {
+        discardSlot.innerHTML = "";
+        if (state.last_discard) {
+          const el = GameCard.create(state.last_discard, { context: "discard", size: "md", clickable: true });
+          discardSlot.appendChild(el);
+        } else {
+          discardSlot.innerHTML = '<div class="deck-card defausse"><span class="defausse-empty">Vide</span></div>';
+        }
+      }
+
       // Mise à jour du bouton pioche (cliquable seulement si mon tour)
       const pileEl = document.querySelector(".deck-card.pioche");
       if (pileEl) {
         pileEl.classList.toggle("clickable", isMyTurn);
         pileEl.onclick = isMyTurn ? drawCard : null;
+      }
+
+      // Mise à jour du bouton "Arc-en-ciel"
+      const arcBtn = document.getElementById('btn-arc-en-ciel');
+      if (arcBtn) {
+        const arcVal = state.game_state?.arc_en_ciel ?? 0;
+        arcBtn.style.display = (isMyTurn && arcVal > 1) ? 'flex' : 'none';
+        arcBtn.disabled = false;
       }
 
       // Mise à jour du bouton "Passer le tour"
@@ -874,7 +936,7 @@
         'vie_professionnelle',
         'vie_personnelle',
         'acquisitions',
-        'salaires_depenses',
+        'cartes_protegees',
         'cartes_speciales',
       ];
 

@@ -215,10 +215,10 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "etoile_filante": lambda: EtoileFilante(_uid(), "img/special_cards/etoile_filante.png", 0),
     "anniversaire":   lambda: Anniversaire(_uid(), "img/special_cards/anniversaire.png", 0),
     "tsunami":        lambda: Tsunami(_uid(), "img/special_cards/tsunami.png", 0),
-    "vengeance":      lambda: Vengeance(_uid(), "img/special_cards/vengeance.png", 0),
+    "vengeance":      lambda: Vengeance(_uid(), "img/special_cards/vengeance.png"),
     "piston":         lambda: Piston(_uid(), "img/special_cards/piston.png", 0),
     "heritage":       lambda: Heritage(_uid(), "img/special_cards/heritage.png", 0, 3),
-    "troc":           lambda: Troc(_uid(), "img/special_cards/troc.png", 0),
+    "troc":           lambda: Troc(_uid(), "img/special_cards/troc.png"),
 }
 
 

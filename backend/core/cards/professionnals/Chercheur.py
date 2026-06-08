@@ -12,6 +12,7 @@ class Chercheur(JobCard):
     def __init__(self, id: int, image_path: str):
         super().__init__(id, image_path)
         self.jobPower.append(Power.CAN_BE_PRICED)
+        self.jobPower.append(Power.MAX_HAND_CARD_6)
         self.study = 6
         self.salary = 2
 

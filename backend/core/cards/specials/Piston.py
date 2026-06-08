@@ -34,7 +34,7 @@ class Piston(SpecialCard):
         selected_card: "Card | None" = interface.ask_card(prompt="Pistonnage", cards=available_cards, kind=IOType.CARD_PICKER)
         print(f"[DEBUG] Carte Selectionnée {selected_card}")
         if selected_card:
-            game.remove_card_from_discard(selected_card)
-            current_player.add_card_to_hand(selected_card)
+            new_card = game.take_card_from_deck()
+            current_player.add_card_to_hand(new_card)
             selected_card.play_card(game, current_player, interface)
         return super().apply_card_effect(game, current_player, interface)

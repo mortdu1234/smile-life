@@ -10,5 +10,8 @@ class ArcEnCiel(SpecialCard):
         return super().can_be_played(player, game)
 
     def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
-        print("[DEBUG] TODO")        
+        print("[DEBUG] TODO") 
+        from ...Game import GameStateKey
+        # Ajoute 3 tours d'arc en ciel
+        game.game_state[GameStateKey.ARC_EN_CIEL] = 3+1       
         return super().apply_card_effect(game, current_player, interface)

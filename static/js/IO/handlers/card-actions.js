@@ -27,11 +27,12 @@
 // ── Helpers endpoints ─────────────────────────────────────────────────────────
 
 const EP = {
-  place:           (game_id, card_id) => ({ url: `/game/${game_id}/place`,           body: { card_id } }),
+  place:           (game_id, card_id) => ({ url: `/game/${game_id}/place`,            body: { card_id } }),
   discard:         (game_id, card_id) => ({ url: `/game/${game_id}/discard`,          body: { card_id } }),
   discardJob:      (game_id, card_id) => ({ url: `/game/${game_id}/discard-job`,      body: { card_id } }),
   discardWedding:  (game_id, card_id) => ({ url: `/game/${game_id}/discard-wedding`,  body: { card_id } }),
   discardAdultery: (game_id, card_id) => ({ url: `/game/${game_id}/discard-adultery`, body: { card_id } }),
+  drawDiscard:     (game_id)          => ({ url: `/game/${game_id}/draw-discard`,     body: {} }),
 };
 
 // ── Catalogue des actions par type de carte ───────────────────────────────────
@@ -46,6 +47,12 @@ export const CARD_ACTIONS = {
       variant: "primary",
       context: ["hand"],
       endpoint: (card, game_id) => EP.place(game_id, card.id),
+    },
+    {
+      label: "▶ Jouer",
+      variant: "primary",
+      context: ["discard"],
+      endpoint: (card, game_id) => EP.drawDiscard(game_id),
     },
     {
       label: "🗑 Défausser",
@@ -63,6 +70,12 @@ export const CARD_ACTIONS = {
       variant: "primary",
       context: ["hand"],
       endpoint: (card, game_id) => EP.place(game_id, card.id),
+    },
+    {
+      label: "▶ Jouer",
+      variant: "primary",
+      context: ["discard"],
+      endpoint: (card, game_id) => EP.drawDiscard(game_id),
     },
     {
       label: "🗑 Défausser",
@@ -89,6 +102,12 @@ export const CARD_ACTIONS = {
       endpoint: (card, game_id) => EP.place(game_id, card.id),
     },
     {
+      label: "▶ Jouer",
+      variant: "primary",
+      context: ["discard"],
+      endpoint: (card, game_id) => EP.drawDiscard(game_id),
+    },
+    {
       label: "🗑 Défausser",
       variant: "danger",
       context: ["hand"],
@@ -111,6 +130,12 @@ export const CARD_ACTIONS = {
       variant: "primary",
       context: ["hand"],
       endpoint: (card, game_id) => EP.place(game_id, card.id),
+    },
+    {
+      label: "▶ Jouer",
+      variant: "primary",
+      context: ["discard"],
+      endpoint: (card, game_id) => EP.drawDiscard(game_id),
     },
     {
       label: "🗑 Défausser",
@@ -158,7 +183,6 @@ function resolveCategory(card) {
  */
 export function getActionsForCard(card, context, is_my_turn) {
   if (!is_my_turn) return [];
-  if (context === "discard" || context === "other") return [];
 
   const category = resolveCategory(card);
   const actions = CARD_ACTIONS[category];

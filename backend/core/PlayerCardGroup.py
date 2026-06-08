@@ -9,7 +9,7 @@ class PlayedCardGroup(Enum):
     VIE_PROFESSIONNELLE = 'vie_professionnelle'
     VIE_PERSONNELLE = 'vie_personnelle'
     ACQUISITIONS = 'acquisitions'
-    SALAIRES_DEPENSES = 'salaires_depenses'
+    CARTES_PROTEGEES = 'cartes_protegees'
     CARTES_SPECIALES = 'cartes_speciales'
     HARDSHIP ="hardship"
 
@@ -58,7 +58,7 @@ class PlayedCardGroup(Enum):
         from .cards.hardships.HardshipCard import Hardship
         result = []
         if isinstance(card, (Flirt, Wedding, Adultery, ChildCard, AnimalCard)):
-            result.append(PlayedCardGroup.ACQUISITIONS)
+            result.append(PlayedCardGroup.VIE_PERSONNELLE)
         if isinstance(card, (StudyCard, SalaryCard, JobCard)):
             result.append(PlayedCardGroup.VIE_PROFESSIONNELLE)
         if isinstance(card, Acquisition):

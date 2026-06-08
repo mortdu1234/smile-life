@@ -16,6 +16,7 @@ class Hardship(Card):
         super().__init__(id, image_path, 0)
         self.target_player = None
     def _selection_cibles(self, game: Game) -> list[Player]:
+        """retourne la liste des cibles potentielles"""
         targetted_players: list[Player] = []
         for player in game.players:
             if self.can_be_targeted(player, game):
