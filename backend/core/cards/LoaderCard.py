@@ -3,6 +3,11 @@ Registre des cartes : mappe les card_id du preset JSON vers les classes Card.
 Ajoute ici chaque nouvelle carte ; le reste du code n'a pas à changer.
 """
 from __future__ import annotations
+
+from backend.core.cards.professionnals.NoPowerJob import Designer, Jardinier, Pizzaiolo
+from backend.core.cards.professionnals.Policier import Policier
+from backend.core.cards.professionnals.Prof import Prof
+from backend.core.cards.professionnals.Stripteaser import Stripteaser
 from .Card import Card
 
 # Animals
@@ -203,13 +208,22 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "chercheur":     lambda: Chercheur(_uid(), "img/personnal_life/professionnal_life/JobCards/chercheur.png"),
     "gourou":        lambda: Gourou(_uid(), "img/personnal_life/professionnal_life/JobCards/gourou.png"),
     "grand_prof":    lambda: Grandprof(_uid(), "img/personnal_life/professionnal_life/JobCards/grand_prof.png"),
+    'designer':     lambda: Designer(_uid(), "img/personnal_life/professionnal_life/JobCards/disigner.png"),
+    'jardinier':     lambda: Jardinier(_uid(), "img/personnal_life/professionnal_life/JobCards/jardinier.png"),
+    'pizzaiolo':     lambda: Pizzaiolo(_uid(), "img/personnal_life/professionnal_life/JobCards/pizzaiolo.png"),
+    'policier':     lambda: Policier(_uid(), "img/personnal_life/professionnal_life/JobCards/policier.png"),
+    'prof__maths':  lambda: Prof(_uid(), "img/personnal_life/professionnal_life/JobCards/prof_maths.png"),
+    'prof__francais':lambda: Prof(_uid(), "img/personnal_life/professionnal_life/JobCards/prof_francais.png"),
+    'prof__anglais':    lambda: Prof(_uid(), "img/personnal_life/professionnal_life/JobCards/prof_anglais.png"),
+    'prof__geo':    lambda: Prof(_uid(), "img/personnal_life/professionnal_life/JobCards/prof_de_geo.png"),
+    'stripteaser':  lambda: Stripteaser(_uid(), "img/personnal_life/professionnal_life/JobCards/stripteaser.png"),
 
     # ── Other ──────────────────────────────────────────────────────────────────
     "legion": lambda: Legion(_uid(), "img/personnal_life/professionnal_life/legion.png", 3),
     "prix":   lambda: Price(_uid(), "img/personnal_life/professionnal_life/price.png", 4),
 
     # ── Specials ───────────────────────────────────────────────────────────────
-    "casino":         lambda: Casino(_uid(), "img/special_cards/casino.png", 0),
+    "casino":         lambda: Casino(_uid(), "img/special_cards/casino.png"),
     "arc_en_ciel":    lambda: ArcEnCiel(_uid(), "img/special_cards/arc_en_ciel.png", 0),
     "chance":         lambda: Chance(_uid(), "img/special_cards/chance.png", 0),
     "etoile_filante": lambda: EtoileFilante(_uid(), "img/special_cards/etoile_filante.png", 0),
@@ -220,6 +234,7 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "heritage":       lambda: Heritage(_uid(), "img/special_cards/heritage.png", 0, 3),
     "troc":           lambda: Troc(_uid(), "img/special_cards/troc.png"),
 }
+
 
 
 def build_card(card_id: str) -> Card | None:

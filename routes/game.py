@@ -309,6 +309,8 @@ def submit(game_id):
     return jsonify({"ok": True})
 
 
+# ── CARTES SPECIALES ───────────────────────────────────────────────────────────────────────
+
 
 @game_bp.route("/<game_id>/stop-arc-en-ciel", methods=["POST"])
 def stop_arc_en_ciel(game_id):
@@ -318,3 +320,19 @@ def stop_arc_en_ciel(game_id):
         success, reason = game.stop_arc_en_ciel(player_id)
         return _action_response(success, reason, game_id)
     return _action_response(False, "[ERROR] Game non trouvée", game_id)
+
+
+@game_bp.route("/<game_id>/bet-on-casino", methods=["POST"])
+def bet_on_casino(game_id):
+    """Permet d'effectuer une mise au casino"""
+    game = get_game(game_id)
+    if not game:
+        print("[ERROR] Game non trouvée")
+        return _action_response(False, "[ERROR] Game non trouvée", game_id)    
+    player_id = game.get_current_player().get_id()
+    card_id, reason = _card_id_from_body()
+    if not card_id:
+        print(reason)
+        return _action_response(False, reason, game_id)
+    success, reason = game.bet_on_casino(player_id, card_id)
+    return _action_response(success, reason, game_id)

@@ -33,6 +33,7 @@ const EP = {
   discardWedding:  (game_id, card_id) => ({ url: `/game/${game_id}/discard-wedding`,  body: { card_id } }),
   discardAdultery: (game_id, card_id) => ({ url: `/game/${game_id}/discard-adultery`, body: { card_id } }),
   drawDiscard:     (game_id)          => ({ url: `/game/${game_id}/draw-discard`,     body: {} }),
+  betOnCasino:     (game_id, card_id) => ({ url: `/game/${game_id}/bet-on-casino`,    body: { card_id } }),
 };
 
 // ── Catalogue des actions par type de carte ───────────────────────────────────
@@ -149,6 +150,33 @@ export const CARD_ACTIONS = {
       context: ["played"],
       confirm: "Mettre fin à cette relation ?",
       endpoint: (card, game_id) => EP.discardAdultery(game_id, card.id),
+    },
+  ],
+  SalaryCard: [
+    {
+      label: "▶ Jouer",
+      variant: "primary",
+      context: ["hand"],
+      endpoint: (card, game_id) => EP.place(game_id, card.id),
+    },
+    {
+      label: "▶ Jouer",
+      variant: "primary",
+      context: ["discard"],
+      endpoint: (card, game_id) => EP.drawDiscard(game_id),
+    },
+    {
+      label: "Miser",
+      variant: "primary",
+      context: ["hand", "discard"],
+      confirm: "Voulez-vous miser cette carte au casino ?",
+      endpoint: (card, game_id) => EP.betOnCasino(game_id, card.id),
+    },
+    {
+      label: "🗑 Défausser",
+      variant: "danger",
+      context: ["hand"],
+      endpoint: (card, game_id) => EP.discard(game_id, card.id),
     },
   ],
 };

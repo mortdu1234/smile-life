@@ -16,7 +16,7 @@
     "serveur": 0, "stripteaser": 0,
 
     "flirt__bar": 0, "flirt__parc": 0, "flirt__theatre": 0, "flirt__cinema": 0,
-    "flirt__boite_de_nuit": 10, "flirt_with_child__camping": 0, "flirt_with_child__hotel": 0,
+    "flirt__boite_de_nuit": 0, "flirt_with_child__camping": 0, "flirt_with_child__hotel": 0,
     "flirt__restaurant": 0, "flirt__zoo": 0, "flirt__internet": 0,
 
     "marriage__corps_nuds": 0, "marriage__fourqueux": 0, "marriage__montcuq": 0,

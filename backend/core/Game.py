@@ -8,6 +8,10 @@ from .PlayerCardGroup import PlayedCardGroup
 from .Player import Player
 from .cards.Card import Card
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .cards.specials.Casino import Casino
+
 class TurnState(Enum):
     PIOCHE = "pioche"
     POSE = "pose"
@@ -94,6 +98,17 @@ class Game:
     def get_current_player(self) -> Player:
         """Retourne le joueur dont c'est le tour."""
         return self.players[self.player_turn]
+
+    def add_card_to_center(self, card: Card):
+        """ajoute une carte au centre de la table"""
+        self.center_cards_played.append(card)
+
+    def get_casino(self) -> "Casino | None":
+        from .cards.specials.Casino import Casino
+        for card in self.center_cards_played:
+            if isinstance(card, Casino):
+                return card
+        return None 
 
     def next_turn(self):
         """Passe au tour du joueur suivant."""
@@ -332,6 +347,31 @@ class Game:
             return False, reason
 
         card.play_card(self, player, player.get_interface())
+        self.next_turn()
+        return True, ""
+
+    
+    @validate_player
+    def bet_on_casino(self, player_id: int, card_id: int) -> tuple[bool, str]:
+        """pose une carte devant lui"""
+        from .cards.professionnals.SalaryCard import SalaryCard
+        player = self.get_current_player()
+
+        # vérifie le l'état du tour
+        card = player.get_card_by_id_from_hand(card_id)
+        if not(card and self.turn_state == TurnState.POSE and isinstance(card, SalaryCard)):
+            card = self.get_last_discard()
+            if not(card and self.turn_state == TurnState.PIOCHE and isinstance(card, SalaryCard)):
+                print("[ERROR] La phase de jeu n'est pas la bonne")
+                return False, "[ERROR] La phase de jeu n'est pas la bonne"
+                
+        casinoCard = self.get_casino()
+        if not casinoCard:
+            return False, "Le casino n'est pas ouvert"
+        success, reason = casinoCard.can_bet(player, self)
+        if not success:
+            return False, reason
+        casinoCard.bet(card, player)
         self.next_turn()
         return True, ""
 
