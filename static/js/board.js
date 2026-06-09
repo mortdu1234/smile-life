@@ -171,8 +171,10 @@ window.updateBoard = function(state) {
 
   // Mise à jour du deck et de la défausse
   const deckCount = document.querySelector(".deck-count");
-  if (deckCount) deckCount.textContent = state.deck_count ?? '?';
-
+  if (deckCount) {
+    const raw = state.deck_count ?? state.deck ?? '?';
+    deckCount.textContent = Array.isArray(raw) ? raw.length : raw;
+  }
   const discardSlot = document.getElementById("discard-card-slot");
   if (discardSlot) {
     discardSlot.innerHTML = "";
