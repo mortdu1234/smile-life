@@ -2,6 +2,7 @@ from flask import Flask, redirect, request, url_for, jsonify
 from flask_socketio import SocketIO
 from backend.webSocket import init_socketio
 import logging
+from backend import cleanup
 
 socketio = SocketIO()
 
@@ -9,6 +10,9 @@ socketio = SocketIO()
 def create_app(secret_key: str = 'change-me-in-production') -> Flask:
     app = Flask(__name__)
     app.secret_key = secret_key
+
+    # ── lancement du cleaner de salles ────────────────────────────────
+    cleanup.start_cleanup_worker()
 
     # ── SocketIO — init avant les blueprints ────────────────────────────────
     socketio.init_app(app, async_mode='gevent', cors_allowed_origins='*')

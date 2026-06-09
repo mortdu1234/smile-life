@@ -4,6 +4,8 @@ Interface propre pour migrer vers PostgreSQL : remplacer les fonctions
 get/set/delete par des requêtes SQLAlchemy sans toucher au reste du code.
 """
 from __future__ import annotations
+
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -18,9 +20,17 @@ _rooms: dict[str, dict] = {}
 _games: dict[str, "Game"] = {}
 
 
+# ── Helpers ────────────────────────────────────────────────────────────────────
+
+def _now() -> datetime:
+    return datetime.now(tz=timezone.utc)
+
+
 # ── Rooms (salles d'attente) ───────────────────────────────────────────────────
 
 def room_save(room: dict) -> None:
+    """Persiste la salle et met à jour son horodatage d'activité."""
+    room["updated_at"] = _now()
     _rooms[room["id"]] = room
 
 
@@ -43,6 +53,8 @@ def rooms_open() -> list[dict]:
 # ── Games (parties en cours) ───────────────────────────────────────────────────
 
 def game_save(game: "Game") -> None:
+    """Persiste la partie et met à jour son horodatage d'activité."""
+    game.updated_at = _now()
     _games[game.id] = game
 
 

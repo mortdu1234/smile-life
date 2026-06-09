@@ -1,4 +1,5 @@
 """Contient l'ensemble des données d'une partie en cours"""
+from datetime import datetime
 from enum import Enum
 import functools
 
@@ -54,6 +55,7 @@ class Game:
     historique: list[str] # historique de la partie
     turn_state: TurnState # etat du jeu
     game_state: dict[GameStateKey, int]
+    updated_at: datetime
     # PARAMETRE SUPPLEMENTAIRE POUR LE JEU
 
     def __init__(self, id: str, players: list[Player], deck: list[Card]):
