@@ -21,6 +21,8 @@ class Wedding(Card):
         if game.turn_state == TurnState.PIOCHE:
             return True, ""
         return False, "on ne peut divorcer que avant de piocher"
+    def get_name(self) -> str:
+        return "Marriage"
 
 class Adultery(Card):
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
@@ -30,7 +32,8 @@ class Adultery(Card):
         if is_adultery:
             return False, "Tu es déja en adultère, tu ne crois pas qu'un ca suffit ?"
         return super().can_be_played(player, game)
-    
+    def get_name(self) -> str:
+        return "Adultère"
     def can_be_discard(self, player: "Player", game: "Game") -> tuple[bool, str]:
         """vérifie si on peut annuler son adultère ou non"""
         from ...Game import TurnState

@@ -15,6 +15,8 @@ class Chercheur(JobCard):
         self.jobPower.append(Power.MAX_HAND_CARD_6)
         self.study = 6
         self.salary = 2
+    def get_name(self) -> str:
+        return "Chercheur"
 
     def apply_card_effect(self, game: Game, current_player: Player, interface: "UserIO") -> bool:
         """Pioche une carte en plus afin d'en avoir 6"""

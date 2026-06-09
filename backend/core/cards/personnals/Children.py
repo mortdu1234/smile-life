@@ -44,61 +44,78 @@ class ChildCard(Card):
             current_player.get_last_flirt().set_used() # type: ignore
         return super().apply_card_effect(game, current_player, interface)
 
+    def get_name(self) -> str:
+        return "Enfant - "
+
 # ------------------------------------------------------------------ #
 #  Enfants concrets                                                    #
 # ------------------------------------------------------------------ #
 
 class AngelaChild(ChildCard, GirlPowerChild):
-    pass
+    def get_name(self) -> str:
+        return super().get_name() + "Angela"
 
 
 class DianaChild(ChildCard, FemaleChild):
-    pass
+    def get_name(self) -> str:
+        return super().get_name() + "Diana"
 
 
 class HarryChild(ChildCard, MaleChild):
-    pass
+    def get_name(self) -> str:
+        return super().get_name() + "Harry"
 
 
 class HermioneChild(ChildCard, FemaleChild):
-    pass
+    def get_name(self) -> str:
+        return super().get_name() + "Hermione"
 
 
 class LaraChild(ChildCard, FemaleChild):
-    pass
+    def get_name(self) -> str:
+        return super().get_name() + "Lara"
 
 
 class LeiaChild(ChildCard, FemaleChild):
-    pass
+    def get_name(self) -> str:
+        return super().get_name() + "Leia"
 
 
 class LouiseChild(ChildCard, GirlPowerChild):
-    pass
+    def get_name(self) -> str:
+        return super().get_name() + "Louise"
 
 
 class LuigiChild(ChildCard, MaleChild):
-    pass
+    def get_name(self) -> str:
+        return super().get_name() + "Luigi"
 
 
 class MarioChild(ChildCard, MaleChild):
-    pass
+    def get_name(self) -> str:
+        return super().get_name() + "Mario"
 
 
 class LukeChild(ChildCard, MaleChild):
-    pass
+    def get_name(self) -> str:
+        return super().get_name() + "Luke"
 
 
 class OlympeChild(ChildCard, GirlPowerChild):
-    pass
+    def get_name(self) -> str:
+        return super().get_name() + "Olympe"
 
 
 class RockyChild(ChildCard, MaleChild):
-    pass
+    def get_name(self) -> str:
+        return super().get_name() + "Rocky"
 
 
 class SimoneChild(ChildCard, GirlPowerChild):
-    pass
+    def get_name(self) -> str:
+        return super().get_name() + "Simone"
 
 
 class ZeldaChild(ChildCard, FemaleChild):
-    pass
+    def get_name(self) -> str:
+        return super().get_name() + "Zelda"

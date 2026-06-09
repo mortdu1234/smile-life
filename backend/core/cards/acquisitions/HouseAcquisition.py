@@ -13,3 +13,6 @@ class House(Acquisition):
         if player.is_wedding():
             cost = self.original_price // 2
         return cost
+
+    def get_name(self) -> str:
+        return f"Maison {self.original_price}"

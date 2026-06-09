@@ -14,6 +14,8 @@ class Policier(JobCard):
         self.jobStatus = JobStatus.FONCTIONNAIRE
         self.study = 1
         self.salary = 1
+    def get_name(self) -> str:
+        return "Policier"
 
     def apply_card_effect(self, game: Game, current_player: Player, interface: "UserIO") -> bool:
         """supprimer tous les bandit et gourous sur le terrain"""

@@ -11,6 +11,8 @@ class ChefDesVentes(JobCard):
         super().__init__(id, image_path)
         self.study = 3
         self.salary = 3
+    def get_name(self) -> str:
+        return "Chef des Ventes"
     def apply_card_effect(self, game: Game, current_player: Player, interface: "UserIO") -> bool:
         """permet de récupérer un salaire posable depuis la défausse"""
         print("[DEBUG] TODO")

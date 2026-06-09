@@ -14,7 +14,9 @@ class Maladie(Hardship):
         if Power.NO_MALADIE in player.get_power():
             return False
         return super().can_be_targeted(player, game)
-
+    def get_name(self) -> str:
+        return "Maladie"
+    
     def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
         success = super().apply_card_effect(game, current_player, interface)
         if not success:

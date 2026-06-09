@@ -11,6 +11,8 @@ class Medium(JobCard):
         super().__init__(id, image_path)
         self.study = 0
         self.salary = 1
+    def get_name(self) -> str:
+        return "Médium"
     def apply_card_effect(self, game: Game, current_player: Player, interface: "UserIO") -> bool:
         """Permet de voir les 13 prochaines cartes du jeu"""
         next_cards: list["Card"] = [game.deck[-i] for i in range(13)]

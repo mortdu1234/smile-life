@@ -33,3 +33,6 @@ class Attentat(Hardship):
                     game.add_card_to_discard(card)
 
         return True
+
+    def get_name(self) -> str:
+        return "Attentat"

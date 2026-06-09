@@ -2,7 +2,7 @@ from enum import Enum
 
 class FlirtPlaces(Enum):
     BAR = "bar"
-    BOITE_DE_NUIT = "boite_de_nuit"
+    BOITE_DE_NUIT = "boite de nuit"
     CINEMA = "cinema"
     INTERNET = "internet"
     PARC = "parc"
@@ -11,3 +11,6 @@ class FlirtPlaces(Enum):
     ZOO = "zoo"
     HOTEL = "hotel"
     CAMPING = "camping"
+
+    def __str__(self) -> str:
+        return self.value

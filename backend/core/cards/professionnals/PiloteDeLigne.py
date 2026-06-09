@@ -7,3 +7,5 @@ class PiloteDeLigne(JobCard):
         self.jobPower.append(Power.TRAVEL_FREE)
         self.study = 5
         self.salary = 4
+    def get_name(self) -> str:
+        return "Pilote de Ligne"

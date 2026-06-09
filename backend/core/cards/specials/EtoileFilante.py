@@ -16,7 +16,8 @@ class EtoileFilante(SpecialCard):
                 cards_availables.append(card)
         current_player.remove_card(self)
         return cards_availables
-        
+    def get_name(self) -> str:
+        return "Etoile Filante"
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         return super().can_be_played(player, game)
 

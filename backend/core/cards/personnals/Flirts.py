@@ -16,7 +16,9 @@ class Flirt(Card):
     def __init__(self, id: int, image_path: str, smiles: int, place: FlirtPlaces):
         super().__init__(id, image_path, smiles)
         self.place = place
-
+    def get_name(self) -> str:
+        return f"Flirt - {self.place}"
+    
     def count_number_flirt(self, player: 'Player'):
         number = 0
         cards = player.get_card_from_group(PlayedCardGroup.VIE_PERSONNELLE)

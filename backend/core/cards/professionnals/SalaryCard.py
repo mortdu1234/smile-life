@@ -18,6 +18,9 @@ class SalaryCard(Card):
     def get_value(self):
         return self.value
 
+    def get_name(self) -> str:
+        return f"Salaire {self.value}"
+
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         job=player.get_job()
         if not (job and job.get_salary() >= self.value):

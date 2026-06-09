@@ -29,10 +29,13 @@ class Card:
         self.id = id
         self.image_path = image_path
         self.smiles = smiles
+
     def get_id(self) -> int:
         return self.id
     def get_smiles(self) -> int:
         return self.smiles
+    def get_name(self) -> str:
+        return str(self.__class__.__name__)
     # ------------------------------------------------------------------ #
     #  Méthodes avec comportement par défaut                             #
     # ------------------------------------------------------------------ #

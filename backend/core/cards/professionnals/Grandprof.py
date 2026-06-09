@@ -12,6 +12,8 @@ class Grandprof(JobCard):
         self.study = 0
         self.salary = 3
         self.status = JobStatus.FONCTIONNAIRE
+    def get_name(self) -> str:
+        return "Grand Professeur"
 
     def can_be_played(self, player: Player, game: Game) -> tuple[bool, str]:
         if not isinstance(player.get_job(), Prof):

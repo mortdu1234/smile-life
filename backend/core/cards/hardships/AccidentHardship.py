@@ -23,3 +23,6 @@ class Accident(Hardship):
         assert self.target_player is not None
         self.target_player.add_skip_turn(1)
         return True
+
+    def get_name(self) -> str:
+        return "Accident"

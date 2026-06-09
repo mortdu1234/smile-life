@@ -7,3 +7,5 @@ class Prof(JobCard):
         self.study = 2
         self.salary = 2
         self.status = JobStatus.FONCTIONNAIRE
+    def get_name(self) -> str:
+        return "Professeur"

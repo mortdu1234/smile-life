@@ -20,7 +20,7 @@ class GameStateKey(Enum):
     CHANCE = "chance"
     ARC_EN_CIEL = "arc_en_ciel"
 
-
+HISTORY_SIZE = 5
 
 def validate_player(method):
     @functools.wraps(method)
@@ -71,8 +71,12 @@ class Game:
         for _ in range(5):
             for player in self.players:
                 player.add_card_to_hand(deck.pop())
-        
-        
+
+    def add_to_history(self, message: str):
+        """ajoute un element a l'historique"""
+        self.historique.append(message)
+        if len(self.historique) > HISTORY_SIZE:
+            self.historique.pop(0)
 
     def to_dict(self, viewer: str | None = None) -> dict:
         """Sérialise l'état de la partie en un dictionnaire pour l'envoyer au client."""
@@ -90,6 +94,7 @@ class Game:
         if last_discard:
             data["last_discard"] = last_discard.to_dict()
         return data
+    
 
     def get_last_discard(self) -> Card | None:
         """Retourne la dernière carte de la défausse, ou None si la défausse est vide."""
@@ -182,6 +187,7 @@ class Game:
             return False, "Il n'y a pas d'arc en ciel en cour"
         self.game_state[GameStateKey.ARC_EN_CIEL] = 1
         self.next_turn()
+        self.add_to_history(f"Le joueur {self.get_current_player().name} arrete son arc en ciel")
         return True, ""
          
     @validate_player
@@ -196,6 +202,8 @@ class Game:
         
         player.skip_turn -= 1
         self.next_turn()
+
+        self.add_to_history(f"Le joueur {self.get_current_player().name} passe son tour")
         return True, ""
 
     @validate_player
@@ -243,6 +251,8 @@ class Game:
         self.turn_state = TurnState.POSE
         card.play_card(self, player, player.get_interface())
         self.next_turn()
+
+        self.add_to_history(f"Le joueur {self.get_current_player().name} a joué la carte de la défausse {card.get_name()}")
         return True, ""
         
 
@@ -252,14 +262,15 @@ class Game:
         """se défausse d'une carte en main vers la défausse"""
         player = self.get_current_player()
         card = player.get_card_by_id_from_hand(card_id)
-        if card:
-            player.remove_card_from_hand(card)
-            self.discard.append(card)
-            self.next_turn()
-            return True, ""
-        else:
+        if not card:
             print("[ERROR] La carte n'est pas trouvée")
             return False, ""
+        player.remove_card_from_hand(card)
+        self.discard.append(card)
+        self.next_turn()
+
+        self.add_to_history(f"Le joueur {self.get_current_player().name} a défaussé {card.get_name()}")
+        return True, ""
 
     @validate_player
     def discard_job_card(self, player_id: int, card_id: int) -> tuple[bool, str]:
@@ -279,7 +290,9 @@ class Game:
                     card.discard_job(player, self)
                     self.add_card_to_discard(card)
                     if card.jobStatus != JobStatus.INTERIMERE:
-                        self.next_turn()    
+                        self.next_turn()
+                    
+                    self.add_to_history(f"Le joueur {self.get_current_player().name} se défausse de son métier : {card.get_name()}")    
                     return True, ""
             else:
                 return False, "[ERROR] la carte n'est pas un métier"
@@ -302,6 +315,8 @@ class Game:
                     player.remove_card(card)
                     self.add_card_to_discard(card)
                     self.next_turn()
+
+                    self.add_to_history(f"Le joueur {self.get_current_player().name} se défausse de son marriage {card.get_name()}")
                     return True, ""
                 else:
                     return False, reason
@@ -324,6 +339,8 @@ class Game:
                     player.remove_card(card)
                     self.add_card_to_discard(card)
                     self.next_turn()
+
+                    self.add_to_history(f"Le joueur {self.get_current_player().name} se défausse de son adultère {card.get_name()}")
                     return True, ""
                 else:
                     return False, reason
@@ -348,6 +365,8 @@ class Game:
 
         card.play_card(self, player, player.get_interface())
         self.next_turn()
+
+        self.add_to_history(f"Le joueur {self.get_current_player().name} a joué la carte {card.get_name()}")
         return True, ""
 
     
@@ -373,6 +392,7 @@ class Game:
             return False, reason
         casinoCard.bet(card, player)
         self.next_turn()
+        self.add_to_history(f"Le joueur {self.get_current_player().name} a misé au casino un salaire")
         return True, ""
 
 

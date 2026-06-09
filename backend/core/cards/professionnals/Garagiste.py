@@ -7,3 +7,5 @@ class Garagiste(JobCard):
         self.jobPower.append(Power.NO_ACCIDENT)
         self.study = 1
         self.salary = 2
+    def get_name(self) -> str:
+        return "Garagiste"

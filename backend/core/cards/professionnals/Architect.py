@@ -7,3 +7,5 @@ class Architect(JobCard):
         self.jobPower.append(Power.FIRST_HOUSE_FREE)
         self.study = 4
         self.salary = 4
+    def get_name(self) -> str:
+        return "Architecte"

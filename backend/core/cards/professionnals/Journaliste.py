@@ -11,6 +11,8 @@ class Journaliste(JobCard):
         self.jobPower.append(Power.CAN_BE_PRICED)
         self.study = 3
         self.salary = 2
+    def get_name(self) -> str:
+        return "Journaliste"
     def apply_card_effect(self, game: Game, current_player: Player, interface:"UserIO") -> bool:
         """permet de voir la main de chaque joueur"""
         current_player.remove_card_from_hand(self)

@@ -10,6 +10,8 @@ class Astronaute(JobCard):
         super().__init__(id, image_path)
         self.study = 6
         self.salary = 4
+    def get_name(self) -> str:
+        return "Astronaute"
     
     def _get_available_card(self, current_player: "Player", game: "Game") -> list["Card"]:
         current_player.add_card_to_played(self)

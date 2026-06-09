@@ -19,3 +19,6 @@ class Price(OtherCard):
     def apply_card_effect(self, game: Game, current_player: Player, interface: UserIO) -> bool:
         current_player.remove_power(Power.CAN_BE_PRICED)
         return super().apply_card_effect(game, current_player, interface)
+
+    def get_name(self) -> str:
+        return "Grand Prix d'Excellence"

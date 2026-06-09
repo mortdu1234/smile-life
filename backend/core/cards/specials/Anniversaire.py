@@ -11,7 +11,9 @@ if TYPE_CHECKING:
 class Anniversaire(SpecialCard):
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         return super().can_be_played(player, game)
-
+    def get_name(self) -> str:
+        return "Anniversaire"
+    
     def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
         print("[DEBUG] TODO")
         from ..professionnals.SalaryCard import SalaryCard

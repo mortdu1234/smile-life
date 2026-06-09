@@ -7,3 +7,5 @@ class Pharmacien(JobCard):
         self.jobPower.append(Power.NO_MALADIE)
         self.study = 5
         self.salary = 3
+    def get_name(self) -> str:
+        return "Pharmacien"

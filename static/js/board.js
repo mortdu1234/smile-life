@@ -45,14 +45,29 @@ const ACTION_ICONS = {
 };
 
 function renderHistory(entries) {
+  console.log("entree historique", entries);
   const list = document.getElementById('history-list');
+  if (!list) return; // Sécurité au cas où l'élément n'existe pas dans le DOM
   if (!entries || entries.length === 0) return;
+  
   list.innerHTML = '';
+  
+  // On prend les 10 derniers éléments et on les inverse pour afficher le plus récent en haut
   entries.slice(-10).reverse().forEach((entry, i) => {
     const div = document.createElement('div');
+    
+    // Le premier élément (i === 0) est le plus récent suite au .reverse()
     div.className = 'history-entry' + (i === 0 ? ' latest' : '');
-    const icon = ACTION_ICONS[entry.action] ?? '▸';
-    div.innerHTML = `<span class="h-icon">${icon}</span><span class="h-text">${entry.text}</span>`;
+    
+    // Sécurité : On gère si l'entrée est une simple String ou un Objet
+    const isObject = typeof entry === 'object' && entry !== null;
+    const actionType = isObject ? entry.action : null;
+    const textContent = isObject ? entry.text : entry; // Si c'est une string, on prend directement la valeur
+    
+    // Récupération de l'icône dans votre dictionnaire ACTION_ICONS
+    const icon = (typeof ACTION_ICONS !== 'undefined' && ACTION_ICONS[actionType]) ? ACTION_ICONS[actionType] : '▸';
+    
+    div.innerHTML = `<span class="h-icon">${icon}</span><span class="h-text">${textContent}</span>`;
     list.appendChild(div);
   });
 }

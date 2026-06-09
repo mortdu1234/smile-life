@@ -8,3 +8,5 @@ class Chirurgien(JobCard):
         self.jobPower.append(Power.INFINITE_STUDY)
         self.study = 6
         self.salary = 4
+    def get_name(self) -> str:
+        return "Chirurgien"

@@ -17,3 +17,6 @@ class Heritage(SpecialCard):
 
     def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:        
         return super().apply_card_effect(game, current_player, interface)
+
+    def get_name(self) -> str:
+        return f"Héritage {self.value}"

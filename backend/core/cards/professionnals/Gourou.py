@@ -8,6 +8,8 @@ class Gourou(JobCard):
         super().__init__(id, image_path)
         self.study = 0
         self.salary = 3
+    def get_name(self) -> str:
+        return "Gourou"
 
     def can_be_played(self, player: Player, game: Game) -> tuple[bool, str]:
         for player in game.players:

@@ -9,3 +9,5 @@ class Serveur(JobCard):
         self.study = 0
         self.salary = 1
         self.status = JobStatus.INTERIMERE
+    def get_name(self) -> str:
+        return "Serveur"

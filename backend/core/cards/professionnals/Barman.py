@@ -9,3 +9,5 @@ class Barman(JobCard):
         self.status = JobStatus.INTERIMERE
         self.study = 0
         self.salary = 1
+    def get_name(self) -> str:
+        return "Barman"

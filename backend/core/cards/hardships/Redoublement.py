@@ -24,7 +24,8 @@ class Redoublement(Hardship):
             return False
         
         return super().can_be_targeted(player, game)
-
+    def get_name(self) -> str:
+        return "Redoublement"
     def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
         success = super().apply_card_effect(game, current_player, interface)
         if not success:

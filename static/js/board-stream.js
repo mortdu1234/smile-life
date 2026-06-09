@@ -14,7 +14,7 @@ socket.on('connect', () => {
 });
 
 socket.on('game_update', (state) => {
-    console.log('📦 game_update reçu — joueur courant :', state.current_player);
+    console.log('📦 game_update reçu — joueur courant :', state);
     if (typeof window.updateBoard === 'function') {
         window.updateBoard(state);
     } else {

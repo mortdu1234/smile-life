@@ -22,3 +22,5 @@ class Bandit(JobCard):
         """ajoute au joueur courrant la caracteristique has_been_bandit"""
         current_player.power.append(Power.HAS_BEEN_BANDIT)
         return super().apply_card_effect(game, current_player, interface)
+    def get_name(self) -> str:
+        return "Bandit"

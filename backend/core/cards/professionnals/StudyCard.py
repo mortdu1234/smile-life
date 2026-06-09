@@ -13,6 +13,9 @@ class StudyCard(Card):
     def get_value(self) -> int:
         return self.value
 
+    def get_name(self) -> str:
+        return f"Etude {self.value}"
+
     def can_be_played(self, player: Player, game: Game) -> tuple[bool, str]:
         job = player.get_job()
         if job and Power.INFINITE_STUDY not in player.get_power():

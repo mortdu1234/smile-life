@@ -31,3 +31,5 @@ class ChefDesAchats(JobCard):
                 current_player.add_card_to_hand(selected_card)
                 selected_card.play_card(game, current_player, interface)
         return super().apply_card_effect(game, current_player, interface)
+    def get_name(self) -> str:
+        return "Chef des achats"

@@ -18,6 +18,8 @@ class Casino(SpecialCard):
         super().__init__(id, image_path, 0)
         self.first_bet = None
         self.first_player = None
+    def get_name(self) -> str:
+        return "Casino"
 
     def to_dict(self) -> dict:
         data = super().to_dict()

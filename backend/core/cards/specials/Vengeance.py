@@ -15,7 +15,8 @@ class Vengeance(SpecialCard):
     def __init__(self, id: int, image_path: str):
         super().__init__(id, image_path, 0)
         self.hardship_card = None
-
+    def get_name(self) -> str:
+        return "Vengeance"
     def get_available_hardships(self, game: "Game") -> "list[Card]":
         current_player = game.get_current_player()
         hardships_cards = current_player.get_card_from_group(PlayedCardGroup.HARDSHIP)

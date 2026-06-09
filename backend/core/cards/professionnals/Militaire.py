@@ -7,3 +7,5 @@ class Militaire(JobCard):
         self.jobPower.append(Power.NO_ATTENTAT)
         self.study = 0
         self.salary = 1
+    def get_name(self) -> str:
+        return "Militaire"

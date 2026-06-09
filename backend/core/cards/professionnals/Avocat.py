@@ -7,3 +7,5 @@ class Avocat(JobCard):
         self.jobPower.append(Power.NO_DIVORCE)
         self.study = 4
         self.salary = 3
+    def get_name(self) -> str:
+        return "Avocat"

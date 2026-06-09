@@ -9,3 +9,5 @@ class Legion(OtherCard):
         if Power.HAS_BEEN_BANDIT in player.get_power():
             return False, "vous avez été bandit"
         return super().can_be_played(player, game)
+    def get_name(self) -> str:
+        return "Legion d'Honneur"
