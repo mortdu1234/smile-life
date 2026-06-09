@@ -1,0 +1,51 @@
+{# card-detail.html #}
+{# Inclure via {% include 'overlays/card-detail.html' %} dans board.html #}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/light-mode/overlays/card-detail.css') }}">
+
+<div id="card-detail-overlay"
+     class="card-detail-overlay"
+     aria-modal="true"
+     role="dialog"
+     aria-labelledby="card-detail-title"
+     hidden>
+
+  <div class="card-detail-overlay__backdrop"></div>
+
+  <div class="card-detail-overlay__panel">
+
+    <!-- Colonne gauche : Image -->
+    <div class="card-detail-overlay__image-col">
+      <img class="card-detail-overlay__img" src="" alt="" />
+    </div>
+
+    <!-- Colonne droite : Infos + Actions -->
+    <div class="card-detail-overlay__right-col">
+
+      <!-- Header -->
+      <div class="card-detail-overlay__header">
+        <span class="card-detail-overlay__tag" id="card-detail-type"></span>
+        <h2 class="card-detail-overlay__title" id="card-detail-title"></h2>
+        <div class="card-detail-overlay__smiles">
+          😊 <span class="card-detail-overlay__smiles-count" id="card-detail-smiles">0</span> smiles
+        </div>
+      </div>
+
+      <!-- Body : Description -->
+      <div class="card-detail-overlay__body">
+        <p class="card-detail-overlay__description" id="card-detail-description"></p>
+      </div>
+
+      <!-- Toast erreur -->
+      <div class="card-detail-overlay__toast" id="card-detail-toast" aria-live="polite"></div>
+
+      <!-- Footer : Boutons -->
+      <div class="card-detail-overlay__footer">
+        <div class="card-detail-overlay__actions" id="card-detail-actions">
+          {# Les boutons dynamiques seront injectés ici par le JS #}
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>

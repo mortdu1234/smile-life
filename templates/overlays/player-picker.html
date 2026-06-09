@@ -1,6 +1,6 @@
 {# templates/overlays/player_picker.html #}
 {# Inclure via {% include 'overlays/player_picker.html' %} dans board.html #}
-<link rel="stylesheet" href="/static/css/player-picker.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/light-mode/overlays/player-picker.css') }}">
 
 <div id="player-picker-overlay"
      class="player-picker-overlay"

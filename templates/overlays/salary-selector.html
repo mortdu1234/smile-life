@@ -1,6 +1,6 @@
 {# templates/overlays/salary_selector.html #}
 {# Inclure ce template via {% include %} ou le rendre dynamiquement via JS #}
-<link rel="stylesheet" href="/static/css/salary-selector.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/light-mode/overlays/salary-selector.css') }}">
 
 <div id="salary-overlay" class="salary-overlay" aria-modal="true" role="dialog" aria-labelledby="salary-overlay-title" hidden>
   <div class="salary-overlay__backdrop"></div>

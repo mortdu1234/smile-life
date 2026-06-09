@@ -1,6 +1,6 @@
 {# templates/overlays/show_hand.html #}
 {# Inclure via {% include 'overlays/show_hand.html' %} dans board.html #}
-<link rel="stylesheet" href="/static/css/show-hand.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/light-mode/overlays/show-hand.css') }}">
 
 <div id="show-hand-overlay"
      class="show-hand-overlay"

@@ -1,6 +1,6 @@
 {# templates/overlays/card_browser.html #}
 {# Inclure via {% include 'overlays/card_browser.html' %} dans board.html #}
-<link rel="stylesheet" href="/static/css/card-browser.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/light-mode/overlays/card-browser.css') }}">
 
 <div id="card-browser-overlay"
      class="card-browser-overlay"

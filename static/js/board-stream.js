@@ -1,18 +1,22 @@
+// ═══════════════════════════════════════════════════════════
+//  board-stream.js — Connexion WebSocket (Socket.IO)
+//  Dépendances : board.js (window.updateBoard, window.GAME_ID, window.PSEUDO)
+// ═══════════════════════════════════════════════════════════
+
 const socket = io();
 
 socket.on('connect', () => {
     console.log('✅ Connecté, SID:', socket.id);
     socket.emit('join', {
         game_id: window.GAME_ID,
-        pseudo:  window.PSEUDO   // ← à t'assurer que window.PSEUDO est défini dans board.html
+        pseudo:  window.PSEUDO,
     });
 });
 
-// Dans board-stream.js, remplace temporairement updateBoard(state) par :
 socket.on('game_update', (state) => {
-    console.log('players[0]:', JSON.stringify(state.players[0], null, 2));
+    console.log('📦 game_update reçu — joueur courant :', state.current_player);
     if (typeof window.updateBoard === 'function') {
-        updateBoard(state);
+        window.updateBoard(state);
     } else {
         console.error('updateBoard non défini');
     }
