@@ -37,8 +37,9 @@ def create_room(host: str, max_players: int) -> dict:
         "host": host,
         "players": [host],
         "max_players": max_players,
-        "status": "waiting",   # waiting | playing | finished
-        "preset_id": None,     # sélectionné depuis le lobby
+        "status": "waiting",    # waiting | playing | finished
+        "preset_id": None,      # sélectionné depuis le lobby
+        "custom_deck": None,    # dict {card_id: count} si deck personnalisé
     }
     room_save(room)
     return room
@@ -99,6 +100,7 @@ def leave_room(game_id: str, pseudo: str) -> None:
 def set_preset(game_id: str, pseudo: str, preset_id: str) -> tuple[dict | None, str | None]:
     """
     L'hôte sélectionne un preset pour la partie.
+    Efface le deck personnalisé éventuel.
     Retourne (room, error).
     """
     room = room_get(game_id)
@@ -110,6 +112,36 @@ def set_preset(game_id: str, pseudo: str, preset_id: str) -> tuple[dict | None, 
         return None, "La partie a déjà commencé."
 
     room["preset_id"] = preset_id
+    room["custom_deck"] = None   # preset prime sur le deck perso
+    room_save(room)
+    return room, None
+
+
+def set_custom_deck(
+    game_id: str,
+    pseudo: str,
+    deck: dict[str, int],
+) -> tuple[dict | None, str | None]:
+    """
+    L'hôte enregistre un deck personnalisé {card_id: count}.
+    Efface le preset_id éventuel.
+    Retourne (room, error).
+    """
+    room = room_get(game_id)
+    if not room:
+        return None, "Partie introuvable."
+    if room["host"] != pseudo:
+        return None, "Seul l'hôte peut composer le deck."
+    if room["status"] != "waiting":
+        return None, "La partie a déjà commencé."
+
+    # Nettoyer : ne garder que les valeurs > 0
+    clean = {k: int(v) for k, v in deck.items() if int(v) > 0}
+    if not clean:
+        return None, "Le deck ne peut pas être vide."
+
+    room["custom_deck"] = clean
+    room["preset_id"] = None    # deck perso prime sur le preset
     room_save(room)
     return room, None
 

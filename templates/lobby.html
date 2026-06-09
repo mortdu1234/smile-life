@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Salle d'attente — {{ room.id }}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/lobby.css') }}" />
-  
 </head>
 <body>
 
@@ -70,32 +69,69 @@
         </div>
       </div>
 
-      <!-- PRESET SELECTOR (hôte uniquement) -->
+      <!-- PRESET SELECTOR + DECK BUILDER (hôte uniquement) -->
       {% if is_host %}
       <div class="card">
         <div class="card-title">Deck de cartes</div>
-        <div class="preset-grid">
-          {% for preset in presets %}
-          <input
-            class="preset-option"
-            type="radio"
-            name="preset_id"
-            id="preset_{{ preset.id }}"
-            value="{{ preset.id }}"
-            {% if room.preset_id == preset.id %}checked
-            {% elif loop.first and not room.preset_id %}checked{% endif %}
-          />
-          <label class="preset-label" for="preset_{{ preset.id }}">
-            <div class="preset-radio-indicator"></div>
-            <div class="preset-info">
-              <div class="preset-name">{{ preset.label }}</div>
-              <div class="preset-desc">{{ preset.description }}</div>
+
+        <!-- Onglets Présets / Personnalisé -->
+        <div class="deck-tabs">
+          <button
+            class="deck-tab {% if not room.get('custom_deck') %}active{% endif %}"
+            id="tabPresets"
+            onclick="switchTab('presets')"
+          >Présets</button>
+          <button
+            class="deck-tab {% if room.get('custom_deck') %}active{% endif %}"
+            id="tabCustom"
+            onclick="switchTab('custom')"
+          >Personnalisé</button>
+        </div>
+
+        <!-- Panneau Présets -->
+        <div id="panelPresets" class="deck-panel {% if room.get('custom_deck') %}hidden{% endif %}">
+          <div class="preset-grid">
+            {% for preset in presets %}
+            <input
+              class="preset-option"
+              type="radio"
+              name="preset_id"
+              id="preset_{{ preset.id }}"
+              value="{{ preset.id }}"
+              {% if room.preset_id == preset.id %}checked
+              {% elif loop.first and not room.preset_id and not room.get('custom_deck') %}checked{% endif %}
+            />
+            <label class="preset-label" for="preset_{{ preset.id }}">
+              <div class="preset-radio-indicator"></div>
+              <div class="preset-info">
+                <div class="preset-name">{{ preset.label }}</div>
+                <div class="preset-desc">{{ preset.description }}</div>
+              </div>
+              {% if preset.card_count > 0 %}
+              <div class="preset-count">{{ preset.card_count }} cartes</div>
+              {% endif %}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Panneau Deck personnalisé -->
+        <div id="panelCustom" class="deck-panel {% if not room.get('custom_deck') %}hidden{% endif %}">
+          {% if room.get('custom_deck') %}
+          <div class="custom-deck-active">
+            <div class="custom-deck-icon">✦</div>
+            <div class="custom-deck-info">
+              <div class="custom-deck-label">Deck personnalisé</div>
+              <div class="custom-deck-count">{{ custom_deck_total }} carte{{ 's' if custom_deck_total > 1 else '' }}</div>
             </div>
-            {% if preset.card_count > 0 %}
-            <div class="preset-count">{{ preset.card_count }} cartes</div>
-            {% endif %}
-          </label>
-          {% endfor %}
+            <button class="btn-edit-deck" onclick="openOverlay()">Modifier</button>
+          </div>
+          {% else %}
+          <div class="custom-deck-empty">
+            <p>Composez votre deck en choisissant le nombre de chaque carte.</p>
+            <button class="btn btn-compose" onclick="openOverlay()">✦ Composer mon deck</button>
+          </div>
+          {% endif %}
         </div>
 
         <!-- ACTIONS -->
@@ -137,18 +173,107 @@
     </div>
   </main>
 
-  <script>
-    const ROOM_ID = "{{ room.id }}";
-    const IS_HOST = {{ 'true' if is_host else 'false' }};
-    const GAME_URL = "{{ url_for('game.play', game_id=room.id) }}";
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- OVERLAY COMPOSITION DU DECK (hôte uniquement)                         -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  {% if is_host %}
+  <div id="deckOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Composer le deck">
+    <div class="overlay-panel">
 
-    // ── Lancer la partie (hôte uniquement) ──────────────────────────────────
+      <!-- Header -->
+      <div class="overlay-header">
+        <div class="overlay-title">Composer le deck</div>
+        <div id="overlayTotal" class="overlay-total">0 carte</div>
+        <button class="overlay-close" onclick="closeOverlay()" aria-label="Fermer">✕</button>
+      </div>
+
+      <!-- Navbar type 1 -->
+      <div class="overlay-tabs" id="overlayTabs">
+        {% for t1 in type1_tabs %}
+          {% if t1 in catalog_nested %}
+          <button
+            class="overlay-tab {% if loop.first %}active{% endif %}"
+            data-tab="{{ t1 }}"
+            onclick="switchOverlayTab('{{ t1 }}')"
+          >{{ t1 }}</button>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <!-- Barre de recherche -->
+      <div class="overlay-search-wrap">
+        <input
+          type="text"
+          id="overlaySearch"
+          class="overlay-search"
+          placeholder="Rechercher une carte…"
+          oninput="filterCards()"
+          autocomplete="off"
+        />
+      </div>
+
+      <!-- Body : un panneau par type 1 -->
+      <div class="overlay-body" id="overlayBody">
+        {% for t1, categories in catalog_nested.items() %}
+        <div class="overlay-tab-panel {% if not loop.first %}hidden{% endif %}" data-panel="{{ t1 }}">
+          {% for type2_label, cards in categories.items() %}
+          <div class="catalog-section">
+            <div class="catalog-section-title">{{ type2_label }}</div>
+            {% for card in cards %}
+            <div class="catalog-row" data-label="{{ card.label|lower }}">
+              <span class="catalog-label">{{ card.label }}</span>
+              <div class="stepper">
+                <button class="step-btn" onclick="adjustCount('{{ card.id }}', -1)">−</button>
+                <span class="step-value" id="cnt_{{ card.id }}">
+                  {{ (room.get('custom_deck') or {}).get(card.id, 0) }}
+                </span>
+                <button class="step-btn" onclick="adjustCount('{{ card.id }}', 1)">+</button>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Footer -->
+      <div class="overlay-footer">
+        <div id="overlayTotalFooter" class="overlay-total-footer">0 carte au total</div>
+        <div class="overlay-actions">
+          <button class="btn btn-ghost" onclick="closeOverlay()">Annuler</button>
+          <button class="btn btn-primary" id="confirmDeckBtn" onclick="confirmDeck()" disabled>
+            Confirmer
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <script>
+    const ROOM_ID   = "{{ room.id }}";
+    const IS_HOST   = {{ 'true' if is_host else 'false' }};
+    const GAME_URL  = "{{ url_for('game.play', game_id=room.id) }}";
+    const HAS_CUSTOM_DECK = {{ 'true' if room.get('custom_deck') else 'false' }};
+
+    // ── Onglets Presets / Personnalisé ─────────────────────────────────────
+    function switchTab(tab) {
+      const isPreset = tab === 'presets';
+      document.getElementById('tabPresets').classList.toggle('active', isPreset);
+      document.getElementById('tabCustom').classList.toggle('active', !isPreset);
+      document.getElementById('panelPresets').classList.toggle('hidden', !isPreset);
+      document.getElementById('panelCustom').classList.toggle('hidden', isPreset);
+    }
+
+    // ── Lancer la partie ───────────────────────────────────────────────────
     function launchGame() {
-      const selected = document.querySelector('input[name="preset_id"]:checked');
-      if (!selected) return;
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = '{{ url_for("game.start") }}';
+
       const addField = (name, value) => {
         const input = document.createElement('input');
         input.type = 'hidden';
@@ -156,18 +281,132 @@
         input.value = value;
         form.appendChild(input);
       };
+
       addField('game_id', ROOM_ID);
-      addField('preset_id', selected.value);
+
+      // N'envoie preset_id que si le panneau présets est actif
+      const presetsVisible = !document.getElementById('panelPresets').classList.contains('hidden');
+      if (presetsVisible) {
+        const selected = document.querySelector('input[name="preset_id"]:checked');
+        if (selected) addField('preset_id', selected.value);
+      }
+
       document.body.appendChild(form);
       form.submit();
     }
 
-    // ── Polling ──────────────────────────────────────────────────────────────
-    // Tous les joueurs interrogent /hub/lobby/<id>/status toutes les 2s.
-    // - Si status == 'playing'  → redirect vers le plateau (tous les joueurs)
-    // - Si status == 'waiting'  → reload pour afficher les nouveaux arrivants
-    // - Si status == 'not_found'→ la salle a disparu, retour au hub
+    // ── Overlay ────────────────────────────────────────────────────────────
+    const _counts = {};
+    document.querySelectorAll('.step-value').forEach(el => {
+      const cardId = el.id.replace(/^cnt_/, '');
+      _counts[cardId] = parseInt(el.textContent, 10) || 0;
+    });
 
+    let _activeTab = document.querySelector('.overlay-tab')?.dataset.tab || '';
+    let _searchQuery = '';
+
+    function switchOverlayTab(t1) {
+      _activeTab = t1;
+      document.querySelectorAll('.overlay-tab').forEach(btn =>
+        btn.classList.toggle('active', btn.dataset.tab === t1)
+      );
+      document.querySelectorAll('.overlay-tab-panel').forEach(panel =>
+        panel.classList.toggle('hidden', panel.dataset.panel !== t1)
+      );
+      // Ré-appliquer la recherche sur le nouvel onglet
+      _applySearch();
+    }
+
+    function filterCards() {
+      _searchQuery = document.getElementById('overlaySearch').value.trim().toLowerCase();
+      _applySearch();
+    }
+
+    function _applySearch() {
+      const panel = document.querySelector(`.overlay-tab-panel[data-panel="${_activeTab}"]`);
+      if (!panel) return;
+
+      panel.querySelectorAll('.catalog-row').forEach(row => {
+        const match = !_searchQuery || row.dataset.label.includes(_searchQuery);
+        row.classList.toggle('search-hidden', !match);
+      });
+
+      // Masquer les sections qui n'ont plus aucune ligne visible
+      panel.querySelectorAll('.catalog-section').forEach(section => {
+        const hasVisible = [...section.querySelectorAll('.catalog-row')]
+          .some(r => !r.classList.contains('search-hidden'));
+        section.classList.toggle('search-empty', !hasVisible);
+      });
+    }
+
+    function openOverlay() {
+      _refreshOverlayTotal();
+      document.getElementById('deckOverlay').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeOverlay() {
+      document.getElementById('deckOverlay').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('deckOverlay')?.addEventListener('click', function(e) {
+      if (e.target === this) closeOverlay();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOverlay(); });
+
+    function adjustCount(cardId, delta) {
+      _counts[cardId] = Math.max(0, (_counts[cardId] || 0) + delta);
+      const el = document.getElementById('cnt_' + cardId);
+      if (el) {
+        el.textContent = _counts[cardId];
+        el.classList.toggle('nonzero', _counts[cardId] > 0);
+      }
+      _refreshOverlayTotal();
+    }
+
+    function _refreshOverlayTotal() {
+      const total = Object.values(_counts).reduce((a, b) => a + b, 0);
+      const label = total === 0 ? '0 carte' : total + ' carte' + (total > 1 ? 's' : '');
+      const el1 = document.getElementById('overlayTotal');
+      const el2 = document.getElementById('overlayTotalFooter');
+      if (el1) el1.textContent = label;
+      if (el2) el2.textContent = label + ' au total';
+      const btn = document.getElementById('confirmDeckBtn');
+      if (btn) btn.disabled = total === 0;
+    }
+
+    async function confirmDeck() {
+      const deck = {};
+      for (const [id, count] of Object.entries(_counts)) {
+        if (count > 0) deck[id] = count;
+      }
+      const btn = document.getElementById('confirmDeckBtn');
+      btn.disabled = true;
+      btn.textContent = '…';
+      try {
+        const res = await fetch(`/hub/lobby/${ROOM_ID}/custom-deck`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ deck }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || 'Erreur lors de l\'enregistrement.');
+          btn.disabled = false;
+          btn.textContent = 'Confirmer';
+          return;
+        }
+        closeOverlay();
+        location.reload();
+      } catch (e) {
+        alert('Erreur réseau.');
+        btn.disabled = false;
+        btn.textContent = 'Confirmer';
+      }
+    }
+
+    // ── Polling ────────────────────────────────────────────────────────────
     let _pollPaused = false;
 
     {% if is_host %}
@@ -177,10 +416,46 @@
     });
     {% endif %}
 
+    const PSEUDO    = "{{ pseudo }}";
+    const MAX_PLAYERS = {{ room.max_players }};
+
+    function _renderPlayers(players, host) {
+      const slots = document.querySelectorAll('.slot');
+      slots.forEach((slot, i) => {
+        if (i < players.length) {
+          const name = players[i];
+          const isMe = name === PSEUDO;
+          const isHost = name === host;
+          slot.className = 'slot filled' + (isMe ? ' me' : '');
+          slot.innerHTML = `
+            <div class="avatar">${name[0].toUpperCase()}</div>
+            <div class="slot-name">${name}</div>
+            ${isHost ? '<div class="slot-tag">Hôte</div>' : isMe ? '<div class="slot-tag">Vous</div>' : ''}
+          `;
+        } else {
+          slot.className = 'slot empty';
+          slot.innerHTML = `
+            <div class="avatar">?</div>
+            <div class="slot-name">En attente d'un joueur…</div>
+          `;
+        }
+      });
+
+      // Progress bar
+      const pct = Math.round(players.length / MAX_PLAYERS * 100);
+      document.querySelector('.progress-fill').style.width = pct + '%';
+      document.querySelector('.progress-label span:last-child').textContent =
+        players.length + ' / ' + MAX_PLAYERS;
+
+      // Bouton start (hôte uniquement)
+      const startBtn = document.getElementById('startBtn');
+      if (startBtn) startBtn.disabled = players.length < 2;
+    }
+
     (function poll() {
       setTimeout(async () => {
         try {
-          const res = await fetch(`/hub/lobby/${ROOM_ID}/status`);
+          const res  = await fetch(`/hub/lobby/${ROOM_ID}/status`);
           const data = await res.json();
 
           if (data.status === 'playing') {
@@ -191,15 +466,13 @@
             window.location.href = '/hub/';
             return;
           }
-          // Encore en attente
+
           if (!_pollPaused) {
-            location.reload();
-          } else {
-            poll();
+            _renderPlayers(data.players, data.host);
           }
-        } catch (e) {
-          poll();
-        }
+        } catch (e) { /* réseau, on réessaie */ }
+
+        poll();
       }, 2000);
     })();
   </script>

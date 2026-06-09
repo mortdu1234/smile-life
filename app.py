@@ -37,6 +37,6 @@ def create_app(secret_key: str = 'change-me-in-production') -> Flask:
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    # logging.basicConfig(level=logging.INFO)
     app = create_app()
     socketio.run(app, debug=True, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)

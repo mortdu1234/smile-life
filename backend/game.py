@@ -106,14 +106,22 @@ def start_game(game_id: str, host_pseudo: str) -> tuple[Game | None, str | None]
         return None, "Seul l'hôte peut lancer la partie."
     if room["status"] != "waiting":
         return None, "La partie a déjà été lancée."
-    if not room.get("preset_id"):
-        return None, "Aucun preset sélectionné."
 
-    preset = load_preset(room["preset_id"])
-    if not preset:
-        return None, f"Preset « {room['preset_id']} » introuvable."
+    # ── Résolution du deck : custom_deck > preset_id ───────────────────────────
+    if room.get("custom_deck"):
+        deck = _build_cards({"deck": room["custom_deck"]})
+        if not deck:
+            return None, "Le deck personnalisé ne contient aucune carte valide."
 
-    deck = _build_cards(preset)
+    elif room.get("preset_id"):
+        preset = load_preset(room["preset_id"])
+        if not preset:
+            return None, f"Preset « {room['preset_id']} » introuvable."
+        deck = _build_cards(preset)
+
+    else:
+        return None, "Aucun deck sélectionné."
+
     players = [Player(pseudo, idx, WebIO()) for idx, pseudo in enumerate(room["players"])]
 
     game = Game(id=game_id, players=players, deck=deck)
@@ -125,7 +133,6 @@ def start_game(game_id: str, host_pseudo: str) -> tuple[Game | None, str | None]
 
 def get_game(game_id: str) -> Game | None:
     return game_get(game_id)
-
 
 
 def end_game(game_id: str) -> None:
