@@ -85,3 +85,6 @@ class Casino(SpecialCard):
 
     def play_card(self, game: Game, current_player: Player, interface: UserIO) -> None:
         return
+
+    def get_card_rule(self) -> str:
+        return """Le casino est une carte un peu compliqué. Une fois que le casino est ouvert : \n- à son tour, un joueur peut miser un salaire de sa MAIN ou de la DEFAUSSE, ensuite il a fini son tour.Quand un deuxième joueur mise au casino. On regarde les 2 cartes salaires misés, si leurs valeurs sont identique alors le deuxième joueur qui a misé au casino le remporte, sinon c'est le premmier joueur.\n- quand un joueur remporte la mise au casino, alors les 2 salaires du casino sont posé devant lui sans restriction (meme si le joueurs n'as pas de métier par exemple)\n- le casino est ouvert a partir du moment où un joueur pose la carte casino\n- le joueur qui pose la carte casino, peut immédiatement miser un salaire de sa main, il repiocheras une carte après. """+ "\n"+ "="*10+ "\n" + super().get_card_rule()

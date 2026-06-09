@@ -7,3 +7,6 @@ class LicorneAnimal(AnimalCard):
 
     def get_name(self) -> str:
         return "Licorne"
+
+    def get_card_rule(self) -> str:
+        return """Une licorne est un animal particulier qui double son nombre de smile donnée si le joueur pose la licorne, l'arc-en-ciel et l'étoile filante devant lui"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

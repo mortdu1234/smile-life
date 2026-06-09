@@ -33,4 +33,5 @@ class ChefDesVentes(JobCard):
                 current_player.add_card_to_hand(selected_card)
                 selected_card.play_card(game, current_player, interface)
         return super().apply_card_effect(game, current_player, interface)
-    
+    def get_card_rule(self) -> str:
+        return """Permet de récupérer un salaire posable de la défausse et pose le immédiatement."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

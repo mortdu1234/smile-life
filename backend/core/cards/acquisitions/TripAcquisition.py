@@ -16,3 +16,6 @@ class Trip(Acquisition):
 
     def get_name(self) -> str:
         return f"Voyage {self.place}"
+
+    def get_card_rule(self) -> str:
+        return """Un voyage n'a rien de particulier""" + "\n"+ "="*10+ "\n" + super().get_card_rule()

@@ -9,3 +9,5 @@ class Plombier(JobCard):
         self.salary = 1
     def get_name(self) -> str:
         return "Plombier"
+    def get_card_rule(self) -> str:
+        return """ce métier est INTERIMERE"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

@@ -49,3 +49,6 @@ class Divorce(Hardship):
             
         
         return True
+
+    def get_card_rule(self) -> str:
+        return """Le divorce fait perdre son marriage à sa cible. La cible doit etre mariée."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

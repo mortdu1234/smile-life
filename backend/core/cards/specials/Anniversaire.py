@@ -38,4 +38,5 @@ class Anniversaire(SpecialCard):
                     current_player.add_card_to_played(selected_card)        
         return super().apply_card_effect(game, current_player, interface)
 
-    
+    def get_card_rule(self) -> str:
+        return """La carte anniversaire peut etre poser durant son tour, une fois poser, cela vas demander a tous les autres joueurs de selectionner un salaire posé de leur choix. Les salaires qu'ils ont sélectionner se retrouve posé devant le joeuur dont c'est l'anniversaire"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

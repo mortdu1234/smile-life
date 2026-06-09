@@ -11,3 +11,5 @@ class Serveur(JobCard):
         self.status = JobStatus.INTERIMERE
     def get_name(self) -> str:
         return "Serveur"
+    def get_card_rule(self) -> str:
+        return """Ce métier est INTERIMERE. Il permet de pouvoir poser des flirts a l'infini avant le mariage"""

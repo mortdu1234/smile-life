@@ -149,11 +149,11 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "house__2": lambda: House(_uid(), "img/acquisition_cards/houses/maison2.png", 2, 8),
     "house__3": lambda: House(_uid(), "img/acquisition_cards/houses/maison3.png", 3, 10),
 
-    "travel__le_caire": lambda: Trip(_uid(), "img/acquisition_cards/trip/le_caire.png", 1, 3),
-    "travel__londre":   lambda: Trip(_uid(), "img/acquisition_cards/trip/londres.png", 1, 3),
-    "travel__new_york": lambda: Trip(_uid(), "img/acquisition_cards/trip/new_york.png", 1, 3),
-    "travel__rio":      lambda: Trip(_uid(), "img/acquisition_cards/trip/rio.png", 1, 3),
-    "travel__sydney":   lambda: Trip(_uid(), "img/acquisition_cards/trip/sydney.png", 1, 3),
+    "travel__le_caire": lambda: Trip(_uid(), "img/acquisition_cards/trip/le_caire.png", 1, 3, "le caire"),
+    "travel__londre":   lambda: Trip(_uid(), "img/acquisition_cards/trip/londres.png", 1, 3, "londre"),
+    "travel__new_york": lambda: Trip(_uid(), "img/acquisition_cards/trip/new_york.png", 1, 3, "new york"),
+    "travel__rio":      lambda: Trip(_uid(), "img/acquisition_cards/trip/rio.png", 1, 3, "rio"),
+    "travel__sydney":   lambda: Trip(_uid(), "img/acquisition_cards/trip/sydney.png", 1, 3, "sydney"),
 
     # ── Hardships ──────────────────────────────────────────────────────────────
     "accident":      lambda: Accident(_uid(), "img/hardship_cards/accident.png"),

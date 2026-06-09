@@ -9,3 +9,5 @@ class Ecrivain(JobCard):
         self.salary = 1
     def get_name(self) -> str:
         return "Écrivain"
+    def get_card_rule(self) -> str:
+        return """Peut recevoir un Grand Prix d'Excellence"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

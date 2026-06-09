@@ -41,4 +41,6 @@ class Acquisition(Card):
                 print("[ERROR] déplace de carte échouée")
                 return False
         return super().apply_card_effect(game, current_player, interface)
-    
+
+    def get_card_rule(self) -> str:
+        return """une acquisition peut etre achetée en dépensant un certain nombre MINIMUM de salaire. Les salaires disponibles pour etre utilisé dans une acquisition sont des salaires posé sur le terrain et dans la catégorie "Vie Professionnelle". Un salaire dépensé ne peux pas être dépensé a nouveau"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

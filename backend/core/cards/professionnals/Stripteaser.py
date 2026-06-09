@@ -10,3 +10,5 @@ class Stripteaser(JobCard):
         self.status = JobStatus.INTERIMERE
     def get_name(self) -> str:
         return "Stripteaser"
+    def get_card_rule(self) -> str:
+        return """Ce métier est INTERIMERE"""

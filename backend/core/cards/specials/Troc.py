@@ -72,3 +72,6 @@ class Troc(SpecialCard):
 
     def get_name(self) -> str:
         return "Troc"
+
+    def get_card_rule(self) -> str:
+        return """La carte Troc pemret de selecitonner un joueur cible et d'échanger 1 cartes avec lui aléatoirement"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

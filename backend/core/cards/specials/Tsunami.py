@@ -30,3 +30,5 @@ class Tsunami(SpecialCard):
         
 
         return super().apply_card_effect(game, current_player, interface)
+    def get_card_rule(self) -> str:
+        return """La carte tsunami permet de redistribuer aléatoirement toutes les cartes des mains."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

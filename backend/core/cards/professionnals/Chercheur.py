@@ -29,3 +29,6 @@ class Chercheur(JobCard):
         selected_card : Card = random.choice(current_player.hand)
         current_player.remove_card_from_hand(selected_card)
         return super().discard_job(current_player, game)
+
+    def get_card_rule(self) -> str:
+        return """Permet de jouer avec 6 cartes en main. Peut recevoir un Grand Prix d'excellence."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

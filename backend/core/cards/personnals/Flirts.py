@@ -48,9 +48,13 @@ class Flirt(Card):
     def get_place(self) -> FlirtPlaces:
         return self.place
 
+    def get_card_rule(self) -> str:
+        return """Les flirt permettent de pouvoir se marié. Il est possible de poser jusqu'a 5 flirts avant le marriage. Quand un joueur pose un flirt, il regarde tous les derniers flirts des autres joueurs qui ne sont pas mariés et vole ce dernier s'il est dans le meme lieu. Ce vol permet d'atteindre plus que 5 flirt avant le marriage"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()
 class FlirtWithChild(Flirt):
     used: bool = False
     def is_used(self) -> bool:
         return self.used
     def set_used(self) -> None:
         self.used = True
+    def get_card_rule(self) -> str:
+        return """Les Flirt avec enfant sont des flirts qui permettent de poser 1 enfant"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

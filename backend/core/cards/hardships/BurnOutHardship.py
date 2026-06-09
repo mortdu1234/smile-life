@@ -30,3 +30,6 @@ class BurnOut(Hardship):
 
     def get_name(self) -> str:
         return "Burn Out"
+
+    def get_card_rule(self) -> str:
+        return """Le Burn Out fait passé 1 tour à sa cible. Sa cible doit avoir un métier pour pouvoir subir un burn out."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

@@ -47,6 +47,9 @@ class ChildCard(Card):
     def get_name(self) -> str:
         return "Enfant - "
 
+    def get_card_rule(self) -> str:
+        return """Les enfant sont des cartes qui peuvent etre posé si le joueur est marié ou alors s'il a un flirt qui autorise un enfant."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()
+
 # ------------------------------------------------------------------ #
 #  Enfants concrets                                                    #
 # ------------------------------------------------------------------ #

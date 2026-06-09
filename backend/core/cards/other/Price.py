@@ -22,3 +22,5 @@ class Price(OtherCard):
 
     def get_name(self) -> str:
         return "Grand Prix d'Excellence"
+    def get_card_rule(self) -> str:
+        return """Le grand prix d'excellence ne peut etre posé qu'en lien avec certain métier. Une fois qu'il est posé, il ne peux pas etre perdu meme si le métier est perdu. Il permet au métier de poser des salaires jusqu'au niveau 4."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

@@ -20,3 +20,6 @@ class Heritage(SpecialCard):
 
     def get_name(self) -> str:
         return f"Héritage {self.value}"
+
+    def get_card_rule(self) -> str:
+        return f"Quand la carte héritage est posé, elle vaut comme un salaire {self.value} et peut etre utiliser comme tel"+ "\n"+ "="*10+ "\n" + super().get_card_rule()

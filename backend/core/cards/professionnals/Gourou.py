@@ -16,3 +16,5 @@ class Gourou(JobCard):
             if Power.NO_GOUROU in player.get_power():
                 return False, "Il y a une personne qui bloque les gourous"
         return super().can_be_played(player, game)
+    def get_card_rule(self) -> str:
+        return """ne peux pas etre poser si il y a un policier de posé"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

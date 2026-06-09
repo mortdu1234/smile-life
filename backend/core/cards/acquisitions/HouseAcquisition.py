@@ -16,3 +16,6 @@ class House(Acquisition):
 
     def get_name(self) -> str:
         return f"Maison {self.original_price}"
+
+    def get_card_rule(self) -> str:
+        return """une maison a pour particularité d'avoir son prix divisé par 2 si le joueur est marié""" + "\n"+ "="*10+ "\n" + super().get_card_rule()

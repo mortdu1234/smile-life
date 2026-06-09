@@ -30,3 +30,5 @@ class Policier(JobCard):
                     player.remove_card(job)
                 
         return super().apply_card_effect(game, current_player, interface)
+    def get_card_rule(self) -> str:
+        return """Ce métier permet d'empecher tous bandits et tous gourous. Ce métier est FONCTIONNAIRE"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

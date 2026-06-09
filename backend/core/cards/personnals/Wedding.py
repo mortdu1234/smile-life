@@ -23,6 +23,8 @@ class Wedding(Card):
         return False, "on ne peut divorcer que avant de piocher"
     def get_name(self) -> str:
         return "Marriage"
+    def get_card_rule(self) -> str:
+        return """Le Marriage peut etre posé a partir du moment où le joueur a poser au moins 1 flirt devant lui. Le marriage permet d'avoir autant d'enfant qu'il souahite et permet d'avoir les prix des maison diviser par 2. Le joueur peut défausser son marriage, pour cela il se défausse de son marriage avant de piocher et cela vas passer son tour."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()
 
 class Adultery(Card):
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
@@ -40,3 +42,5 @@ class Adultery(Card):
         if game.turn_state == TurnState.PIOCHE:
             return True, ""
         return False, "on ne peut quitter son adultère que avant de piocher"
+    def get_card_rule(self) -> str:
+        return """Les adultères permet de continuer a flirter après le marriage, les flirts pendant un adultère ne peuvent pas etre volé. Par contre en cas de divorce, le joueur pert son marriage, son adultère et aussi tous ces enfants. Le joueur peut défausser son adultère a tout moment, alors il ne pert rien, et il jette son adultère dans la défausse. Il ne perd pas de tour a défausser son adultère, il peut le faire a tout moment"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

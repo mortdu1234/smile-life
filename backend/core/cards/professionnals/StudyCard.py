@@ -21,3 +21,6 @@ class StudyCard(Card):
         if job and Power.INFINITE_STUDY not in player.get_power():
             return False, "tu as déja un métier" 
         return super().can_be_played(player, game)
+
+    def get_card_rule(self) -> str:
+        return """Premet d'augmenter son niveau d'étude. Il est possible de poser jusqu'a 6 cartes études maxmimum. Les études permettent d'avoir un meilleur métier. Il n'est pas possible de poser une carte étude si on a déja un métier."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

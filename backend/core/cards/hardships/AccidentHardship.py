@@ -26,3 +26,6 @@ class Accident(Hardship):
 
     def get_name(self) -> str:
         return "Accident"
+
+    def get_card_rule(self) -> str:
+        return """Un Accident fait passer 1 tour à la cible"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

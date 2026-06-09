@@ -11,3 +11,5 @@ class Legion(OtherCard):
         return super().can_be_played(player, game)
     def get_name(self) -> str:
         return "Legion d'Honneur"
+    def get_card_rule(self) -> str:
+        return """La légion d'honneur donne simplement des smiles. Elle ne peut pas etre posé si le joueur a été bandit dans la partie"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

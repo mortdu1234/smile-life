@@ -9,3 +9,5 @@ class Militaire(JobCard):
         self.salary = 1
     def get_name(self) -> str:
         return "Militaire"
+    def get_card_rule(self) -> str:
+        return """Empeche tous attentat"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

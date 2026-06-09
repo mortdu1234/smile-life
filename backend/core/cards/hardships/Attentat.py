@@ -36,3 +36,5 @@ class Attentat(Hardship):
 
     def get_name(self) -> str:
         return "Attentat"
+    def get_card_rule(self) -> str:
+        return """Un Attentat est particulier car il se pose sur le board du joueur qui le pose. Son effet est de tuer tous les enfants du terrain. Attention après avoir fait un attentat, il n'est plus possible d'avoir la légion d'honneur"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

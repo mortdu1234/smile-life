@@ -24,3 +24,5 @@ class Chance(SpecialCard):
         from ...Game import GameStateKey
         game.game_state[GameStateKey.CHANCE] += 1
         return super().apply_card_effect(game, current_player, interface)
+    def get_card_rule(self) -> str:
+        return """La carte chance permet de piocher 3 cartes, en choisir 1 parmis les 3 et défausser les 2 autres. Ensuite il continue son tour"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

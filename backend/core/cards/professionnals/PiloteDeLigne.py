@@ -9,3 +9,5 @@ class PiloteDeLigne(JobCard):
         self.salary = 4
     def get_name(self) -> str:
         return "Pilote de Ligne"
+    def get_card_rule(self) -> str:
+        return """Permet de poser des voyages gratuitement"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

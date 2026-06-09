@@ -127,6 +127,7 @@
 }
 
 .card-detail-overlay__description {
+  white-space: pre-line;
   font-size: 0.82rem;
   color: #7a7168;
   line-height: 1.55;

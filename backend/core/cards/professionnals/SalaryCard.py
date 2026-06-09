@@ -28,3 +28,5 @@ class SalaryCard(Card):
                 return False, f"le métier ne permet pas de mettre des salaires de valeur {self.value}>{job.get_salary()}"  
             return False, f"Vous n'avez pas de métiers0"
         return super().can_be_played(player, game)
+    def get_card_rule(self) -> str:
+        return f"Il s'agit d'une carte Salaire de valeur {self.value}" + """les salaires peuvent etre dépensé, dans ce cas, ils arrivent dans la zone "Cartes Protégéesé". POur etre posé il faut avoir un métier ou les miser au casino (si le casino est ouvert)"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

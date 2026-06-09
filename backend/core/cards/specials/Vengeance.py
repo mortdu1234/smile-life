@@ -55,3 +55,6 @@ class Vengeance(SpecialCard):
         self.hardship_card.play_card(game, current_player, interface)        
 
         return super().apply_card_effect(game, current_player, interface)
+
+    def get_card_rule(self) -> str:
+        return """La carte Vengeance permet d'attribuer a un adversaire une des cartes Malus recus"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

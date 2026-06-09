@@ -22,3 +22,5 @@ class Medium(JobCard):
             cards=next_cards
         )
         return super().apply_card_effect(game, current_player, interface)
+    def get_card_rule(self) -> str:
+        return """Peremt de voir les 13 prochaines cartes de la pioche au moment ou le métier est posé"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

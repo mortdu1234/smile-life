@@ -48,3 +48,11 @@ class JobCard(Card):
         if game.turn_state == TurnState.POSE and self.jobStatus != JobStatus.INTERIMERE:
             return False, "Vous ne pouvez démissionner que en phase de pioche sauf si vous etes intérimère"
         return True, ""
+
+    def get_card_rule(self) -> str:
+        return """Les Cartes métier sont des cartes qui permet de poser des salaires. Les métiers necessitent un certain nombre d'études.\n
+        Certains métier ont des status : \n
+        -FONCTIONNAIRE : ne peut etre licencier\n
+        -INTERRIMAIRE : peut démissionner a tout moment lors de sont tour, sans devoir passer son tour\n
+        Il est possible de démissionner d'un métier. Pour cela, avant de piocher, il faut démissionner, et c'est la fin de son 
+        tour.\n"""+ f"Ce métier permet demande {self.study} d'étude et peut poser des salaires jusqu'à {self.salary}."+ "\n"+ "="*10+ "\n" + super().get_card_rule()

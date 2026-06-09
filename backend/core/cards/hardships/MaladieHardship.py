@@ -25,3 +25,6 @@ class Maladie(Hardship):
         # ajoute un tour a skip
         self.target_player.add_skip_turn(1)
         return True
+
+    def get_card_rule(self) -> str:
+        return """la Maladie fait passé 1 tour à sa cible"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

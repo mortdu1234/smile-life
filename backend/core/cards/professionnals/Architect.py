@@ -9,3 +9,5 @@ class Architect(JobCard):
         self.salary = 4
     def get_name(self) -> str:
         return "Architecte"
+    def get_card_rule(self) -> str:
+        return """L'Architecte permet de poser 1 maison gratuite."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

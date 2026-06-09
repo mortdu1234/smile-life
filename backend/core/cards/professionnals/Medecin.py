@@ -10,3 +10,5 @@ class Medecin(JobCard):
         self.salary = 4
     def get_name(self) -> str:
         return "Médecin"
+    def get_card_rule(self) -> str:
+        return """Permet de continer a étudier avec le métier. Ne peut pas recevoir de maladies"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

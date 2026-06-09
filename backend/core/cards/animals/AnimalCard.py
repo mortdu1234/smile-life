@@ -17,10 +17,8 @@ class AnimalCard(Card):
         return base
 
     def get_card_rule(self) -> str:
-        return f"Carte Animal — {self.smiles} smiles. Jouable à tout moment.\n"
+        return """Un animal de Companie peut etre posé et permet d'avoir des smiles en plus"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()
 
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         return True, ""
 
-    def play_card(self, game: "Game", current_player: "Player") -> None:
-        super().play_card(game, current_player)

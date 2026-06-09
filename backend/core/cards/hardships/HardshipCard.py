@@ -61,3 +61,5 @@ class Hardship(Card):
             return False
         return super().apply_card_effect(game, current_player, interface)
     
+    def get_card_rule(self) -> str:
+        return """Les Cartes Malus sont des cartes a utiliser sur un adversaire afin de lui infliger son malus"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

@@ -41,3 +41,6 @@ class Piston(SpecialCard):
 
     def get_name(self) -> str:
         return "Piston"
+
+    def get_card_rule(self) -> str:
+        return """La carte piston permet de poser un métier sans aucune restriction d'étude"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

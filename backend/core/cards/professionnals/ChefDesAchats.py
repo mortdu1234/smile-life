@@ -33,3 +33,5 @@ class ChefDesAchats(JobCard):
         return super().apply_card_effect(game, current_player, interface)
     def get_name(self) -> str:
         return "Chef des achats"
+    def get_card_rule(self) -> str:
+        return """Permet de récupérer une acquisition achetable depuis la défausse et l'achète immédiatement"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

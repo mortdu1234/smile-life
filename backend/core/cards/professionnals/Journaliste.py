@@ -22,3 +22,5 @@ class Journaliste(JobCard):
         interface.show_players_hand(players_names, players_hands)
         current_player.add_card_to_hand(self)
         return super().apply_card_effect(game, current_player, interface)
+    def get_card_rule(self) -> str:
+        return """Quand la carte est posé, permet de voir les mains de tous les joueurs. Peut recevoir un Grand Prix d'Excellence."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

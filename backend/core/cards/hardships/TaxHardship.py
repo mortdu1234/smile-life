@@ -36,3 +36,6 @@ class Tax(Hardship):
         self.target_player.remove_card(last_salary)
         game.add_card_to_discard(last_salary)
         return True
+
+    def get_card_rule(self) -> str:
+        return """L'impot est une carte qui fait perdre le dernier salaire posé. La cible doit obligatoirement travailler pour pouvoir subir ce malus."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

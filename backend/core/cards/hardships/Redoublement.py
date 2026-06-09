@@ -36,3 +36,5 @@ class Redoublement(Hardship):
         self.target_player.remove_card(last_study)
         game.add_card_to_discard(last_study)
         return True
+    def get_card_rule(self) -> str:
+        return """le redoublement fait jetter dans la défausse la dernière carte étude de la cible. La cible doit être étudiante pour pouvoir subir ce malus."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

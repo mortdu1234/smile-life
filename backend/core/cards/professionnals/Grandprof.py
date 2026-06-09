@@ -19,5 +19,6 @@ class Grandprof(JobCard):
         if not isinstance(player.get_job(), Prof):
             return False, "Tu dois etre un prof avant d'etre grand prof"
         return True, ""
-
+    def get_card_rule(self) -> str:
+        return """Effectue une amélioration du étier de professeur. Necessite d'etre professeur avant de passer en grand prof. ce métier est un FONCTIONNAIRE."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()
     

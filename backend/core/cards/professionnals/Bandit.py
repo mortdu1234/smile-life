@@ -24,3 +24,5 @@ class Bandit(JobCard):
         return super().apply_card_effect(game, current_player, interface)
     def get_name(self) -> str:
         return "Bandit"
+    def get_card_rule(self) -> str:
+        return """Le Bandit ne peut pas recevoir d'impot ni etre licencier. Si le joueur pose la carte bandit, il ne peut plus recevoir de légion d'honneur.\nAttention, peut recevoir la prison"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

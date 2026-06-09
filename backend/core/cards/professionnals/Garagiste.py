@@ -9,3 +9,5 @@ class Garagiste(JobCard):
         self.salary = 2
     def get_name(self) -> str:
         return "Garagiste"
+    def get_card_rule(self) -> str:
+        return """Ne peut subir d'accidents"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

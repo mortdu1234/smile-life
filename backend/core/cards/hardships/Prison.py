@@ -45,3 +45,6 @@ class Prison(Hardship):
         self.target_player.add_skip_turn(3)
         
         return True
+
+    def get_card_rule(self) -> str:
+        return """La prison est une carte qui peut s'appliquer uniquement sur quelqu'un qui est actuellement bandit. Son effet est de faire passer 3 tours, faire démissionner le bandit, retirer 2 cartes aléatoire de la main"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

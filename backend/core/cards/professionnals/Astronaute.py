@@ -12,6 +12,8 @@ class Astronaute(JobCard):
         self.salary = 4
     def get_name(self) -> str:
         return "Astronaute"
+    def get_card_rule(self) -> str:
+        return """permet de récupérer une carte posable au choix depuis la défausse au moment ou le joueur pose la carte Astronaute"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()
     
     def _get_available_card(self, current_player: "Player", game: "Game") -> list["Card"]:
         current_player.add_card_to_played(self)

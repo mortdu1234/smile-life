@@ -33,3 +33,6 @@ class Licenciement(Hardship):
         game.add_card_to_discard(job_card)
         
         return True
+
+    def get_card_rule(self) -> str:
+        return """Le Licenciement fait démissionner un joueur, les métiers fonctionnaires sont immunisés au licenciement."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()
