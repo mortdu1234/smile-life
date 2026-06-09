@@ -123,4 +123,5 @@ registerHandler("card-detail", function render(pending) {
 
   // 6. Afficher l'overlay
   overlay.hidden = false;
+  return document.createDocumentFragment();
 });

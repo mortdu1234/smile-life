@@ -311,12 +311,18 @@
   {% include 'overlays/show-hand.html' %}
   {% include 'overlays/card-picker.html' %}
   {% include 'overlays/player-picker.html' %}
-  {% include "overlays/card-detail.html" %}
+  {% include 'overlays/card-detail.html' %}
 
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-  <script src="{{ url_for('static', filename='js/board-stream.js') }}"></script>
   <script type="module" src="{{ url_for('static', filename='js/IO/io-core.js') }}"></script>
+  <script>
+    // Variables Jinja exposées sur window — doit rester inline
+    window.GAME_ID = GAME_ID;
+    window.IS_MY_TURN = IS_MY_TURN;
+    window.PSEUDO = "{{ pseudo }}";
+    
+  </script>
   <script src="{{ url_for('static', filename='js/board.js') }}"></script>
-  
+  <script src="/static/js/board-stream.js"></script>
 </body>
 </html>

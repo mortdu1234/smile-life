@@ -25,3 +25,6 @@ socket.on('game_update', (state) => {
 socket.on('disconnect', () => {
     console.warn('❌ Déconnecté');
 });
+console.log('=== DEBUG WS ===');
+console.log('GAME_ID:', window.GAME_ID);
+console.log('PSEUDO:', window.PSEUDO);
