@@ -68,9 +68,96 @@
     background-size: 16px;
 }
 
-/* Style des options pour les navigateurs qui le supportent (généralement basé sur l'arrière-plan de l'OS) */
+/* Style des options */
 .theme-switcher__select option {
     background: var(--surface);
     color: var(--text);
     padding: 8px;
+}
+
+/* =========================================================================
+   INTEGRATION DES BOUTONS PREMIUM EN DEUX VERSIONS (Inspirés de l'image)
+   ========================================================================= */
+
+/* ── VERSION 1 : BOUTON PRIMAIRE (Plein - Or & Accent dégradé) ── */
+.btn-premium-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    
+    padding: 11px 32px;
+    border: 1px solid var(--gold);
+    border-radius: var(--radius, 4px);
+    background: linear-gradient(135deg, var(--gold) 0%, var(--accent) 100%);
+    color: #141210; /* Contraste sombre optimal sur l'or */
+    
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    box-shadow: 0 4px 14px rgba(184, 154, 106, 0.15);
+}
+
+.btn-premium-primary:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(184, 154, 106, 0.25);
+}
+
+.btn-premium-primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-premium-primary:disabled {
+    background: var(--line, #2a2520);
+    border-color: var(--line, #2a2520);
+    color: var(--muted, #7a7168);
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* ── VERSION 2 : BOUTON SECONDAIRE (Bordure seule - Épuré Luxe) ── */
+.btn-premium-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    
+    padding: 11px 32px;
+    border: 1px solid var(--line, #2a2520);
+    border-radius: var(--radius, 4px);
+    background: transparent;
+    color: var(--muted, #7a7168);
+    
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    
+    cursor: pointer;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.15s ease;
+}
+
+.btn-premium-secondary:hover:not(:disabled) {
+    border-color: var(--accent, #d4b98a);
+    color: var(--text, #e8e2d9);
+    background-color: rgba(232, 226, 217, 0.03);
+    transform: translateY(-1px);
+}
+
+.btn-premium-secondary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-premium-secondary:disabled {
+    border-color: rgba(42, 37, 32, 0.4);
+    color: rgba(122, 113, 104, 0.4);
+    cursor: not-allowed;
 }

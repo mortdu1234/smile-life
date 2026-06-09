@@ -19,8 +19,7 @@
   <!-- NAV -->
   <nav>
     <div class="nav-logo">La <span>Vie</span></div>
-
-    <select id="theme-switcher"></select>
+    <theme-switcher></theme-switcher>
     <div class="nav-right">
       <span class="nav-code">Partie {{ game.id }}</span>
       {% if is_my_turn %}
@@ -327,6 +326,7 @@
     
   </script>
   <script src="{{ url_for('static', filename='js/board.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/components/theme-switcher.js') }}"></script>
   <script src="/static/js/board-stream.js"></script>
 </body>
 </html>

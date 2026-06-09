@@ -1,7 +1,5 @@
-/* ── THEME SWITCHER ─────────────────────────────────────────────────────────
-   À placer dans : css/light-mode/theme-switcher.css
-   À inclure sur chaque page avant le CSS spécifique à la page.
-   ─────────────────────────────────────────────────────────────────────────── */
+/* ── theme-switcher.css ── */
+/* Sélecteur de thème — variables héritées de board.css */
 
 .theme-switcher {
     position: absolute;
@@ -25,14 +23,15 @@
     color: var(--muted);
 
     cursor: pointer;
-    transition: border-color 0.18s, box-shadow 0.18s, color 0.18s;
+    transition: border-color 0.18s, box-shadow 0.18s, color 0.18s, background-color 0.18s;
     z-index: 300;
 }
 
 .theme-switcher:hover {
     border-color: var(--gold);
-    color: var(--accent);
-    box-shadow: 0 2px 10px rgba(184, 154, 106, 0.12);
+    color: var(--text);
+    background: #242018;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 /* Icône palette à gauche du select */
@@ -41,6 +40,7 @@
     line-height: 1;
     flex-shrink: 0;
     pointer-events: none;
+    color: var(--accent);
 }
 
 /* Le <select> lui-même — reset complet puis harmonisé */
@@ -60,17 +60,104 @@
     color: inherit;
     cursor: pointer;
 
-    /* Petite flèche dessinée en SVG inline via background */
-    padding-right: 14px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237a7168' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    /* Petite flèche dessinée en SVG inline via background, colorée avec la couleur dorée */
+    padding-right: 16px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23b89a6a'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 0 center;
+    background-position: calc(100% + 2px) center;
+    background-size: 16px;
 }
 
-/* Options dans la liste déroulante native */
+/* Style des options */
 .theme-switcher__select option {
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.82rem;
     background: var(--surface);
     color: var(--text);
+    padding: 8px;
+}
+
+/* =========================================================================
+   INTEGRATION DES BOUTONS PREMIUM EN DEUX VERSIONS (Inspirés de l'image)
+   ========================================================================= */
+
+/* ── VERSION 1 : BOUTON PRIMAIRE (Plein - Or & Accent dégradé) ── */
+.btn-premium-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    
+    padding: 11px 32px;
+    border: 1px solid var(--gold);
+    border-radius: var(--radius, 4px);
+    background: linear-gradient(135deg, var(--gold) 0%, var(--accent) 100%);
+    color: #141210; /* Contraste sombre optimal sur l'or */
+    
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    box-shadow: 0 4px 14px rgba(184, 154, 106, 0.15);
+}
+
+.btn-premium-primary:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(184, 154, 106, 0.25);
+}
+
+.btn-premium-primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-premium-primary:disabled {
+    background: var(--line, #2a2520);
+    border-color: var(--line, #2a2520);
+    color: var(--muted, #7a7168);
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* ── VERSION 2 : BOUTON SECONDAIRE (Bordure seule - Épuré Luxe) ── */
+.btn-premium-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    
+    padding: 11px 32px;
+    border: 1px solid var(--line, #2a2520);
+    border-radius: var(--radius, 4px);
+    background: transparent;
+    color: var(--muted, #7a7168);
+    
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    
+    cursor: pointer;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.15s ease;
+}
+
+.btn-premium-secondary:hover:not(:disabled) {
+    border-color: var(--accent, #d4b98a);
+    color: var(--text, #e8e2d9);
+    background-color: rgba(232, 226, 217, 0.03);
+    transform: translateY(-1px);
+}
+
+.btn-premium-secondary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-premium-secondary:disabled {
+    border-color: rgba(42, 37, 32, 0.4);
+    color: rgba(122, 113, 104, 0.4);
+    cursor: not-allowed;
 }
