@@ -27,13 +27,13 @@
 // ── Helpers endpoints ─────────────────────────────────────────────────────────
 
 const EP = {
-  place:           (game_id, card_id) => ({ url: `/game/${game_id}/place`,            body: { card_id } }),
-  discard:         (game_id, card_id) => ({ url: `/game/${game_id}/discard`,          body: { card_id } }),
-  discardJob:      (game_id, card_id) => ({ url: `/game/${game_id}/discard-job`,      body: { card_id } }),
-  discardWedding:  (game_id, card_id) => ({ url: `/game/${game_id}/discard-wedding`,  body: { card_id } }),
-  discardAdultery: (game_id, card_id) => ({ url: `/game/${game_id}/discard-adultery`, body: { card_id } }),
-  drawDiscard:     (game_id)          => ({ url: `/game/${game_id}/draw-discard`,     body: {} }),
-  betOnCasino:     (game_id, card_id) => ({ url: `/game/${game_id}/bet-on-casino`,    body: { card_id } }),
+  place:           (game_id, card_id) => ({ url: `${window.BASE_URL}/game/${game_id}/place`,            body: { card_id } }),
+  discard:         (game_id, card_id) => ({ url: `${window.BASE_URL}/game/${game_id}/discard`,          body: { card_id } }),
+  discardJob:      (game_id, card_id) => ({ url: `${window.BASE_URL}/game/${game_id}/discard-job`,      body: { card_id } }),
+  discardWedding:  (game_id, card_id) => ({ url: `${window.BASE_URL}/game/${game_id}/discard-wedding`,  body: { card_id } }),
+  discardAdultery: (game_id, card_id) => ({ url: `${window.BASE_URL}/game/${game_id}/discard-adultery`, body: { card_id } }),
+  drawDiscard:     (game_id)          => ({ url: `${window.BASE_URL}/game/${game_id}/draw-discard`,     body: {} }),
+  betOnCasino:     (game_id, card_id) => ({ url: `${window.BASE_URL}/game/${game_id}/bet-on-casino`,    body: { card_id } }),
 };
 
 // ── Catalogue des actions par type de carte ───────────────────────────────────
