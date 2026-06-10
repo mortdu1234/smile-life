@@ -11,7 +11,7 @@ class Policier(JobCard):
         super().__init__(id, image_path)
         self.jobPower.append(Power.NO_BANDIT)
         self.jobPower.append(Power.NO_GOUROU)
-        self.jobStatus = JobStatus.FONCTIONNAIRE
+        self.status = JobStatus.FONCTIONNAIRE
         self.study = 1
         self.salary = 1
     def get_name(self) -> str:
