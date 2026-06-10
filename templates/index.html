@@ -78,21 +78,38 @@
                 <div class="game-meta">Hôte : {{ g.host }}</div>
               </div>
               <div style="display:flex; align-items:center; gap:12px;">
-                <div class="game-slots">
-                  {% for i in range(g.max_players) %}
-                  <div class="slot-dot {% if i < g.players|length %}filled{% endif %}"></div>
-                  {% endfor %}
-                </div>
-                <form method="POST" style="margin:0;">
-                  <input type="hidden" name="action" value="join" />
-                  <input type="hidden" name="pseudo" id="pseudoJoin_{{ g.id }}" />
-                  <input type="hidden" name="game_id" value="{{ g.id }}" />
-                  <button
-                    type="submit"
-                    class="btn btn-outline join-btn"
-                    onclick="fillPseudo('pseudoJoin_{{ g.id }}')"
-                  >Rejoindre</button>
-                </form>
+
+                {% if g.status == 'playing' %}
+                  <!-- Partie en cours → Observer -->
+                  <span class="game-status-badge playing">En cours</span>
+                  <form method="POST" action="{{ url_for('hub.observe', game_id=g.id) }}" style="margin:0;">
+                    <input type="hidden" name="pseudo" id="pseudoObserve_{{ g.id }}" />
+                    <button
+                      type="submit"
+                      class="btn btn-ghost observe-btn"
+                      onclick="fillPseudo('pseudoObserve_{{ g.id }}')"
+                    >👁 Observer</button>
+                  </form>
+
+                {% else %}
+                  <!-- Partie ouverte → Rejoindre -->
+                  <div class="game-slots">
+                    {% for i in range(g.max_players) %}
+                    <div class="slot-dot {% if i < g.players|length %}filled{% endif %}"></div>
+                    {% endfor %}
+                  </div>
+                  <form method="POST" style="margin:0;">
+                    <input type="hidden" name="action" value="join" />
+                    <input type="hidden" name="pseudo" id="pseudoJoin_{{ g.id }}" />
+                    <input type="hidden" name="game_id" value="{{ g.id }}" />
+                    <button
+                      type="submit"
+                      class="btn btn-outline join-btn"
+                      onclick="fillPseudo('pseudoJoin_{{ g.id }}')"
+                    >Rejoindre</button>
+                  </form>
+                {% endif %}
+
               </div>
             </div>
             {% endfor %}

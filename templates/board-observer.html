@@ -1,0 +1,141 @@
+{% extends "board.html" %}
+
+{% block extra_styles %}
+<style>
+
+  .observer-bar {
+    position: relative;
+    width: 100%;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 1.5rem;
+    background: #ffffff;
+    border-bottom: 2px solid #e0e0e0;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.8rem;
+  }
+
+  .observer-bar-label {
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-muted, #888);
+    margin-right: 0.5rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .player-switcher-list {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+    min-width: 0;
+  }
+  .player-switcher-list::-webkit-scrollbar { display: none; }
+
+  .player-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border, #d4d4d4);
+    background: var(--color-surface, #fff);
+    color: var(--color-text, #222);
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    text-decoration: none;
+  }
+  .player-pill:hover {
+    background: var(--color-hover, #f3f3f3);
+    border-color: var(--color-accent, #5a5af7);
+    transform: translateY(-1px);
+  }
+  .player-pill--observed {
+    background: var(--color-accent, #5a5af7);
+    border-color: var(--color-accent, #5a5af7);
+    color: #fff;
+    font-weight: 600;
+  }
+  .player-pill--observed .pill-avatar {
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+  }
+
+  .pill-avatar {
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    background: var(--color-muted-bg, #eee);
+    color: var(--color-muted, #666);
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .pill-turn-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: #f0a500;
+    flex-shrink: 0;
+  }
+
+  .observer-bar-sep {
+    width: 1px;
+    height: 1.25rem;
+    background: var(--color-border, #ddd);
+    margin: 0 0.5rem;
+    flex-shrink: 0;
+  }
+
+</style>
+{% endblock %}
+
+{% block extra_navbar %}
+<div class="observer-bar">
+  <span class="observer-bar-label">👁️ Observer</span>
+
+  <nav class="player-switcher-list" aria-label="Changer de joueur observé">
+    {% for player in game.players %}
+    <a
+      href="{{ url_for('game.board_as', game_id=game.id, player_name=player.name) }}"
+      class="player-pill {% if player.name == pseudo %}player-pill--observed{% endif %}"
+      aria-current="{% if player.name == pseudo %}true{% else %}false{% endif %}"
+    >
+      <span class="pill-avatar">{{ player.name[0]|upper }}</span>
+      {{ player.name }}
+      {% if player.name == current_player.name %}
+        <span class="pill-turn-dot" title="C'est son tour"></span>
+      {% endif %}
+    </a>
+    {% endfor %}
+  </nav>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script type="module" src="{{ url_for('static', filename='js/IO/io-core.js') }}"></script>
+  <script>
+    // Variables Jinja exposées sur window — doit rester inline
+    window.GAME_ID = GAME_ID;
+    window.IS_MY_TURN = false; 
+    window.PSEUDO = "{{ pseudo }}";
+    window.IS_OBSERVER = true;
+  </script>
+  {# board.js et board-stream.js volontairement exclus : l'observateur ne peut pas agir #}
+  <script src="{{ url_for('static', filename='js/components/theme-switcher.js') }}"></script>
+{% endblock %}

@@ -14,6 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/light-mode/board.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/light-mode/theme-switcher.css') }}" />
+  {% block extra_styles %}{% endblock %}
 </head>
 <body>
 
@@ -24,12 +25,14 @@
     <div class="nav-right">
       <span class="nav-code">Partie {{ game.id }}</span>
       {% if is_my_turn %}
-        <div id="nav-turn" class="nav-turn my-turn">✦ Votre tour</div>
+      <div id="nav-turn" class="nav-turn my-turn">✦ Votre tour</div>
       {% else %}
-        <div id="nav-turn" class="nav-turn other-turn">⏳ Tour de {{ current_player.name }}</div>
+      <div id="nav-turn" class="nav-turn other-turn">⏳ Tour de {{ current_player.name }}</div>
       {% endif %}
     </div>
   </nav>
+  {% block extra_navbar %}{% endblock %}
+
 
   <!-- BOARD -->
   <div class="board">
@@ -316,6 +319,7 @@
   {% include 'overlays/player-picker.html' %}
   {% include 'overlays/card-detail.html' %}
 
+  {% block scripts %}
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script type="module" src="{{ url_for('static', filename='js/IO/io-core.js') }}"></script>
   <script>
@@ -328,5 +332,6 @@
   <script src="{{ url_for('static', filename='js/board.js') }}"></script>
   <script src="{{ url_for('static', filename='js/components/theme-switcher.js') }}"></script>
   <script src="{{ url_for('static', filename='js/board-stream.js') }}"></script>
+  {% endblock %}
 </body>
 </html>

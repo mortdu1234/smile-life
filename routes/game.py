@@ -66,13 +66,15 @@ def register_socket_events(sio):
         game_id = data.get('game_id')
         pseudo  = data.get('pseudo')
         game = get_game(game_id)
-        if not game or pseudo not in [p.name for p in game.players]:
+        
+        if not game:
             return
-        # Room personnelle pour recevoir sa propre main
-        join_room(f"player_{pseudo}_{game_id}")
-        # Room commune pour les futures features (chat, etc.)
-        join_room(game_id)
-        print(f"[WS] ✅ {pseudo} a rejoint les rooms de {game_id}")
+            
+        # On permet de rejoindre la room du jeu même si on n'est pas sur la liste des joueurs actifs
+        join_room(f"player_{pseudo}_{game_id}") # Utile pour voir la main du joueur switché
+        join_room(game_id)                      # Utile pour les événements globaux
+        
+        print(f"[WS] 👁 {pseudo} observe la partie {game_id}")
         sio.emit('game_update', game.to_dict(viewer=pseudo), room=request.sid)
 
 # ── Lancer la partie ───────────────────────────────────────────────────────────
@@ -128,7 +130,32 @@ def play(game_id):
         discard_top=game.get_last_discard(),
     )
 
+# ── OBSERVATEUR ───────────────────────────────────────────────────────────────────────
 
+
+@game_bp.route("/<game_id>/observe/<player_name>")
+def board_as(game_id, player_name):
+    game = get_game(game_id)
+    if not game:
+        return redirect(url_for("hub.index"))
+
+    player_names = [p.name for p in game.players]
+    if player_name not in player_names:
+        abort(404, "Joueur introuvable.")
+
+    current_player = game.get_current_player()
+    my_player = next(p for p in game.players if p.name == player_name)
+
+    return render_template(
+        "board-observer.html",
+        game=game,
+        pseudo=player_name,
+        my_player=my_player,
+        current_player=current_player,
+        is_my_turn=(current_player.name == player_name),
+        deck_size=len(game.deck),
+        last_discard=game.get_last_discard(),
+    )
 # ── État JSON ──────────────────────────────────────────────────────────────────
 
 @game_bp.route("/<game_id>/state")
@@ -250,6 +277,8 @@ def skip(game_id):
         success, reason = game.skip_turn(player_id)
         return _action_response(success, reason, game_id)
     return _action_response(False, "[ERROR] Game non trouvée", game_id)
+
+
 
 
 # ── UserIO ───────────────────────────────────────────────────────────────────────

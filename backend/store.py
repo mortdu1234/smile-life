@@ -46,7 +46,7 @@ def rooms_open() -> list[dict]:
     """Retourne les salles en attente avec de la place."""
     return [
         r for r in _rooms.values()
-        if r["status"] == "waiting" and len(r["players"]) < r["max_players"]
+        # if r["status"] == "waiting" and len(r["players"]) < r["max_players"]
     ]
 
 

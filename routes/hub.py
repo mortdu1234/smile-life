@@ -58,6 +58,24 @@ def index():
 
     return render_template("index.html", games=get_open_rooms(), error=error)
 
+# ── Observer une partie en cours ───────────────────────────────────────────────
+
+@hub_bp.route("/observe/<game_id>", methods=["POST"])
+def observe(game_id):
+    pseudo, error = _require_pseudo()
+    if error:
+        return redirect(url_for("hub.index"))
+    
+    from backend.game import get_game
+    game = get_game(game_id)
+    if not game:
+        return redirect(url_for("hub.index"))
+
+    session["pseudo"] = pseudo
+    # Redirige vers la vue observer en prenant la perspective du premier joueur par défaut
+    first_player = game.players[0].name
+    return redirect(url_for("game.board_as", game_id=game_id, player_name=first_player))
+
 
 # ── Lobby ──────────────────────────────────────────────────────────────────────
 
