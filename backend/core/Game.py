@@ -185,6 +185,7 @@ class Game:
     @validate_player
     def stop_arc_en_ciel(self, player_id: int) -> tuple[bool, str]:
         """Permet d'arreter un Arc En Ciel en cour"""
+        print("[INFO] action du joueur : stop arc en ciel")
         if self.game_state.get(GameStateKey.ARC_EN_CIEL, 0) <= 1:
             return False, "Il n'y a pas d'arc en ciel en cour"
         self.game_state[GameStateKey.ARC_EN_CIEL] = 1
@@ -197,6 +198,7 @@ class Game:
         """Le joueur courrant passe son tour
         pre: uniquement si le joueur courrant a des tours a passer
         """
+        print("[INFO] action du joueur : passer un tour")
         player = self.get_current_player()
         if player.skip_turn <= 0:
             print("[ERROR] skip un tour alors que le joueur n'as pas de tours a skip")
@@ -212,6 +214,7 @@ class Game:
     @validate_phase(TurnState.PIOCHE)
     def draw_card_from_deck(self, player_id: int) -> tuple[bool, str]:
         """pioche une carte depuis la pioche"""
+        print("[INFO] action du joueur : piocher une carte")
         player = self.get_current_player()
         if player.skip_turn > 0:
             print("[ERROR] essaye de piocher alors que je joueurs dois skip un tour")
@@ -230,6 +233,7 @@ class Game:
     @validate_phase(TurnState.PIOCHE)
     def draw_card_from_discard(self, player_id: int) -> tuple[bool, str]:
         """pioche une carte depuis la défausse"""
+        print("[INFO] action du joueur : poser la carte de la défausse")
         player = self.get_current_player()
         if player.skip_turn > 0:
             print("[ERROR] essaye de piocher alors que je joueurs dois skip un tour")
@@ -261,6 +265,7 @@ class Game:
     @validate_phase(TurnState.POSE)
     def discard_card_from_hand(self, player_id: int, card_id: int) -> tuple[bool, str]:
         """se défausse d'une carte en main vers la défausse"""
+        print("[INFO] action du joueur : défausser une carte de la main")
         player = self.get_current_player()
         card = player.get_card_by_id_from_hand(card_id)
         if not card:
@@ -276,6 +281,7 @@ class Game:
     @validate_player
     def discard_job_card(self, player_id: int, card_id: int) -> tuple[bool, str]:
         """démissionne volontairement d'un métier"""
+        print("[INFO] action du joueur : démissionner de son métier")
         player = self.get_current_player()
         card = player.find_card_by_id(card_id)
         if card:
@@ -304,6 +310,7 @@ class Game:
     @validate_phase(TurnState.PIOCHE)
     def discard_wedding_card(self, player_id: int, card_id: int) -> tuple[bool, str]:
         """supprime son marriage volontairement"""
+        print("[INFO] action du joueur : divorcer de son marriage")
         player = self.get_current_player()
         card = player.find_card_by_id(card_id)
         if card:
@@ -328,6 +335,7 @@ class Game:
     @validate_phase(TurnState.PIOCHE)
     def discard_adultery_card(self, player_id: int, card_id: int) -> tuple[bool, str]:
         """supprime son adultaire volontairement"""
+        print("[INFO] action du joueur : défausser son adultère")
         player = self.get_current_player()
         card = player.find_card_by_id(card_id)
         if card:
@@ -358,6 +366,7 @@ class Game:
         if not card:
             print("[ERROR] la carte n'est pas trouvée")
             return False, ""
+        print(f"[INFO] action du joueur : poser la carte {card.get_name()}")
         success, reason = card.can_be_played(player, self)
         if not success:
             return False, reason
@@ -372,6 +381,7 @@ class Game:
     @validate_player
     def bet_on_casino(self, player_id: int, card_id: int) -> tuple[bool, str]:
         """pose une carte devant lui"""
+        print("[INFO] action du joueur : miser au casino une carte")
         from .cards.professionnals.SalaryCard import SalaryCard
         player = self.get_current_player()
 
