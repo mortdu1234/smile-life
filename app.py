@@ -27,7 +27,8 @@ def create_app(secret_key: str = 'change-me-in-production') -> Flask:
 
     app.register_blueprint(game_bp)
     app.register_blueprint(hub_bp)
-
+    
+    app.config['APPLICATION_ROOT'] = '/game-smile-life'
     # ── Routes ──────────────────────────────────────────────────────────────
     @app.route('/')
     def root():
