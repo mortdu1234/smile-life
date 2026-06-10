@@ -5,6 +5,8 @@ import logging
 from backend import cleanup
 from werkzeug.middleware.proxy_fix import ProxyFix
 import os
+from dotenv import load_dotenv  # ← ajoute cet import
+load_dotenv()  
 
 socketio = SocketIO()
 
