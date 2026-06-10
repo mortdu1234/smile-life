@@ -13,7 +13,6 @@ class ChefDesAchats(JobCard):
         self.salary = 3
     def apply_card_effect(self, game: Game, current_player: Player, interface: "UserIO") -> bool:
         """permet de récupérer une acquisition de la défausse et de l'acheter si il a l'argent"""
-        print("[DEBUG] TODO")
         current_player.add_card_to_played(self)
         cards_availables: list["Card"] = []
         for card in game.discard:
@@ -25,7 +24,6 @@ class ChefDesAchats(JobCard):
         if len(cards_availables) > 0:
             from ....userIo.interface import IOType
             selected_card: "Card | None" = interface.ask_card(prompt="Recherche dans la défausse des acquisitions posable : Chef Des Achats", cards=cards_availables, kind=IOType.CARD_PICKER)
-            print(f"[DEBUG] Carte Selectionnée {selected_card}")
             if selected_card:
                 game.remove_card_from_discard(selected_card)
                 current_player.add_card_to_hand(selected_card)

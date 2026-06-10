@@ -68,8 +68,6 @@ class Casino(SpecialCard):
         return super().can_be_played(player, game)
 
     def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
-        print("[DEBUG] TODO")
-
         from ..professionnals.SalaryCard import SalaryCard
         success, reason = self.can_bet(current_player, game)
         if success:

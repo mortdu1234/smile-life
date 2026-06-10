@@ -85,7 +85,7 @@ class Game:
         data = {
             'id': self.id,
             "players": [p.to_dict(reveal_hand=(p.name == viewer)) for p in self.players],
-            'deck_count': [c.to_dict() for c in self.deck],
+            'deck_count': len([c.to_dict() for c in self.deck]),
             'discard_count': [c.to_dict() for c in self.discard],
             'current_player': self.get_current_player().to_dict(),
             'center_cards_played': [c.to_dict() for c in self.center_cards_played],
@@ -230,7 +230,6 @@ class Game:
     @validate_phase(TurnState.PIOCHE)
     def draw_card_from_discard(self, player_id: int) -> tuple[bool, str]:
         """pioche une carte depuis la défausse"""
-        print("[DEBUG] pioche depuis la défausse")
         player = self.get_current_player()
         if player.skip_turn > 0:
             print("[ERROR] essaye de piocher alors que je joueurs dois skip un tour")
@@ -277,7 +276,6 @@ class Game:
     @validate_player
     def discard_job_card(self, player_id: int, card_id: int) -> tuple[bool, str]:
         """démissionne volontairement d'un métier"""
-        print("[DEBUG] discard JOB")
         player = self.get_current_player()
         card = player.find_card_by_id(card_id)
         if card:
@@ -287,7 +285,6 @@ class Game:
                 if not success:
                     return False, reason
                 else:
-                    print("[DEBUG] demission du job reussi")
                     player.remove_card(card)
                     card.discard_job(player, self)
                     self.add_card_to_discard(card)

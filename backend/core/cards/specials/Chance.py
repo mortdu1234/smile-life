@@ -13,7 +13,6 @@ class Chance(SpecialCard):
     def get_name(self) -> str:
         return "Chance"
     def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
-        print("[DEBUG] TODO")
         available_cards = []
         for _ in range(3):
             available_cards.append(game.take_card_from_deck())

@@ -15,7 +15,6 @@ class Anniversaire(SpecialCard):
         return "Anniversaire"
     
     def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
-        print("[DEBUG] TODO")
         from ..professionnals.SalaryCard import SalaryCard
         from ....userIo.interface import IOType
         players = game.players

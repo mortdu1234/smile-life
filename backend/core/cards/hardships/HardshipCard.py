@@ -30,14 +30,12 @@ class Hardship(Card):
 
     def select_target(self, game: "Game", interface: "UserIO") -> bool:
         """Selectionne la cible et la met dans self.target_player"""
-        print("[DEBUG] TODO")
         targetted_players: list[Player] = self._selection_cibles(game)
         target: Player | None = interface.ask_player("Selection d'une cible", targetted_players, IOType.PLAYER_PICKER)
         if not target:
             print("[ERROR] aucune cible n'a été choisie")
             return False
         else:
-            print("[DEBUG] selection de la cible avec succès")
             self.target_player = target
             return True
 

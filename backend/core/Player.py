@@ -152,9 +152,7 @@ class Player:
 
     def get_power(self) -> list[Power]:
         if self.job:
-            print(f"[DEBUG] get_power() : perso + job : {self.power + self.job.get_power()}")
             return self.power + self.job.get_power()
-        print(f"[DEBUG] get_power() : perso : {self.power}")
         return self.power
 
     def get_job(self) -> JobCard | None:

@@ -296,15 +296,3 @@ window.updateBoard = function(state) {
   }
 };
 
-// ── Polling léger en fallback (si SSE non connecté) ──────────────────────
-// Uniquement pour l'historique — le reload de tour est géré par updateBoard
-(function pollHistory() {
-  setTimeout(async () => {
-    try {
-      const res = await fetch(`${window.BASE_URL}/game/${window.GAME_ID}/state`);
-      const state = await res.json();
-      if (state.history) renderHistory(state.history);
-    } catch (e) { /* silencieux */ }
-    pollHistory();
-  }, 5000);
-})();

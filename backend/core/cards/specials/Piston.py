@@ -27,11 +27,9 @@ class Piston(SpecialCard):
         return super().can_be_played(player, game)
 
     def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
-        print("[DEBUG] TODO")
         available_cards = self._get_available_card(current_player, game)
         from ....userIo.interface import IOType
         selected_card: "Card | None" = interface.ask_card(prompt="Pistonnage", cards=available_cards, kind=IOType.CARD_PICKER)
-        print(f"[DEBUG] Carte Selectionnée {selected_card}")
         if selected_card:
             new_card = game.take_card_from_deck()
             current_player.add_card_to_hand(new_card)

@@ -26,12 +26,10 @@ class EtoileFilante(SpecialCard):
 
     def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
         """Recupère une carte depuis la défausse posable et la pose immédiatement"""
-        print("[DEBUG] TODO")
         cards_availables = self._get_available_card(current_player, game)
         if len(cards_availables) > 0:
             from ....userIo.interface import IOType
             selected_card: "Card | None" = interface.ask_card(prompt="Recherche dans la défausse : Etoile Filante", cards=cards_availables, kind=IOType.CARD_PICKER)
-            print(f"[DEBUG] Carte Selectionnée {selected_card}")
             if selected_card:
                 game.remove_card_from_discard(selected_card)
                 current_player.add_card_to_hand(selected_card)
