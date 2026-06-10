@@ -1,6 +1,5 @@
 from enum import Enum
 
-from numpy import isin
 from .cards.Card import Card
 
 
