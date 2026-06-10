@@ -75,7 +75,7 @@ function renderHistory(entries) {
 // ── Piocher ──────────────────────────────────────────────────────────────
 async function drawCard() {
   if (!window.IS_MY_TURN) return;
-  const res = await fetch(`/game/${window.GAME_ID}/draw`, { method: 'POST' });
+  const res = await fetch(`${window.BASE_URL}/game/${window.GAME_ID}/draw`, { method: 'POST' });
   const data = await res.json();
   if (!data.ok) { alert(data.error); return; }
   if (data.state) updateBoard(data.state);
@@ -86,7 +86,7 @@ async function skipTurn() {
   if (!window.IS_MY_TURN) return;
   const btn = document.getElementById('btn-skip');
   if (btn) btn.disabled = true;
-  const res = await fetch(`/game/${window.GAME_ID}/skip`, { method: 'POST' });
+  const res = await fetch(`${window.BASE_URL}/game/${window.GAME_ID}/skip`, { method: 'POST' });
   const data = await res.json();
   if (!data.ok) { alert(data.error); if (btn) btn.disabled = false; return; }
   if (data.state) updateBoard(data.state);
@@ -97,7 +97,7 @@ async function stopArcEnCiel() {
   if (!window.IS_MY_TURN) return;
   const btn = document.getElementById('btn-arc-en-ciel');
   if (btn) btn.disabled = true;
-  const res = await fetch(`/game/${window.GAME_ID}/stop-arc-en-ciel`, { method: 'POST' });
+  const res = await fetch(`${window.BASE_URL}/game/${window.GAME_ID}/stop-arc-en-ciel`, { method: 'POST' });
   const data = await res.json();
   if (!data.ok) { alert(data.error); if (btn) btn.disabled = false; return; }
   if (data.state) updateBoard(data.state);
@@ -107,7 +107,7 @@ window.stopArcEnCiel = stopArcEnCiel;
 // ── Jouer une carte ──────────────────────────────────────────────────────
 async function playCard(cardId) {
   if (!window.IS_MY_TURN) return;
-  const res = await fetch(`/game/${window.GAME_ID}/place`, {
+  const res = await fetch(`${window.BASE_URL}/game/${window.GAME_ID}/place`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ card_id: cardId }),
@@ -122,7 +122,7 @@ window.playCard = playCard;
 // ── Défausser une carte ───────────────────────────────────────────────────
 async function discardCard(cardId) {
   if (!window.IS_MY_TURN) return;
-  const res = await fetch(`/game/${window.GAME_ID}/discard`, {
+  const res = await fetch(`${window.BASE_URL}/game/${window.GAME_ID}/discard`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ card_id: cardId }),
@@ -301,7 +301,7 @@ window.updateBoard = function(state) {
 (function pollHistory() {
   setTimeout(async () => {
     try {
-      const res = await fetch(`/game/${window.GAME_ID}/state`);
+      const res = await fetch(`${window.BASE_URL}/game/${window.GAME_ID}/state`);
       const state = await res.json();
       if (state.history) renderHistory(state.history);
     } catch (e) { /* silencieux */ }

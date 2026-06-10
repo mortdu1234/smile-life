@@ -4,13 +4,14 @@ from backend.webSocket import init_socketio
 import logging
 from backend import cleanup
 from werkzeug.middleware.proxy_fix import ProxyFix
+import os
 
 socketio = SocketIO()
 
 def create_app(secret_key: str = 'change-me-in-production') -> Flask:
     app = Flask(__name__)
     app.secret_key = secret_key
-    app.config['APPLICATION_ROOT'] = '/game-smile-life'  # ← avant tout
+    BASE_URL = os.getenv('BASE_URL', '')
 
     # Corrige les redirects derrière nginx
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_prefix=1)
@@ -28,6 +29,10 @@ def create_app(secret_key: str = 'change-me-in-production') -> Flask:
     @app.route('/')
     def root():
         return redirect(url_for('hub.index'))
+
+    @app.context_processor
+    def inject_base_url():
+        return {'BASE_URL': BASE_URL}
 
     return app
 
