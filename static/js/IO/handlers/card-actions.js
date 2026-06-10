@@ -209,10 +209,11 @@ function resolveCategory(card) {
  * @param {boolean} is_my_turn
  * @returns {Action[]}
  */
-export function getActionsForCard(card, context, is_my_turn) {
+export function getActionsForCard(card, context, is_my_turn, { onSuccess, onError } = {}) {
   if (!is_my_turn) return [];
-
   const category = resolveCategory(card);
   const actions = CARD_ACTIONS[category];
-  return actions.filter((a) => a.context.includes(context));
+  return actions
+    .filter((a) => a.context.includes(context))
+    .map((a) => ({ ...a, onSuccess, onError })); // callbacks injectés proprement
 }

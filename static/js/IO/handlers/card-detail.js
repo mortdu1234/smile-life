@@ -30,10 +30,13 @@ registerHandler("card-detail", function render(pending) {
 
   // Fonctions utilitaires
   function closeOverlay() {
+    let cancelled = false;
+    overlay._cancelClose = () => { cancelled = true; }; // ← stocke l'annulation
+
     overlay.classList.add("cd-closing");
     overlay.addEventListener("animationend", () => {
       overlay.classList.remove("cd-closing");
-      overlay.hidden = true;
+      if (!cancelled) overlay.hidden = true; // ← ne ferme que si pas annulé
     }, { once: true });
   }
 
@@ -91,25 +94,31 @@ registerHandler("card-detail", function render(pending) {
       btn.disabled = true;
       btn.classList.add("card-detail-overlay__btn--loading");
 
+      closeOverlay();
+
       const { url, body } = action.endpoint(card, game_id);
 
-      await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      }).then(async (res) => {
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
         const data = await res.json();
         if (!res.ok || data.error) throw new Error(data.error || "Erreur serveur");
 
-        closeOverlay();
+        action.onSuccess?.();
         if (typeof window.refreshGameState === "function") window.refreshGameState();
-      }).catch((err) => {
+      } catch (err) {
+        overlay._cancelClose?.(); // ← annule la fermeture en cours
+        overlay.classList.remove("cd-closing");
+        overlay.hidden = false;
         btn.disabled = false;
         btn.classList.remove("card-detail-overlay__btn--loading");
         showError(err.message);
-      });
+        action.onError?.(err);
+      }
     });
-
     actionsEl.appendChild(btn);
   });
 
