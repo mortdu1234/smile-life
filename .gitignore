@@ -3,3 +3,4 @@ venv
 .venv
 erreures.txt
 ignore
+.env
