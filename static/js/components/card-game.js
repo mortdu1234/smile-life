@@ -277,7 +277,7 @@ class GameCard extends HTMLElement {
     this.innerHTML = `
       <div class="gc-root">
         ${this.cardImage
-          ? `<img class="gc-image" src="/static/${_esc(this.cardImage)}" alt="${_esc(this.cardName)}" onerror="this.style.display='none'">`
+          ? `<img class="gc-image" src="${window.BASE_URL}//static/${_esc(this.cardImage)}" alt="${_esc(this.cardName)}" onerror="this.style.display='none'">`
           : `<div class="gc-image"></div>`}
 
         ${this.cardType ? `<span class="gc-type">${_esc(this.cardType)}</span>` : ""}
