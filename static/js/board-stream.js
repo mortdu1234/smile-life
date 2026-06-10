@@ -3,8 +3,9 @@
 //  Dépendances : board.js (window.updateBoard, window.GAME_ID, window.PSEUDO)
 // ═══════════════════════════════════════════════════════════
 
-const socket = io();
-
+const socket = io({
+    path: `${window.BASE_URL}/socket.io/`
+});
 socket.on('connect', () => {
     console.log('✅ Connecté, SID:', socket.id);
     socket.emit('join', {
