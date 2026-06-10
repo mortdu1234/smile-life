@@ -27,7 +27,7 @@ window.openCard = function(card, context) {
 
 // ── IO polling (pour les actions nécessitant un choix joueur) ────────────────
 async function submit(index) {
-  await fetch(`/game/${window.GAME_ID}/submit`, {
+  await fetch(`${window.BASE_URL}/game/${window.GAME_ID}/submit`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ index }),
@@ -36,7 +36,7 @@ async function submit(index) {
 }
 
 async function submitIndices(indices) {
-  await fetch(`/game/${window.GAME_ID}/submit-indices`, {
+  await fetch(`${window.BASE_URL}/game/${window.GAME_ID}/submit-indices`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ indices }),
@@ -45,14 +45,14 @@ async function submitIndices(indices) {
 }
 
 async function submitDismiss() {
-  await fetch(`/game/${window.GAME_ID}/dismiss`, { method: "POST" });
+  await fetch(`${window.BASE_URL}/game/${window.GAME_ID}/dismiss`, { method: "POST" });
   poll();
 }
 
 async function poll() {
   let pending = null;
   try {
-    const res = await fetch(`/game/${window.GAME_ID}/pending`);
+    const res = await fetch(`${window.BASE_URL}/game/${window.GAME_ID}/pending`);
     if (!res.ok) {
       setTimeout(poll, 2000);
       return;
