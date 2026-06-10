@@ -27,10 +27,10 @@
     "leia": 0, "hermione": 0, "lara": 0, "luke": 0, "diana": 0,
     "mario": 0, "zelda": 0, "luigi": 0, "rocky": 0, "harry": 0,
 
-    "accident": 0, "burnout": 0, "divorce": 0, "tax": 0, "licenciement": 0,
-    "maladie": 0, "redoublement": 0, "prison": 0, "attentat": 0,
+    "accident": 10, "burnout": 0, "divorce": 0, "tax": 10, "licenciement": 0,
+    "maladie": 10, "redoublement": 0, "prison": 0, "attentat": 0,
 
-    "anniversaire": 0, "arc_en_ciel": 10, "casino": 100, "chance": 10,
+    "anniversaire": 0, "arc_en_ciel": 10, "casino": 0, "chance": 10,
     "etoile_filante": 0, "heritage": 0, "piston": 0, "troc": 0,
     "tsunami": 0, "vengeance": 0,
 

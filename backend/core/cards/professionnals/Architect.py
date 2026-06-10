@@ -6,7 +6,7 @@ class Architect(JobCard):
         super().__init__(id, image_path)
         self.jobPower.append(Power.FIRST_HOUSE_FREE)
         self.study = 4
-        self.salary = 4
+        self.salary = 3
     def get_name(self) -> str:
         return "Architecte"
     def get_card_rule(self) -> str:

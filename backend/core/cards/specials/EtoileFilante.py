@@ -19,6 +19,9 @@ class EtoileFilante(SpecialCard):
     def get_name(self) -> str:
         return "Etoile Filante"
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
+        cards = self._get_available_card(player, game)
+        if len(cards) == 0:
+            return False, "Il n'y a pas de cartes posable dans la défausse"
         return super().can_be_played(player, game)
 
     def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:

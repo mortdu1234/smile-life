@@ -188,8 +188,8 @@ class Game:
         if self.game_state.get(GameStateKey.ARC_EN_CIEL, 0) <= 1:
             return False, "Il n'y a pas d'arc en ciel en cour"
         self.game_state[GameStateKey.ARC_EN_CIEL] = 1
-        self.next_turn()
         self.add_to_history(f"Le joueur {self.get_current_player().name} arrete son arc en ciel")
+        self.next_turn()
         return True, ""
          
     @validate_player
@@ -203,9 +203,9 @@ class Game:
             return False, ""
         
         player.skip_turn -= 1
+        self.add_to_history(f"Le joueur {self.get_current_player().name} passe son tour")
         self.next_turn()
 
-        self.add_to_history(f"Le joueur {self.get_current_player().name} passe son tour")
         return True, ""
 
     @validate_player
@@ -252,9 +252,9 @@ class Game:
         player.add_card_to_hand(card)
         self.turn_state = TurnState.POSE
         card.play_card(self, player, player.get_interface())
+        self.add_to_history(f"Le joueur {self.get_current_player().name} a joué la carte de la défausse {card.get_name()}")
         self.next_turn()
 
-        self.add_to_history(f"Le joueur {self.get_current_player().name} a joué la carte de la défausse {card.get_name()}")
         return True, ""
         
 
@@ -269,9 +269,9 @@ class Game:
             return False, ""
         player.remove_card_from_hand(card)
         self.discard.append(card)
+        self.add_to_history(f"Le joueur {self.get_current_player().name} a défaussé {card.get_name()}")
         self.next_turn()
 
-        self.add_to_history(f"Le joueur {self.get_current_player().name} a défaussé {card.get_name()}")
         return True, ""
 
     @validate_player
@@ -291,10 +291,10 @@ class Game:
                     player.remove_card(card)
                     card.discard_job(player, self)
                     self.add_card_to_discard(card)
+                    self.add_to_history(f"Le joueur {self.get_current_player().name} se défausse de son métier : {card.get_name()}")    
                     if card.jobStatus != JobStatus.INTERIMERE:
                         self.next_turn()
                     
-                    self.add_to_history(f"Le joueur {self.get_current_player().name} se défausse de son métier : {card.get_name()}")    
                     return True, ""
             else:
                 return False, "[ERROR] la carte n'est pas un métier"
@@ -316,9 +316,9 @@ class Game:
                 if success:
                     player.remove_card(card)
                     self.add_card_to_discard(card)
+                    self.add_to_history(f"Le joueur {self.get_current_player().name} se défausse de son marriage {card.get_name()}")
                     self.next_turn()
 
-                    self.add_to_history(f"Le joueur {self.get_current_player().name} se défausse de son marriage {card.get_name()}")
                     return True, ""
                 else:
                     return False, reason
@@ -340,9 +340,9 @@ class Game:
                 if success:
                     player.remove_card(card)
                     self.add_card_to_discard(card)
+                    self.add_to_history(f"Le joueur {self.get_current_player().name} se défausse de son adultère {card.get_name()}")
                     self.next_turn()
 
-                    self.add_to_history(f"Le joueur {self.get_current_player().name} se défausse de son adultère {card.get_name()}")
                     return True, ""
                 else:
                     return False, reason
@@ -366,9 +366,9 @@ class Game:
             return False, reason
 
         card.play_card(self, player, player.get_interface())
+        self.add_to_history(f"Le joueur {self.get_current_player().name} a joué la carte {card.get_name()}")
         self.next_turn()
 
-        self.add_to_history(f"Le joueur {self.get_current_player().name} a joué la carte {card.get_name()}")
         return True, ""
 
     
@@ -393,8 +393,8 @@ class Game:
         if not success:
             return False, reason
         casinoCard.bet(card, player)
-        self.next_turn()
         self.add_to_history(f"Le joueur {self.get_current_player().name} a misé au casino un salaire")
+        self.next_turn()
         return True, ""
 
 
