@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Salle d'attente — {{ room.id }}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/lobby.css') }}" />
+  <script>window.BASE_URL = "{{ BASE_URL }}";</script>
 </head>
 <body>
 
@@ -385,7 +386,7 @@
       btn.disabled = true;
       btn.textContent = '…';
       try {
-        const res = await fetch(`/hub/lobby/${ROOM_ID}/custom-deck`, {
+        const res = await fetch(`${window.BASE_URL}/hub/lobby/${ROOM_ID}/custom-deck`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ deck }),
@@ -455,7 +456,7 @@
     (function poll() {
       setTimeout(async () => {
         try {
-          const res  = await fetch(`/hub/lobby/${ROOM_ID}/status`);
+          const res  = await fetch(`${window.BASE_URL}/hub/lobby/${ROOM_ID}/status`);
           const data = await res.json();
 
           if (data.status === 'playing') {
