@@ -56,7 +56,7 @@ def index():
                     session["game_id"] = room["id"]
                     return redirect(url_for("hub.lobby", game_id=room["id"]))
 
-    return render_template(url_for("index.html", games=get_open_rooms(), error=error))
+    return render_template("index.html", games=get_open_rooms(), error=error)
 
 
 # ── Lobby ──────────────────────────────────────────────────────────────────────
@@ -80,7 +80,7 @@ def lobby(game_id):
     custom_deck_total = sum(custom_deck.values()) if custom_deck else 0
 
     return render_template(
-        url_for("lobby.html",
+        "lobby.html",
         room=room,
         pseudo=pseudo,
         error=error,
@@ -89,7 +89,7 @@ def lobby(game_id):
         catalog_nested=get_catalog_nested() if is_host else {},
         type1_tabs=TYPE1_ORDER,          # ← importer aussi depuis cardCatalog
         custom_deck_total=custom_deck_total,
-        ))
+        )
 
 
 # ── Statut JSON (polling des non-hôtes) ───────────────────────────────────────
