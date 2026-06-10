@@ -12,6 +12,7 @@ def create_app(secret_key: str = 'change-me-in-production') -> Flask:
     app = Flask(__name__)
     app.secret_key = secret_key
     BASE_URL = os.getenv('BASE_URL', '')
+    print("base d'url utilisé : ", BASE_URL)
 
     # Corrige les redirects derrière nginx
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_prefix=1)
