@@ -3,39 +3,33 @@ from flask_socketio import SocketIO
 from backend.webSocket import init_socketio
 import logging
 from backend import cleanup
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 socketio = SocketIO()
-
 
 def create_app(secret_key: str = 'change-me-in-production') -> Flask:
     app = Flask(__name__)
     app.secret_key = secret_key
-    app.config['APPLICATION_ROOT'] = '/game-smile-life'
-    
+    app.config['APPLICATION_ROOT'] = '/game-smile-life'  # ← avant tout
 
-    # ── lancement du cleaner de salles ────────────────────────────────
+    # Corrige les redirects derrière nginx
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_prefix=1)
+
     cleanup.start_cleanup_worker()
-
-    # ── SocketIO — init avant les blueprints ────────────────────────────────
     socketio.init_app(app, async_mode='gevent', cors_allowed_origins='*')
     init_socketio(socketio)
 
-    # ── Blueprints ──────────────────────────────────────────────────────────
     from routes.hub import hub_bp
     from routes.game import game_bp, register_socket_events
-
-    # Enregistre les handlers WS maintenant que socketio est prêt
     register_socket_events(socketio)
-
     app.register_blueprint(game_bp)
     app.register_blueprint(hub_bp)
-    # ── Routes ──────────────────────────────────────────────────────────────
+
     @app.route('/')
     def root():
         return redirect(url_for('hub.index'))
 
     return app
-
 
 if __name__ == '__main__':
     # logging.basicConfig(level=logging.INFO)
