@@ -69,7 +69,7 @@ registerHandler("card-detail", function render(pending) {
 
   if (img) {
     if (card.image_path) {
-      img.src = `/static/${card.image_path}`;
+      img.src = `${window.BASE_URL}/static/${card.image_path}`;
       img.alt = card.name || "";
       img.style.display = "";
     } else {
