@@ -1,5 +1,4 @@
 
-from matplotlib.style import available
 
 from .SpecialCard import SpecialCard
 from typing import TYPE_CHECKING
