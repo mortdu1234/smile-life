@@ -1,3 +1,5 @@
+from time import sleep
+
 from .SpecialCard import SpecialCard
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -7,15 +9,31 @@ if TYPE_CHECKING:
     from ...Player import Player
 
 class EtoileFilante(SpecialCard):
-    def _get_available_card(self, current_player: "Player", game: "Game") -> list["Card"]:
-        current_player.add_card_to_played(self)
-        cards_availables: list["Card"] = []
+    def _get_available_card(self, player: "Player", game: "Game") -> list["Card"]:
+        """
+        Parcourt la défausse et retourne une liste de cartes uniques (par type) 
+        que le joueur a le droit de poser.
+        """
+        available_cards: list["Card"] = []
+        seen_card_types: set[str] = set()
+        seen_card_types.add(self.get_name())
+
+        # On parcourt toute la défausse du jeu
         for card in game.discard:
-            sucess, reason = card.can_be_played(current_player, game)
-            if sucess:
-                cards_availables.append(card)
-        current_player.remove_card(self)
-        return cards_availables
+            card_name = card.get_name()
+            
+            # Si on a déjà validé ce type de carte, pas besoin de le revérifier
+            if card_name in seen_card_types:
+                continue
+                
+            # On vérifie si le joueur a le droit de jouer cette carte
+            can_play, _ = card.can_be_played(player, game)
+            if can_play:
+                available_cards.append(card)
+                seen_card_types.add(card_name)
+
+        return available_cards
+    
     def get_name(self) -> str:
         return "Etoile Filante"
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
@@ -33,6 +51,7 @@ class EtoileFilante(SpecialCard):
             if selected_card:
                 game.remove_card_from_discard(selected_card)
                 current_player.add_card_to_hand(selected_card)
+                sleep(0.2)
                 selected_card.play_card(game, current_player, interface)
         return super().apply_card_effect(game, current_player, interface)
     def get_card_rule(self) -> str:

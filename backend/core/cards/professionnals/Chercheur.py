@@ -20,8 +20,9 @@ class Chercheur(JobCard):
 
     def apply_card_effect(self, game: Game, current_player: Player, interface: "UserIO") -> bool:
         """Pioche une carte en plus afin d'en avoir 6"""
-        card = game._draw_card_from_deck()
-        current_player.add_card_to_hand(card)
+        if len(game.deck) > 0:
+            card = game._draw_card_from_deck()
+            current_player.add_card_to_hand(card)
         return super().apply_card_effect(game, current_player, interface)
     
     def discard_job(self, current_player: Player, game: Game):

@@ -61,7 +61,13 @@ class Player:
         if reveal_hand:
             base["hand"] = [c.to_dict() for c in self.hand]
         return base
-
+    def get_smiles(self) -> int:
+        """retourne le nombre de smiles"""
+        score = 0
+        for id, card in self.cards.items():
+            score += card.get_smiles()
+        return score
+    
     def get_max_hand_card(self):
         maxCard = 0
         for power in self.get_power():

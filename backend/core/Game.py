@@ -116,6 +116,8 @@ class Game:
             if isinstance(card, Casino):
                 return card
         return None 
+    def end_game(self):
+        pass
 
     def next_turn(self):
         """Passe au tour du joueur suivant."""
@@ -162,20 +164,30 @@ class Game:
                 return card
         return None
 
-    def remove_card_from_discard(self, card: "Card"):
+    def remove_card_from_discard(self, card: "Card") -> int:
         """supprime une carte de la défausse"""
+        indice = self.discard.index(card)
         self.discard.remove(card)
+        return indice
     
 
-    def add_card_to_discard(self, card: "Card"):
+    def add_card_to_discard(self, card: "Card", indice:int|None=None):
         """ajoute une carte a la défausse"""
-        self.discard.append(card)
-
-    def take_card_from_discard(self) -> "Card":
+        if not indice:
+            self.discard.append(card)
+            return
+        self.discard.insert(indice+1, card)
+        return
+    
+    def take_card_from_discard(self) -> "Card|None":
+        if len(self.discard) == 0:
+            return None
         return self.discard.pop()
 
-    def take_card_from_deck(self) -> "Card":
+    def take_card_from_deck(self) -> "Card|None":
         """prend une carte du deck"""
+        if len(self.deck) == 0:
+            return None
         return self.deck.pop()
 
     
@@ -252,6 +264,8 @@ class Game:
             return False, reason
         print("[DEUBG] gestion de la pose de la carte")
         card = self.take_card_from_discard()
+        if not card:
+            return False, "pas de carte dans la défausse"
         player.add_card_to_hand(card)
         self.turn_state = TurnState.POSE
         card.play_card(self, player, player.get_interface())

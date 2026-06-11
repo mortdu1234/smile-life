@@ -13,7 +13,7 @@
     "jardinier": 0, "journaliste": 0, "medecin": 0, "medium": 0, "militaire": 0,
     "pharmacien": 0, "pilote": 0, "pizzaiolo": 0, "plombier": 0, "policier": 0,
     "prof__maths": 0, "prof__francais": 0, "prof__anglais": 0, "prof__geo": 0,
-    "serveur": 0, "stripteaser": 100,
+    "serveur": 0, "stripteaser": 0,
 
     "flirt__bar": 0, "flirt__parc": 0, "flirt__theatre": 0, "flirt__cinema": 0,
     "flirt__boite_de_nuit": 0, "flirt_with_child__camping": 0, "flirt_with_child__hotel": 0,
@@ -30,8 +30,8 @@
     "accident": 0, "burnout": 0, "divorce": 0, "tax": 0, "licenciement": 0,
     "maladie": 0, "redoublement": 0, "prison": 0, "attentat": 0,
 
-    "anniversaire": 0, "arc_en_ciel": 10, "casino": 0, "chance": 10,
-    "etoile_filante": 0, "heritage": 0, "piston": 0, "troc": 0,
+    "anniversaire": 0, "arc_en_ciel": 10, "casino": 0, "chance": 50,
+    "etoile_filante": 50, "heritage": 0, "piston": 0, "troc": 0,
     "tsunami": 0, "vengeance": 0,
 
     "house__1": 0, "house__2": 0, "house__3": 0,

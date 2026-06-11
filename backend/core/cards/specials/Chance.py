@@ -7,15 +7,26 @@ if TYPE_CHECKING:
     from ...Player import Player
     from ..Card import Card
 class Chance(SpecialCard):
+    def get_available_card(self, game: "Game") -> "list[Card]":
+        cards = []
+        for _ in range(3):
+            card = game.take_card_from_deck()
+            if card:
+                cards.append(card)
+        return cards
     
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
+        if len(game.deck) == 0:
+            return False, "il n'y a pas de cartes dans la pioche"
         return super().can_be_played(player, game)
     def get_name(self) -> str:
         return "Chance"
     def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
         available_cards = []
         for _ in range(3):
-            available_cards.append(game.take_card_from_deck())
+            card = game.take_card_from_deck()
+            if card:
+                available_cards.append(card)
         selected_card: "Card | None" = interface.ask_card(prompt=f"Selection de la carte a piocher", cards=available_cards, kind=IOType.CARD_PICKER)
         if not selected_card:
             return False

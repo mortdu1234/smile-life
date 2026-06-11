@@ -15,7 +15,8 @@ class Medium(JobCard):
         return "Médium"
     def apply_card_effect(self, game: Game, current_player: Player, interface: "UserIO") -> bool:
         """Permet de voir les 13 prochaines cartes du jeu"""
-        next_cards: list["Card"] = [game.deck[-i] for i in range(13)]
+        max_cards = min(13, len(game.deck))
+        next_cards: list["Card"] = [game.deck[-i] for i in range(max_cards)]
         interface.show_cards(
             title="Médiums",
             prompt="Voici les 13 prochaines cartes",

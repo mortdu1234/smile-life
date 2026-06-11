@@ -1,12 +1,8 @@
-from enum import Enum
+"""
+probleme avec Etoile Filante
+probleme avec medium
+probleme avec divorce
+probleme avec burnout
 
-class GameSpecificState(Enum):
-    ARC_EN_CIEL = "arc_en_ciel"
-    CHANCE = "chance"
-
-    def set_ARC_EN_CIEL_value(value: int):
-        GameSpecificState.ARC_EN_CIEL = value
-
-    def reduce_ARC_EN_CIEL_value():
-        GameSpecificState.ARC_EN_CIEL -= 1
-                
+probleme avec chance (en fin de partie)
+"""
