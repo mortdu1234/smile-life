@@ -135,8 +135,9 @@ window.discardCard = discardCard;
 // ── updateBoard : met à jour le plateau sans recharger la page ───────────
 window.updateBoard = function(state) {
   console.log('Mise à jour plateau debut:', state.players.map(p => ({
-    name: p.name,
-    cartes_posees: Object.keys(p.cards).length,
+    name: p.name ?? '?',
+    is_bot: p.is_bot ?? false,
+    cartes_posees: Object.keys(p.cards ?? {}).length,
     hand: p.hand?.length ?? 'masquée'
   })));
   if (!state) return;
@@ -159,10 +160,11 @@ window.updateBoard = function(state) {
     scoresList.innerHTML = state.players.map(p => {
       const smiles = Object.values(p.groupe ?? {})
         .flat().reduce((s, c) => s + (c.smiles ?? 0), 0);
-      const isMe = p.name === window.PSEUDO;
-      return `<div class="score-row ${isMe ? 'me' : ''}">
-        <div class="score-avatar">${p.name[0].toUpperCase()}</div>
-        <span class="score-name">${p.name}</span>
+      const isMe   = p.name === window.PSEUDO;
+      const avatar = p.is_bot ? '🤖' : (p.name?.[0] ?? '?').toUpperCase();
+      return `<div class="score-row ${isMe ? 'me' : ''}${p.is_bot ? ' bot' : ''}">
+        <div class="score-avatar">${avatar}</div>
+        <span class="score-name">${p.name ?? '?'}${p.is_bot ? ' 🤖' : ''}</span>
         <span class="score-val">${smiles}</span>
         </div>`;
     }).join('');
@@ -252,6 +254,7 @@ window.updateBoard = function(state) {
 
   if (state.players) {
     state.players.forEach(player => {
+      if (!player?.name) return;   // garde : ignore tout joueur sans nom
       const isMe = player.name === window.PSEUDO;
       const isCurrent = player.name === state.current_player?.name;
 
@@ -295,4 +298,3 @@ window.updateBoard = function(state) {
     });
   }
 };
-

@@ -16,6 +16,7 @@ from pathlib import Path
 
 from .webSocket import broadcast_game
 from .userIo.web import WebIO
+from .userIo.botIO import BotIO
 
 from .core.Game import Game
 from .core.Player import Player
@@ -122,7 +123,13 @@ def start_game(game_id: str, host_pseudo: str) -> tuple[Game | None, str | None]
     else:
         return None, "Aucun deck sélectionné."
 
-    players = [Player(pseudo, idx, WebIO()) for idx, pseudo in enumerate(room["players"])]
+    players = []
+    for idx, entry in enumerate(room["players"]):
+        if isinstance(entry, dict) and entry.get("is_bot"):
+            players.append(Player(entry["name"], idx, BotIO(), is_bot=True))
+        else:
+            name = entry if isinstance(entry, str) else entry["name"]
+            players.append(Player(name, idx, WebIO()))
 
     game = Game(id=game_id, players=players, deck=deck)
     game_save(game)

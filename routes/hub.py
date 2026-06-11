@@ -109,7 +109,24 @@ def lobby(game_id):
         custom_deck_total=custom_deck_total,
         )
 
+@hub_bp.route('/lobby/<game_id>/add-bot', methods=['POST'])
+def lobby_add_bot(game_id):
+    room = get_room(game_id)  # ta logique de récup de room
+    if not room or request.json.get('pseudo') != room['host']:
+        # optionnel : vérification hôte via session
+        pass
+    bot_count = sum(1 for p in room['players'] if isinstance(p, dict) and p.get('is_bot'))
+    bot_name = f"Bot {bot_count + 1}"
+    room['players'].append({'name': bot_name, 'is_bot': True})
+    return jsonify({'players': room['players'], 'host': room['host']})
 
+@hub_bp.route('/lobby/<game_id>/remove-bot', methods=['POST'])
+def lobby_remove_bot(game_id):
+    room = get_room(game_id)
+    name = request.json.get('name')
+    room['players'] = [p for p in room['players']
+                       if not (isinstance(p, dict) and p.get('name') == name and p.get('is_bot'))]
+    return jsonify({'players': room['players'], 'host': room['host']})
 # ── Statut JSON (polling des non-hôtes) ───────────────────────────────────────
 
 @hub_bp.route("/lobby/<game_id>/status")

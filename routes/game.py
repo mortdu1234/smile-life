@@ -9,6 +9,8 @@ from backend.game import (
 from backend.hub import set_preset
 from flask_socketio import join_room
 from backend.webSocket import broadcast_game
+import gevent
+import time
 
 game_bp = Blueprint(
     "game",
@@ -40,12 +42,26 @@ def _card_id_from_body() -> tuple[int | None, str]:
     except (TypeError, ValueError):
         return None, "card_id invalide."
 
+def _run_bot_turns(game: Game) -> None:
+    """Greenlet : joue les tours des bots consécutifs en broadcastant après chaque tour."""
+    MAX_BOT_TURNS = 50  # garde-fou contre les boucles infinies (partie 100% bots)
+    for _ in range(MAX_BOT_TURNS):
+        if not game.needs_bot_turn():
+            break
+        gevent.sleep(0.4)          # petite pause pour que le client voie chaque action
+        game._play_bot_turn()
+        broadcast_game(game)
+
+
 def _action_response(success: bool, reason: str, game_id: str):
     if success:
         game = get_game(game_id)
         broadcast_game(game)
         pseudo = session.get("pseudo")
         state = game.to_dict(viewer=pseudo) if game else None
+        # Si le tour suivant appartient à un bot, on le déclenche en arrière-plan
+        if game and game.needs_bot_turn():
+            gevent.spawn(_run_bot_turns, game)
         return jsonify({"ok": True, "state": state})
     return jsonify({"ok": False, "error": reason or "Action impossible."}), 400
 

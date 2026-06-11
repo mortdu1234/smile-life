@@ -5,6 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Salle d'attente — {{ room.id }}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/lobby.css') }}" />
+  <style>
+    /* ── Bot slots ── */
+    .btn-add-bot {
+      margin-left: auto;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      border: 1px dashed var(--color-border, #ccc);
+      border-radius: 6px;
+      background: transparent;
+      cursor: pointer;
+      color: var(--color-muted, #888);
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-add-bot:hover { background: var(--color-surface2, #f0f0f0); color: var(--color-text, #333); }
+
+    .btn-remove-bot {
+      margin-left: auto;
+      padding: 2px 7px;
+      font-size: 0.7rem;
+      border: none;
+      border-radius: 5px;
+      background: transparent;
+      cursor: pointer;
+      color: var(--color-muted, #aaa);
+      transition: color 0.15s;
+    }
+    .btn-remove-bot:hover { color: #e55; }
+
+    .slot-tag.bot-tag { background: var(--color-surface2, #e8e8ff); color: #555; }
+    .slot.bot { opacity: 0.85; }
+  </style>
   <script>window.BASE_URL = "{{ BASE_URL }}";</script>
 </head>
 <body>
@@ -51,8 +82,11 @@
               </div>
             {% else %}
               <div class="slot empty">
-                <div class="avatar">?</div>
+                <div class="avatar">🤖</div>
                 <div class="slot-name">En attente d'un joueur…</div>
+                {% if is_host %}
+                <button class="btn-add-bot" onclick="addBot({{ i }})">+ Bot</button>
+                {% endif %}
               </div>
             {% endif %}
           {% endfor %}
@@ -407,6 +441,33 @@
       }
     }
 
+    // ── Bots ───────────────────────────────────────────────────────────────
+    async function addBot(slotIndex) {
+      try {
+        const res  = await fetch(`${window.BASE_URL}/hub/lobby/${ROOM_ID}/add-bot`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slot: slotIndex }),
+        });
+        const data = await res.json();
+        if (!res.ok) { alert(data.error || 'Impossible d\'ajouter un bot.'); return; }
+        _renderPlayers(data.players, data.host);
+      } catch (e) { alert('Erreur réseau.'); }
+    }
+
+    async function removeBot(botName) {
+      try {
+        const res  = await fetch(`${window.BASE_URL}/hub/lobby/${ROOM_ID}/remove-bot`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: botName }),
+        });
+        const data = await res.json();
+        if (!res.ok) { alert(data.error || 'Impossible de retirer le bot.'); return; }
+        _renderPlayers(data.players, data.host);
+      } catch (e) { alert('Erreur réseau.'); }
+    }
+
     // ── Polling ────────────────────────────────────────────────────────────
     let _pollPaused = false;
 
@@ -424,20 +485,33 @@
       const slots = document.querySelectorAll('.slot');
       slots.forEach((slot, i) => {
         if (i < players.length) {
-          const name = players[i];
-          const isMe = name === PSEUDO;
+          const p = players[i]; // peut être string ou {name, is_bot}
+          const name   = typeof p === 'object' ? p.name    : p;
+          const is_bot = typeof p === 'object' ? p.is_bot  : false;
+          const isMe   = name === PSEUDO;
           const isHost = name === host;
-          slot.className = 'slot filled' + (isMe ? ' me' : '');
+          slot.className = 'slot filled' + (isMe ? ' me' : '') + (is_bot ? ' bot' : '');
+          let tag = '';
+          if (is_bot)       tag = '<div class="slot-tag bot-tag">🤖 Bot</div>';
+          else if (isHost)  tag = '<div class="slot-tag">Hôte</div>';
+          else if (isMe)    tag = '<div class="slot-tag">Vous</div>';
+          const removeBtn = IS_HOST && is_bot
+            ? `<button class="btn-remove-bot" onclick="removeBot('${name}')">✕</button>`
+            : '';
           slot.innerHTML = `
-            <div class="avatar">${name[0].toUpperCase()}</div>
+            <div class="avatar">${is_bot ? '🤖' : name[0].toUpperCase()}</div>
             <div class="slot-name">${name}</div>
-            ${isHost ? '<div class="slot-tag">Hôte</div>' : isMe ? '<div class="slot-tag">Vous</div>' : ''}
+            ${tag}${removeBtn}
           `;
         } else {
+          const addBotBtn = IS_HOST
+            ? `<button class="btn-add-bot" onclick="addBot(${i})">+ Bot</button>`
+            : '';
           slot.className = 'slot empty';
           slot.innerHTML = `
             <div class="avatar">?</div>
             <div class="slot-name">En attente d'un joueur…</div>
+            ${addBotBtn}
           `;
         }
       });
