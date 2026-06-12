@@ -154,6 +154,28 @@ class Game:
         print("[INFO] "+"="*60)
         self.turn_state = TurnState.PIOCHE
 
+        # ── Déclenche le bot si c'est son tour ────────────────────────────────
+        self._maybe_trigger_bot()
+
+    def _maybe_trigger_bot(self):
+        """Lance le tour du bot en arrière-plan si le joueur courant est un bot."""
+        from .BotPlayer import BotPlayer
+        import gevent
+        current = self.get_current_player()
+        if isinstance(current, BotPlayer):
+            print(f"[BOT] Tour du bot : {current.name}")
+            gevent.spawn_later(0.8, self._run_bot_turn)
+
+    def _run_bot_turn(self):
+        """Exécute le tour complet du bot puis broadcast l'état."""
+        from ..webSocket import broadcast_game
+        player = self.get_current_player()
+        try:
+            player.get_interface().play_turn(player, self)
+        except Exception as e:
+            print(f"[BOT][ERROR] Erreur pendant le tour de {player.name} : {e}")
+        broadcast_game(self)
+
     def _draw_card_from_deck(self) -> "Card":
         """retourne la prochaine carte du deck SANS FAIRE DE TEST DE SECURITEE"""
         return self.deck.pop()
