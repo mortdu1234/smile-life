@@ -12,7 +12,7 @@ class Price(OtherCard):
 
     def can_be_played(self, player: Player, game: Game) -> tuple[bool, str]:
         job = player.get_job()
-        if job and Power.CAN_BE_PRICED not in player.get_power():
+        if not(job and Power.CAN_BE_PRICED in player.get_power()):
             return False, "il te faut un métier qui puisse etre priced"
         return super().can_be_played(player, game)
 
