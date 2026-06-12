@@ -14,6 +14,8 @@ import json
 import random
 from pathlib import Path
 
+from backend.core.BotPlayer import BotPlayer
+
 from .webSocket import broadcast_game
 from .userIo.web import WebIO
 from .userIo.botIO import BotIO
@@ -126,7 +128,7 @@ def start_game(game_id: str, host_pseudo: str) -> tuple[Game | None, str | None]
     players = []
     for idx, entry in enumerate(room["players"]):
         if isinstance(entry, dict) and entry.get("is_bot"):
-            players.append(Player(entry["name"], idx, BotIO(), is_bot=True))
+            players.append(BotPlayer(entry["name"], idx, BotIO()))
         else:
             name = entry if isinstance(entry, str) else entry["name"]
             players.append(Player(name, idx, WebIO()))

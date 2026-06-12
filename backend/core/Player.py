@@ -20,7 +20,6 @@ from .PlayerCardGroup import PlayedCardGroup
 class Player:
     name: str # Pseudo du joueur
     id: int
-    is_bot: bool # True si ce joueur est un bot
     hand: list[Card] # Cartes en main du joueur
     power: list[Power]
     job: JobCard | None
@@ -30,10 +29,9 @@ class Player:
     cards: dict[int, Card] # Toutes les cartes posées du joueurs
     interface: "UserIO"
     
-    def __init__(self, name: str, id: int, interface: "UserIO", is_bot: bool = False):
+    def __init__(self, name: str, id: int, interface: "UserIO"):
         self.name = name
         self.id = id
-        self.is_bot = is_bot
         self.hand = []
         self.power = [Power.MAX_HAND_CARD_5]
         self.job = None
@@ -52,7 +50,6 @@ class Player:
     def to_dict(self, reveal_hand: bool = False) -> dict:
         base ={
             'name': self.name,
-            'is_bot': self.is_bot,
             'hand_count': len(self.hand),
             'cards': {str(k): v.to_dict() for k, v in self.cards.items()},
             'groupe': {
