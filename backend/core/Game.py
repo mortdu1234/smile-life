@@ -382,7 +382,7 @@ class Game:
                     card.discard_job(player, self)
                     self.add_card_to_discard(card)
                     self.add_to_history(f"Le joueur {self.get_current_player().name} se défausse de son métier : {card.get_name()}")    
-                    if card.jobStatus != JobStatus.INTERIMERE:
+                    if card.status != JobStatus.INTERIMERE:
                         self.next_turn()
                     
                     return True, ""
