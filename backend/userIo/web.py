@@ -1,3 +1,4 @@
+from time import sleep
 from typing import Sequence, TYPE_CHECKING
 
 from backend.core.cards.Card import Card
@@ -17,6 +18,7 @@ class WebIO(UserIO):
         self.pending: dict | None = None
 
     def _ask(self, prompt: str, options: list, kind: IOType) -> "Card | Player | None":
+        sleep(0.5)
         self.pending = {
             "ui_component": kind.value,
             "prompt": prompt,
