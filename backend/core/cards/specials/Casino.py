@@ -78,6 +78,7 @@ class Casino(SpecialCard):
                 print("[ERROR] aucune carte n'as été selectionnées")
                 return False
             self.bet(card, current_player)
+            current_player.add_card_to_hand(game.take_card_from_deck())
         return True
 
     def play_card(self, game: Game, current_player: Player, interface: UserIO) -> None:
@@ -87,6 +88,7 @@ class Casino(SpecialCard):
             print("[ERROR] Le casino n'as pas réussi a etre posé")
             return
         game.add_card_to_center(self)
+        current_player.remove_card_from_hand(self)
         print("[INFO] Le casino est posé")
         return
 
