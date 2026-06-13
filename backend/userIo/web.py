@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 from gevent.queue import Queue
 
+TEMPS_ATTENTES = 0.5
 
 class WebIO(UserIO):
     def __init__(self):
@@ -18,7 +19,7 @@ class WebIO(UserIO):
         self.pending: dict | None = None
 
     def _ask(self, prompt: str, options: list, kind: IOType) -> "Card | Player | None":
-        sleep(0.5)
+        sleep(TEMPS_ATTENTES)
         self.pending = {
             "ui_component": kind.value,
             "prompt": prompt,
@@ -40,6 +41,7 @@ class WebIO(UserIO):
         """Affiche l'overlay de sélection de salaires.
         Bloque la greenlet jusqu'à ce que le joueur valide une sélection dont la somme >= cost.
         """
+        sleep(TEMPS_ATTENTES)
         self.pending = {
             "ui_component": IOType.SALARY_SELECTOR.value,
             "prompt": f"Payer {acquisition.name if hasattr(acquisition, 'name') else 'acquisition'} ({cost})", # type: ignore
@@ -54,6 +56,7 @@ class WebIO(UserIO):
         """Affiche l'overlay de consultation de cartes (lecture seule).
         Bloque la greenlet jusqu'à ce que le joueur ferme l'overlay.
         """
+        sleep(TEMPS_ATTENTES)
         self.pending = {
             "ui_component": IOType.CARD_BROWSER.value,
             "title":  title,
@@ -76,6 +79,7 @@ class WebIO(UserIO):
         self._queue.put(None)
 
     def show_players_hand(self, players_names: Sequence[str], players_hands: Sequence[Sequence[Card]]):
+        sleep(TEMPS_ATTENTES)
         self.pending = {
             "ui_component": IOType.SHOW_HAND.value,
             "players_names": players_names,
