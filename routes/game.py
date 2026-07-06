@@ -191,6 +191,21 @@ def draw_discard(game_id):
     return _action_response(False, "[ERROR] Game non trouvée", game_id)
 
 
+@game_bp.route("/<game_id>/draw-river", methods=["POST"])
+def draw_river(game_id):
+    game = get_game(game_id)
+    if game:
+        card_id, reason = _card_id_from_body()
+        if not card_id:
+            return _action_response(False, reason, game_id)
+        
+        player_id = game.get_current_player().get_id()
+        success, reason = game.draw_card_from_river(player_id, card_id)
+        return _action_response(success, reason, game_id)
+    return _action_response(False, "[ERROR] Game non trouvée", game_id)
+
+
+
 
 
 # ── Pose / défausse depuis la main ─────────────────────────────────────────────

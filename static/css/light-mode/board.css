@@ -342,11 +342,11 @@ nav {
     border-color: #7c4dcc;
 }
 
-.deck-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.deck-pile { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.deck-label { font-size: 0.65rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.deck-row { display: flex; gap: 6px; }
+.deck-pile { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.deck-label { font-size: 0.6rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); text-align: center; }
 .deck-card {
-    width: 58px; height: 80px; border-radius: 5px;
+    width: 100%; max-width: 58px; height: 80px; border-radius: 5px;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
     position: relative; overflow: hidden;
 }
@@ -369,6 +369,18 @@ nav {
 .deck-card.defausse { background: var(--bg); border: 1.5px dashed var(--line); border-radius: 5px; }
 .deck-card.defausse img { width: 100%; height: 100%; object-fit: cover; }
 .defausse-empty { font-size: 0.65rem; color: var(--muted); font-style: italic; }
+
+/* ── RIVIÈRE ── */
+.river-pile { justify-content: flex-start; }
+.river-cards { display: flex; flex-direction: column; gap: 4px; width: 100%; align-items: center; }
+.river-card,
+game-card.river-card {
+    width: 44px !important;
+    height: 60px !important;
+    max-width: 44px;
+}
+.river-cards .gc-type,
+.river-cards .gc-footer { display: none !important; }
 
 .scores-list { display: flex; flex-direction: column; gap: 5px; }
 .score-row {

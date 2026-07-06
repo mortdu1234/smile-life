@@ -281,6 +281,27 @@
             <img class="deck-icon" src="{{ url_for('static', filename='img/back_card.png') }}" alt="">
           </div>
         </div>
+        {% if game.river_deck %}
+        <div class="deck-pile river-pile">
+          <span class="deck-label">Rivière</span>
+          <div class="river-cards" id="river-cards">
+            {% for card in game.river_deck %}
+            <game-card
+              class="river-card"
+              card-id="{{ card.get_id() }}"
+              name="{{ card.name }}"
+              type="{{ card.__class__.__name__ }}"
+              image="{{ card.image_path }}"
+              smiles="{{ card.smiles }}"
+              value="{{ card.value | default(0) }}"
+              context="river"
+              size="lg"
+              clickable
+              data-card='{{ card.to_dict()|tojson }}'></game-card>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
         <div class="deck-pile">
           <span class="deck-label">Défausse</span>
           <div id="discard-card-slot">

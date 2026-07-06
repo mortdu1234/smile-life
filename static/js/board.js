@@ -211,6 +211,20 @@ window.updateBoard = function(state) {
     const raw = state.deck_count ?? state.deck ?? '?';
     deckCount.textContent = Array.isArray(raw) ? raw.length : raw;
   }
+  // Mise à jour de la rivière
+  const riverEl = document.getElementById("river-cards");
+  if (riverEl) {
+    const riverCards = state.river_deck ?? [];
+    riverEl.innerHTML = "";
+    riverCards.forEach(card => {
+      const el = GameCard.create(card, { context: "river", size: "lg", clickable: true });
+      riverEl.appendChild(el);
+    });
+    // Affiche/masque tout le bloc "Rivière" si le mode de jeu n'est pas River / plus de cartes
+    const riverPile = riverEl.closest(".river-pile");
+    if (riverPile) riverPile.style.display = riverCards.length > 0 ? "" : "none";
+  }
+
   const discardSlot = document.getElementById("discard-card-slot");
   if (discardSlot) {
     discardSlot.innerHTML = "";

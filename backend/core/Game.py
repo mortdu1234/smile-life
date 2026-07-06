@@ -18,6 +18,10 @@ class TurnState(Enum):
     PIOCHE = "pioche"
     POSE = "pose"
 
+class GameModes(Enum):
+    CLASSIC = "classic"
+    RIVER = "river"
+
 class GameStateKey(Enum):
     CHANCE = "chance"
     ARC_EN_CIEL = "arc_en_ciel"
@@ -56,7 +60,11 @@ class Game:
     historique: list[str] # historique de la partie
     turn_state: TurnState # etat du jeu
     game_state: dict[GameStateKey, int]
+    game_mode: GameModes
+    river_deck: list[Card]
     updated_at: datetime
+    
+
     # PARAMETRE SUPPLEMENTAIRE POUR LE JEU
 
     def __init__(self, id: str, players: list[Player], deck: list[Card]):
@@ -69,7 +77,8 @@ class Game:
         self.historique = []
         self.turn_state = TurnState.PIOCHE
         self.game_state = {key:0 for key in GameStateKey}
-        print(self.game_state)
+        self.game_mode = GameModes.CLASSIC
+        self.river_deck = []
         # Donne les mains des joueurs
         for _ in range(5):
             for player in self.players:
@@ -92,6 +101,8 @@ class Game:
             'center_cards_played': [c.to_dict() for c in self.center_cards_played],
             'history': self.historique,
             'game_state': {key.value: val for key, val in self.game_state.items()},
+            'game_mode': self.game_mode.value,
+            'river_deck': [c.to_dict() for c in self.river_deck],
         }
         last_discard = self.get_last_discard()
         if last_discard:
@@ -243,6 +254,38 @@ class Game:
         player.add_card_to_hand(card)
         self.turn_state = TurnState.POSE
         return True, ""
+
+
+    @validate_player
+    @validate_phase(TurnState.PIOCHE)
+    def draw_card_from_river(self, player_id: int, card_id: int) -> tuple[bool, str]:
+        """pioche une carte depuis la rivière"""
+        print("[INFO] action du joueur : piocher une carte depuis la riviere")
+        player = self.get_current_player()
+        if player.skip_turn > 0:
+            print("[ERROR] essaye de piocher alors que je joueurs dois skip un tour")
+            return False, ""
+
+        if not self.game_mode == GameModes.RIVER:
+            print("[ERROR] le mode de jeu n'est pas river")
+            return False, "Le jeux n'est pas en mode rivière"
+
+        # recherche de la carte dans la riviere
+        card = None
+        for i in range(len(self.river_deck)):
+            card = self.river_deck[i]
+            if card.get_id() == card_id:
+                # changer la carte de la rivière
+                self.river_deck[i] = self._draw_card_from_deck()
+                break
+        if not card:
+            print("[ERROR] la carte n'est pas trouvée dans la rivière")
+            return False, "La carte n'est pas trouvée dans la rivière"
+                
+        player.add_card_to_hand(card)
+        self.turn_state = TurnState.POSE
+        return True, ""
+
 
     @validate_player
     @validate_phase(TurnState.PIOCHE)

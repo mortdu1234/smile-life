@@ -32,8 +32,20 @@ const EP = {
   discardJob:      (game_id, card_id) => ({ url: `${window.BASE_URL}/game/${game_id}/discard-job`,      body: { card_id } }),
   discardWedding:  (game_id, card_id) => ({ url: `${window.BASE_URL}/game/${game_id}/discard-wedding`,  body: { card_id } }),
   discardAdultery: (game_id, card_id) => ({ url: `${window.BASE_URL}/game/${game_id}/discard-adultery`, body: { card_id } }),
+  draw:            (game_id, card_id) => ({ url: `${window.BASE_URL}/game/${game_id}/draw`,             body: { card_id } }),
+  drawRiver:       (game_id, card_id) => ({ url: `${window.BASE_URL}/game/${game_id}/draw-river`,       body: { card_id } }),
   drawDiscard:     (game_id)          => ({ url: `${window.BASE_URL}/game/${game_id}/draw-discard`,     body: {} }),
   betOnCasino:     (game_id, card_id) => ({ url: `${window.BASE_URL}/game/${game_id}/bet-on-casino`,    body: { card_id } }),
+};
+
+// ── Action rivière ─────────────────────────────────────────────────────────────
+// Cliquer sur n'importe quelle carte de la rivière déclenche la même action que
+// cliquer sur la pioche (draw_card_from_deck), quel que soit le type de carte.
+const RIVER_ACTION = {
+  label: "🃏 Piocher",
+  variant: "primary",
+  context: ["river"],
+  endpoint: (card, game_id) => EP.drawRiver(game_id, card.id),
 };
 
 // ── Catalogue des actions par type de carte ───────────────────────────────────
@@ -211,6 +223,13 @@ function resolveCategory(card) {
  */
 export function getActionsForCard(card, context, is_my_turn, { onSuccess, onError } = {}) {
   if (!is_my_turn) return [];
+
+  // Contexte rivière : une seule action possible, identique pour tous les types
+  // de carte — piocher (comme un clic sur la pioche).
+  if (context === "river") {
+    return [{ ...RIVER_ACTION, onSuccess, onError }];
+  }
+
   const category = resolveCategory(card);
   const actions = CARD_ACTIONS[category];
   return actions
