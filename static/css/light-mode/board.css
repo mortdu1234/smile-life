@@ -62,10 +62,11 @@ nav {
     inset: var(--nav-h) 0 0 0;
     display: grid;
     grid-template-columns: 1fr 210px;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto auto 1fr;
     grid-template-areas:
-    "my-hand  sidebar"
-    "play-area sidebar";
+    "my-hand     sidebar"
+    "center-zone sidebar"
+    "play-area   sidebar";
     z-index: 1;
 }
 
@@ -95,6 +96,26 @@ nav {
     overflow-x: auto; padding-bottom: 2px;
 }
 .hand-empty { font-size: 0.78rem; color: var(--muted); font-style: italic; padding: 8px 0; }
+
+/* ── CENTRE DE LA TABLE ── */
+.center-zone {
+    grid-area: center-zone;
+    border-bottom: 1px solid var(--line);
+    padding: 10px 20px 12px;
+    background: var(--surface);
+    box-shadow: 0 2px 10px rgba(59,48,40,0.05);
+}
+.center-cards {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    max-height: 150px; overflow-y: auto;
+    padding-bottom: 2px; padding-right: 4px;
+}
+.center-cards .game-card { cursor: pointer; }
+.center-cards .game-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(59,48,40,0.15);
+    border-color: var(--gold);
+}
 
 /* ── GAME CARD ── */
 .game-card {
@@ -151,7 +172,7 @@ nav {
 
 .col-headers {
     display: grid;
-    grid-template-columns: 160px repeat(5, 1fr);
+    grid-template-columns: 160px repeat(6, 1fr);
     gap: 0;
     position: sticky; top: 0;
     background: var(--bg);
@@ -175,7 +196,7 @@ nav {
 
 .player-row {
     display: grid;
-    grid-template-columns: 160px repeat(5, 1fr);
+    grid-template-columns: 160px repeat(6, 1fr);
     gap: 0;
     border-bottom: 1px solid var(--line);
     min-height: 130px;
@@ -240,6 +261,21 @@ nav {
 .cell-empty {
     grid-column: 1 / -1;
     font-size: 0.68rem; color: var(--muted); font-style: italic; text-align: center; margin: auto; opacity: 0.5;
+}
+
+/* ── COLONNE MALUS ── */
+.malus-cell {
+    background: rgba(178,58,58,0.05);
+}
+.malus-cell .game-card {
+    border-color: rgba(178,58,58,0.35);
+}
+.malus-cell .game-card .card-type {
+    background: rgba(120,30,30,0.75);
+}
+.malus-cell .game-card:hover {
+    border-color: #b23a3a;
+    box-shadow: 0 6px 18px rgba(178,58,58,0.2);
 }
 
 /* ── SIDEBAR ── */

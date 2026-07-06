@@ -22,7 +22,7 @@ from .store import (
 # ── Timeouts (secondes) ────────────────────────────────────────────────────────
 
 ROOM_TTL: int = 10*60   # 10 minutes
-GAME_TTL: int = 60*60   # 60 minutes
+GAME_TTL: int = 5*60*60   # 5 hours
 CHECK_INTERVAL: int = 60  # vérification toutes les 60 s
 
 # ── Worker ─────────────────────────────────────────────────────────────────────

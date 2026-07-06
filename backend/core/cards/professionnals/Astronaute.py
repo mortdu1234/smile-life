@@ -26,14 +26,15 @@ class Astronaute(JobCard):
         return cards_availables
         
 
-    def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         """Recupère une carte depuis la défausse posable et la pose immédiatement"""
         cards_availables = self._get_available_card(current_player, game)
         if len(cards_availables) > 0:
             from ....userIo.interface import IOType
+            interface = current_player.get_interface()
             selected_card: "Card | None" = interface.ask_card(prompt="Recherche dans la défausse : Astronaute", cards=cards_availables, kind=IOType.CARD_PICKER)
             if selected_card:
                 game.remove_card_from_discard(selected_card)
                 current_player.add_card_to_hand(selected_card)
-                selected_card.play_card(game, current_player, interface)
-        return super().apply_card_effect(game, current_player, interface)
+                selected_card.play_card(game, current_player)
+        return super().apply_card_effect(game, current_player)

@@ -13,8 +13,8 @@ class SpecialCard(Card):
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         return super().can_be_played(player, game)
 
-    def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
-        return super().apply_card_effect(game, current_player, interface)
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+        return super().apply_card_effect(game, current_player)
 
     
 

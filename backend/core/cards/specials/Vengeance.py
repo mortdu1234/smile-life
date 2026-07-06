@@ -12,11 +12,14 @@ if TYPE_CHECKING:
     
 class Vengeance(SpecialCard):
     hardship_card: Hardship | None
+
     def __init__(self, id: int, image_path: str):
         super().__init__(id, image_path, 0)
         self.hardship_card = None
+
     def get_name(self) -> str:
         return "Vengeance"
+
     def get_available_hardships(self, game: "Game") -> "list[Card]":
         current_player = game.get_current_player()
         hardships_cards = current_player.get_card_from_group(PlayedCardGroup.HARDSHIP)
@@ -45,15 +48,16 @@ class Vengeance(SpecialCard):
             return False, "il n'y a pas de cible possible"
         return super().can_be_played(player, game)
 
-    def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+        interface = current_player.get_interface()
         success = self.select_harship(game, interface)
         if not success or not self.hardship_card:
             return False
         # ajouter temporairement l'hardship dans la main
         current_player.add_card_to_hand(self.hardship_card)
-        self.hardship_card.play_card(game, current_player, interface)        
+        self.hardship_card.play_card(game, current_player)        
 
-        return super().apply_card_effect(game, current_player, interface)
+        return super().apply_card_effect(game, current_player)
 
     def get_card_rule(self) -> str:
         return """La carte Vengeance permet d'attribuer a un adversaire une des cartes Malus recus"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

@@ -16,9 +16,12 @@ class Price(OtherCard):
             return False, "il te faut un métier qui puisse etre priced"
         return super().can_be_played(player, game)
 
-    def apply_card_effect(self, game: Game, current_player: Player, interface: UserIO) -> bool:
+    def apply_card_effect(self, game: Game, current_player: Player) -> bool:
         current_player.remove_power(Power.CAN_BE_PRICED)
-        return super().apply_card_effect(game, current_player, interface)
+        job = current_player.get_job()
+        assert job is not None, "Le joueur n'a pas de métier"
+        job.set_salary(4)
+        return super().apply_card_effect(game, current_player)
 
     def get_name(self) -> str:
         return "Grand Prix d'Excellence"

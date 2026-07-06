@@ -43,7 +43,8 @@ class Troc(SpecialCard):
             return False, "Il n'y a pas de cible possible"
         return super().can_be_played(player, game)
 
-    def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+        interface = current_player.get_interface()
         have_target = self.select_target(game, interface)
         if not have_target or not self.target_player:
             return False
@@ -65,7 +66,7 @@ class Troc(SpecialCard):
         self.target_player.add_card_to_hand(current_choose)
 
 
-        return super().apply_card_effect(game, current_player, interface)
+        return super().apply_card_effect(game, current_player)
 
     def get_name(self) -> str:
         return "Troc"

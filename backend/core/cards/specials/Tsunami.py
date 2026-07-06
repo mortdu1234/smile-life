@@ -13,7 +13,8 @@ class Tsunami(SpecialCard):
 
     def get_name(self) -> str:
         return "Tsunami"
-    def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
+    
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         current_player.remove_card_from_hand(self)
         nb_cards: list[int] = []
         cards: list["Card"] = []
@@ -31,6 +32,6 @@ class Tsunami(SpecialCard):
 
         current_player.add_card_to_hand(self)
 
-        return super().apply_card_effect(game, current_player, interface)
+        return super().apply_card_effect(game, current_player)
     def get_card_rule(self) -> str:
         return """La carte tsunami permet de redistribuer aléatoirement toutes les cartes des mains."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

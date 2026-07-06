@@ -18,10 +18,10 @@ class Bandit(JobCard):
                 return False, "Il y a une personne qui bloque les bandits"
         return super().can_be_played(player, game)
 
-    def apply_card_effect(self, game: Game, current_player: Player, interface: "UserIO") -> bool:
+    def apply_card_effect(self, game: Game, current_player: Player) -> bool:
         """ajoute au joueur courrant la caracteristique has_been_bandit"""
         current_player.power.append(Power.HAS_BEEN_BANDIT)
-        return super().apply_card_effect(game, current_player, interface)
+        return super().apply_card_effect(game, current_player)
     def get_name(self) -> str:
         return "Bandit"
     def get_card_rule(self) -> str:

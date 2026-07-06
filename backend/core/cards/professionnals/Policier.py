@@ -17,7 +17,7 @@ class Policier(JobCard):
     def get_name(self) -> str:
         return "Policier"
 
-    def apply_card_effect(self, game: Game, current_player: Player, interface: "UserIO") -> bool:
+    def apply_card_effect(self, game: Game, current_player: Player) -> bool:
         """supprimer tous les bandit et gourous sur le terrain"""
         for player in game.players:
             job = player.get_job()
@@ -29,6 +29,6 @@ class Policier(JobCard):
                     job.discard_job(player, game)
                     player.remove_card(job)
                 
-        return super().apply_card_effect(game, current_player, interface)
+        return super().apply_card_effect(game, current_player)
     def get_card_rule(self) -> str:
         return """Ce métier permet d'empecher tous bandits et tous gourous. Ce métier est FONCTIONNAIRE"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

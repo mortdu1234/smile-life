@@ -67,7 +67,7 @@ class Casino(SpecialCard):
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         return super().can_be_played(player, game)
 
-    def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         from ..professionnals.SalaryCard import SalaryCard
         success, reason = self.can_bet(current_player, game)
         if success:
@@ -78,12 +78,14 @@ class Casino(SpecialCard):
                 print("[ERROR] aucune carte n'as été selectionnées")
                 return False
             self.bet(card, current_player)
-            current_player.add_card_to_hand(game.take_card_from_deck())
+            take_card = game.take_card_from_deck()
+            assert take_card is not None, "Le deck est vide"
+            current_player.add_card_to_hand(take_card)
         return True
 
-    def play_card(self, game: Game, current_player: Player, interface: UserIO) -> None:
+    def play_card(self, game: Game, current_player: Player) -> None:
         print("[INFO] Un joueur pose le casino")
-        success = self.apply_card_effect(game, current_player, interface)
+        success = self.apply_card_effect(game, current_player)
         if not success:
             print("[ERROR] Le casino n'as pas réussi a etre posé")
             return

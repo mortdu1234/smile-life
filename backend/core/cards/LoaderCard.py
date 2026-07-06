@@ -137,7 +137,7 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "simone":   lambda: SimoneChild(_uid(), "img/personnal_life/children/simone.png"),
     "zelda":    lambda: ZeldaChild(_uid(), "img/personnal_life/children/zelda.png"),
     # ── Animaux ────────────────────────────────────────────────────────────────
-    "chien":   lambda: Chien(_uid(), "img/acquisition_cards/animals/chien.png"),
+    "chien":   lambda: Chien(_uid(), "img/acquisition_cards/animals/chien.png"  ),
     "chat":    lambda: Chat(_uid(), "img/acquisition_cards/animals/chat.png"),
     "crapaud": lambda: Crapaud(_uid(), "img/acquisition_cards/animals/crapaud.png"),
     "lapin":   lambda: Lapin(_uid(), "img/acquisition_cards/animals/lapin.png"),
@@ -208,7 +208,7 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "chercheur":     lambda: Chercheur(_uid(), "img/personnal_life/professionnal_life/JobCards/chercheur.png"),
     "gourou":        lambda: Gourou(_uid(), "img/personnal_life/professionnal_life/JobCards/gourou.png"),
     "grand_prof":    lambda: Grandprof(_uid(), "img/personnal_life/professionnal_life/JobCards/grand_prof.png"),
-    'designer':     lambda: Designer(_uid(), "img/personnal_life/professionnal_life/JobCards/disigner.png"),
+    'designer':     lambda: Designer(_uid(), "img/personnal_life/professionnal_life/JobCards/designer.png"),
     'jardinier':     lambda: Jardinier(_uid(), "img/personnal_life/professionnal_life/JobCards/jardinier.png"),
     'pizzaiolo':     lambda: Pizzaiolo(_uid(), "img/personnal_life/professionnal_life/JobCards/pizzaiolo.png"),
     'policier':     lambda: Policier(_uid(), "img/personnal_life/professionnal_life/JobCards/policier.png"),

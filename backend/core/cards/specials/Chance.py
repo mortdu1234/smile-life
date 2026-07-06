@@ -19,9 +19,12 @@ class Chance(SpecialCard):
         if len(game.deck) == 0:
             return False, "il n'y a pas de cartes dans la pioche"
         return super().can_be_played(player, game)
+    
     def get_name(self) -> str:
         return "Chance"
-    def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
+    
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+        interface = current_player.get_interface()
         available_cards = []
         for _ in range(3):
             card = game.take_card_from_deck()
@@ -33,6 +36,7 @@ class Chance(SpecialCard):
         current_player.add_card_to_hand(selected_card)
         from ...Game import GameStateKey
         game.game_state[GameStateKey.CHANCE] += 1
-        return super().apply_card_effect(game, current_player, interface)
+        return super().apply_card_effect(game, current_player)
+    
     def get_card_rule(self) -> str:
         return """La carte chance permet de piocher 3 cartes, en choisir 1 parmis les 3 et défausser les 2 autres. Ensuite il continue son tour"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

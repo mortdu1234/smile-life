@@ -13,7 +13,7 @@ class ChefDesVentes(JobCard):
         self.salary = 3
     def get_name(self) -> str:
         return "Chef des Ventes"
-    def apply_card_effect(self, game: Game, current_player: Player, interface: "UserIO") -> bool:
+    def apply_card_effect(self, game: Game, current_player: Player) -> bool:
         """permet de récupérer un salaire posable depuis la défausse"""
         current_player.add_card_to_played(self)
         cards_availables: list["Card"] = []
@@ -25,11 +25,12 @@ class ChefDesVentes(JobCard):
         current_player.remove_card(self)
         if len(cards_availables) > 0:
             from ....userIo.interface import IOType
+            interface = current_player.get_interface()
             selected_card: "Card | None" = interface.ask_card(prompt="Recherche dans la défausse des salaire posable : Chef Des Ventes", cards=cards_availables, kind=IOType.CARD_PICKER)
             if selected_card:
                 game.remove_card_from_discard(selected_card)
                 current_player.add_card_to_hand(selected_card)
-                selected_card.play_card(game, current_player, interface)
-        return super().apply_card_effect(game, current_player, interface)
+                selected_card.play_card(game, current_player)
+        return super().apply_card_effect(game, current_player)
     def get_card_rule(self) -> str:
         return """Permet de récupérer un salaire posable de la défausse et pose le immédiatement."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

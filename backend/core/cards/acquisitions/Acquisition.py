@@ -29,9 +29,10 @@ class Acquisition(Card):
             return False, "pas assez de salaire"
         return super().can_be_played(player, game)
 
-    def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         """effectue la selection des salaires pour l'acquisition"""
         available_salaries = current_player.get_available_salary()
+        interface = current_player.get_interface()
 
         selected_salaries: list[Card] = interface.ask_salaries(self, available_salaries, self.calcul_cost(current_player, game))
         for card in selected_salaries:
@@ -40,7 +41,7 @@ class Acquisition(Card):
             if not success:
                 print("[ERROR] déplace de carte échouée")
                 return False
-        return super().apply_card_effect(game, current_player, interface)
+        return super().apply_card_effect(game, current_player)
 
     def get_card_rule(self) -> str:
         return """une acquisition peut etre achetée en dépensant un certain nombre MINIMUM de salaire. Les salaires disponibles pour etre utilisé dans une acquisition sont des salaires posé sur le terrain et dans la catégorie "Vie Professionnelle". Un salaire dépensé ne peux pas être dépensé a nouveau"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

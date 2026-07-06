@@ -186,6 +186,25 @@ window.updateBoard = function(state) {
     }
   }
 
+  // Mise à jour des cartes posées au centre de la table
+  const centerEl = document.getElementById("center-cards");
+  const centerCountEl = document.getElementById("center-count");
+  if (centerEl) {
+    const centerCards = state.center_cards_played ?? [];
+    if (centerCountEl) {
+      centerCountEl.textContent = `${centerCards.length} carte${centerCards.length !== 1 ? 's' : ''}`;
+    }
+    if (centerCards.length === 0) {
+      centerEl.innerHTML = '<span class="hand-empty">Aucune carte au centre.</span>';
+    } else {
+      centerEl.innerHTML = "";
+      centerCards.forEach(card => {
+        const el = GameCard.create(card, { context: "center", size: "md", clickable: true });
+        centerEl.appendChild(el);
+      });
+    }
+  }
+
   // Mise à jour du deck et de la défausse
   const deckCount = document.querySelector(".deck-count");
   if (deckCount) {
@@ -250,6 +269,7 @@ window.updateBoard = function(state) {
     'acquisitions',
     'cartes_protegees',
     'cartes_speciales',
+    'hardship',
   ];
 
   if (state.players) {

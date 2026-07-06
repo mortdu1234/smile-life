@@ -15,12 +15,14 @@ class JobCard(Card):
     study: int
     salary: int
     status: JobStatus
+    old_salary: int | None
     def __init__(self, id: int, image_path: str):
         super().__init__(id, image_path, 2)
         self.jobPower = []
         self.status = JobStatus.RIEN
         self.study = 0
         self.salary = 0
+        self.old_salary = None
 
     def get_power(self):
         """retourne les pouvoirs du métier"""
@@ -28,7 +30,15 @@ class JobCard(Card):
 
     def discard_job(self, current_player: "Player", game: "Game"):
         """Effectue les actions lors d'un discard du métier"""
-        pass
+        if self.old_salary:
+            self.salary = self.old_salary
+            self.old_salary = None
+
+    def set_salary(self, new_salary: int):
+        """permet de changer le salaire du métier"""
+        self.old_salary = self.salary
+        self.salary = new_salary
+
 
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         player_level = player.get_study_level() 

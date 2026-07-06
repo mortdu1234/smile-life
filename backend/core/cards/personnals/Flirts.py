@@ -34,7 +34,7 @@ class Flirt(Card):
             return False, "tu as déja ateint la limite"
         return super().can_be_played(player, game)
 
-    def apply_card_effect(self, game: 'Game', current_player: 'Player', interface: 'UserIO') -> bool:
+    def apply_card_effect(self, game: 'Game', current_player: 'Player') -> bool:
         """vole le dernier flirt de quelqu'un si ceux si sont les mêmes"""
         players = game.players
         for player in players:
@@ -43,7 +43,7 @@ class Flirt(Card):
                 if last_flirt and last_flirt.get_place() == self.place:
                     player.remove_card(last_flirt)
                     current_player.add_card_to_played(last_flirt)
-        return super().apply_card_effect(game, current_player, interface)
+        return super().apply_card_effect(game, current_player)
     
     def get_place(self) -> FlirtPlaces:
         return self.place

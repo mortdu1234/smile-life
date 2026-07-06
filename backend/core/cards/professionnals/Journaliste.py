@@ -13,14 +13,15 @@ class Journaliste(JobCard):
         self.salary = 2
     def get_name(self) -> str:
         return "Journaliste"
-    def apply_card_effect(self, game: Game, current_player: Player, interface:"UserIO") -> bool:
+    def apply_card_effect(self, game: Game, current_player: Player) -> bool:
         """permet de voir la main de chaque joueur"""
+        interface = current_player.get_interface()
         current_player.remove_card_from_hand(self)
         players = game.players
         players_names = [player.name for player in players]
         players_hands = [player.hand for player in players]
         interface.show_players_hand(players_names, players_hands)
         current_player.add_card_to_hand(self)
-        return super().apply_card_effect(game, current_player, interface)
+        return super().apply_card_effect(game, current_player)
     def get_card_rule(self) -> str:
         return """Quand la carte est posé, permet de voir les mains de tous les joueurs. Peut recevoir un Grand Prix d'Excellence."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

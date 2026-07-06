@@ -16,8 +16,8 @@ class Accident(Hardship):
         
         return super().can_be_targeted(player, game)
 
-    def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
-        success = super().apply_card_effect(game, current_player, interface)
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+        success = super().apply_card_effect(game, current_player)
         if not success:
             return False
         assert self.target_player is not None

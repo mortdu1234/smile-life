@@ -40,13 +40,13 @@ class Card:
     #  Méthodes avec comportement par défaut                             #
     # ------------------------------------------------------------------ #
 
-    def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         """Applique l'effet de la carte. Retourne True si succès."""
         return True
 
-    def play_card(self, game: "Game", current_player: "Player", interface: "UserIO") -> None:
+    def play_card(self, game: "Game", current_player: "Player") -> None:
         """Pose la carte : applique l'effet puis déplace la carte dans les posées."""
-        if self.apply_card_effect(game, current_player, interface):
+        if self.apply_card_effect(game, current_player):
             current_player.remove_card_from_hand(self)
             current_player.add_card_to_played(self)
         else:

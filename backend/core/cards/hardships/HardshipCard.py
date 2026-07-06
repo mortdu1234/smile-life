@@ -45,19 +45,20 @@ class Hardship(Card):
             return False
         return True
 
-    def play_card(self, game: "Game", current_player: "Player", interface: "UserIO") -> None:
+    def play_card(self, game: "Game", current_player: "Player") -> None:
         """Pose la carte : applique l'effet puis déplace la carte dans les posées."""
-        if self.apply_card_effect(game, current_player, interface) and self.target_player:
+        if self.apply_card_effect(game, current_player) and self.target_player:
             current_player.remove_card_from_hand(self)
             self.target_player.add_card_to_played(self)
         else:
             print("[ERROR] : il y a une erreur lors du pouvoir")
 
-    def apply_card_effect(self, game: Game, current_player: Player, interface: UserIO) -> bool:
+    def apply_card_effect(self, game: Game, current_player: Player) -> bool:
+        interface = current_player.get_interface()
         have_target = self.select_target(game, interface)
         if not have_target:
             return False
-        return super().apply_card_effect(game, current_player, interface)
+        return super().apply_card_effect(game, current_player)
     
     def get_card_rule(self) -> str:
         return """Les Cartes Malus sont des cartes a utiliser sur un adversaire afin de lui infliger son malus"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

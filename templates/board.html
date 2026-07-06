@@ -66,6 +66,30 @@
       </div>
     </section>
 
+    <!-- CENTRE DE LA TABLE -->
+    <section class="center-zone">
+      <div class="zone-header">
+        <span class="zone-title">Cartes au centre</span>
+        <span class="zone-count" id="center-count">{{ game.center_cards_played|length }} carte{{ 's' if game.center_cards_played|length != 1 }}</span>
+      </div>
+      <div class="center-cards" id="center-cards">
+        {% if game.center_cards_played %}
+          {% for card in game.center_cards_played %}
+          <div class="game-card clickable-card" data-card='{{ card.to_dict()|tojson }}' data-context="center">
+            <span class="card-type">{{ card.__class__.__name__ }}</span>
+            <img src="{{ url_for('static', filename=card.image_path) }}" alt="{{ card.__class__.__name__ }}" onerror="this.style.display='none'">
+            <div class="card-footer">
+              <span class="card-name">{{ card.__class__.__name__ }}</span>
+              <span class="card-smiles">😊 {{ card.smiles }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <span class="hand-empty">Aucune carte au centre.</span>
+        {% endif %}
+      </div>
+    </section>
+
     <!-- ZONE DE JEU -->
     <section class="play-area">
 
@@ -77,6 +101,7 @@
         <div class="col-header"><span class="col-icon">🏡</span><span class="col-name">Acquisitions</span></div>
         <div class="col-header"><span class="col-icon">💰</span><span class="col-name">Salaires / Dép.</span></div>
         <div class="col-header"><span class="col-icon">✨</span><span class="col-name">Spéciales</span></div>
+        <div class="col-header"><span class="col-icon">🔻</span><span class="col-name">Malus</span></div>
       </div>
 
       {% for player in game.players %}
@@ -191,6 +216,25 @@
         <!-- Cartes spéciales -->
         <div class="category-cell" id="cell-{{ player.name }}-cartes_speciales">
           {% set cards = player.groupe_str.get('cartes_speciales', []) or [] %}
+          {% if cards %}
+            {% for card in cards %}
+            <div class="game-card clickable-card" data-card='{{ card.to_dict()|tojson }}' data-context="played">
+              <span class="card-type">{{ card.__class__.__name__ }}</span>
+              <img src="{{ url_for('static', filename=card.image_path) }}" alt="{{ card.__class__.__name__ }}" onerror="this.style.display='none'">
+              <div class="card-footer">
+                <span class="card-name">{{ card.__class__.__name__ }}</span>
+                <span class="card-smiles">😊 {{ card.smiles }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <span class="cell-empty">—</span>
+          {% endif %}
+        </div>
+
+        <!-- Malus (cartes hardship reçues) -->
+        <div class="category-cell malus-cell" id="cell-{{ player.name }}-hardship">
+          {% set cards = player.groupe_str.get('hardship', []) or [] %}
           {% if cards %}
             {% for card in cards %}
             <div class="game-card clickable-card" data-card='{{ card.to_dict()|tojson }}' data-context="played">

@@ -34,15 +34,17 @@ class ChildCard(Card):
 
     def can_be_played(self, player: 'Player', game: 'Game') -> tuple[bool, str]:
         from .Flirts import FlirtWithChild
-        if not player.is_wedding() or (isinstance(player.get_last_flirt(), FlirtWithChild) and player.get_last_flirt().is_used()) : # type: ignore
+        if not player.is_wedding() or (isinstance(player.get_last_flirt(), FlirtWithChild) and not player.get_last_flirt().is_used()) : # type: ignore
             return False, "il faut etre marriée ou avoir un flirt pour enfant en dernier"
         return super().can_be_played(player, game)
 
-    def apply_card_effect(self, game: 'Game', current_player: 'Player', interface: 'UserIO') -> bool:
+    def apply_card_effect(self, game: 'Game', current_player: 'Player') -> bool:
         from .Flirts import FlirtWithChild
         if not current_player.is_wedding() and isinstance(current_player.get_last_flirt(), FlirtWithChild):
-            current_player.get_last_flirt().set_used() # type: ignore
-        return super().apply_card_effect(game, current_player, interface)
+            last_flirt = current_player.get_last_flirt()
+            assert isinstance(last_flirt, FlirtWithChild), "Le dernier flirt du joueur n'est pas un FlirtWithChild" 
+            last_flirt.set_used()
+        return super().apply_card_effect(game, current_player)
 
     def get_name(self) -> str:
         return "Enfant - "

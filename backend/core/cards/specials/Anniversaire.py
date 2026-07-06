@@ -14,7 +14,7 @@ class Anniversaire(SpecialCard):
     def get_name(self) -> str:
         return "Anniversaire"
     
-    def apply_card_effect(self, game: "Game", current_player: "Player", interface: "UserIO") -> bool:
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         from ..professionnals.SalaryCard import SalaryCard
         from ....userIo.interface import IOType
         players = game.players
@@ -35,7 +35,7 @@ class Anniversaire(SpecialCard):
                     # Ajoute la carte donnée au joueur courrant
                     player.remove_card(selected_card)
                     current_player.add_card_to_played(selected_card)        
-        return super().apply_card_effect(game, current_player, interface)
+        return super().apply_card_effect(game, current_player)
 
     def get_card_rule(self) -> str:
         return """La carte anniversaire peut etre poser durant son tour, une fois poser, cela vas demander a tous les autres joueurs de selectionner un salaire posé de leur choix. Les salaires qu'ils ont sélectionner se retrouve posé devant le joeuur dont c'est l'anniversaire"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()
