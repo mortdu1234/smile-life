@@ -6,6 +6,8 @@ class FlirtPlaces(Enum):
     CINEMA = "cinema"
     INTERNET = "internet"
     PARC = "parc"
+    MANIF = "manif"
+    BIBLIOTHEQUE = "bibliotheque"
     RESTAURANT = "restaurant"
     THEATRE = "theatre"
     ZOO = "zoo"

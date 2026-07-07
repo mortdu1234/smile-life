@@ -56,7 +56,8 @@ class Player:
                 group.value: [c.to_dict() for c in cards]
                 for group, cards in self.groupe.items()
             }, 
-            "skip_turn": self.skip_turn
+            "skip_turn": self.skip_turn, 
+            "smiles": self.get_smiles(),
         }
         if reveal_hand:
             base["hand"] = [c.to_dict() for c in self.hand]
@@ -66,7 +67,7 @@ class Player:
         """retourne le nombre de smiles"""
         score = 0
         for id, card in self.cards.items():
-            score += card.get_smiles()
+            score += card.get_smiles(self)
         return score
     
     def get_max_hand_card(self):
@@ -161,6 +162,10 @@ class Player:
         if self.job:
             return self.power + self.job.get_power()
         return self.power
+    def add_power(self, power: Power):
+        """ajoute un pouvoir dans la liste"""
+        if power not in self.power:
+            self.power.append(power)
 
     def get_job(self) -> JobCard | None:
         return self.job

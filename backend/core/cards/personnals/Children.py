@@ -1,26 +1,13 @@
 """
 Cartes enfants.
 """
+from ...Power import Power
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ...Game import Game
     from ...Player import Player
     from ....userIo.interface import UserIO
 from ..Card import Card
-
-# ------------------------------------------------------------------ #
-#  Marqueurs de genre                                                  #
-# ------------------------------------------------------------------ #
-
-class FemaleChild(Card):
-    """Mixin — enfant féminin."""
-
-class MaleChild(Card):
-    """Mixin — enfant masculin."""
-
-
-class GirlPowerChild(Card):
-    """Mixin — enfant girl-power."""
 
 
 # ------------------------------------------------------------------ #
@@ -34,7 +21,7 @@ class ChildCard(Card):
 
     def can_be_played(self, player: 'Player', game: 'Game') -> tuple[bool, str]:
         from .Flirts import FlirtWithChild
-        if not player.is_wedding() or (isinstance(player.get_last_flirt(), FlirtWithChild) and not player.get_last_flirt().is_used()) : # type: ignore
+        if not player.is_wedding() and not (isinstance(player.get_last_flirt(), FlirtWithChild) and not player.get_last_flirt().is_used()): # type: ignore
             return False, "il faut etre marriée ou avoir un flirt pour enfant en dernier"
         return super().can_be_played(player, game)
 
@@ -53,74 +40,105 @@ class ChildCard(Card):
         return """Les enfant sont des cartes qui peuvent etre posé si le joueur est marié ou alors s'il a un flirt qui autorise un enfant."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()
 
 # ------------------------------------------------------------------ #
+#  Marqueurs de genre                                                  #
+# ------------------------------------------------------------------ #
+
+class FemaleChild(ChildCard):
+    """Mixin — enfant féminin."""
+    def get_smiles(self, owner: "Player") -> int:
+        if Power.GYNOCRATIE in owner.get_power():
+            return self.smiles // 2
+        return self.smiles
+
+class MaleChild(ChildCard):
+    """Mixin — enfant masculin."""
+    def get_smiles(self, owner: "Player") -> int:
+        if Power.PHALOCRATIE in owner.get_power():
+            return self.smiles // 2
+        return self.smiles
+
+class GirlPowerChild(ChildCard):
+    """Mixin — enfant girl-power."""
+
+
+# ------------------------------------------------------------------ #
 #  Enfants concrets                                                    #
 # ------------------------------------------------------------------ #
 
-class AngelaChild(ChildCard, GirlPowerChild):
+class AngelaChild(GirlPowerChild):
     def get_name(self) -> str:
         return super().get_name() + "Angela"
 
 
-class DianaChild(ChildCard, FemaleChild):
+class DianaChild(FemaleChild):
     def get_name(self) -> str:
         return super().get_name() + "Diana"
 
 
-class HarryChild(ChildCard, MaleChild):
+class HarryChild(MaleChild):
     def get_name(self) -> str:
         return super().get_name() + "Harry"
 
 
-class HermioneChild(ChildCard, FemaleChild):
+class HermioneChild(FemaleChild):
     def get_name(self) -> str:
         return super().get_name() + "Hermione"
 
 
-class LaraChild(ChildCard, FemaleChild):
+class LaraChild(FemaleChild):
     def get_name(self) -> str:
         return super().get_name() + "Lara"
 
 
-class LeiaChild(ChildCard, FemaleChild):
+class LeiaChild(FemaleChild):
     def get_name(self) -> str:
         return super().get_name() + "Leia"
 
 
-class LouiseChild(ChildCard, GirlPowerChild):
+class LouiseChild(GirlPowerChild):
     def get_name(self) -> str:
         return super().get_name() + "Louise"
 
 
-class LuigiChild(ChildCard, MaleChild):
+class LuigiChild(MaleChild):
     def get_name(self) -> str:
         return super().get_name() + "Luigi"
 
 
-class MarioChild(ChildCard, MaleChild):
+class MarioChild(MaleChild):
     def get_name(self) -> str:
         return super().get_name() + "Mario"
 
 
-class LukeChild(ChildCard, MaleChild):
+class LukeChild(MaleChild):
     def get_name(self) -> str:
         return super().get_name() + "Luke"
 
 
-class OlympeChild(ChildCard, GirlPowerChild):
+class OlympeChild(GirlPowerChild):
     def get_name(self) -> str:
         return super().get_name() + "Olympe"
 
 
-class RockyChild(ChildCard, MaleChild):
+class RockyChild(MaleChild):
     def get_name(self) -> str:
         return super().get_name() + "Rocky"
 
 
-class SimoneChild(ChildCard, GirlPowerChild):
+class SimoneChild(GirlPowerChild):
     def get_name(self) -> str:
         return super().get_name() + "Simone"
 
 
-class ZeldaChild(ChildCard, FemaleChild):
+class ZeldaChild(FemaleChild):
     def get_name(self) -> str:
         return super().get_name() + "Zelda"
+
+class BeatrixChild(GirlPowerChild):
+    def get_name(self) -> str:
+        return super().get_name() + "Beatrix"
+
+class DaenerysChild(GirlPowerChild):
+    def get_name(self) -> str:
+        return super().get_name() + "Daenerys"
+    

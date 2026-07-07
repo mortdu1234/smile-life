@@ -105,13 +105,6 @@
       </div>
 
       {% for player in game.players %}
-      {# Calcul des smiles totaux via les groupes de cartes posées #}
-      {% set total_smiles = namespace(val=0) %}
-      {% for category_cards in player.groupe.values() %}
-        {% for card in (category_cards or []) %}
-          {% set total_smiles.val = total_smiles.val + card.smiles %}
-        {% endfor %}
-      {% endfor %}
 
       <div class="player-row {% if player.name == pseudo %}is-me{% endif %}" id="row-{{ player.name }}">
 
@@ -121,7 +114,7 @@
             <div class="player-avatar">{{ player.name[0]|upper }}</div>
             <span class="player-name">{{ player.name }}</span>
           </div>
-          <div class="player-stats">😊 {{ total_smiles.val }} smiles · {{ player.hand|length }} carte{{ 's' if player.hand|length != 1 }}</div>
+          <div class="player-stats">😊 {{ player.get_smiles() }} smiles · {{ player.hand|length }} carte{{ 's' if player.hand|length != 1 }}</div>
 
           {% if player.name == pseudo %}
             <span class="me-tag">Moi</span>
@@ -343,16 +336,10 @@
         <div class="sidebar-title">😊 Scores</div>
         <div class="scores-list" id="scores-list">
           {% for player in game.players %}
-          {% set total_smiles = namespace(val=0) %}
-          {% for category_cards in player.groupe.values() %}
-            {% for card in (category_cards or []) %}
-              {% set total_smiles.val = total_smiles.val + card.smiles %}
-            {% endfor %}
-          {% endfor %}
           <div class="score-row {% if player.name == pseudo %}me{% endif %}">
             <div class="score-avatar">{{ player.name[0]|upper }}</div>
             <span class="score-name">{{ player.name }}</span>
-            <span class="score-val">{{ total_smiles.val }}</span>
+            <span class="score-val">{{ player.get_smiles() }}</span>
           </div>
           {% endfor %}
         </div>

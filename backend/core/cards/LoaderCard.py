@@ -34,6 +34,11 @@ from .hardships.LicenciementHardship import Licenciement
 from .hardships.Redoublement import Redoublement
 from .hardships.Prison import Prison
 from .hardships.Attentat import Attentat
+from .hardships.ChargeMentale import ChargeMentale
+from .hardships.TachesMenagere import TachesMenagere
+from .hardships.Porc import Porc
+from .hardships.Phalocratie import Phalocratie
+from .hardships.Gynocratie import Gynocratie
 
 # Personnal life
 from .personnals.Flirts import Flirt, FlirtWithChild
@@ -53,6 +58,8 @@ from .personnals.Children import (
     RockyChild,
     SimoneChild,
     ZeldaChild,
+    BeatrixChild,
+    DaenerysChild,
 )
 
 # Professionnals
@@ -122,24 +129,19 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "study__2": lambda: StudyCard(_uid(), "img/personnal_life/professionnal_life/StudyCards/study2.png", 1, 2),
 
     # Children
-    "angela":   lambda: AngelaChild(_uid(), "img/personnal_life/children/angela.png"),
     "diana":    lambda: DianaChild(_uid(), "img/personnal_life/children/diana.png"),
     "harry":    lambda: HarryChild(_uid(), "img/personnal_life/children/harry.png"),
     "hermione": lambda: HermioneChild(_uid(), "img/personnal_life/children/hermione.png"),
     "lara":     lambda: LaraChild(_uid(), "img/personnal_life/children/lara.png"),
     "leia":     lambda: LeiaChild(_uid(), "img/personnal_life/children/leia.png"),
-    "louise":   lambda: LouiseChild(_uid(), "img/personnal_life/children/louise.png"),
     "luigi":    lambda: LuigiChild(_uid(), "img/personnal_life/children/luigi.png"),
     "mario":    lambda: MarioChild(_uid(), "img/personnal_life/children/mario.png"),
     "luke":     lambda: LukeChild(_uid(), "img/personnal_life/children/luke.png"),
-    "olympe":   lambda: OlympeChild(_uid(), "img/personnal_life/children/olympe.png"),
     "rocky":    lambda: RockyChild(_uid(), "img/personnal_life/children/rocky.png"),
-    "simone":   lambda: SimoneChild(_uid(), "img/personnal_life/children/simone.png"),
     "zelda":    lambda: ZeldaChild(_uid(), "img/personnal_life/children/zelda.png"),
     # ── Animaux ────────────────────────────────────────────────────────────────
     "chien":   lambda: Chien(_uid(), "img/acquisition_cards/animals/chien.png"  ),
     "chat":    lambda: Chat(_uid(), "img/acquisition_cards/animals/chat.png"),
-    "crapaud": lambda: Crapaud(_uid(), "img/acquisition_cards/animals/crapaud.png"),
     "lapin":   lambda: Lapin(_uid(), "img/acquisition_cards/animals/lapin.png"),
     "poussin": lambda: Poussin(_uid(), "img/acquisition_cards/animals/poussin.png"),
     "licorne": lambda: LicorneAnimal(_uid(), "img/acquisition_cards/animals/licorne.png"),
@@ -215,7 +217,7 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     'prof__maths':  lambda: Prof(_uid(), "img/personnal_life/professionnal_life/JobCards/prof_maths.png"),
     'prof__francais':lambda: Prof(_uid(), "img/personnal_life/professionnal_life/JobCards/prof_francais.png"),
     'prof__anglais':    lambda: Prof(_uid(), "img/personnal_life/professionnal_life/JobCards/prof_anglais.png"),
-    'prof__geo':    lambda: Prof(_uid(), "img/personnal_life/professionnal_life/JobCards/prof_de_geo.png"),
+    'prof__histoire':    lambda: Prof(_uid(), "img/personnal_life/professionnal_life/JobCards/prof_histoire.png"),
     'stripteaser':  lambda: Stripteaser(_uid(), "img/personnal_life/professionnal_life/JobCards/stripteaser.png"),
 
     # ── Other ──────────────────────────────────────────────────────────────────
@@ -233,6 +235,67 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "piston":         lambda: Piston(_uid(), "img/special_cards/piston.png", 0),
     "heritage":       lambda: Heritage(_uid(), "img/special_cards/heritage.png", 0, 3),
     "troc":           lambda: Troc(_uid(), "img/special_cards/troc.png"),
+
+
+
+    #########################################################################################
+    # ── Girl Power ──────────────────────────────────────────────────────────────
+    #########################################################################################
+    # ── Salaires ──────────────────────────────────────────────────────────────
+    # ── Études ────────────────────────────────────────────────────────────────
+    # ── Enfants ───────────────────────────────────────────────────────────────
+    "olympe":   lambda: OlympeChild(_uid(), "img/personnal_life/children/olympe.png"),
+    "simone":   lambda: SimoneChild(_uid(), "img/personnal_life/children/simone.png"),
+    "angela":   lambda: AngelaChild(_uid(), "img/personnal_life/children/angela.png"),
+    "beatrix":   lambda: BeatrixChild(_uid(), "img/personnal_life/children/beatrix.png"),
+    "daenerys":   lambda: DaenerysChild(_uid(), "img/personnal_life/children/daenerys.png"),
+    "louise":   lambda: LouiseChild(_uid(), "img/personnal_life/children/louise.png"),
+
+    # ── Animaux ───────────────────────────────────────────────────────────────
+    "crapaud": lambda: Crapaud(_uid(), "img/acquisition_cards/animals/crapaud.png"),
+    # ── Acquisitions ──────────────────────────────────────────────────────────
+    # ── Épreuves ──────────────────────────────────────────────────────────────
+    "charge_mentale":      lambda: ChargeMentale(_uid(), "img/hardship_cards/charge_mentale.png"),
+    "taches_menageres":      lambda: TachesMenagere(_uid(), "img/hardship_cards/taches_menageres.png"),
+    "porc":      lambda: Porc(_uid(), "img/hardship_cards/porc.png"),
+    "phalocratie":      lambda: Phalocratie(_uid(), "img/hardship_cards/phalocratie.png"),
+    "gynocratie":      lambda: Gynocratie(_uid(), "img/hardship_cards/gynocratie.png"),
+
+    # ── Flirts ────────────────────────────────────────────────────────────────
+    "flirt__manif":            lambda: Flirt(_uid(), "img/personnal_life/flirts/manif.png", 1, FlirtPlaces.MANIF),
+    "flirt_with_child__bibliotheque":            lambda: FlirtWithChild(_uid(), "img/personnal_life/flirts/bibliotheque.png", 1, FlirtPlaces.BIBLIOTHEQUE),
+    # ── Métiers ───────────────────────────────────────────────────────────────
+    "serveuse": lambda: Serveur(_uid(), "img/personnal_life/professionnal_life/JobCards/serveuse.png"),
+    "garagiste_f": lambda: Garagiste(_uid(), "img/personnal_life/professionnal_life/JobCards/garagiste_f.png"),
+    "plombiere": lambda: Plombier(_uid(), "img/personnal_life/professionnal_life/JobCards/plombiere.png"),
+    "bandit_f": lambda: Bandit(_uid(), "img/personnal_life/professionnal_life/JobCards/bandit_f.png"),
+    "ecrivaine": lambda: Ecrivain(_uid(), "img/personnal_life/professionnal_life/JobCards/ecrivaine.png"),
+    "pharmacienne": lambda: Pharmacien(_uid(), "img/personnal_life/professionnal_life/JobCards/pharmacienne.png"),
+    "architecte_f": lambda: Architect(_uid(), "img/personnal_life/professionnal_life/JobCards/architecte_f.png"),
+    "militaire_f": lambda: Militaire(_uid(), "img/personnal_life/professionnal_life/JobCards/militaire_f.png"),
+    "voyante": lambda: Medium(_uid(), "img/personnal_life/professionnal_life/JobCards/voyante.png"),
+    "journaliste_f": lambda: Journaliste(_uid(), "img/personnal_life/professionnal_life/JobCards/journaliste_f.png"),
+    "cheffe_des_achats": lambda: ChefDesAchats(_uid(), "img/personnal_life/professionnal_life/JobCards/cheffe_des_achats.png"),
+    "medecin_f": lambda: Medecin(_uid(), "img/personnal_life/professionnal_life/JobCards/medecin_f.png"),
+    "chirurgienne": lambda: Chirurgien(_uid(), "img/personnal_life/professionnal_life/JobCards/chirurgienne.png"),
+    "pilote_de_ligne_f": lambda: PiloteDeLigne(_uid(), "img/personnal_life/professionnal_life/JobCards/pilote_de_ligne_f.png"),
+    "astronaute_f": lambda: Astronaute(_uid(), "img/personnal_life/professionnal_life/JobCards/astronaute_f.png"),
+    "avocate": lambda: Avocat(_uid(), "img/personnal_life/professionnal_life/JobCards/avocate.png"),
+    "barmaid": lambda: Barman(_uid(), "img/personnal_life/professionnal_life/JobCards/barmaid.png"),
+    "cheffe_des_ventes": lambda: ChefDesVentes(_uid(), "img/personnal_life/professionnal_life/JobCards/cheffe_des_ventes.png"),
+    "chercheuse": lambda: Chercheur(_uid(), "img/personnal_life/professionnal_life/JobCards/chercheuse.png"),
+    "gourou_f": lambda: Gourou(_uid(), "img/personnal_life/professionnal_life/JobCards/gourou_f.png"),
+    "grande_prof": lambda: Grandprof(_uid(), "img/personnal_life/professionnal_life/JobCards/grand_prof_f.png"),
+    "designeuse": lambda: Designer(_uid(), "img/personnal_life/professionnal_life/JobCards/designeuse.png"),
+    "jardiniere": lambda: Jardinier(_uid(), "img/personnal_life/professionnal_life/JobCards/jardiniere.png"),
+    "pizzaiola": lambda: Pizzaiolo(_uid(), "img/personnal_life/professionnal_life/JobCards/pizzaiola.png"),
+    "policiere": lambda: Policier(_uid(), "img/personnal_life/professionnal_life/JobCards/policiere.png"),
+    "prof__chimie": lambda: Prof(_uid(), "img/personnal_life/professionnal_life/JobCards/prof_chimie.png"),
+    "prof__musique": lambda: Prof(_uid(), "img/personnal_life/professionnal_life/JobCards/prof_musique.png"),
+    "prof__philo": lambda: Prof(_uid(), "img/personnal_life/professionnal_life/JobCards/prof_philo.png"),
+    "prof__geo": lambda: Prof(_uid(), "img/personnal_life/professionnal_life/JobCards/prof_geo.png"),
+    "stripteaseuse": lambda: Stripteaser(_uid(), "img/personnal_life/professionnal_life/JobCards/stripteaseuse.png"),
+
 }
 
 

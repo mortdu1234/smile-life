@@ -7,9 +7,12 @@ from __future__ import annotations
 
 from collections import OrderedDict
 
-TYPE1_ORDER = ["Base", "Extension simple", "Girl power", "Apocalypse", "Fantastique"]
+TYPE1_ORDER = ["Base", "Extension simple", "Girl-Power", "Apocalypse", "Fantastique"]
 
 CATALOG: list[dict] = [
+    #########################################################################################
+    # ── Base ──────────────────────────────────────────────────────────────
+    #########################################################################################    
     # ── Salaires ──────────────────────────────────────────────────────────────
     {"id": "salary__1",  "label": "Salaire niv. 1",       "category": ["Base", "Salaires"]},
     {"id": "salary__2",  "label": "Salaire niv. 2",       "category": ["Base", "Salaires"]},
@@ -19,24 +22,19 @@ CATALOG: list[dict] = [
     {"id": "study__1",   "label": "Étude niv. 1",         "category": ["Base", "Études"]},
     {"id": "study__2",   "label": "Étude niv. 2",         "category": ["Base", "Études"]},
     # ── Enfants ───────────────────────────────────────────────────────────────
-    {"id": "angela",     "label": "Angela",                "category": ["Base", "Enfants"]},
     {"id": "diana",      "label": "Diana",                 "category": ["Base", "Enfants"]},
     {"id": "harry",      "label": "Harry",                 "category": ["Base", "Enfants"]},
     {"id": "hermione",   "label": "Hermione",              "category": ["Base", "Enfants"]},
     {"id": "lara",       "label": "Lara",                  "category": ["Base", "Enfants"]},
     {"id": "leia",       "label": "Leia",                  "category": ["Base", "Enfants"]},
-    {"id": "louise",     "label": "Louise",                "category": ["Base", "Enfants"]},
     {"id": "luigi",      "label": "Luigi",                 "category": ["Base", "Enfants"]},
     {"id": "mario",      "label": "Mario",                 "category": ["Base", "Enfants"]},
     {"id": "luke",       "label": "Luke",                  "category": ["Base", "Enfants"]},
-    {"id": "olympe",     "label": "Olympe",                "category": ["Base", "Enfants"]},
-    {"id": "rocky",      "label": "Rocky",                 "category": ["Base", "Enfants"]},
-    {"id": "simone",     "label": "Simone",                "category": ["Base", "Enfants"]},
     {"id": "zelda",      "label": "Zelda",                 "category": ["Base", "Enfants"]},
+    {"id": "rocky",      "label": "Rocky",                 "category": ["Base", "Enfants"]},
     # ── Animaux ───────────────────────────────────────────────────────────────
     {"id": "chien",      "label": "Chien",                 "category": ["Base", "Animaux"]},
     {"id": "chat",       "label": "Chat",                  "category": ["Base", "Animaux"]},
-    {"id": "crapaud",    "label": "Crapaud",               "category": ["Base", "Animaux"]},
     {"id": "lapin",      "label": "Lapin",                 "category": ["Base", "Animaux"]},
     {"id": "poussin",    "label": "Poussin",               "category": ["Base", "Animaux"]},
     {"id": "licorne",    "label": "Licorne",               "category": ["Base", "Animaux"]},
@@ -105,7 +103,7 @@ CATALOG: list[dict] = [
     {"id": "prof__maths",      "label": "Prof de Maths",       "category": ["Base", "Métiers"]},
     {"id": "prof__francais",   "label": "Prof de Français",    "category": ["Base", "Métiers"]},
     {"id": "prof__anglais",    "label": "Prof d'Anglais",      "category": ["Base", "Métiers"]},
-    {"id": "prof__geo",        "label": "Prof de Géo",         "category": ["Base", "Métiers"]},
+    {"id": "prof__histoire",   "label": "Prof d'Histoire",     "category": ["Base", "Métiers"]},
     {"id": "stripteaser",      "label": "Stripteaser",         "category": ["Base", "Métiers"]},
     # ── Autres ────────────────────────────────────────────────────────────────
     {"id": "legion",           "label": "Légion d'Honneur",    "category": ["Base", "Autres"]},
@@ -121,6 +119,129 @@ CATALOG: list[dict] = [
     {"id": "piston",           "label": "Piston",              "category": ["Base", "Spéciales"]},
     {"id": "heritage",         "label": "Héritage",            "category": ["Base", "Spéciales"]},
     {"id": "troc",             "label": "Troc",                "category": ["Base", "Spéciales"]},
+    #########################################################################################
+    # ── Girl Power ──────────────────────────────────────────────────────────────
+    #########################################################################################
+    # ── Salaires ──────────────────────────────────────────────────────────────
+    # ── Études ────────────────────────────────────────────────────────────────
+    # ── Enfants ───────────────────────────────────────────────────────────────
+    {"id": "olympe",     "label": "Olympe",                "category": ["Girl-Power", "Enfants"]},
+    {"id": "simone",     "label": "Simone",                "category": ["Girl-Power", "Enfants"]},
+    {"id": "angela",     "label": "Angela",                "category": ["Girl-Power", "Enfants"]},
+    {"id": "beatrix",     "label": "Beatrix",                "category": ["Girl-Power", "Enfants"]},
+    {"id": "daenerys",     "label": "Daenerys",                "category": ["Girl-Power", "Enfants"]},
+    {"id": "louise",     "label": "Louise",                "category": ["Girl-Power", "Enfants"]}, 
+    # ── Animaux ───────────────────────────────────────────────────────────────
+    {"id": "crapaud",    "label": "Crapaud",               "category": ["Girl-Power", "Animaux"]},
+    # ── Acquisitions ──────────────────────────────────────────────────────────
+    # ── Épreuves ──────────────────────────────────────────────────────────────
+    {"id": "charge_mentale",      "label": "Charge Mentale",            "category": ["Girl-Power", "Épreuves"]},
+    {"id": "taches_menageres",      "label": "Tâches Ménagères",            "category": ["Girl-Power", "Épreuves"]},
+    {"id": "porc",      "label": "Porc",            "category": ["Girl-Power", "Épreuves"]},
+    {"id": "phalocratie",      "label": "Phalocratie",            "category": ["Girl-Power", "Épreuves"]},
+    {"id": "gynocratie",      "label": "Gynocratie",            "category": ["Girl-Power", "Épreuves"]},
+    # ── Flirts ────────────────────────────────────────────────────────────────
+    {"id": "flirt__manif",               "label": "Flirt – manif",         "category": ["Girl-Power", "Flirts & Mariages"]},
+    {"id": "flirt_with_child__bibliotheque",  "label": "Flirt – bibliotheque",       "category": ["Girl-Power", "Flirts & Mariages"]},    
+    # ── Métiers ───────────────────────────────────────────────────────────────
+    {"id": "serveuse",          "label": "Serveure",             "category": ["Girl-Power", "Métiers"]},
+    {"id": "garagiste_f",        "label": "Garagiste(f)",           "category": ["Girl-Power", "Métiers"]},
+    {"id": "plombiere",         "label": "Plombière",            "category": ["Girl-Power", "Métiers"]},
+    {"id": "bandit_f",           "label": "Bandit(f)",              "category": ["Girl-Power", "Métiers"]},
+    {"id": "ecrivaine",         "label": "Écrivaine",            "category": ["Girl-Power", "Métiers"]},
+    {"id": "pharmacienne",       "label": "Pharmacienne",          "category": ["Girl-Power", "Métiers"]},
+    {"id": "architecte_f",       "label": "Architecte(f)",          "category": ["Girl-Power", "Métiers"]},
+    {"id": "militaire_f",        "label": "Militaire(f)",           "category": ["Girl-Power", "Métiers"]},
+    {"id": "voyante",           "label": "Voyante",              "category": ["Girl-Power", "Métiers"]},
+    {"id": "journaliste_f",      "label": "Journaliste(f)",         "category": ["Girl-Power", "Métiers"]},
+    {"id": "cheffe_des_achats",  "label": "Cheffe des Achats",     "category": ["Girl-Power", "Métiers"]},
+    {"id": "medecin_f",          "label": "Médecin(f)",             "category": ["Girl-Power", "Métiers"]},
+    {"id": "chirurgienne",       "label": "Chirurgienne",          "category": ["Girl-Power", "Métiers"]},
+    {"id": "pilote_de_ligne_f",           "label": "Pilote de Ligne(f)",     "category": ["Girl-Power", "Métiers"]},
+    {"id": "astronaute_f",       "label": "Astronaute(f)",          "category": ["Girl-Power", "Métiers"]},
+    {"id": "avocate",           "label": "Avocate",              "category": ["Girl-Power", "Métiers"]},
+    {"id": "barmaid",           "label": "Barmaid",              "category": ["Girl-Power", "Métiers"]},
+    {"id": "cheffe_des_ventes",  "label": "Cheffe des Ventes",     "category": ["Girl-Power", "Métiers"]},
+    {"id": "chercheuse",        "label": "Chercheuse",           "category": ["Girl-Power", "Métiers"]},
+    {"id": "gourou_f",           "label": "Gourou(f)",              "category": ["Girl-Power", "Métiers"]},
+    {"id": "grande_prof",       "label": "Grande Professeure",    "category": ["Girl-Power", "Métiers"]},
+    {"id": "designeuse",         "label": "Designeuse",            "category": ["Girl-Power", "Métiers"]},
+    {"id": "jardiniere",        "label": "Jardinière",           "category": ["Girl-Power", "Métiers"]},
+    {"id": "pizzaiola",        "label": "Pizzaïola",           "category": ["Girl-Power", "Métiers"]},
+    {"id": "policiere",         "label": "Policière",            "category": ["Girl-Power", "Métiers"]},
+    {"id": "prof__chimie",      "label": "Prof de Chimie",       "category": ["Girl-Power", "Métiers"]},
+    {"id": "prof__musique",   "label": "Prof de Musique",    "category": ["Girl-Power", "Métiers"]},
+    {"id": "prof__philo",    "label": "Prof de Philo",      "category": ["Girl-Power", "Métiers"]},
+    {"id": "prof__geo",        "label": "Prof de Géo",         "category": ["Girl-Power", "Métiers"]},
+    {"id": "stripteaseuse",      "label": "Stripteaseuse",         "category": ["Girl-Power", "Métiers"]},   
+    # ── Autres ────────────────────────────────────────────────────────────────
+    # ── Spéciales ─────────────────────────────────────────────────────────────
+    #########################################################################################
+    # ── Fantastique ──────────────────────────────────────────────────────────────
+    #########################################################################################
+    # ── Salaires ──────────────────────────────────────────────────────────────
+    # ── Études ────────────────────────────────────────────────────────────────
+    # ── Enfants ───────────────────────────────────────────────────────────────
+    # ── Animaux ───────────────────────────────────────────────────────────────
+    # ── Acquisitions ──────────────────────────────────────────────────────────
+    # ── Épreuves ──────────────────────────────────────────────────────────────
+    # ── Flirts ────────────────────────────────────────────────────────────────
+    # ── Métiers ───────────────────────────────────────────────────────────────   
+    # ── Autres ────────────────────────────────────────────────────────────────
+    # ── Spéciales ─────────────────────────────────────────────────────────────
+    #########################################################################################
+    # ── Trash ──────────────────────────────────────────────────────────────
+    #########################################################################################
+    # ── Salaires ──────────────────────────────────────────────────────────────
+    # ── Études ────────────────────────────────────────────────────────────────
+    # ── Enfants ───────────────────────────────────────────────────────────────
+    # ── Animaux ───────────────────────────────────────────────────────────────
+    # ── Acquisitions ──────────────────────────────────────────────────────────
+    # ── Épreuves ──────────────────────────────────────────────────────────────
+    # ── Flirts ────────────────────────────────────────────────────────────────
+    # ── Métiers ───────────────────────────────────────────────────────────────   
+    # ── Autres ────────────────────────────────────────────────────────────────
+    # ── Spéciales ─────────────────────────────────────────────────────────────
+    #########################################################################################
+    # ── Vie de Luxe ──────────────────────────────────────────────────────────────
+    #########################################################################################
+    # ── Salaires ──────────────────────────────────────────────────────────────
+    # ── Études ────────────────────────────────────────────────────────────────
+    # ── Enfants ───────────────────────────────────────────────────────────────
+    # ── Animaux ───────────────────────────────────────────────────────────────
+    # ── Acquisitions ──────────────────────────────────────────────────────────
+    # ── Épreuves ──────────────────────────────────────────────────────────────
+    # ── Flirts ────────────────────────────────────────────────────────────────
+    # ── Métiers ───────────────────────────────────────────────────────────────   
+    # ── Autres ────────────────────────────────────────────────────────────────
+    # ── Spéciales ─────────────────────────────────────────────────────────────
+    #########################################################################################
+    # ── Apocalypses ──────────────────────────────────────────────────────────────
+    #########################################################################################
+    # ── Salaires ──────────────────────────────────────────────────────────────
+    # ── Études ────────────────────────────────────────────────────────────────
+    # ── Enfants ───────────────────────────────────────────────────────────────
+    # ── Animaux ───────────────────────────────────────────────────────────────
+    # ── Acquisitions ──────────────────────────────────────────────────────────
+    # ── Épreuves ──────────────────────────────────────────────────────────────
+    # ── Flirts ────────────────────────────────────────────────────────────────
+    # ── Métiers ───────────────────────────────────────────────────────────────   
+    # ── Autres ────────────────────────────────────────────────────────────────
+    # ── Spéciales ─────────────────────────────────────────────────────────────
+    #########################################################################################
+    # ── Autres ──────────────────────────────────────────────────────────────
+    #########################################################################################
+    # ── Salaires ──────────────────────────────────────────────────────────────
+    # ── Études ────────────────────────────────────────────────────────────────
+    # ── Enfants ───────────────────────────────────────────────────────────────
+    # ── Animaux ───────────────────────────────────────────────────────────────
+    # ── Acquisitions ──────────────────────────────────────────────────────────
+    # ── Épreuves ──────────────────────────────────────────────────────────────
+    # ── Flirts ────────────────────────────────────────────────────────────────
+    # ── Métiers ───────────────────────────────────────────────────────────────   
+    # ── Autres ────────────────────────────────────────────────────────────────
+    # ── Spéciales ─────────────────────────────────────────────────────────────
+
 ]
 
 def get_catalog() -> list[dict]:

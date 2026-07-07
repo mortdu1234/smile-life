@@ -32,7 +32,7 @@ class Card:
 
     def get_id(self) -> int:
         return self.id
-    def get_smiles(self) -> int:
+    def get_smiles(self, owner: "Player") -> int:
         return self.smiles
     def get_name(self) -> str:
         return str(self.__class__.__name__)

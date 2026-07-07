@@ -107,7 +107,7 @@ export const CARD_ACTIONS = {
 
   // ── Carte Mariage (Wedding) ────────────────────────────────────────────────
   // Méthodes Game.py : place_card / discard_wedding_card
-  WeddingCard: [
+  Wedding: [
     {
       label: "▶ Jouer",
       variant: "primary",
@@ -137,7 +137,7 @@ export const CARD_ACTIONS = {
 
   // ── Carte Adultère (Adultery) ──────────────────────────────────────────────
   // Méthodes Game.py : place_card / discard_adultery_card
-  AdulteryCard: [
+  Adultery: [
     {
       label: "▶ Jouer",
       variant: "primary",

@@ -158,8 +158,7 @@ window.updateBoard = function(state) {
   const scoresList = document.getElementById("scores-list");
   if (scoresList && state.players) {
     scoresList.innerHTML = state.players.map(p => {
-      const smiles = Object.values(p.groupe ?? {})
-        .flat().reduce((s, c) => s + (c.smiles ?? 0), 0);
+      const smiles = p.smiles ?? 0;
       const isMe   = p.name === window.PSEUDO;
       const avatar = p.is_bot ? '🤖' : (p.name?.[0] ?? '?').toUpperCase();
       return `<div class="score-row ${isMe ? 'me' : ''}${p.is_bot ? ' bot' : ''}">
@@ -295,8 +294,7 @@ window.updateBoard = function(state) {
       // Info col : smiles + main adversaire
       const infoEl = document.getElementById(`info-${player.name}`);
       if (infoEl) {
-        const smiles = Object.values(player.groupe ?? {})
-          .flat().reduce((s, c) => s + (c.smiles ?? 0), 0);
+        const smiles = player.smiles ?? 0;
         const handCount = player.hand_count ?? 0;
         infoEl.querySelector('.player-stats').textContent =
           `😊 ${smiles} smiles · ${handCount} carte${handCount !== 1 ? 's' : ''}`;
@@ -331,4 +329,4 @@ window.updateBoard = function(state) {
       });
     });
   }
-};
+};  

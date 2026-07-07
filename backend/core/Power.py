@@ -20,3 +20,5 @@ class Power(Enum):
     NO_BURNOUT  = "no_burnout" # ne peux pas recevoir de carte burnout
     MAX_HAND_CARD_6 = "max_hand_card_6" # peut avoir jusqu'a 6 cartes en main
     MAX_HAND_CARD_5 = "max_hand_card_5" # peut avoir jusqu'a 5 cartes en main
+    GYNOCRATIE = "gynocratie" # les smiles des enfants garçons sont divisés par 2
+    PHALOCRATIE = "phalocratie" # les smiles des enfants filles sont divisés par 2

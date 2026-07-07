@@ -1,0 +1,36 @@
+from .HardshipCard import Hardship
+from ...PlayerCardGroup import PlayedCardGroup as groupe
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.Game import Game
+    from backend.core.Player import Player
+
+class ChargeMentale(Hardship):
+    def can_be_targeted(self, player: "Player", game: "Game") -> bool:
+        children = 0
+        from ..personnals.Children import ChildCard
+        for card in player.get_card_from_group(groupe.VIE_PERSONNELLE):
+            if isinstance(card, ChildCard):
+                children += 1
+        return children > 0 and super().can_be_targeted(player, game)
+
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+        success = super().apply_card_effect(game, current_player)
+        if not success:
+            return False
+        assert self.target_player is not None
+        from ..personnals.Children import ChildCard
+        from ....userIo.interface import IOType
+        list_children = [card for card in self.target_player.get_card_from_group(groupe.VIE_PERSONNELLE) if isinstance(card, ChildCard)]
+        selected_child = self.target_player.get_interface().ask_card("Charge Mentale: Choisissez un enfant à défausser", cards=list_children, kind=IOType.CARD_PICKER) # pyright: ignore[reportArgumentType]
+        if not selected_child:
+            return False
+        self.target_player.remove_card(selected_child)
+        game.add_card_to_discard(selected_child)
+        return True
+
+    def get_name(self) -> str:
+        return "Charge Mentale"
+
+    def get_card_rule(self) -> str:
+        return """Défausse un enfant si la cible possède un métier"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()
