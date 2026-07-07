@@ -182,6 +182,9 @@ CATALOG: list[dict] = [
     {"id": "stripteaseuse",      "label": "Stripteaseuse",         "category": ["Girl-Power", "Métiers"]},   
     # ── Autres ────────────────────────────────────────────────────────────────
     # ── Spéciales ─────────────────────────────────────────────────────────────
+    {"id": "cliche_accident",             "label": "Cliché Accident",                "category": ["Girl-Power", "Spéciales"]},
+    {"id": "cliche_flirt",             "label": "Cliché Flirt",                "category": ["Girl-Power", "Spéciales"]},
+
     #########################################################################################
     # ── Fantastique ──────────────────────────────────────────────────────────────
     #########################################################################################

@@ -108,6 +108,8 @@ from .specials.Vengeance import Vengeance
 from .specials.Piston import Piston
 from .specials.Heritage import Heritage
 from .specials.Troc import Troc
+from .specials.ClicheAccident import ClicheAccident
+from .specials.ClicheFlirt import ClicheFlirt
 
 from ..FlirtPlaces import FlirtPlaces
 
@@ -246,8 +248,6 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     #########################################################################################
     # ── Girl Power ──────────────────────────────────────────────────────────────
     #########################################################################################
-    # ── Salaires ──────────────────────────────────────────────────────────────
-    # ── Études ────────────────────────────────────────────────────────────────
     # ── Enfants ───────────────────────────────────────────────────────────────
     "olympe":   lambda: OlympeChild(_uid(), "img/personnal_life/children/olympe.png"),
     "simone":   lambda: SimoneChild(_uid(), "img/personnal_life/children/simone.png"),
@@ -255,7 +255,6 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "beatrix":   lambda: BeatrixChild(_uid(), "img/personnal_life/children/beatrix.png"),
     "daenerys":   lambda: DaenerysChild(_uid(), "img/personnal_life/children/daenerys.png"),
     "louise":   lambda: LouiseChild(_uid(), "img/personnal_life/children/louise.png"),
-
     # ── Animaux ───────────────────────────────────────────────────────────────
     "crapaud": lambda: Crapaud(_uid(), "img/acquisition_cards/animals/crapaud.png"),
     "dragon": lambda: Dragon(_uid(), "img/acquisition_cards/animals/dragon.png"),
@@ -270,7 +269,6 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "phalocratie":      lambda: Phalocratie(_uid(), "img/hardship_cards/phalocratie.png"),
     "gynocratie":      lambda: Gynocratie(_uid(), "img/hardship_cards/gynocratie.png"),
     "plafond_de_verre":      lambda: PlafondDeVerre(_uid(), "img/hardship_cards/plafond_de_verre.png"),
-
     # ── Flirts ────────────────────────────────────────────────────────────────
     "flirt__manif":            lambda: Flirt(_uid(), "img/personnal_life/flirts/manif.png", 1, FlirtPlaces.MANIF),
     "flirt_with_child__bibliotheque":            lambda: FlirtWithChild(_uid(), "img/personnal_life/flirts/bibliotheque.png", 1, FlirtPlaces.BIBLIOTHEQUE),
@@ -305,6 +303,9 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "prof__philo": lambda: Prof(_uid(), "img/personnal_life/professionnal_life/JobCards/prof_philo.png"),
     "prof__geo": lambda: Prof(_uid(), "img/personnal_life/professionnal_life/JobCards/prof_geo.png"),
     "stripteaseuse": lambda: Stripteaser(_uid(), "img/personnal_life/professionnal_life/JobCards/stripteaseuse.png"),
+    # ── Specials ───────────────────────────────────────────────────────────────
+    "cliche_accident": lambda: ClicheAccident(_uid(), "img/special_cards/cliche_accident.png", 0),
+    "cliche_flirt": lambda: ClicheFlirt(_uid(), "img/special_cards/cliche_flirt.png", 0),
 
 }
 
