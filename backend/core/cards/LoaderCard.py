@@ -258,7 +258,7 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "crapaud": lambda: Crapaud(_uid(), "img/acquisition_cards/animals/crapaud.png"),
     # ── Acquisitions ──────────────────────────────────────────────────────────
     "concert": lambda: Concert(_uid(), "img/acquisition_cards/other/place_de_concert.png", 1, 1),
-    "nounou": lambda: Nounou(_uid(), "img/acquisition_cards/other/nounou.png", 1, 0),
+    "nounou": lambda: Nounou(_uid(), "img/acquisition_cards/other/nounou.png", 1, 4),
     # ── Épreuves ──────────────────────────────────────────────────────────────
     "charge_mentale":      lambda: ChargeMentale(_uid(), "img/hardship_cards/charge_mentale.png"),
     "taches_menageres":      lambda: TachesMenagere(_uid(), "img/hardship_cards/taches_menageres.png"),
