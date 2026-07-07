@@ -23,6 +23,7 @@ from .animals.LicorneCard import LicorneAnimal
 # Acquisitions
 from .acquisitions.HouseAcquisition import House
 from .acquisitions.TripAcquisition import Trip
+from .acquisitions.PlaceDeConcert import Concert
 
 # Hardships
 from .hardships.AccidentHardship import Accident
@@ -255,6 +256,7 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     # ── Animaux ───────────────────────────────────────────────────────────────
     "crapaud": lambda: Crapaud(_uid(), "img/acquisition_cards/animals/crapaud.png"),
     # ── Acquisitions ──────────────────────────────────────────────────────────
+    "concert": lambda: Concert(_uid(), "img/acquisition_cards/other/place_de_concert.png", 1, 1),
     # ── Épreuves ──────────────────────────────────────────────────────────────
     "charge_mentale":      lambda: ChargeMentale(_uid(), "img/hardship_cards/charge_mentale.png"),
     "taches_menageres":      lambda: TachesMenagere(_uid(), "img/hardship_cards/taches_menageres.png"),
