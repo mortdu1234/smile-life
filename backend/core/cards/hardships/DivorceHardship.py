@@ -40,13 +40,16 @@ class Divorce(Hardship):
             game.add_card_to_discard(adultery_card)
 
             # suppression de tous les enfants
-            from ...PlayerCardGroup import PlayedCardGroup
-            from ..personnals.Children import ChildCard
-            for card in self.target_player.get_card_from_group(PlayedCardGroup.VIE_PERSONNELLE):
-                if isinstance(card, ChildCard):
-                    self.target_player.remove_card(card)
-                    game.add_card_to_discard(card)
-            
+            power = self.target_player.get_power()
+            if Power.CHILDREN_PROTECTED in power:
+                print("[DEBUG] Le joueur {} est protégé de la perte d'enfants".format(self.target_player.name))
+            else:
+                from ...PlayerCardGroup import PlayedCardGroup
+                from ..personnals.Children import ChildCard
+                for card in self.target_player.get_card_from_group(PlayedCardGroup.VIE_PERSONNELLE):
+                    if isinstance(card, ChildCard):
+                        self.target_player.remove_card(card)
+                        game.add_card_to_discard(card)            
         
         return True
 

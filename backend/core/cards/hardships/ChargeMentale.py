@@ -1,5 +1,6 @@
 from .HardshipCard import Hardship
 from ...PlayerCardGroup import PlayedCardGroup as groupe
+from ...Power import Power
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from backend.core.Game import Game
@@ -7,6 +8,9 @@ if TYPE_CHECKING:
 
 class ChargeMentale(Hardship):
     def can_be_targeted(self, player: "Player", game: "Game") -> bool:
+        power = player.get_power()
+        if Power.CHILDREN_PROTECTED in power:
+            return False
         children = 0
         from ..personnals.Children import ChildCard
         for card in player.get_card_from_group(groupe.VIE_PERSONNELLE):

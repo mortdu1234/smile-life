@@ -1,10 +1,3 @@
-ce qu'il me reste a faire :
-en overlay : 
-  -anniversaire, pour chaque joueurs (autre que le joueur courrant) ouvrir une fenetre avec la liste des salaires posé et devoir en selectionner un chacun
-
-prof problem
-pilote de ligne
-louise angela
-
-
-se défausser de son marriage
+attentat problemes : 
+- normalement après un attentat les enfants sont purement et simplement supprimé
+- normalement l'attentat fini dans les cartes posé du joueur qui l'as posé
