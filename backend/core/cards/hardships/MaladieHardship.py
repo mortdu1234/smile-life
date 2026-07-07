@@ -1,3 +1,5 @@
+from backend.core.Game import Game
+from backend.core.Player import Player
 from backend.core.Power import Power
 from .HardshipCard import Hardship
 from typing import TYPE_CHECKING
@@ -16,14 +18,18 @@ class Maladie(Hardship):
         return super().can_be_targeted(player, game)
     def get_name(self) -> str:
         return "Maladie"
+
+    def hardship_effect(self, game: Game, target: Player) -> bool:
+        target.add_skip_turn(1)
+        
+        return super().hardship_effect(game, target)
     
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         success = super().apply_card_effect(game, current_player)
         if not success:
             return False
         assert self.target_player is not None
-        # ajoute un tour a skip
-        self.target_player.add_skip_turn(1)
+        self.hardship_effect(game, self.target_player)
         return True
 
     def get_card_rule(self) -> str:

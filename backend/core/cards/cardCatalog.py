@@ -136,6 +136,7 @@ CATALOG: list[dict] = [
     # ── Acquisitions ──────────────────────────────────────────────────────────
     {"id": "concert",  "label": "Concert",        "category": ["Girl-Power", "Acquisitions"]},
     {"id": "nounou",  "label": "Nounou",        "category": ["Girl-Power", "Acquisitions"]},
+    {"id": "sabre",  "label": "Sabre",        "category": ["Girl-Power", "Acquisitions"]},
 
     # ── Épreuves ──────────────────────────────────────────────────────────────
     {"id": "charge_mentale",      "label": "Charge Mentale",            "category": ["Girl-Power", "Épreuves"]},

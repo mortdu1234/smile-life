@@ -1,3 +1,5 @@
+from backend.core.Game import Game
+from backend.core.Player import Player
 from backend.core.cards.professionnals.Bandit import Bandit
 from .HardshipCard import Hardship
 import random
@@ -18,35 +20,40 @@ class Prison(Hardship):
         return super().can_be_targeted(player, game)
     def get_name(self) -> str:
         return "Prison"
-    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
-        success = super().apply_card_effect(game, current_player)
-        if not success:
-            return False
-        assert self.target_player is not None
-        job = self.target_player.get_job()
+
+    def hardship_effect(self, game: Game, target: Player) -> bool:
+        job = target.get_job()
         if not job:
             print("[ERROR] métier non trouvé")
             return False
         # retire le métier
-        self.target_player.remove_card(job)
+        target.remove_card(job)
 
         # retire 2 cartes aléatoire de la main du joueur
         nombre_de_carte_retiree = 2
-        player_hand = self.target_player.get_hand()
+        player_hand = target.get_hand()
         for _ in range(nombre_de_carte_retiree):
             selected_card = random.choice(player_hand)
-            self.target_player.remove_card_from_hand(selected_card)
+            target.remove_card_from_hand(selected_card)
             game.add_card_to_discard(selected_card)
         for _ in range(nombre_de_carte_retiree):
             new_card = game.take_card_from_deck()
             if not new_card:
                 game.end_game()
                 return False
-            self.target_player.add_card_to_hand(new_card)
+            target.add_card_to_hand(new_card)
 
         # fait passer 3 tours
-        self.target_player.add_skip_turn(3)
-        
+        target.add_skip_turn(3)
+
+        return super().hardship_effect(game, target)
+    
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+        success = super().apply_card_effect(game, current_player)
+        if not success:
+            return False
+        assert self.target_player is not None
+        self.hardship_effect(game, self.target_player)
         return True
 
     def get_card_rule(self) -> str:

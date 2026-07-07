@@ -1,3 +1,5 @@
+from backend.core.Game import Game
+from backend.core.Player import Player
 from backend.core.Power import Power
 from .HardshipCard import Hardship
 from typing import TYPE_CHECKING
@@ -22,16 +24,21 @@ class Licenciement(Hardship):
 
     def get_name(self) -> str:
         return "Licenciement"
+
+    def hardship_effect(self, game: Game, target: Player) -> bool:
+        job_card = target.get_job()
+        assert job_card is not None
+        target.remove_card(job_card)
+        game.add_card_to_discard(job_card)
+        return super().hardship_effect(game, target)
+
+    
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         success = super().apply_card_effect(game, current_player)
         if not success:
             return False
         assert self.target_player is not None
-        job_card = self.target_player.get_job()
-        assert job_card is not None
-        self.target_player.remove_card(job_card)
-        game.add_card_to_discard(job_card)
-        
+        self.hardship_effect(game, self.target_player)
         return True
 
     def get_card_rule(self) -> str:

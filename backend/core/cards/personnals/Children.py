@@ -1,6 +1,9 @@
 """
 Cartes enfants.
 """
+from backend.core.Game import Game
+from backend.core.Player import Player
+from ...PlayerCardGroup import PlayedCardGroup as groupe
 from ...Power import Power
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -141,6 +144,13 @@ class ZeldaChild(FemaleChild):
 class BeatrixChild(GirlPowerChild):
     def get_name(self) -> str:
         return super().get_name() + "Beatrix"
+    def apply_card_effect(self, game: Game, current_player: Player) -> bool:
+        # recherche du sabre dans les cartes jouées
+        from ..acquisitions.Sabre import Sabre
+        for card in current_player.get_card_from_group(groupe.ACQUISITIONS):
+            if isinstance(card, Sabre):
+                card.sabre_effect(game, current_player)
+        return super().apply_card_effect(game, current_player)
 
 class DaenerysChild(GirlPowerChild):
     def get_name(self) -> str:

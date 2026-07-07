@@ -18,19 +18,25 @@ class ChargeMentale(Hardship):
                 children += 1
         return children > 0 and super().can_be_targeted(player, game)
 
+    def hardship_effect(self, game: "Game", target: "Player") -> bool:
+        """effectue simplement l'effet de la carte"""
+        from ..personnals.Children import ChildCard
+        from ....userIo.interface import IOType
+        list_children = [card for card in target.get_card_from_group(groupe.VIE_PERSONNELLE) if isinstance(card, ChildCard)]
+        selected_child = target.get_interface().ask_card("Charge Mentale: Choisissez un enfant à défausser", cards=list_children, kind=IOType.CARD_PICKER) # pyright: ignore[reportArgumentType]
+        if not selected_child:
+            return False
+        target.remove_card(selected_child)
+        game.add_card_to_discard(selected_child)
+        return super().hardship_effect(game, target)
+
+
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         success = super().apply_card_effect(game, current_player)
         if not success:
             return False
         assert self.target_player is not None
-        from ..personnals.Children import ChildCard
-        from ....userIo.interface import IOType
-        list_children = [card for card in self.target_player.get_card_from_group(groupe.VIE_PERSONNELLE) if isinstance(card, ChildCard)]
-        selected_child = self.target_player.get_interface().ask_card("Charge Mentale: Choisissez un enfant à défausser", cards=list_children, kind=IOType.CARD_PICKER) # pyright: ignore[reportArgumentType]
-        if not selected_child:
-            return False
-        self.target_player.remove_card(selected_child)
-        game.add_card_to_discard(selected_child)
+        self.hardship_effect(game, self.target_player)
         return True
 
     def get_name(self) -> str:

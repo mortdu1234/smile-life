@@ -17,12 +17,8 @@ class Attentat(Hardship):
         
         return super().can_be_targeted(player, game)
 
-    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
-        success = super().apply_card_effect(game, current_player)
-        if not success:
-            return False
-        assert self.target_player is not None
-        # Action
+    def hardship_effect(self, game: "Game", target: "Player") -> bool:
+        """effectue simplement l'effet de la carte"""
         from ...PlayerCardGroup import PlayedCardGroup
         from ..personnals.Children import ChildCard
         players = game.players
@@ -34,8 +30,15 @@ class Attentat(Hardship):
             for card in player.get_card_from_group(PlayedCardGroup.VIE_PERSONNELLE):
                 if isinstance(card, ChildCard):
                     player.remove_card(card)
-                    game.add_card_to_discard(card)
+        
+        return super().hardship_effect(game, target)
 
+
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+        self.target_player = current_player
+        # Action
+        self.hardship_effect(game, self.target_player)
+        
         return True
 
     def get_name(self) -> str:

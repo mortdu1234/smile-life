@@ -1,3 +1,6 @@
+from backend.core.Game import Game
+from backend.core.Player import Player
+
 from .HardshipCard import Hardship
 from ...PlayerCardGroup import PlayedCardGroup as groupe
 from typing import TYPE_CHECKING
@@ -9,19 +12,25 @@ class TachesMenagere(Hardship):
     def can_be_targeted(self, player: "Player", game: "Game") -> bool:
         return super().can_be_targeted(player, game)
 
+    def hardship_effect(self, game: Game, target: Player) -> bool:
+
+        from ..acquisitions.HouseAcquisition import House
+        played = target.get_card_from_group(groupe.ACQUISITIONS)
+        smiles = 0
+        for card in played:
+            if isinstance(card, House):
+                smiles += card.get_smiles(target)
+        target.add_skip_turn(smiles)
+        print("[DEBUG] taches ménagère : ", smiles, " tours à skip")
+
+        return super().hardship_effect(game, target)
+    
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         success = super().apply_card_effect(game, current_player)
         if not success:
             return False
         assert self.target_player is not None
-        from ..acquisitions.HouseAcquisition import House
-        played = self.target_player.get_card_from_group(groupe.ACQUISITIONS)
-        smiles = 0
-        for card in played:
-            if isinstance(card, House):
-                smiles += card.get_smiles(self.target_player)
-        self.target_player.add_skip_turn(smiles)
-        print("[DEBUG] taches ménagère : ", smiles, " tours à skip")
+        self.hardship_effect(game, self.target_player)
         return True
 
     def get_name(self) -> str:

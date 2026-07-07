@@ -39,6 +39,10 @@ class Hardship(Card):
             self.target_player = target
             return True
 
+    def hardship_effect(self, game: "Game", target: "Player") -> bool:
+        """effectue simplement l'effet de la carte"""
+        return True
+
     def can_be_targeted(self, player: "Player", game: "Game") -> bool:
         """retourne si le player est une cible potentielle"""
         if player == game.get_current_player():

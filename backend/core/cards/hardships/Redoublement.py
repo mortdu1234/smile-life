@@ -1,3 +1,5 @@
+from backend.core.Game import Game
+from backend.core.Player import Player
 from backend.core.Power import Power
 from .HardshipCard import Hardship
 from typing import TYPE_CHECKING
@@ -26,15 +28,22 @@ class Redoublement(Hardship):
         return super().can_be_targeted(player, game)
     def get_name(self) -> str:
         return "Redoublement"
+
+    def hardship_effect(self, game: Game, target: Player) -> bool:
+
+        last_study = target.get_last_study_placed()
+        assert last_study is not None
+        target.remove_card(last_study)
+        game.add_card_to_discard(last_study)
+
+        return super().hardship_effect(game, target)
+    
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         success = super().apply_card_effect(game, current_player)
         if not success:
             return False
         assert self.target_player is not None
-        last_study = self.target_player.get_last_study_placed()
-        assert last_study is not None
-        self.target_player.remove_card(last_study)
-        game.add_card_to_discard(last_study)
+        self.hardship_effect(game, self.target_player)
         return True
     def get_card_rule(self) -> str:
         return """le redoublement fait jetter dans la défausse la dernière carte étude de la cible. La cible doit être étudiante pour pouvoir subir ce malus."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

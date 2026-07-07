@@ -21,36 +21,42 @@ class Divorce(Hardship):
         return super().can_be_targeted(player, game)
     def get_name(self) -> str:
         return "Divorce"
+
+
+    def hardship_effect(self, game: "Game", target: "Player") -> bool:
+        """effectue simplement l'effet de la carte"""
+        wedding_card = target.get_wedding()
+        assert wedding_card is not None
+        target.remove_card(wedding_card)
+        game.add_card_to_discard(wedding_card)
+
+        # Vérification du cas d'adultère
+        adultery_card = target.get_adultery()
+        if adultery_card:
+            print("Cas d'adultère")
+            target.remove_card(adultery_card)
+            game.add_card_to_discard(adultery_card)
+
+            # suppression de tous les enfants
+            power = target.get_power()
+            if Power.CHILDREN_PROTECTED in power:
+                print("[DEBUG] Le joueur {} est protégé de la perte d'enfants".format(target.name))
+            else:
+                from ...PlayerCardGroup import PlayedCardGroup
+                from ..personnals.Children import ChildCard
+                for card in target.get_card_from_group(PlayedCardGroup.VIE_PERSONNELLE):
+                    if isinstance(card, ChildCard):
+                        target.remove_card(card)
+                        game.add_card_to_discard(card)            
+        
+        return super().hardship_effect(game, target)
     
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         success = super().apply_card_effect(game, current_player)
         if not success:
             return False
         assert self.target_player is not None
-        wedding_card = self.target_player.get_wedding()
-        assert wedding_card is not None
-        self.target_player.remove_card(wedding_card)
-        game.add_card_to_discard(wedding_card)
-
-        # Vérification du cas d'adultère
-        adultery_card = self.target_player.get_adultery()
-        if adultery_card:
-            print("Cas d'adultère")
-            self.target_player.remove_card(adultery_card)
-            game.add_card_to_discard(adultery_card)
-
-            # suppression de tous les enfants
-            power = self.target_player.get_power()
-            if Power.CHILDREN_PROTECTED in power:
-                print("[DEBUG] Le joueur {} est protégé de la perte d'enfants".format(self.target_player.name))
-            else:
-                from ...PlayerCardGroup import PlayedCardGroup
-                from ..personnals.Children import ChildCard
-                for card in self.target_player.get_card_from_group(PlayedCardGroup.VIE_PERSONNELLE):
-                    if isinstance(card, ChildCard):
-                        self.target_player.remove_card(card)
-                        game.add_card_to_discard(card)            
-        
+        self.hardship_effect(game, self.target_player)
         return True
 
     def get_card_rule(self) -> str:

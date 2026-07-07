@@ -9,12 +9,19 @@ class Gynocratie(Hardship):
     def can_be_targeted(self, player: "Player", game: "Game") -> bool:
         return super().can_be_targeted(player, game)
 
+
+
+    def hardship_effect(self, game: "Game", target: "Player") -> bool:
+        """effectue simplement l'effet de la carte"""
+        target.add_power(Power.GYNOCRATIE)
+        return super().hardship_effect(game, target)
+
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         success = super().apply_card_effect(game, current_player)
         if not success:
             return False
         assert self.target_player is not None
-        self.target_player.add_power(Power.GYNOCRATIE)
+        self.hardship_effect(game, self.target_player)
         return True
 
     def get_name(self) -> str:

@@ -1,3 +1,5 @@
+from backend.core.Game import Game
+from backend.core.Player import Player
 from backend.core.Power import Power
 from .HardshipCard import Hardship
 from typing import TYPE_CHECKING
@@ -26,15 +28,22 @@ class Tax(Hardship):
         return super().can_be_targeted(player, game)
     def get_name(self) -> str:
         return "Impot sur le revenue"
+
+    def hardship_effect(self, game: Game, target: Player) -> bool:
+
+        last_salary = target.get_last_salary_placed()
+        assert last_salary is not None
+        target.remove_card(last_salary)
+        game.add_card_to_discard(last_salary)
+
+        return super().hardship_effect(game, target)
+    
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         success = super().apply_card_effect(game, current_player)
         if not success:
             return False
         assert self.target_player is not None
-        last_salary = self.target_player.get_last_salary_placed()
-        assert last_salary is not None
-        self.target_player.remove_card(last_salary)
-        game.add_card_to_discard(last_salary)
+        self.hardship_effect(game, self.target_player)
         return True
 
     def get_card_rule(self) -> str:
