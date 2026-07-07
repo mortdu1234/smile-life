@@ -28,7 +28,7 @@ class Licenciement(Hardship):
     def hardship_effect(self, game: Game, target: Player) -> bool:
         job_card = target.get_job()
         assert job_card is not None
-        target.remove_card(job_card)
+        target.remove_card(job_card, game)
         game.add_card_to_discard(job_card)
         return super().hardship_effect(game, target)
 

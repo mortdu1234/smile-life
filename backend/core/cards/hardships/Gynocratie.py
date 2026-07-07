@@ -1,3 +1,6 @@
+from backend.core.Game import Game
+from backend.core.Player import Player
+
 from .HardshipCard import Hardship
 from ...Power import Power
 from typing import TYPE_CHECKING
@@ -23,6 +26,10 @@ class Gynocratie(Hardship):
         assert self.target_player is not None
         self.hardship_effect(game, self.target_player)
         return True
+
+    def discard_card(self, game: Game, owner: Player) -> None:
+        owner.remove_player_power(Power.GYNOCRATIE)
+        return super().discard_card(game, owner)
 
     def get_name(self) -> str:
         return "Gynocratie"

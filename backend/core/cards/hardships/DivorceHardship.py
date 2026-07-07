@@ -27,14 +27,14 @@ class Divorce(Hardship):
         """effectue simplement l'effet de la carte"""
         wedding_card = target.get_wedding()
         assert wedding_card is not None
-        target.remove_card(wedding_card)
+        target.remove_card(wedding_card, game)
         game.add_card_to_discard(wedding_card)
 
         # Vérification du cas d'adultère
         adultery_card = target.get_adultery()
         if adultery_card:
             print("Cas d'adultère")
-            target.remove_card(adultery_card)
+            target.remove_card(adultery_card, game)
             game.add_card_to_discard(adultery_card)
 
             # suppression de tous les enfants
@@ -46,7 +46,7 @@ class Divorce(Hardship):
                 from ..personnals.Children import ChildCard
                 for card in target.get_card_from_group(PlayedCardGroup.VIE_PERSONNELLE):
                     if isinstance(card, ChildCard):
-                        target.remove_card(card)
+                        target.remove_card(card, game)
                         game.add_card_to_discard(card)            
         
         return super().hardship_effect(game, target)

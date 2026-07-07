@@ -19,6 +19,7 @@ from .animals.SimpleAnimalCard import (
     Poussin,
 )
 from .animals.LicorneCard import LicorneAnimal
+from .animals.Dragon import Dragon
 
 # Acquisitions
 from .acquisitions.HouseAcquisition import House
@@ -257,10 +258,11 @@ _REGISTRY: dict[str, callable] = { # type: ignore
 
     # ── Animaux ───────────────────────────────────────────────────────────────
     "crapaud": lambda: Crapaud(_uid(), "img/acquisition_cards/animals/crapaud.png"),
+    "dragon": lambda: Dragon(_uid(), "img/acquisition_cards/animals/dragon.png"),
     # ── Acquisitions ──────────────────────────────────────────────────────────
     "concert": lambda: Concert(_uid(), "img/acquisition_cards/other/place_de_concert.png", 1, 1),
-    "nounou": lambda: Nounou(_uid(), "img/acquisition_cards/other/nounou.png", 1, 4),
-    "sabre": lambda: Sabre(_uid(), "img/acquisition_cards/other/sabre.png", 1, 0),
+    "nounou": lambda: Nounou(_uid(), "img/acquisition_cards/other/nounou.png", 1, 0),
+    "sabre": lambda: Sabre(_uid(), "img/acquisition_cards/other/sabre.png", 1, 1),
     # ── Épreuves ──────────────────────────────────────────────────────────────
     "charge_mentale":      lambda: ChargeMentale(_uid(), "img/hardship_cards/charge_mentale.png"),
     "taches_menageres":      lambda: TachesMenagere(_uid(), "img/hardship_cards/taches_menageres.png"),

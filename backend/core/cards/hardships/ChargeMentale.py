@@ -26,7 +26,7 @@ class ChargeMentale(Hardship):
         selected_child = target.get_interface().ask_card("Charge Mentale: Choisissez un enfant à défausser", cards=list_children, kind=IOType.CARD_PICKER) # pyright: ignore[reportArgumentType]
         if not selected_child:
             return False
-        target.remove_card(selected_child)
+        target.remove_card(selected_child, game)
         game.add_card_to_discard(selected_child)
         return super().hardship_effect(game, target)
 

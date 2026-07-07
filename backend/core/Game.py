@@ -351,8 +351,7 @@ class Game:
                 if not success:
                     return False, reason
                 else:
-                    player.remove_card(card)
-                    card.discard_job(player, self)
+                    player.remove_card(card, self)
                     self.add_card_to_discard(card)
                     self.add_to_history(f"Le joueur {self.get_current_player().name} se défausse de son métier : {card.get_name()}")    
                     if card.status != JobStatus.INTERIMERE:
@@ -378,7 +377,7 @@ class Game:
             if isinstance(card, Wedding):
                 success, reason = card.can_be_discard(player, self)
                 if success:
-                    player.remove_card(card)
+                    player.remove_card(card, self)
                     self.add_card_to_discard(card)
                     self.add_to_history(f"Le joueur {self.get_current_player().name} se défausse de son marriage {card.get_name()}")
                     self.next_turn()
@@ -403,7 +402,7 @@ class Game:
             if isinstance(card, Adultery):
                 success, reason = card.can_be_discard(player, self)
                 if success:
-                    player.remove_card(card)
+                    player.remove_card(card, self)
                     self.add_card_to_discard(card)
                     self.add_to_history(f"Le joueur {self.get_current_player().name} se défausse de son adultère {card.get_name()}")
                     self.next_turn()

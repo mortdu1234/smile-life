@@ -57,7 +57,10 @@ class Card:
     # ------------------------------------------------------------------ #
     def get_card_rule(self) -> str:
         return f"Carte classique — donne {self.smiles} smile(s).\n"
-    
+
+    def discard_card(self, game: "Game", owner: "Player") -> None:
+        """Effectue les actions lors de la perte de la carte"""
+        pass    
 
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         """Vérifie si la carte peut être jouée dans le contexte courant."""

@@ -33,7 +33,7 @@ class Redoublement(Hardship):
 
         last_study = target.get_last_study_placed()
         assert last_study is not None
-        target.remove_card(last_study)
+        target.remove_card(last_study, game)
         game.add_card_to_discard(last_study)
 
         return super().hardship_effect(game, target)

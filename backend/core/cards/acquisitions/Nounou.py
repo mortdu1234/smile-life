@@ -21,5 +21,9 @@ class Nounou(Acquisition):
         current_player.add_power(Power.CHILDREN_PROTECTED)
         return True
 
+    def discard_card(self, game: Game, owner: Player) -> None:
+        owner.remove_player_power(Power.CHILDREN_PROTECTED)
+        return super().discard_card(game, owner)
+
     def get_card_rule(self) -> str:
         return """Protège tous les enfants posé par le joueur de tous les malus""" + "\n"+ "="*10+ "\n" + super().get_card_rule()

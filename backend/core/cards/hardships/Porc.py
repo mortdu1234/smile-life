@@ -19,7 +19,7 @@ class Porc(Hardship):
         for _ in range(3):
             flirt_card = target.get_last_flirt()
             if flirt_card:
-                target.remove_card(flirt_card)
+                target.remove_card(flirt_card, game)
                 game.add_card_to_discard(flirt_card)
         return super().hardship_effect(game, target)
     

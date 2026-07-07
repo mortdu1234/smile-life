@@ -30,12 +30,10 @@ class Tax(Hardship):
         return "Impot sur le revenue"
 
     def hardship_effect(self, game: Game, target: Player) -> bool:
-
         last_salary = target.get_last_salary_placed()
         assert last_salary is not None
-        target.remove_card(last_salary)
+        target.remove_card(last_salary, game)
         game.add_card_to_discard(last_salary)
-
         return super().hardship_effect(game, target)
     
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:

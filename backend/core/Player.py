@@ -5,6 +5,7 @@ if TYPE_CHECKING:
     from ..userIo.interface import UserIO
     from .cards.professionnals.SalaryCard import SalaryCard
     from .cards.professionnals.StudyCard import StudyCard
+    from .Game import Game
 from ..userIo.web import WebIO
 from .cards.personnals.Wedding import Adultery, Wedding
 from .cards.professionnals.JobCard import JobCard
@@ -113,7 +114,7 @@ class Player:
         """recherche une carte jouée par son id"""
         return self.cards.get(card_id)
 
-    def remove_card(self, card: Card) -> None:
+    def remove_card(self, card: Card, game: "Game") -> None:
         """retire une carte des cartes jouées"""
         card_id = card.get_id()
         success = self.cards.pop(card_id, None)
@@ -122,6 +123,7 @@ class Player:
         groups: list[PlayedCardGroup] = PlayedCardGroup.get_card_groups(card)
         for group in groups:
             try:
+                card.discard_card(game, self)
                 self.groupe[group].remove(card)
             except ValueError:
                 print(f"Erreur, player:{self.name} \nretirer carte:{card.id} de type {card.__class__}\ngroupe:{group} contient : {[carte.__class__ for carte in self.groupe[group]]}")
@@ -192,6 +194,12 @@ class Player:
             if isinstance(card, Wedding):
                 return True
         return False
+    def remove_player_power(self, power: Power):
+        """retire un pouvoir dans la liste du joueur (sans le métier)"""
+        try:
+            self.power.remove(power)
+        except ValueError:        
+            print("[ERROR] Le pouvoir demander est nul part")
 
     def remove_power(self, power: Power):
         """retire un pouvoir dans la liste"""

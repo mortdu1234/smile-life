@@ -28,11 +28,11 @@ class JobCard(Card):
         """retourne les pouvoirs du métier"""
         return self.jobPower + [Power.NO_FIRE] if self.status==JobStatus.FONCTIONNAIRE else self.jobPower
 
-    def discard_job(self, current_player: "Player", game: "Game"):
-        """Effectue les actions lors d'un discard du métier"""
+    def discard_card(self, game: "Game", owner: "Player") -> None:
         if self.old_salary:
             self.salary = self.old_salary
             self.old_salary = None
+        return super().discard_card(game, owner)
 
     def set_salary(self, new_salary: int):
         """permet de changer le salaire du métier"""

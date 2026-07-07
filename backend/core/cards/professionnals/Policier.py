@@ -1,11 +1,11 @@
 from ...JobStatus import JobStatus
-from ...Game import Game
-from ...Player import Player
 from ...Power import Power
 from .JobCard import JobCard
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ....userIo.interface import UserIO
+    from ...Game import Game
+    from ...Player import Player
 class Policier(JobCard):
     def __init__(self, id: int, image_path: str):
         super().__init__(id, image_path)
@@ -17,7 +17,7 @@ class Policier(JobCard):
     def get_name(self) -> str:
         return "Policier"
 
-    def apply_card_effect(self, game: Game, current_player: Player) -> bool:
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         """supprimer tous les bandit et gourous sur le terrain"""
         for player in game.players:
             job = player.get_job()
@@ -26,8 +26,7 @@ class Policier(JobCard):
                 from .Gourou import Gourou
                 if isinstance(job, (Gourou, Bandit)):
                     print("Perte d'un métier a cause du policier")
-                    job.discard_job(player, game)
-                    player.remove_card(job)
+                    player.remove_card(job, game)
                 
         return super().apply_card_effect(game, current_player)
     def get_card_rule(self) -> str:

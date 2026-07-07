@@ -24,12 +24,11 @@ class Chercheur(JobCard):
             card = game._draw_card_from_deck()
             current_player.add_card_to_hand(card)
         return super().apply_card_effect(game, current_player)
-    
-    def discard_job(self, current_player: Player, game: Game):
-        """retire une carte aléatoire de sa main et la jette dans la défausse"""
-        selected_card : Card = random.choice(current_player.hand)
-        current_player.remove_card_from_hand(selected_card)
-        return super().discard_job(current_player, game)
 
+    def discard_card(self, game: Game, owner: Player) -> None:
+        selected_card : Card = random.choice(owner.hand)
+        owner.remove_card_from_hand(selected_card)
+        return super().discard_card(game, owner)
+    
     def get_card_rule(self) -> str:
         return """Permet de jouer avec 6 cartes en main. Peut recevoir un Grand Prix d'excellence."""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

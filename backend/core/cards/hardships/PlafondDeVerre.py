@@ -23,6 +23,11 @@ class PlafondDeVerre(Hardship):
         self.hardship_effect(game, self.target_player)
         return True
 
+    def discard_card(self, game: Game, owner: Player) -> None:
+        owner.remove_player_power(Power.JOB_MAX_STUDY_4)
+        return super().discard_card(game, owner)
+
+    
     def get_name(self) -> str:
         return "Plafond de Verre"
 

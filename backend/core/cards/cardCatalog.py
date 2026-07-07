@@ -133,6 +133,7 @@ CATALOG: list[dict] = [
     {"id": "louise",     "label": "Louise",                "category": ["Girl-Power", "Enfants"]}, 
     # ── Animaux ───────────────────────────────────────────────────────────────
     {"id": "crapaud",    "label": "Crapaud",               "category": ["Girl-Power", "Animaux"]},
+    {"id": "dragon",    "label": "Dragon",               "category": ["Girl-Power", "Animaux"]},
     # ── Acquisitions ──────────────────────────────────────────────────────────
     {"id": "concert",  "label": "Concert",        "category": ["Girl-Power", "Acquisitions"]},
     {"id": "nounou",  "label": "Nounou",        "category": ["Girl-Power", "Acquisitions"]},

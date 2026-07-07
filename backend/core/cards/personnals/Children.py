@@ -155,4 +155,11 @@ class BeatrixChild(GirlPowerChild):
 class DaenerysChild(GirlPowerChild):
     def get_name(self) -> str:
         return super().get_name() + "Daenerys"
+    def apply_card_effect(self, game: Game, current_player: Player) -> bool:
+        # recherche du dragon dans les cartes jouées
+        from ..animals.Dragon import Dragon
+        for card in current_player.get_card_from_group(groupe.VIE_PERSONNELLE):
+            if isinstance(card, Dragon):
+                card.dragon_effect(game, current_player)
+        return super().apply_card_effect(game, current_player)
     

@@ -29,7 +29,7 @@ class Attentat(Hardship):
                 continue
             for card in player.get_card_from_group(PlayedCardGroup.VIE_PERSONNELLE):
                 if isinstance(card, ChildCard):
-                    player.remove_card(card)
+                    player.remove_card(card, game)
         
         return super().hardship_effect(game, target)
 

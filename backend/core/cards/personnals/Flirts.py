@@ -41,7 +41,7 @@ class Flirt(Card):
             if player != current_player:
                 last_flirt = player.get_last_flirt()
                 if last_flirt and last_flirt.get_place() == self.place and not player.is_wedding():
-                    player.remove_card(last_flirt)
+                    player.remove_card(last_flirt, game)
                     current_player.add_card_to_played(last_flirt)
         return super().apply_card_effect(game, current_player)
     
