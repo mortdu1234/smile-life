@@ -39,6 +39,7 @@ from .hardships.TachesMenagere import TachesMenagere
 from .hardships.Porc import Porc
 from .hardships.Phalocratie import Phalocratie
 from .hardships.Gynocratie import Gynocratie
+from .hardships.PlafondDeVerre import PlafondDeVerre
 
 # Personnal life
 from .personnals.Flirts import Flirt, FlirtWithChild
@@ -260,6 +261,7 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "porc":      lambda: Porc(_uid(), "img/hardship_cards/porc.png"),
     "phalocratie":      lambda: Phalocratie(_uid(), "img/hardship_cards/phalocratie.png"),
     "gynocratie":      lambda: Gynocratie(_uid(), "img/hardship_cards/gynocratie.png"),
+    "plafond_de_verre":      lambda: PlafondDeVerre(_uid(), "img/hardship_cards/plafond_de_verre.png"),
 
     # ── Flirts ────────────────────────────────────────────────────────────────
     "flirt__manif":            lambda: Flirt(_uid(), "img/personnal_life/flirts/manif.png", 1, FlirtPlaces.MANIF),

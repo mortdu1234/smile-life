@@ -22,3 +22,5 @@ class Power(Enum):
     MAX_HAND_CARD_5 = "max_hand_card_5" # peut avoir jusqu'a 5 cartes en main
     GYNOCRATIE = "gynocratie" # les smiles des enfants garçons sont divisés par 2
     PHALOCRATIE = "phalocratie" # les smiles des enfants filles sont divisés par 2
+    JOB_MAX_STUDY_5 = "job_max_study_5" # le joueur peut avoir un job avec un niveau d'étude maximum de 5
+    JOB_MAX_STUDY_4 = "job_max_study_4" # le joueur peut avoir un job avec un niveau d'étude maximum de 4

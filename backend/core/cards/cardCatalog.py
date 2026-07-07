@@ -140,6 +140,7 @@ CATALOG: list[dict] = [
     {"id": "porc",      "label": "Porc",            "category": ["Girl-Power", "Épreuves"]},
     {"id": "phalocratie",      "label": "Phalocratie",            "category": ["Girl-Power", "Épreuves"]},
     {"id": "gynocratie",      "label": "Gynocratie",            "category": ["Girl-Power", "Épreuves"]},
+    {"id": "plafond_de_verre",      "label": "Plafond de Verre",            "category": ["Girl-Power", "Épreuves"]},
     # ── Flirts ────────────────────────────────────────────────────────────────
     {"id": "flirt__manif",               "label": "Flirt – manif",         "category": ["Girl-Power", "Flirts & Mariages"]},
     {"id": "flirt_with_child__bibliotheque",  "label": "Flirt – bibliotheque",       "category": ["Girl-Power", "Flirts & Mariages"]},    

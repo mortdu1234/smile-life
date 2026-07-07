@@ -44,6 +44,14 @@ class JobCard(Card):
         player_level = player.get_study_level() 
         if player_level < self.study:
             return False, f"Pas assez d'étude, {player_level}<{self.study}"
+
+        player_power = player.get_power()
+        if Power.JOB_MAX_STUDY_5 in player_power and self.study > 5:
+            return False, f"Vous ne pouvez pas poser un métier avec plus de 5 d'étude"
+        if Power.JOB_MAX_STUDY_4 in player_power and self.study > 4:
+            return False, f"Vous ne pouvez pas poser un métier avec plus de 4 d'étude"
+
+
         print(f"essaye de poser un métier : {player.get_job()}")
         if player.get_job():
             return False, "Vous avez déja un métier"
