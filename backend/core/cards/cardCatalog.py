@@ -66,8 +66,8 @@ CATALOG: list[dict] = [
     {"id": "flirt__restaurant",        "label": "Flirt – Restaurant",  "category": ["Base", "Flirts & Mariages"]},
     {"id": "flirt__theatre",           "label": "Flirt – Théâtre",     "category": ["Base", "Flirts & Mariages"]},
     {"id": "flirt__zoo",               "label": "Flirt – Zoo",         "category": ["Base", "Flirts & Mariages"]},
-    {"id": "flirt_with_child__hotel",  "label": "Flirt – Hôtel",       "category": ["Base", "Flirts & Mariages"]},
-    {"id": "flirt_with_child__camping","label": "Flirt – Camping",     "category": ["Base", "Flirts & Mariages"]},
+    {"id": "flirt_with_child__hotel",  "label": "Flirt enfant – Hôtel",       "category": ["Base", "Flirts & Mariages"]},
+    {"id": "flirt_with_child__camping","label": "Flirt enfant – Camping",     "category": ["Base", "Flirts & Mariages"]},
     {"id": "adultery",                 "label": "Adultère",            "category": ["Base", "Flirts & Mariages"]},
     {"id": "marriage__corps_nuds",     "label": "Mariage Corps Nus",   "category": ["Base", "Flirts & Mariages"]},
     {"id": "marriage__fourqueux",      "label": "Mariage Fourqueux",   "category": ["Base", "Flirts & Mariages"]},
@@ -143,7 +143,7 @@ CATALOG: list[dict] = [
     {"id": "plafond_de_verre",      "label": "Plafond de Verre",            "category": ["Girl-Power", "Épreuves"]},
     # ── Flirts ────────────────────────────────────────────────────────────────
     {"id": "flirt__manif",               "label": "Flirt – manif",         "category": ["Girl-Power", "Flirts & Mariages"]},
-    {"id": "flirt_with_child__bibliotheque",  "label": "Flirt – bibliotheque",       "category": ["Girl-Power", "Flirts & Mariages"]},    
+    {"id": "flirt_with_child__bibliotheque",  "label": "Flirt enfant – bibliotheque",       "category": ["Girl-Power", "Flirts & Mariages"]},    
     # ── Métiers ───────────────────────────────────────────────────────────────
     {"id": "serveuse",          "label": "Serveure",             "category": ["Girl-Power", "Métiers"]},
     {"id": "garagiste_f",        "label": "Garagiste(f)",           "category": ["Girl-Power", "Métiers"]},
