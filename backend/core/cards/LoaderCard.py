@@ -8,6 +8,7 @@ from backend.core.cards.professionnals.NoPowerJob import Designer, Jardinier, Pi
 from backend.core.cards.professionnals.Policier import Policier
 from backend.core.cards.professionnals.Prof import Prof
 from backend.core.cards.professionnals.Stripteaser import Stripteaser
+
 from .Card import Card
 
 # Animals
@@ -110,6 +111,7 @@ from .specials.Heritage import Heritage
 from .specials.Troc import Troc
 from .specials.ClicheAccident import ClicheAccident
 from .specials.ClicheFlirt import ClicheFlirt
+from .specials.CoupDeFoudre import CoupDeFoudre
 
 from ..FlirtPlaces import FlirtPlaces
 
@@ -260,7 +262,7 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "dragon": lambda: Dragon(_uid(), "img/acquisition_cards/animals/dragon.png"),
     # ── Acquisitions ──────────────────────────────────────────────────────────
     "concert": lambda: Concert(_uid(), "img/acquisition_cards/other/place_de_concert.png", 1, 1),
-    "nounou": lambda: Nounou(_uid(), "img/acquisition_cards/other/nounou.png", 1, 0),
+    "nounou": lambda: Nounou(_uid(), "img/acquisition_cards/other/nounou.png", 1, 4),
     "sabre": lambda: Sabre(_uid(), "img/acquisition_cards/other/sabre.png", 1, 1),
     # ── Épreuves ──────────────────────────────────────────────────────────────
     "charge_mentale":      lambda: ChargeMentale(_uid(), "img/hardship_cards/charge_mentale.png"),
@@ -306,6 +308,7 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     # ── Specials ───────────────────────────────────────────────────────────────
     "cliche_accident": lambda: ClicheAccident(_uid(), "img/special_cards/cliche_accident.png", 0),
     "cliche_flirt": lambda: ClicheFlirt(_uid(), "img/special_cards/cliche_flirt.png", 0),
+    "coup_de_foudre": lambda: CoupDeFoudre(_uid(), "img/special_cards/coup_de_foudre.png", 0),
 
 }
 

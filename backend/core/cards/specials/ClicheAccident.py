@@ -1,6 +1,3 @@
-from backend.core.Game import Game
-from backend.core.Player import Player
-
 from .SpecialCard import SpecialCard
 from typing import TYPE_CHECKING
 from ...Power import Power
@@ -21,7 +18,7 @@ class ClicheAccident(SpecialCard):
         current_player.add_power(Power.NO_ACCIDENT)
         return super().apply_card_effect(game, current_player)
 
-    def discard_card(self, game: Game, owner: Player) -> None:
+    def discard_card(self, game: "Game", owner: "Player") -> None:
         owner.remove_player_power(Power.NO_ACCIDENT)
         return super().discard_card(game, owner)
     

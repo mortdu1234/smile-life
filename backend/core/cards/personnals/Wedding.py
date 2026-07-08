@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from ...PlayerCardGroup import PlayedCardGroup as groupe
 if TYPE_CHECKING:
     from ...Game import Game
     from ...Player import Player
@@ -36,6 +37,15 @@ class Adultery(Card):
         return super().can_be_played(player, game)
     def get_name(self) -> str:
         return "Adultère"
+    def discard_card(self, game: "Game", owner: "Player") -> None:
+        # vérifie si le joueur possède un adultère, dans ce cas, le retire aussi
+        from .Wedding import Adultery
+        played = owner.get_card_from_group(groupe.VIE_PERSONNELLE)
+        for card in played:
+            if isinstance(card, Adultery):
+                owner.remove_card(card, game)
+        return super().discard_card(game, owner)
+    
     def can_be_discard(self, player: "Player", game: "Game") -> tuple[bool, str]:
         """vérifie si on peut annuler son adultère ou non"""
         from ...Game import TurnState

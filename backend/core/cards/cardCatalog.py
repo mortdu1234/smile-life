@@ -184,6 +184,7 @@ CATALOG: list[dict] = [
     # ── Spéciales ─────────────────────────────────────────────────────────────
     {"id": "cliche_accident",             "label": "Cliché Accident",                "category": ["Girl-Power", "Spéciales"]},
     {"id": "cliche_flirt",             "label": "Cliché Flirt",                "category": ["Girl-Power", "Spéciales"]},
+    {"id": "coup_de_foudre",             "label": "Coup De Foudre",                "category": ["Girl-Power", "Spéciales"]},
 
     #########################################################################################
     # ── Fantastique ──────────────────────────────────────────────────────────────
