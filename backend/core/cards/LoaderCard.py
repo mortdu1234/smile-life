@@ -116,6 +116,7 @@ from .specials.EgaliteSalaire import EgaliteSalaire
 from .specials.SoireeEntreFille import SoireeEntreFille
 from .specials.GirlPower import GrilPower
 from .specials.ErreurEtiquetage import ErreurEtiquetage
+from .specials.RedistributionTaches import RedistributionTaches
 
 from ..FlirtPlaces import FlirtPlaces
 
@@ -317,6 +318,7 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "soiree_entre_fille": lambda: SoireeEntreFille(_uid(), "img/special_cards/soiree_entre_filles.png", 0),
     "gril_power": lambda: GrilPower(_uid(), "img/special_cards/girl_power.png", 0),
     "erreur_etiquetage": lambda: ErreurEtiquetage(_uid(), "img/special_cards/erreur_etiquetage.png", 0),
+    "redistribution_taches": lambda: RedistributionTaches(_uid(), "img/special_cards/redistribution_taches.png", 0),
 }
 
 
