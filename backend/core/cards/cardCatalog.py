@@ -74,6 +74,7 @@ CATALOG: list[dict] = [
     {"id": "marriage__montcuq",        "label": "Mariage Montcuq",     "category": ["Base", "Flirts & Mariages"]},
     {"id": "marriage__monteton",       "label": "Mariage Monteton",    "category": ["Base", "Flirts & Mariages"]},
     {"id": "marriage__sainte_vierge",  "label": "Mariage Sainte-Vierge","category": ["Base", "Flirts & Mariages"]},
+    {"id": "marriage__bourg_la_reine",  "label": "Mariage Bourg-la-reine","category": ["Base", "Flirts & Mariages"]},
     # ── Métiers ───────────────────────────────────────────────────────────────
     {"id": "serveur",          "label": "Serveur",             "category": ["Base", "Métiers"]},
     {"id": "garagiste",        "label": "Garagiste",           "category": ["Base", "Métiers"]},

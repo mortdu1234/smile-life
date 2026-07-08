@@ -190,6 +190,7 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "marriage__montcuq":            lambda: Wedding(_uid(), "img/personnal_life/mariages/marriage_montcuq.png", 3),
     "marriage__monteton":           lambda: Wedding(_uid(), "img/personnal_life/mariages/marriage_monteton.png", 3),
     "marriage__sainte_vierge":      lambda: Wedding(_uid(), "img/personnal_life/mariages/marriage_sainte_vierge.png", 3),
+    "marriage__bourg_la_reine":      lambda: Wedding(_uid(), "img/personnal_life/mariages/marriage_bourg_la_reine.png", 3),
 
     "flirt__bar":            lambda: Flirt(_uid(), "img/personnal_life/flirts/bar.png", 1, FlirtPlaces.BAR),
     "flirt__boite_de_nuit":  lambda: Flirt(_uid(), "img/personnal_life/flirts/boite_de_nuit.png", 1, FlirtPlaces.BOITE_DE_NUIT),

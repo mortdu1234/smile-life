@@ -1,7 +1,7 @@
 {
-  "id": "standard",
-  "label": "🎮 Base",
-  "description": "Uniquement les cartes de base (sans cartes spéciales ni extensions)",
+  "id": "girl-power",
+  "label": "Girl Power",
+  "description": "Possède le jeu de base + l'extention Girl Power",
   "deck": {
     "study__1": 22, "study__2": 3,
 
@@ -41,6 +41,32 @@
 
     "licorne": 1, "poussin": 1, "lapin": 1, "chien": 1, "chat": 1,
 
-    "prix": 2, "legion": 1
+    "prix": 2, "legion": 1,
+
+
+
+    "olympe":1, "simone":1, "angela":1, "beatrix":1, "daenerys":1, "louise":1,
+
+    "crapaud":1, "dragon":1,
+
+    "concert":1, "nounou":1, "sabre":1,
+
+    "charge_mentale":1, "taches_menageres":1, "porc":1, "phalocratie":1, 
+    "gynocratie":1, "plafond_de_verre":1,
+
+    "flirt__manif":2, "flirt_with_child__bibliotheque":2,
+
+    "serveuse": 1, "garagiste_f": 1, "plombiere": 1, "bandit_f": 1,
+    "ecrivaine": 1, "pharmacienne": 1, "architecte_f": 1, "militaire_f": 1,
+    "voyante": 1, "journaliste_f": 1, "cheffe_des_achats": 1, "medecin_f": 1,
+    "chirurgienne": 1, "pilote_de_ligne_f": 1, "astronaute_f": 1, "avocate": 1,
+    "barmaid": 1, "cheffe_des_ventes": 1,"chercheuse": 1,"gourou_f": 1,
+    "grande_prof": 1,"designeuse": 1,"jardiniere": 1,"pizzaiola": 1,
+    "policiere": 1,"prof__chimie": 1,"prof__musique": 1,"prof__philo": 1,
+    "prof__geo": 1, "stripteaseuse": 1,
+  
+    "cliche_accident": 1, "cliche_flirt": 1, "coup_de_foudre": 1,
+    "egalite_salaire": 1, "soiree_entre_fille": 1, "girl_power": 1,
+    "erreur_etiquetage": 1,"redistribution_taches": 1
   }
 }
