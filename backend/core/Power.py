@@ -25,4 +25,4 @@ class Power(Enum):
     JOB_MAX_STUDY_5 = "job_max_study_5" # le joueur peut avoir un job avec un niveau d'étude maximum de 5
     JOB_MAX_STUDY_4 = "job_max_study_4" # le joueur peut avoir un job avec un niveau d'étude maximum de 4
     CHILDREN_PROTECTED = "children_protected" # les enfants du joueur sont protégés de tous les malus
-    
+    EGALITE_SALAIRE = "egalite_salaire" # permet de poser des salaires par rapport au métier le mieux payé

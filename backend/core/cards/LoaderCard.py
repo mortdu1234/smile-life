@@ -112,6 +112,7 @@ from .specials.Troc import Troc
 from .specials.ClicheAccident import ClicheAccident
 from .specials.ClicheFlirt import ClicheFlirt
 from .specials.CoupDeFoudre import CoupDeFoudre
+from .specials.EgaliteSalaire import EgaliteSalaire
 
 from ..FlirtPlaces import FlirtPlaces
 
@@ -309,6 +310,7 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "cliche_accident": lambda: ClicheAccident(_uid(), "img/special_cards/cliche_accident.png", 0),
     "cliche_flirt": lambda: ClicheFlirt(_uid(), "img/special_cards/cliche_flirt.png", 0),
     "coup_de_foudre": lambda: CoupDeFoudre(_uid(), "img/special_cards/coup_de_foudre.png", 0),
+    "egalite_salaire": lambda: EgaliteSalaire(_uid(), "img/special_cards/egalite_salaire.png", 0),
 
 }
 

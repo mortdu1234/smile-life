@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from ...Player import Player
 
 from ..Card import Card
-
+from ...Power import Power
 class SalaryCard(Card):
     value: int
     def __init__(self, id: int, image_path: str, smiles: int, value: int):
@@ -23,10 +23,23 @@ class SalaryCard(Card):
 
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         job=player.get_job()
-        if not (job and job.get_salary() >= self.value):
-            if job:
-                return False, f"le métier ne permet pas de mettre des salaires de valeur {self.value}>{job.get_salary()}"  
-            return False, f"Vous n'avez pas de métiers0"
+        powers = player.get_power()
+        if not job:
+            return False, f"Vous n'avez pas de métiers"
+
+        max_salary = job.get_salary() 
+        if Power.EGALITE_SALAIRE in powers:
+            players = game.players
+            for player_i in players:
+                job_i = player_i.get_job()
+                if job_i:
+                    salary = job_i.get_salary() 
+                    max_salary = max(salary, max_salary)
+    
+        if max_salary < self.value:
+            return False, f"le métier ne permet pas de mettre des salaires de valeur {self.value}>{job.get_salary()}"  
+            
         return super().can_be_played(player, game)
+    
     def get_card_rule(self) -> str:
         return f"Il s'agit d'une carte Salaire de valeur {self.value}" + """les salaires peuvent etre dépensé, dans ce cas, ils arrivent dans la zone "Cartes Protégéesé". POur etre posé il faut avoir un métier ou les miser au casino (si le casino est ouvert)"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()
