@@ -16,7 +16,7 @@ class Piston(SpecialCard):
             from backend.core.cards.professionnals.JobCard import JobCard
             if isinstance(card, JobCard):
                 cards_availables.append(card)
-        current_player.remove_card(self)
+        current_player.remove_card(self, game)
         return cards_availables
         
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:

@@ -114,6 +114,7 @@ from .specials.ClicheFlirt import ClicheFlirt
 from .specials.CoupDeFoudre import CoupDeFoudre
 from .specials.EgaliteSalaire import EgaliteSalaire
 from .specials.SoireeEntreFille import SoireeEntreFille
+from .specials.GrilPower import GrilPower
 
 from ..FlirtPlaces import FlirtPlaces
 
@@ -313,6 +314,7 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "coup_de_foudre": lambda: CoupDeFoudre(_uid(), "img/special_cards/coup_de_foudre.png", 0),
     "egalite_salaire": lambda: EgaliteSalaire(_uid(), "img/special_cards/egalite_salaire.png", 0),
     "soiree_entre_fille": lambda: SoireeEntreFille(_uid(), "img/special_cards/soiree_entre_filles.png", 0),
+    "gril_power": lambda: GrilPower(_uid(), "img/special_cards/girl_power.png", 0),
 
 }
 

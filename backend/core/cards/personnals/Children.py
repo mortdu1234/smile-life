@@ -54,6 +54,16 @@ class FemaleChild(ChildCard):
         if Power.GYNOCRATIE in owner.get_power():
             return self.smiles // 2
         return self.smiles
+    def apply_card_effect(self, game: Game, current_player: Player) -> bool:
+        from ..specials.GrilPower import GrilPower
+        powers = current_player.get_power()
+        if Power.GIRL_POWER in powers:
+            played = current_player.get_card_from_group(groupe.CARTES_SPECIALES)
+            for card in played:
+                if isinstance(card, GrilPower):
+                    card.girl_power_effect(game, current_player)
+                    
+        return super().apply_card_effect(game, current_player)
 
 class MaleChild(ChildCard):
     """Mixin — enfant masculin."""

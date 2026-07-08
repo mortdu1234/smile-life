@@ -187,6 +187,7 @@ CATALOG: list[dict] = [
     {"id": "coup_de_foudre",             "label": "Coup De Foudre",                "category": ["Girl-Power", "Spéciales"]},
     {"id": "egalite_salaire",             "label": "Egalité des Salaires",                "category": ["Girl-Power", "Spéciales"]},
     {"id": "soiree_entre_fille",             "label": "Soirée entre Filles",                "category": ["Girl-Power", "Spéciales"]},
+    {"id": "girl_power",             "label": "Girl Power",                "category": ["Girl-Power", "Spéciales"]},
 
     #########################################################################################
     # ── Fantastique ──────────────────────────────────────────────────────────────
