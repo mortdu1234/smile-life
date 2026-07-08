@@ -1,0 +1,61 @@
+{# templates/overlays/error-labelling.html #}
+{# Inclure ce template via {% include %} ou le rendre dynamiquement via JS #}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/light-mode/overlays/error-labelling.css') }}">
+
+<div id="labelling-overlay" class="labelling-overlay" aria-modal="true" role="dialog" aria-labelledby="labelling-overlay-title" hidden>
+  <div class="labelling-overlay__backdrop"></div>
+
+  <div class="labelling-overlay__panel">
+
+    <div class="labelling-overlay__header">
+      <span class="labelling-overlay__tag">ERREUR D'ÉTIQUETAGE</span>
+      <h2 class="labelling-overlay__title" id="labelling-overlay-title">Échanger une carte</h2>
+      <p class="labelling-overlay__prompt" id="labelling-prompt-text"></p>
+    </div>
+
+    <div class="labelling-overlay__body">
+
+      <!-- Joueur courant (owner) -->
+      <section class="labelling-overlay__owner-section">
+        <div class="labelling-overlay__section-header">
+          <div class="labelling-overlay__player-badge">
+            <div class="labelling-overlay__player-avatar" id="owner-avatar"></div>
+            <span class="labelling-overlay__player-name" id="owner-name"></span>
+          </div>
+          <span class="labelling-overlay__hint">Choisissez 1 carte</span>
+        </div>
+        <div class="labelling-overlay__cards-row" id="owner-cards-grid" role="listbox" aria-label="Cartes du joueur courant"></div>
+      </section>
+
+      <div class="labelling-overlay__divider"></div>
+
+      <!-- Autres joueurs -->
+      <section class="labelling-overlay__others-section">
+        <div class="labelling-overlay__section-header">
+          <span class="labelling-overlay__section-title">Autres joueurs</span>
+          <span class="labelling-overlay__hint">Choisissez 1 carte parmi tous les autres joueurs</span>
+        </div>
+        <div class="labelling-overlay__others-list" id="others-list">
+          {# Lignes injectées dynamiquement via JS, une par adversaire #}
+        </div>
+      </section>
+
+    </div>
+
+    <div class="labelling-overlay__footer">
+      <button
+        class="labelling-overlay__btn labelling-overlay__btn--confirm"
+        id="labelling-confirm-btn"
+        type="button"
+        disabled
+        aria-label="Confirmer la sélection"
+      >
+        <span class="labelling-overlay__btn-text">Confirmer</span>
+        <svg class="labelling-overlay__btn-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+  </div>
+</div>

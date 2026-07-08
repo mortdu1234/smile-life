@@ -188,6 +188,7 @@ CATALOG: list[dict] = [
     {"id": "egalite_salaire",             "label": "Egalité des Salaires",                "category": ["Girl-Power", "Spéciales"]},
     {"id": "soiree_entre_fille",             "label": "Soirée entre Filles",                "category": ["Girl-Power", "Spéciales"]},
     {"id": "girl_power",             "label": "Girl Power",                "category": ["Girl-Power", "Spéciales"]},
+    {"id": "erreur_etiquetage",             "label": "Erreur Etiquetage",                "category": ["Girl-Power", "Spéciales"]},
 
     #########################################################################################
     # ── Fantastique ──────────────────────────────────────────────────────────────

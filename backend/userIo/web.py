@@ -1,13 +1,14 @@
+from http.client import TEMPORARY_REDIRECT
 from time import sleep
 from typing import Sequence, TYPE_CHECKING
 
-from backend.core.cards.Card import Card
 
 from .interface import UserIO, IOType
 if TYPE_CHECKING:
     from ..core.Player import Player
     from ..core.cards.Card import Card
     from ..core.cards.acquisitions.Acquisition import Acquisition
+    from ..core.cards.personnals.Children import ChildCard
 
 from gevent.queue import Queue
 
@@ -36,6 +37,30 @@ class WebIO(UserIO):
     def ask_card(self, prompt: str, cards: list["Card"], kind: IOType) -> "Card | None":
         """retourne l'id de la carte selectionnée"""
         return self._ask(prompt, cards, kind) # type: ignore
+
+    def erreur_detiquetage_interface(self, owner: "Player", others: "list[Player]", children_owner: "list[ChildCard]", children_others: "list[list[ChildCard]]") -> "tuple[ChildCard, ChildCard, Player]":
+        """effectue l'interface de l'erreur d'étiquetage, retourne 2 carte selectionnee avec le joueur selectionnee"""
+        sleep(TEMPS_ATTENTES)
+        self.pending = {
+            "ui_component": IOType.ERROR_LABELLING.value,
+            "prompt": "Sélectionnez une carte à échanger avec la carte d'un autre joueur.",
+            "owner_name": owner.name,
+            "owner_cards": [c.to_dict() for c in children_owner],
+            "others": [
+                {"player_name": p.name, "cards": [c.to_dict() for c in cards]}
+                for p, cards in zip(others, children_others)
+            ],
+        }
+        # Le frontend envoie via la route générique /submit-indices :
+        # [owner_index, other_player_index, other_card_index]
+        owner_index, other_player_index, other_card_index = self._queue.get()
+        self.pending = None
+
+        owner_card = children_owner[owner_index]
+        other_player = others[other_player_index]
+        other_card = children_others[other_player_index][other_card_index]
+        return owner_card, other_card, other_player
+
 
     def ask_salaries(self, acquisition: "Acquisition", salaries: Sequence["Card"], cost: int) -> list["Card"]:
         """Affiche l'overlay de sélection de salaires.
@@ -78,7 +103,7 @@ class WebIO(UserIO):
         """Appelé par la route Flask quand l'utilisateur ferme un overlay de consultation."""
         self._queue.put(None)
 
-    def show_players_hand(self, players_names: Sequence[str], players_hands: Sequence[Sequence[Card]]):
+    def show_players_hand(self, players_names: Sequence[str], players_hands: "Sequence[Sequence[Card]]"):
         sleep(TEMPS_ATTENTES)
         self.pending = {
             "ui_component": IOType.SHOW_HAND.value,

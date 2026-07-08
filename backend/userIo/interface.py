@@ -6,6 +6,7 @@ if TYPE_CHECKING:
     from ..core.Player import Player
     from ..core.cards.Card import Card
     from ..core.cards.acquisitions.Acquisition import Acquisition
+    from ..core.cards.personnals.Children import ChildCard
 
 class IOType(Enum):
     HARDSHIP_TARGET = "hardship-target"
@@ -14,6 +15,7 @@ class IOType(Enum):
     SHOW_HAND       = "show-hand"
     CARD_PICKER     = "card-picker"
     PLAYER_PICKER   = "player-picker"
+    ERROR_LABELLING = "error-labelling"
 
 class UserIO(ABC):
     @abstractmethod
@@ -24,6 +26,11 @@ class UserIO(ABC):
     @abstractmethod
     def ask_card(self, prompt: str, cards: list["Card"], kind: IOType) -> "Card | None":
         """retourne l'id de la carte selectionnée"""
+        pass
+
+    @abstractmethod
+    def erreur_detiquetage_interface(self, owner: "Player", others: "list[Player]", children_owner: "list[ChildCard]", children_others: "list[list[ChildCard]]") -> "tuple[ChildCard, ChildCard, Player]":
+        """effectue l'interface de l'erreur d'étiquetage, retourne 2 carte selectionnee avec le joueur selectionnee"""
         pass
 
     @abstractmethod

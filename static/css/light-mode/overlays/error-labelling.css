@@ -1,0 +1,153 @@
+/* ══════════════════════════════════════════════════════════════
+   OVERLAY — Erreur d'étiquetage
+   Réutilise les tokens définis dans board.css (:root)
+   ══════════════════════════════════════════════════════════════ */
+
+.labelling-overlay {
+    position: fixed; inset: 0;
+    z-index: 600;
+    display: flex; align-items: center; justify-content: center;
+    animation: labellingOverlayIn 0.2s ease;
+}
+.labelling-overlay[hidden] { display: none; }
+
+@keyframes labellingOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+.labelling-overlay__backdrop {
+    position: absolute; inset: 0;
+    background: rgba(26,23,20,0.55);
+    backdrop-filter: blur(3px);
+}
+
+.labelling-overlay__panel {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 24px 64px rgba(59,48,40,0.2);
+    width: min(680px, 92vw);
+    max-height: 88vh;
+    display: flex; flex-direction: column;
+    animation: labellingModalIn 0.25s ease;
+    overflow: hidden;
+}
+
+@keyframes labellingModalIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── HEADER ── */
+.labelling-overlay__header {
+    padding: 24px 28px 16px;
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+}
+.labelling-overlay__tag {
+    display: inline-block;
+    font-size: 0.65rem; font-weight: 600; letter-spacing: 0.12em;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 6px;
+}
+.labelling-overlay__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem; font-weight: 600; color: var(--accent);
+    margin-bottom: 4px;
+}
+.labelling-overlay__prompt {
+    font-size: 0.85rem; color: var(--muted); line-height: 1.5;
+}
+
+/* ── BODY ── */
+.labelling-overlay__body {
+    padding: 20px 28px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex; flex-direction: column;
+}
+
+.labelling-overlay__section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-bottom: 10px;
+}
+.labelling-overlay__section-title {
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--accent);
+}
+.labelling-overlay__hint {
+    font-size: 0.7rem; color: var(--muted); font-style: italic;
+    white-space: nowrap;
+}
+
+.labelling-overlay__player-badge {
+    display: flex; align-items: center; gap: 8px;
+}
+.labelling-overlay__player-avatar {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent); color: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.8rem; font-weight: 600;
+    flex-shrink: 0;
+}
+.labelling-overlay__player-name {
+    font-size: 0.85rem; font-weight: 500; color: var(--text);
+}
+
+/* Ligne du joueur courant */
+.labelling-overlay__owner-section { margin-bottom: 8px; }
+.labelling-overlay__owner-section .labelling-overlay__player-avatar { background: var(--gold); }
+
+.labelling-overlay__cards-row {
+    display: flex; flex-wrap: nowrap; gap: 8px;
+    overflow-x: auto; padding-bottom: 4px;
+}
+
+/* ── SEPARATEUR ── */
+.labelling-overlay__divider {
+    height: 1px; background: var(--line);
+    margin: 18px 0;
+}
+
+/* ── AUTRES JOUEURS ── */
+.labelling-overlay__others-list {
+    display: flex; flex-direction: column; gap: 16px;
+}
+.labelling-overlay__other-row { display: flex; flex-direction: column; gap: 8px; }
+.labelling-overlay__other-row .labelling-overlay__cards-row {
+    padding-left: 2px;
+}
+.labelling-overlay__other-empty {
+    font-size: 0.72rem; color: var(--muted); font-style: italic;
+}
+
+/* ── CARTES SÉLECTIONNABLES ──
+   Le hover, la bordure "selected" et le badge ✓ sont désormais gérés
+   directement par le composant <game-card> (voir card-game.js) via ses
+   attributs [clickable] / [selectable] / [selected]. On se contente ici
+   d'ajuster la mise en page de la rangée. */
+.labelling-overlay__cards-row game-card {
+    flex-shrink: 0;
+}
+
+/* ── FOOTER ── */
+.labelling-overlay__footer {
+    padding: 16px 28px; border-top: 1px solid var(--line);
+    display: flex; justify-content: flex-end; gap: 10px;
+    flex-shrink: 0;
+}
+.labelling-overlay__btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border-radius: var(--radius);
+    font-size: 0.8rem; font-weight: 500;
+    border: 1px solid transparent; cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+}
+.labelling-overlay__btn--confirm {
+    background: var(--accent); color: var(--bg);
+}
+.labelling-overlay__btn--confirm:hover:not(:disabled) { background: #2a221b; }
+.labelling-overlay__btn--confirm:disabled {
+    opacity: 0.4; cursor: not-allowed;
+}
+.labelling-overlay__btn-icon { width: 14px; height: 14px; }

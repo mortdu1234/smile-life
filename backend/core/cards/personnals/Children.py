@@ -55,7 +55,7 @@ class FemaleChild(ChildCard):
             return self.smiles // 2
         return self.smiles
     def apply_card_effect(self, game: Game, current_player: Player) -> bool:
-        from ..specials.GrilPower import GrilPower
+        from ..specials.GirlPower import GrilPower
         powers = current_player.get_power()
         if Power.GIRL_POWER in powers:
             played = current_player.get_card_from_group(groupe.CARTES_SPECIALES)
