@@ -332,8 +332,8 @@ class Game:
 
         ephemeride = self.get_ephemeride()
         if ephemeride:
-            from .cards.ephemerides.Eclipse import Eclipse
-            if isinstance(ephemeride, Eclipse):
+            from .cards.ephemerides.Equinoxe import Equinoxe
+            if isinstance(ephemeride, Equinoxe):
                 # demander a l'utilisateur de garder la carte ou de la troquer troc=True (effectuer un troc)
                 troc = player.get_interface().ask_troc(card)
                 if troc:
