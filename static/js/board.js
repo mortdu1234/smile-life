@@ -104,6 +104,18 @@ async function stopArcEnCiel() {
 }
 window.stopArcEnCiel = stopArcEnCiel;
 
+// ── Terminer le tour ─────────────────────────────────────────────────────
+async function finishTurn() {
+  if (!window.IS_MY_TURN) return;
+  const btn = document.getElementById('btn-finish-turn');
+  if (btn) btn.disabled = true;
+  const res = await fetch(`${window.BASE_URL}/game/${window.GAME_ID}/finish-turn`, { method: 'POST' });
+  const data = await res.json();
+  if (!data.ok) { alert(data.error); if (btn) btn.disabled = false; return; }
+  if (data.state) updateBoard(data.state);
+}
+window.finishTurn = finishTurn;
+
 // ── Jouer une carte ──────────────────────────────────────────────────────
 async function playCard(cardId) {
   if (!window.IS_MY_TURN) return;
@@ -250,6 +262,15 @@ window.updateBoard = function(state) {
     arcBtn.disabled = false;
   }
 
+  // Mise à jour du bouton "Terminer le tour"
+  const finishTurnBtn = document.getElementById('btn-finish-turn');
+  if (finishTurnBtn) {
+    const finishTurnStates = ['in_discarding', 'in_placing'];
+    const showFinishTurn = isMyTurn && finishTurnStates.includes(state.turn_state);
+    finishTurnBtn.style.display = showFinishTurn ? 'flex' : 'none';
+    finishTurnBtn.disabled = false;
+  }
+
   // Mise à jour du bouton "Passer le tour"
   const skipBtn   = document.getElementById('btn-skip');
   const skipBadge = document.getElementById('skip-badge');
@@ -329,4 +350,4 @@ window.updateBoard = function(state) {
       });
     });
   }
-};  
+};

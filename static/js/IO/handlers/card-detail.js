@@ -10,7 +10,7 @@ const VARIANT_CLASS = {
 };
 
 registerHandler("card-detail", function render(pending) {
-  const { card, context, is_my_turn, game_id } = pending;
+  const { card, context, is_my_turn, game_id, prompt, customActions } = pending;
 
   // 1. Cibler l'overlay directement dans le DOM (injecté par card-detail.html)
   const overlay = document.getElementById("card-detail-overlay");
@@ -66,8 +66,10 @@ registerHandler("card-detail", function render(pending) {
   if (smilesEl) smilesEl.textContent = card.smiles ?? 0;
 
   if (descEl) {
-    descEl.textContent = card.description || "";
-    descEl.style.display = card.description ? "" : "none";
+    // Le prompt (ex: question de choix) prime sur la description de la carte
+    const descText = prompt || card.description || "";
+    descEl.textContent = descText;
+    descEl.style.display = descText ? "" : "none";
   }
 
   if (img) {
@@ -81,6 +83,33 @@ registerHandler("card-detail", function render(pending) {
   }
 
   // 5. Générer et injecter les boutons d'action
+  //
+  // Deux modes :
+  //  - customActions fourni (ex: choix binaire troc/garder) → boutons simples
+  //    qui appellent directement action.onClick() (pas de fetch vers une route
+  //    dédiée, pas de bouton "Fermer" séparé : chaque bouton EST le choix).
+  //  - sinon → comportement historique via getActionsForCard + endpoints REST.
+  if (customActions) {
+    customActions.forEach((action) => {
+      const btn = document.createElement("button");
+      btn.className = `card-detail-overlay__btn ${VARIANT_CLASS[action.variant] ?? "card-detail-overlay__btn--ghost"}`;
+      btn.textContent = action.label;
+      btn.type = "button";
+
+      btn.addEventListener("click", () => {
+        if (action.confirm && !window.confirm(action.confirm)) return;
+        btn.disabled = true;
+        closeOverlay();
+        action.onClick();
+      });
+
+      actionsEl.appendChild(btn);
+    });
+
+    overlay.hidden = false;
+    return document.createDocumentFragment();
+  }
+
   const actions = getActionsForCard(card, context, is_my_turn);
   actions.forEach((action) => {
     const btn = document.createElement("button");

@@ -22,7 +22,7 @@ class Astronaute(JobCard):
             sucess, reason = card.can_be_played(current_player, game)
             if sucess:
                 cards_availables.append(card)
-        current_player.remove_card(self)
+        current_player.remove_card(self, game)
         return cards_availables
         
 

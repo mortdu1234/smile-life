@@ -4,11 +4,13 @@ from enum import Enum
 import functools
 
 from backend.core.JobStatus import JobStatus
+from .cards.ephemerides.Ephemeride import Ephemeride
 
 from .PlayerCardGroup import PlayedCardGroup
 from .Player import Player
 from .cards.Card import Card
 from ..userIo.botIO import BotIO
+from .Power import Power
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -17,6 +19,8 @@ if TYPE_CHECKING:
 class TurnState(Enum):
     PIOCHE = "pioche"
     POSE = "pose"
+    IN_DISCARDING = "in_discarding"
+    IN_PLACING = "in_placing"
 
 class GameModes(Enum):
     CLASSIC = "classic"
@@ -25,8 +29,11 @@ class GameModes(Enum):
 class GameStateKey(Enum):
     CHANCE = "chance"
     ARC_EN_CIEL = "arc_en_ciel"
+    NB_CARDS_DISCARD = "nb_cards_discard"
+    NB_CARDS_PLACED = "nb_cards_placed"
 
 HISTORY_SIZE = 5
+NB_CARD_RIVER = 3
 
 def validate_player(method):
     @functools.wraps(method)
@@ -36,16 +43,16 @@ def validate_player(method):
         return method(self, player_id, *args, **kwargs)
     return wrapper
 
-def validate_phase(required_phase: TurnState):
+def validate_phase(*required_phases: TurnState):
     def decorator(method):
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
-            if self.turn_state != required_phase:
-                return None, f"Action impossible en phase '{self.turn_state}' (attendu : '{required_phase}')."
+            if self.turn_state not in required_phases:
+                phases_str = ", ".join(str(p) for p in required_phases)
+                return None, f"Action impossible en phase '{self.turn_state}' (attendu : '{phases_str}')."
             return method(self, *args, **kwargs)
         return wrapper
     return decorator
-
 
 
 
@@ -63,7 +70,7 @@ class Game:
     game_mode: GameModes
     river_deck: list[Card]
     updated_at: datetime
-    
+    ephemeride: Ephemeride | None
 
     # PARAMETRE SUPPLEMENTAIRE POUR LE JEU
 
@@ -79,10 +86,18 @@ class Game:
         self.game_state = {key:0 for key in GameStateKey}
         self.game_mode = GameModes.CLASSIC
         self.river_deck = []
+        self.ephemeride = None
         # Donne les mains des joueurs
         for _ in range(5):
             for player in self.players:
-                player.add_card_to_hand(deck.pop())
+                result = False
+                while not result:
+                    card = deck.pop()
+                    result = player.add_card_to_hand(card)
+                    if not result:
+                        player.remove_card_from_hand(card)
+                        deck.insert(len(deck)//2, card)
+
 
     def add_to_history(self, message: str):
         """ajoute un element a l'historique"""
@@ -103,12 +118,38 @@ class Game:
             'game_state': {key.value: val for key, val in self.game_state.items()},
             'game_mode': self.game_mode.value,
             'river_deck': [c.to_dict() for c in self.river_deck],
+            'turn_state': self.turn_state.value,
         }
         last_discard = self.get_last_discard()
         if last_discard:
             data["last_discard"] = last_discard.to_dict()
         return data
-    
+
+    def change_game_mode(self, new: GameModes):
+        """change le mode de jeu vers le mode riviere"""
+        if new == GameModes.RIVER:
+            for _ in range(NB_CARD_RIVER):
+                self.river_deck.append(self._draw_card_from_deck())
+            self.game_mode = new
+        else:
+            print("change mode to classic")
+            for card in self.river_deck:
+                self.add_card_to_discard(card)
+            self.river_deck = []
+            print(self.river_deck)
+
+
+    def take_card_from_deck_to_player_hand(self, current_player: Player):
+        result = False
+        while not result:
+            card = self.take_card_from_deck()
+            assert card is not None, "La pioche est vide"
+            result = current_player.add_card_to_hand(card)
+            if not result:
+                self.add_to_history(f"Le joueur {self.get_current_player().name} a pioché l'ephemeride {card.get_name()}")
+                card.play_card(self, current_player)
+
+
 
     def get_last_discard(self) -> Card | None:
         """Retourne la dernière carte de la défausse, ou None si la défausse est vide."""
@@ -152,18 +193,35 @@ class Game:
             nb_cards_to_add = current_player.get_max_hand_card() - len(current_player.get_hand())
             print(f"{nb_cards_to_add} cartes.")
             for _ in range(nb_cards_to_add):
-                card = self.take_card_from_deck()
-                assert card is not None, "La pioche est vide"
-                current_player.add_card_to_hand(card)        
-        
+                self.take_card_from_deck_to_player_hand(current_player)
+
+
+        value = self.game_state.get(GameStateKey.NB_CARDS_DISCARD, 0) 
+        if value > 0:
+            print(f"[INFO] le joueur ({self.get_current_player().name}) a défausser {value} cartes, donc il repioche")
+            for _ in range(value-1):
+                current_player = self.get_current_player()
+                self.take_card_from_deck_to_player_hand(current_player)
+            self.game_state[GameStateKey.NB_CARDS_DISCARD] = 0
+
+        value = self.game_state.get(GameStateKey.NB_CARDS_PLACED, 0) 
+        if value > 0:
+            print(f"[INFO] le joueur ({self.get_current_player().name}) a posé {value} cartes, donc il repioche")
+            for _ in range(value-1):
+                current_player = self.get_current_player()
+                self.take_card_from_deck_to_player_hand(current_player)
+            self.game_state[GameStateKey.NB_CARDS_PLACED] = 0
+                                
         print("[INFO] "+"="*60)
         print("[INFO] "+f" FIN du tour du joueur {self.get_current_player().name}")
         print("[INFO] "+"="*60)
+        print("[DEBUG] "+f"info du joueur qui viens de finir son tour \n\tpower:{self.get_current_player().get_power()}")
         self.player_turn = (self.player_turn + 1) % len(self.players)
 
         print("[INFO] "+"="*60)
         print("[INFO] "+f" DEBUT du tour du joueur {self.get_current_player().name}")
         print("[INFO] "+"="*60)
+        print("[DEBUG] "+f"info du joueur qui viens de commencer son tour \n\tpower:{self.get_current_player().get_power()}")
         self.turn_state = TurnState.PIOCHE
 
 
@@ -204,11 +262,25 @@ class Game:
             return None
         return self.deck.pop()
 
-    
+    def get_ephemeride(self) -> "Ephemeride | None":
+        """retourne la carte ephemeride qui est en cour"""
+        from .cards.ephemerides.Ephemeride import Ephemeride
+        for card in self.center_cards_played:
+            if isinstance(card, Ephemeride):
+                return card
+        return None
+
+    def set_ephemeride(self, new: "Ephemeride"):
+        card = self.get_ephemeride()
+        if card:
+            self.center_cards_played.remove(card)
+        self.center_cards_played.append(new)
+
     # ------------------------------------------------------------------ #
     #  Actions du tour - Actions                                         #
     # ------------------------------------------------------------------ #   
     @validate_player
+    @validate_phase(TurnState.POSE)
     def stop_arc_en_ciel(self, player_id: int) -> tuple[bool, str]:
         """Permet d'arreter un Arc En Ciel en cour"""
         print("[INFO] action du joueur : stop arc en ciel")
@@ -220,6 +292,7 @@ class Game:
         return True, ""
          
     @validate_player
+    @validate_phase(TurnState.PIOCHE)
     def skip_turn(self, player_id: int) -> tuple[bool, str]:
         """Le joueur courrant passe son tour
         pre: uniquement si le joueur courrant a des tours a passer
@@ -249,8 +322,23 @@ class Game:
         if not self.deck:
             print("[ERROR] pioche vide")
             return False, ""
-        
         card: Card = self._draw_card_from_deck()
+        if isinstance(card, Ephemeride):
+            player.add_card_to_hand(card)
+            self.add_to_history(f"Le joueur {self.get_current_player().name} a pioché l'ephemeride {card.get_name()}")
+            card.play_card(self, player)
+            self.next_turn()
+            return True, ""
+
+        ephemeride = self.get_ephemeride()
+        if ephemeride:
+            from .cards.ephemerides.Eclipse import Eclipse
+            if isinstance(ephemeride, Eclipse):
+                # demander a l'utilisateur de garder la carte ou de la troquer troc=True (effectuer un troc)
+                troc = player.get_interface().ask_troc(card)
+                if troc:
+                    card = ephemeride.troc_cards(self, player, card)
+        
         player.add_card_to_hand(card)
         self.turn_state = TurnState.POSE
         return True, ""
@@ -283,6 +371,12 @@ class Game:
             return False, "La carte n'est pas trouvée dans la rivière"
                 
         player.add_card_to_hand(card)
+        if isinstance(card, Ephemeride):
+            self.add_to_history(f"Le joueur {self.get_current_player().name} a pioché l'ephemeride {card.get_name()}")
+            card.play_card(self, player)
+            self.next_turn()
+            return True, ""
+                
         self.turn_state = TurnState.POSE
         return True, ""
 
@@ -322,7 +416,7 @@ class Game:
         
 
     @validate_player
-    @validate_phase(TurnState.POSE)
+    @validate_phase(TurnState.POSE, TurnState.IN_DISCARDING)
     def discard_card_from_hand(self, player_id: int, card_id: int) -> tuple[bool, str]:
         """se défausse d'une carte en main vers la défausse"""
         print("[INFO] action du joueur : défausser une carte de la main")
@@ -334,11 +428,21 @@ class Game:
         player.remove_card_from_hand(card)
         self.discard.append(card)
         self.add_to_history(f"Le joueur {self.get_current_player().name} a défaussé {card.get_name()}")
+
+        ephemeride = self.get_ephemeride()
+        if ephemeride:
+            from .cards.ephemerides.LuneRouge import LuneRouge
+            if isinstance(ephemeride, LuneRouge):
+                self.turn_state = TurnState.IN_DISCARDING
+                self.game_state[GameStateKey.NB_CARDS_DISCARD] += 1
+                return True, ""
+                
         self.next_turn()
 
         return True, ""
 
     @validate_player
+    @validate_phase(TurnState.POSE, TurnState.PIOCHE)
     def discard_job_card(self, player_id: int, card_id: int) -> tuple[bool, str]:
         """démissionne volontairement d'un métier"""
         print("[INFO] action du joueur : démissionner de son métier")
@@ -354,8 +458,9 @@ class Game:
                     player.remove_card(card, self)
                     self.add_card_to_discard(card)
                     self.add_to_history(f"Le joueur {self.get_current_player().name} se défausse de son métier : {card.get_name()}")    
-                    if card.status != JobStatus.INTERIMERE:
-                        self.next_turn()
+                    if Power.INSTANT_QUIT_JOB in player.get_power():
+                        return True, ""
+                    self.next_turn()
                     
                     return True, ""
             else:
@@ -380,8 +485,9 @@ class Game:
                     player.remove_card(card, self)
                     self.add_card_to_discard(card)
                     self.add_to_history(f"Le joueur {self.get_current_player().name} se défausse de son marriage {card.get_name()}")
+                    if Power.INSTANT_QUIT_WEDDING in player.get_power():
+                        return True, ""
                     self.next_turn()
-
                     return True, ""
                 else:
                     return False, reason
@@ -391,7 +497,7 @@ class Game:
             return False, "[ERROR] La carte n'est pas trouvée"
 
     @validate_player
-    @validate_phase(TurnState.PIOCHE)
+    @validate_phase(TurnState.POSE, TurnState.PIOCHE)
     def discard_adultery_card(self, player_id: int, card_id: int) -> tuple[bool, str]:
         """supprime son adultaire volontairement"""
         print("[INFO] action du joueur : défausser son adultère")
@@ -405,7 +511,6 @@ class Game:
                     player.remove_card(card, self)
                     self.add_card_to_discard(card)
                     self.add_to_history(f"Le joueur {self.get_current_player().name} se défausse de son adultère {card.get_name()}")
-                    self.next_turn()
 
                     return True, ""
                 else:
@@ -417,7 +522,7 @@ class Game:
 
 
     @validate_player
-    @validate_phase(TurnState.POSE)
+    @validate_phase(TurnState.POSE, TurnState.IN_PLACING)
     def place_card(self, player_id: int, card_id: int) -> tuple[bool, str]:
         """pose une carte devant lui"""
         player = self.get_current_player()
@@ -432,12 +537,28 @@ class Game:
 
         card.play_card(self, player)
         self.add_to_history(f"Le joueur {self.get_current_player().name} a joué la carte {card.get_name()}")
+
+        ephemeride = self.get_ephemeride()
+        if ephemeride:
+            from .cards.ephemerides.PleineLune import PleineLune
+            if isinstance(ephemeride, PleineLune):
+                self.turn_state = TurnState.IN_PLACING
+                self.game_state[GameStateKey.NB_CARDS_PLACED] += 1
+                return True, ""
+            
         self.next_turn()
 
         return True, ""
-
     
     @validate_player
+    @validate_phase(TurnState.IN_DISCARDING, TurnState.IN_PLACING)
+    def finish_turn(self, player_id: int) -> tuple[bool, str]:
+        self.next_turn()
+        return True, ""
+
+        
+    @validate_player
+    @validate_phase(TurnState.POSE, TurnState.IN_PLACING)
     def bet_on_casino(self, player_id: int, card_id: int) -> tuple[bool, str]:
         """pose une carte devant lui"""
         print("[INFO] action du joueur : miser au casino une carte")
@@ -460,5 +581,14 @@ class Game:
             return False, reason
         casinoCard.bet(card, player)
         self.add_to_history(f"Le joueur {self.get_current_player().name} a misé au casino un salaire")
+
+        ephemeride = self.get_ephemeride()
+        if ephemeride:
+            from .cards.ephemerides.PleineLune import PleineLune
+            if isinstance(ephemeride, PleineLune):
+                self.turn_state = TurnState.IN_PLACING
+                self.game_state[GameStateKey.NB_CARDS_PLACED] += 1
+                return True, ""
+
         self.next_turn()
         return True, ""

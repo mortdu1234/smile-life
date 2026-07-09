@@ -37,11 +37,7 @@ class Prison(Hardship):
             target.remove_card_from_hand(selected_card)
             game.add_card_to_discard(selected_card)
         for _ in range(nombre_de_carte_retiree):
-            new_card = game.take_card_from_deck()
-            if not new_card:
-                game.end_game()
-                return False
-            target.add_card_to_hand(new_card)
+            game.take_card_from_deck_to_player_hand(target)
 
         # fait passer 3 tours
         target.add_skip_turn(3)

@@ -9,6 +9,7 @@ import "./handlers/show-hand.js";
 import "./handlers/card-picker.js";
 import "./handlers/player-picker.js";
 import "./handlers/error-labelling.js";
+import "./handlers/troc-choice.js";
 
 // ── Expose openCard globalement pour board.html ───────────────────────────────
 window.openCard = function(card, context) {

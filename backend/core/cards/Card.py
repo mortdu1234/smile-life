@@ -5,6 +5,7 @@ if TYPE_CHECKING:
     from ..Game import Game
     from ...userIo.interface import UserIO
 
+
 class Card:
     id: int
     image_path: str
@@ -65,3 +66,6 @@ class Card:
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         """Vérifie si la carte peut être jouée dans le contexte courant."""
         return True, ""
+    
+class InstantPlayedCard(Card):
+    pass

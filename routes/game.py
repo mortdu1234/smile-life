@@ -298,6 +298,17 @@ def skip(game_id):
     return _action_response(False, "[ERROR] Game non trouvée", game_id)
 
 
+@game_bp.route("/<game_id>/finish-turn", methods=["POST"])
+def finish_turn(game_id):
+    """Permet au joueur de mettre fin à son tour (phases IN_DISCARDING / IN_PLACING)"""
+    game = get_game(game_id)
+    if game:
+        player_id = game.get_current_player().get_id()
+        success, reason = game.finish_turn(player_id)
+        return _action_response(success, reason, game_id)
+    return _action_response(False, "[ERROR] Game non trouvée", game_id)
+
+
 
 
 # ── UserIO ───────────────────────────────────────────────────────────────────────

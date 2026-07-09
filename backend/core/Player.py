@@ -12,7 +12,7 @@ from .cards.professionnals.JobCard import JobCard
 from .cards.personnals.Flirts import Flirt
 from .cards.specials.Heritage import Heritage
 
-from .cards.Card import Card
+from .cards.Card import Card, InstantPlayedCard
 
 from .Power import Power
 from .PlayerCardGroup import PlayedCardGroup
@@ -231,9 +231,12 @@ class Player:
     def get_card_from_group(self, group1: PlayedCardGroup) -> list[Card]:
         return self.groupe.get(group1, [])
 
-    def add_card_to_hand(self, card: Card):
-        """ajoute une nouvelle carte a la main"""
+    def add_card_to_hand(self, card: Card) -> bool:
+        """ajoute une nouvelle carte a la main et vérifie si c'est une carte qui dois etre jouée directement"""
         self.hand.append(card)
+        if isinstance(card, InstantPlayedCard):
+            return False
+        return True
 
     def get_card_by_id_from_hand(self, card_id: int) -> Card | None:
         """retourne une carte de la main a partir de son ID"""

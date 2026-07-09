@@ -78,9 +78,7 @@ class Casino(SpecialCard):
                 print("[ERROR] aucune carte n'as été selectionnées")
                 return False
             self.bet(card, current_player)
-            take_card = game.take_card_from_deck()
-            assert take_card is not None, "Le deck est vide"
-            current_player.add_card_to_hand(take_card)
+            game.take_card_from_deck_to_player_hand(current_player)
         return True
 
     def play_card(self, game: Game, current_player: Player) -> None:

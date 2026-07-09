@@ -32,10 +32,8 @@ class Piston(SpecialCard):
         from ....userIo.interface import IOType
         selected_card: "Card | None" = interface.ask_card(prompt="Pistonnage", cards=available_cards, kind=IOType.CARD_PICKER)
         if selected_card:
-            new_card = game.take_card_from_deck()
-            assert new_card is not None, "Le deck est vide"
-            current_player.add_card_to_hand(new_card)
             selected_card.play_card(game, current_player)
+            game.take_card_from_deck_to_player_hand(current_player)
         return super().apply_card_effect(game, current_player)
 
     def get_name(self) -> str:

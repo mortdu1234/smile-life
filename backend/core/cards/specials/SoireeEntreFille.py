@@ -26,7 +26,7 @@ class SoireeEntreFille(SpecialCard):
                     current_player.add_card_to_played(card)
             for card in filles:
                 player.remove_card_from_hand(card)
-                player.add_card_to_hand(game._draw_card_from_deck())
+                game.take_card_from_deck_to_player_hand(current_player)
 
         return super().apply_card_effect(game, current_player)
 

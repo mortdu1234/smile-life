@@ -16,6 +16,7 @@ class IOType(Enum):
     CARD_PICKER     = "card-picker"
     PLAYER_PICKER   = "player-picker"
     ERROR_LABELLING = "error-labelling"
+    TROC_CHOICE     = "troc-choice"
 
 class UserIO(ABC):
     @abstractmethod
@@ -31,6 +32,12 @@ class UserIO(ABC):
     @abstractmethod
     def erreur_detiquetage_interface(self, owner: "Player", others: "list[Player]", children_owner: "list[ChildCard]", children_others: "list[list[ChildCard]]") -> "tuple[ChildCard, ChildCard, Player]":
         """effectue l'interface de l'erreur d'étiquetage, retourne 2 carte selectionnee avec le joueur selectionnee"""
+        pass
+
+    @abstractmethod
+    def ask_troc(self, card: "Card") -> bool:
+        """Demande au joueur s'il souhaite troquer la carte piochée (effet Eclipse).
+        Retourne True si le joueur choisit de troquer, False s'il choisit de la garder."""
         pass
 
     @abstractmethod

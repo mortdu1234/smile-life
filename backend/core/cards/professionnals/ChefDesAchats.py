@@ -20,7 +20,7 @@ class ChefDesAchats(JobCard):
             from ..acquisitions.Acquisition import Acquisition
             if sucess and isinstance(card, Acquisition):
                 cards_availables.append(card)
-        current_player.remove_card(self)
+        current_player.remove_card(self, game)
         if len(cards_availables) > 0:
             from ....userIo.interface import IOType
             interface = current_player.get_interface()

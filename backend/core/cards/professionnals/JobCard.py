@@ -26,7 +26,12 @@ class JobCard(Card):
 
     def get_power(self):
         """retourne les pouvoirs du métier"""
-        return self.jobPower + [Power.NO_FIRE] if self.status==JobStatus.FONCTIONNAIRE else self.jobPower
+        res = self.jobPower
+        if self.status == JobStatus.FONCTIONNAIRE:
+            res += [Power.NO_FIRE]
+        if self.status == JobStatus.INTERIMERE:
+            res += [Power.INSTANT_QUIT_JOB]
+        return res
 
     def discard_card(self, game: "Game", owner: "Player") -> None:
         if self.old_salary:
@@ -62,7 +67,7 @@ class JobCard(Card):
 
     def can_be_discard(self, player: 'Player', game: "Game") -> tuple[bool, str]:
         from ...Game import TurnState
-        if game.turn_state == TurnState.POSE and self.status != JobStatus.INTERIMERE:
+        if game.turn_state == TurnState.POSE and Power.INSTANT_QUIT_JOB not in player.get_power():
             return False, "Vous ne pouvez démissionner que en phase de pioche sauf si vous etes intérimère"
         return True, ""
 

@@ -274,8 +274,7 @@
             <img class="deck-icon" src="{{ url_for('static', filename='img/back_card.png') }}" alt="">
           </div>
         </div>
-        {% if game.river_deck %}
-        <div class="deck-pile river-pile">
+        <div class="deck-pile river-pile" {% if not game.river_deck %}style="display:none"{% endif %}>
           <span class="deck-label">Rivière</span>
           <div class="river-cards" id="river-cards">
             {% for card in game.river_deck %}
@@ -294,7 +293,6 @@
             {% endfor %}
           </div>
         </div>
-        {% endif %}
         <div class="deck-pile">
           <span class="deck-label">Défausse</span>
           <div id="discard-card-slot">
@@ -329,6 +327,13 @@
               onclick="stopArcEnCiel()"
               style="display:none">
         🌈 Arrêter l'arc-en-ciel
+      </button>
+      {% set finish_turn_states = ['in_discarding', 'in_placing'] %}
+      <button id="btn-finish-turn"
+              class="btn-finish-turn"
+              onclick="finishTurn()"
+              style="display: {{ 'flex' if (is_my_turn and game.turn_state.value in finish_turn_states) else 'none' }};">
+        ✅ Terminer le tour
       </button>
     </div>
 

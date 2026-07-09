@@ -120,6 +120,12 @@ from .specials.RedistributionTaches import RedistributionTaches
 
 from ..FlirtPlaces import FlirtPlaces
 
+from .ephemerides.LuneBleu import LuneBleu
+from .ephemerides.Eclipse import Eclipse
+from .ephemerides.Equinoxe import Equinoxe
+from .ephemerides.LuneRouge import LuneRouge
+from .ephemerides.PleineLune import PleineLune
+
 # ── Compteur d'ID unique ───────────────────────────────────────────────────────
 _next_id = 0
 
@@ -132,6 +138,16 @@ def _uid() -> int:
 # ── Fabrique : card_id (str) → instance Card ──────────────────────────────────
 # Signature de chaque lambda : () -> Card
 _REGISTRY: dict[str, callable] = { # type: ignore
+    
+    #########################################################################################
+    # ── Girl Power ──────────────────────────────────────────────────────────────
+    #########################################################################################
+    "ephemeride__eclipse": lambda : Eclipse(_uid(), "img/ephemerides/eclipse.png"),
+    "ephemeride__equinoxe": lambda : Equinoxe(_uid(), "img/ephemerides/equinoxe.png"),
+    "ephemeride__lune_bleu": lambda : LuneBleu(_uid(), "img/ephemerides/lune_bleu.png"),
+    "ephemeride__lune_rouge": lambda : LuneRouge(_uid(), "img/ephemerides/lune_rouge.png"),
+    "ephemeride__pleine_lune": lambda : PleineLune(_uid(), "img/ephemerides/pleine_lune.png"),
+
     # Salary cards
     "salary__1": lambda: SalaryCard(_uid(), "img/personnal_life/professionnal_life/SalaryCards/salary1.png", 1, 1),
     "salary__2": lambda: SalaryCard(_uid(), "img/personnal_life/professionnal_life/SalaryCards/salary2.png", 1, 2),

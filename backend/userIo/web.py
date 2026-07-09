@@ -62,6 +62,21 @@ class WebIO(UserIO):
         return owner_card, other_card, other_player
 
 
+    def ask_troc(self, card: "Card") -> bool:
+        """Affiche l'overlay de choix troc/garder pour la carte piochée (effet Eclipse).
+        Bloque la greenlet jusqu'à ce que le joueur choisisse.
+        Le frontend envoie via /submit : index 0 = troquer, index 1 = garder.
+        """
+        sleep(TEMPS_ATTENTES)
+        self.pending = {
+            "ui_component": IOType.TROC_CHOICE.value,
+            "prompt": "Une éclipse est en cours : voulez-vous troquer cette carte ?\n"+card.get_card_rule(),
+            "card": card.to_dict(),
+        }
+        index: int = self._queue.get()
+        self.pending = None
+        return index == 0
+
     def ask_salaries(self, acquisition: "Acquisition", salaries: Sequence["Card"], cost: int) -> list["Card"]:
         """Affiche l'overlay de sélection de salaires.
         Bloque la greenlet jusqu'à ce que le joueur valide une sélection dont la somme >= cost.
