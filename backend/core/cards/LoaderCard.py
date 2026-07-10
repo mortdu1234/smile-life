@@ -21,10 +21,14 @@ from .animals.SimpleAnimalCard import (
 )
 from .animals.LicorneCard import LicorneAnimal
 from .animals.Dragon import Dragon
+from .animals.Rat import Rat
+from .animals.ChauveSourie import ChauveSourie
+from .animals.Phoenix import Phoenix
+from .animals.Hibou import Hibou
 
 # Acquisitions
 from .acquisitions.HouseAcquisition import House
-from .acquisitions.TripAcquisition import Trip
+from .acquisitions.TripAcquisition import Trip, Ecosse, Atlandide, Salem, Transylvanie
 from .acquisitions.PlaceDeConcert import Concert
 from .acquisitions.Nounou import Nounou
 from .acquisitions.Sabre import Sabre
@@ -66,6 +70,9 @@ from .personnals.Children import (
     ZeldaChild,
     BeatrixChild,
     DaenerysChild,
+    PeterChild,
+    MerlinChild,
+    BuffyChild
 )
 
 # Professionnals
@@ -140,13 +147,29 @@ def _uid() -> int:
 _REGISTRY: dict[str, callable] = { # type: ignore
     
     #########################################################################################
-    # ── Girl Power ──────────────────────────────────────────────────────────────
+    # ── Fantastique ──────────────────────────────────────────────────────────────
     #########################################################################################
     "ephemeride__eclipse": lambda : Eclipse(_uid(), "img/ephemerides/eclipse.png"),
     "ephemeride__equinoxe": lambda : Equinoxe(_uid(), "img/ephemerides/equinoxe.png"),
     "ephemeride__lune_bleu": lambda : LuneBleu(_uid(), "img/ephemerides/lune_bleu.png"),
     "ephemeride__lune_rouge": lambda : LuneRouge(_uid(), "img/ephemerides/lune_rouge.png"),
     "ephemeride__pleine_lune": lambda : PleineLune(_uid(), "img/ephemerides/pleine_lune.png"),
+
+    # Trip
+    "travel__transylvanie": lambda: Transylvanie(_uid(), "img/acquisition_cards/trip/transylvanie.png", 1, 3, "transylvanie"),
+    "travel__ecosse": lambda: Ecosse(_uid(), "img/acquisition_cards/trip/ecosse.png", 1, 3, "ecosse"),
+    "travel__atlantide": lambda: Atlandide(_uid(), "img/acquisition_cards/trip/atlantide.png", 1, 3, "atlandide"),
+    "travel__salem": lambda: Salem(_uid(), "img/acquisition_cards/trip/salem.png", 1, 3, "salem"),
+
+    "peter": lambda: PeterChild(_uid(), "img/personnal_life/children/peter.png"),
+    "buffy": lambda: BuffyChild(_uid(), "img/personnal_life/children/buffy.png"),
+    "merlin": lambda: MerlinChild(_uid(), "img/personnal_life/children/merlin.png"),
+
+    "phoenix": lambda: Phoenix(_uid(), "img/acquisition_cards/animals/phoenix.png"),
+    "rat": lambda: Rat(_uid(), "img/acquisition_cards/animals/rat.png"),
+    "hibou": lambda: Hibou(_uid(), "img/acquisition_cards/animals/hibou.png"),
+    "chauve_sourie": lambda: ChauveSourie(_uid(), "img/acquisition_cards/animals/chauve_sourie.png"),
+
 
     # Salary cards
     "salary__1": lambda: SalaryCard(_uid(), "img/personnal_life/professionnal_life/SalaryCards/salary1.png", 1, 1),

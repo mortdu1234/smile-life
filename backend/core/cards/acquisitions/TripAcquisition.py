@@ -19,3 +19,15 @@ class Trip(Acquisition):
 
     def get_card_rule(self) -> str:
         return """Un voyage n'a rien de particulier""" + "\n"+ "="*10+ "\n" + super().get_card_rule()
+
+class Atlandide(Trip):
+    pass
+
+class Ecosse(Trip):
+    pass
+
+class Salem(Trip):
+    pass
+
+class Transylvanie(Trip):
+    pass

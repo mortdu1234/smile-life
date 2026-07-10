@@ -13,17 +13,27 @@ CATALOG: list[dict] = [
     #########################################################################################
     # ── Fantastique ──────────────────────────────────────────────────────────────
     #########################################################################################
+    # ── Ephemeride ──────────────────────────────────────────────────────────────
     {"id": "ephemeride__eclipse",  "label": "eclipse",       "category": ["Fantastique", "Ephemeride"]},
     {"id": "ephemeride__equinoxe",  "label": "equinoxe",       "category": ["Fantastique", "Ephemeride"]},
     {"id": "ephemeride__lune_bleu",  "label": "lune_bleu",       "category": ["Fantastique", "Ephemeride"]},
     {"id": "ephemeride__lune_rouge",  "label": "lune_rouge",       "category": ["Fantastique", "Ephemeride"]},
     {"id": "ephemeride__pleine_lune",  "label": "pleine_lune",       "category": ["Fantastique", "Ephemeride"]},
-
-    # ── Salaires ──────────────────────────────────────────────────────────────
     # ── Études ────────────────────────────────────────────────────────────────
     # ── Enfants ───────────────────────────────────────────────────────────────
+    {"id": "peter",      "label": "Peter",                 "category": ["Fantastique", "Enfants"]},
+    {"id": "merlin",      "label": "Merlin",                 "category": ["Fantastique", "Enfants"]},
+    {"id": "buffy",      "label": "Buffy",                 "category": ["Fantastique", "Enfants"]},
     # ── Animaux ───────────────────────────────────────────────────────────────
+    {"id": "phoenix",      "label": "Phoenix",                  "category": ["Fantastique", "Animaux"]},
+    {"id": "rat",      "label": "Rat",                          "category": ["Fantastique", "Animaux"]},
+    {"id": "hibou",      "label": "Hibou",                      "category": ["Fantastique", "Animaux"]},
+    {"id": "chauve_sourie",      "label": "Chauve Sourie",                 "category": ["Fantastique", "Animaux"]},
     # ── Acquisitions ──────────────────────────────────────────────────────────
+    {"id": "travel__transylvanie",  "label": "Transylvanie",        "category": ["Fantastique", "Acquisitions"]},
+    {"id": "travel__ecosse",  "label": "Ecosse",        "category": ["Fantastique", "Acquisitions"]},
+    {"id": "travel__atlantide",  "label": "Atlantide",        "category": ["Fantastique", "Acquisitions"]},
+    {"id": "travel__salem",  "label": "Salem",        "category": ["Fantastique", "Acquisitions"]},
     # ── Épreuves ──────────────────────────────────────────────────────────────
     # ── Flirts ────────────────────────────────────────────────────────────────
     # ── Métiers ───────────────────────────────────────────────────────────────   

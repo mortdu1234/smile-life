@@ -77,6 +77,8 @@ class MaleChild(ChildCard):
 class GirlPowerChild(ChildCard):
     """Mixin — enfant girl-power."""
 
+class FantastiqueChild(ChildCard):
+    pass
 
 # ------------------------------------------------------------------ #
 #  Enfants concrets                                                    #
@@ -172,4 +174,17 @@ class DaenerysChild(GirlPowerChild):
             if isinstance(card, Dragon):
                 card.dragon_effect(game, current_player)
         return super().apply_card_effect(game, current_player)
-    
+
+class PeterChild(FantastiqueChild):
+    def get_name(self) -> str:
+        return super().get_name() + "Peter"
+
+
+class MerlinChild(FantastiqueChild):
+    def get_name(self) -> str:
+        return super().get_name() + "Merlin"
+
+
+class BuffyChild(FantastiqueChild):
+    def get_name(self) -> str:
+        return super().get_name() + "Buffy"
