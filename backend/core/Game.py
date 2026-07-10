@@ -62,6 +62,7 @@ class Game:
     players: list[Player] # Liste des joueurs dans la partie
     deck: list[Card] # Cartes restantes dans la pioche
     discard: list[Card] # Cartes dans la défausse
+    cards_removed: list[Card] # Cartes supprimer par violence
     player_turn: int # Index du joueur dont c'est le tour
     center_cards_played: list[Card] # Cartes jouées au centre de la table
     historique: list[str] # historique de la partie
@@ -71,6 +72,7 @@ class Game:
     river_deck: list[Card]
     updated_at: datetime
     ephemeride: Ephemeride | None
+
 
     # PARAMETRE SUPPLEMENTAIRE POUR LE JEU
 
@@ -86,6 +88,7 @@ class Game:
         self.game_state = {key:0 for key in GameStateKey}
         self.game_mode = GameModes.CLASSIC
         self.river_deck = []
+        self.cards_removed = []
         self.ephemeride = None
         # Donne les mains des joueurs
         for _ in range(5):
@@ -98,6 +101,14 @@ class Game:
                         player.remove_card_from_hand(card)
                         deck.insert(len(deck)//2, card)
 
+    def add_card_to_cards_remove(self, card: "Card"):
+        """ajoute une carte au carte supprimées"""
+        self.cards_removed.append(card)
+    def get_removed_cards(self) -> "list[Card]":
+        return self.cards_removed
+    def remove_cards_from_removed_cards(self, card: "Card"):
+        """retire une carte des cartes retirées"""
+        self.cards_removed.remove(card)
 
     def add_to_history(self, message: str):
         """ajoute un element a l'historique"""
@@ -237,7 +248,7 @@ class Game:
         return None
 
     def remove_card_from_discard(self, card: "Card") -> int:
-        """supprime une carte de la défausse"""
+        """supprime une carte de la défausse et renvois l'indice"""
         indice = self.discard.index(card)
         self.discard.remove(card)
         return indice

@@ -5,11 +5,24 @@
   "deck": {
       "ephemeride__pleine_lune":0,
       "ephemeride__lune_rouge":0,
-      "ephemeride__lune_bleu":10,
+      "ephemeride__lune_bleu":0,
       "ephemeride__equinoxe":0,
-      "ephemeride__eclipse":10,
-      "bandit": 20,
-      "salary__1": 20
+      "ephemeride__eclipse":0,
+      "bandit": 0,
+      "salary__1": 20,
+      "marriage__corps_nuds": 0,
+
+      "potion__amour_eternel": 0,
+      "potion__argent": 0,
+      "potion__chance": 0,
+      "potion__epousaille": 0,
+      "potion__excellence": 0,
+      "potion__fertilite": 0,
+      "potion__interim": 0,
+      "potion__resurrection": 0,
+      "potion__ristournelle": 10,
+      "potion__savoir": 0,
+      "potion__vitalite":0
 
   }
 }

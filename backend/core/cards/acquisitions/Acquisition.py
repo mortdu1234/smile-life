@@ -1,5 +1,5 @@
 from typing import TYPE_CHECKING
-
+from ...Power import Power
 
 if TYPE_CHECKING:
     from ...Game import Game
@@ -17,6 +17,8 @@ class Acquisition(Card):
 
     def calcul_cost(self, player: "Player", game: "Game") -> int:
         """retourne le prix de l'acquisition"""
+        if Power.RISTOURNELLE in player.get_power():
+            return self.original_price - 1
         return self.original_price
         
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:

@@ -133,6 +133,18 @@ from .ephemerides.Equinoxe import Equinoxe
 from .ephemerides.LuneRouge import LuneRouge
 from .ephemerides.PleineLune import PleineLune
 
+from .acquisitions.potions.AmourEternelPotion import AmourEternelPotion
+from .acquisitions.potions.ArgentPotion import ArgentPotion
+from .acquisitions.potions.ChancePotion import ChancePotion
+from .acquisitions.potions.EpousaillePotion import EpousaillePotion
+from .acquisitions.potions.ExcellencePotion import ExcellencePotion
+from .acquisitions.potions.FertilitePotion import FertilitePotion
+from .acquisitions.potions.InterimPotion import InterimPotion
+from .acquisitions.potions.ResurrectionPotion import ResurrectionPotion
+from .acquisitions.potions.RistournellePotion import RistournellePotion
+from .acquisitions.potions.SavoirPotion import SavoirPotion
+from .acquisitions.potions.VitalitePotion import VitalitePotion
+
 # ── Compteur d'ID unique ───────────────────────────────────────────────────────
 _next_id = 0
 
@@ -149,6 +161,18 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     #########################################################################################
     # ── Fantastique ──────────────────────────────────────────────────────────────
     #########################################################################################
+    "potion__amour_eternel": lambda: AmourEternelPotion(_uid(), "img/acquisition_cards/potions/potion_amour_eternel.png", 1, 0),
+    "potion__argent": lambda: ArgentPotion(_uid(), "img/acquisition_cards/potions/potion_argent.png", 1, 0),
+    "potion__chance": lambda: ChancePotion(_uid(), "img/acquisition_cards/potions/potion_chance.png", 1, 0),
+    "potion__epousaille": lambda: EpousaillePotion(_uid(), "img/acquisition_cards/potions/potion_epousaille.png", 1, 0),
+    "potion__excellence": lambda: ExcellencePotion(_uid(), "img/acquisition_cards/potions/potion_excellence.png", 1, 0),
+    "potion__fertilite": lambda: FertilitePotion(_uid(), "img/acquisition_cards/potions/potion_fertilite.png", 1, 0),
+    "potion__interim": lambda: InterimPotion(_uid(), "img/acquisition_cards/potions/potion_interim.png", 1, 0),
+    "potion__resurrection": lambda: ResurrectionPotion(_uid(), "img/acquisition_cards/potions/potion_resurrection.png", 1, 0),
+    "potion__ristournelle": lambda: RistournellePotion(_uid(), "img/acquisition_cards/potions/potion_ristournelle.png", 1, 0),
+    "potion__savoir": lambda: SavoirPotion(_uid(), "img/acquisition_cards/potions/potion_savoir.png", 1, 0),
+    "potion__vitalite": lambda: VitalitePotion(_uid(), "img/acquisition_cards/potions/potion_vitalite.png", 1, 0),
+
     "ephemeride__eclipse": lambda : Eclipse(_uid(), "img/ephemerides/eclipse.png"),
     "ephemeride__equinoxe": lambda : Equinoxe(_uid(), "img/ephemerides/equinoxe.png"),
     "ephemeride__lune_bleu": lambda : LuneBleu(_uid(), "img/ephemerides/lune_bleu.png"),

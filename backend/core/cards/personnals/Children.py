@@ -24,6 +24,8 @@ class ChildCard(Card):
 
     def can_be_played(self, player: 'Player', game: 'Game') -> tuple[bool, str]:
         from .Flirts import FlirtWithChild
+        if Power.CAN_PLAY_CHILD in player.get_power():
+            return True, ""
         if not player.is_wedding() and not (isinstance(player.get_last_flirt(), FlirtWithChild) and not player.get_last_flirt().is_used()): # type: ignore
             return False, "il faut etre marriée ou avoir un flirt pour enfant en dernier"
         return super().can_be_played(player, game)

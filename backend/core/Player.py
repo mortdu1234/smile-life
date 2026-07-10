@@ -1,6 +1,7 @@
 """représente un joueur dans la partie"""
 from typing import TYPE_CHECKING
 
+
 if TYPE_CHECKING:
     from ..userIo.interface import UserIO
     from .cards.professionnals.SalaryCard import SalaryCard
@@ -149,12 +150,12 @@ class Player:
     def get_study_level(self) -> int:
         """Retourne le niveau d'étude de joueur"""
         total = 0
-
+        double_study: bool = Power.DOUBLE_STUDY in self.get_power()
         from .cards.professionnals.StudyCard import StudyCard
         for card in self.groupe.get(PlayedCardGroup.VIE_PROFESSIONNELLE, []):
 
             if isinstance(card, StudyCard):
-                total += card.get_value()  # pyright: ignore[reportAttributeAccessIssue]
+                total += card.get_value() * (1+double_study)
         return total
 
     def get_id(self) ->int:

@@ -19,7 +19,19 @@ CATALOG: list[dict] = [
     {"id": "ephemeride__lune_bleu",  "label": "lune_bleu",       "category": ["Fantastique", "Ephemeride"]},
     {"id": "ephemeride__lune_rouge",  "label": "lune_rouge",       "category": ["Fantastique", "Ephemeride"]},
     {"id": "ephemeride__pleine_lune",  "label": "pleine_lune",       "category": ["Fantastique", "Ephemeride"]},
-    # ── Études ────────────────────────────────────────────────────────────────
+    # ── Potions ────────────────────────────────────────────────────────────────
+    {"id": "potion__amour_eternel",  "label": "Potion Amour Eternel",       "category": ["Fantastique", "Potion"]},
+    {"id": "potion__argent",  "label": "Potion Argent",       "category": ["Fantastique", "Potion"]},
+    {"id": "potion__chance",  "label": "Potion Chance",       "category": ["Fantastique", "Potion"]},
+    {"id": "potion__epousaille",  "label": "Potion Epousaille",       "category": ["Fantastique", "Potion"]},
+    {"id": "potion__excellence",  "label": "Potion Excellence",       "category": ["Fantastique", "Potion"]},
+    {"id": "potion__fertilite",  "label": "Potion Fertilité",       "category": ["Fantastique", "Potion"]},
+    {"id": "potion__interim",  "label": "Potion Interim",       "category": ["Fantastique", "Potion"]},
+    {"id": "potion__resurrection",  "label": "Potion Résurrection",       "category": ["Fantastique", "Potion"]},
+    {"id": "potion__ristournelle",  "label": "Potion Ristournelle",       "category": ["Fantastique", "Potion"]},
+    {"id": "potion__savoir",  "label": "Potion Savoir",       "category": ["Fantastique", "Potion"]},
+    {"id": "potion__vitalite",  "label": "Potion Vitalite",       "category": ["Fantastique", "Potion"]},
+        
     # ── Enfants ───────────────────────────────────────────────────────────────
     {"id": "peter",      "label": "Peter",                 "category": ["Fantastique", "Enfants"]},
     {"id": "merlin",      "label": "Merlin",                 "category": ["Fantastique", "Enfants"]},

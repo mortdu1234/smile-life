@@ -38,6 +38,7 @@ class Dragon(AnimalCard):
             assert selected_card is not None, "aucune cartes n'est selectionnées"
             # suppression de la carte
             target_player.remove_card(selected_card, game)
+            game.add_card_to_cards_remove(selected_card)
 
         return True
 

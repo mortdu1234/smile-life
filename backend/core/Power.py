@@ -29,3 +29,6 @@ class Power(Enum):
     JOB_MAX_STUDY_4 = "job_max_study_4" # le joueur peut avoir un job avec un niveau d'étude maximum de 4
     INSTANT_QUIT_JOB = "instant_quit_job" # le joueur peut quitter n'importe quel métier sans avoir a passer son tour
     INSTANT_QUIT_WEDDING = "instant_quit_wedding" # le joueur peut quitter un marriage sans avoir a passer son tour
+    CAN_PLAY_CHILD = "can_play_child" # permet au joueur de poser des enfants sans autre condition
+    DOUBLE_STUDY = "double_study" # double les etudes
+    RISTOURNELLE = "ristournelle" # réduit le prix des acquisition de 1
