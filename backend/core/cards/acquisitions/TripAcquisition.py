@@ -14,6 +14,11 @@ class Trip(Acquisition):
             return 0
         return super().calcul_cost(player, game)
 
+    def get_smiles(self, owner: Player) -> int:
+        if Power.TRAVEL_DOUBLE in owner.get_power():
+            return super().get_smiles(owner)*2 
+        return super().get_smiles(owner)
+
     def get_name(self) -> str:
         return f"Voyage {self.place}"
 

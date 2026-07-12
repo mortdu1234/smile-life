@@ -13,6 +13,29 @@ CATALOG: list[dict] = [
     #########################################################################################
     # ── Fantastique ──────────────────────────────────────────────────────────────
     #########################################################################################
+    {"id": "malefice__alcatras", "label": "Alcatras", "category": ["Fantastique", "Maléfices"]},
+    {"id": "malefice__sacrapas", "label": "Sacrapas", "category": ["Fantastique", "Maléfices"]},
+    {"id": "malefice__restataplas", "label": "Restataplas", "category": ["Fantastique", "Maléfices"]},
+    {"id": "malefice__minus_miserablis", "label": "Minus Miserablis", "category": ["Fantastique", "Maléfices"]},
+    {"id": "malefice__maxus_miserablis", "label": "Maxus Miserablis", "category": ["Fantastique", "Maléfices"]},
+    {"id": "malefice__mano_negra", "label": "Mano Negra", "category": ["Fantastique", "Maléfices"]},
+    {"id": "malefice__desenchantement", "label": "Désenchantement", "category": ["Fantastique", "Maléfices"]},
+    {"id": "malefice__cas_burnas", "label": "Cas Burnas", "category": ["Fantastique", "Maléfices"]},
+    {"id": "malefice__bis_repetitas", "label": "Bis Repetitas", "category": ["Fantastique", "Maléfices"]},
+    {"id": "malefice__aveuglement", "label": "Aveuglement", "category": ["Fantastique", "Maléfices"]},
+    # ── Objet Magique ──────────────────────────────────────────────────────────────
+    {"id": "objet_magique__amulette", "label": "Amulette", "category": ["Fantastique", "Objets Magiques"]},
+    {"id": "objet_magique__anneau_de_pouvoir", "label": "Anneau de Pouvoir", "category": ["Fantastique", "Objets Magiques"]},
+    {"id": "objet_magique__baguette_magique", "label": "Baguette Magique", "category": ["Fantastique", "Objets Magiques"]},
+    {"id": "objet_magique__balai", "label": "Balai", "category": ["Fantastique", "Objets Magiques"]},
+    {"id": "objet_magique__boule_de_cristal", "label": "Boule de Cristal", "category": ["Fantastique", "Objets Magiques"]},
+    {"id": "objet_magique__miroir", "label": "Miroir", "category": ["Fantastique", "Objets Magiques"]},
+    {"id": "objet_magique__lasso_magique", "label": "Lasso Magique", "category": ["Fantastique", "Objets Magiques"]},
+    {"id": "objet_magique__lampe_magique", "label": "Lampe Magique", "category": ["Fantastique", "Objets Magiques"]},
+    {"id": "objet_magique__grimoire", "label": "Grimoire", "category": ["Fantastique", "Objets Magiques"]},
+    {"id": "objet_magique__flute_enchantee", "label": "Flûte Enchantée", "category": ["Fantastique", "Objets Magiques"]},
+    {"id": "objet_magique__chaudron", "label": "Chaudron", "category": ["Fantastique", "Objets Magiques"]},
+    {"id": "objet_magique__cape_invisible", "label": "Cape Invisible", "category": ["Fantastique", "Objets Magiques"]},
     # ── Ephemeride ──────────────────────────────────────────────────────────────
     {"id": "ephemeride__eclipse",  "label": "eclipse",       "category": ["Fantastique", "Ephemeride"]},
     {"id": "ephemeride__equinoxe",  "label": "equinoxe",       "category": ["Fantastique", "Ephemeride"]},

@@ -27,6 +27,11 @@ class SalaryCard(Card):
         if not job:
             return False, f"Vous n'avez pas de métiers"
 
+        if Power.NO_SALARY_1 in powers and self.value == 1:
+            return False, "Vous ne pouvez pas poser de salaire 1"
+        if Power.NO_SALARY_4 in powers and self.value == 4:
+            return False, "Vous ne pouvez pas poser de salaire 4"
+                
         max_salary = job.get_salary() 
         if Power.EGALITE_SALAIRE in powers:
             players = game.players

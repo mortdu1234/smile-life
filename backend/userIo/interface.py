@@ -20,6 +20,12 @@ class IOType(Enum):
 
 class UserIO(ABC):
     @abstractmethod
+    def ask_cards(self, prompt: str, cards: list["Card"], kind: IOType, nb: int) -> list["Card"]:
+        """Demande au joueur de sélectionner exactement nb cartes parmi la liste.
+        Retourne la liste des nb cartes selectionnées."""
+        pass
+    
+    @abstractmethod
     def ask_player(self, prompt: str, players: list["Player"], kind: IOType) -> "Player | None":
         """retourne l'id du joueur selectionnée"""
         pass

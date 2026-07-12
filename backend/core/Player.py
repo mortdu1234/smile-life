@@ -65,6 +65,12 @@ class Player:
             base["hand"] = [c.to_dict() for c in self.hand]
         return base
 
+    def get_group(self, card: "Card") -> "PlayedCardGroup|None":
+        for groupe in self.groupe:
+            if card in self.groupe[groupe]:
+                return groupe
+        return None
+
     def get_smiles(self) -> int:
         """retourne le nombre de smiles"""
         score = 0
@@ -163,7 +169,8 @@ class Player:
 
     def get_power(self) -> list[Power]:
         if self.job:
-            return self.power + self.job.get_power()
+            return self.power + self.job.get_power(self)
+        
         return self.power
     def add_power(self, power: Power):
         """ajoute un pouvoir dans la liste"""
@@ -184,6 +191,12 @@ class Player:
         cards = self.get_card_from_group(PlayedCardGroup.CARTES_SPECIALES)
         for card in cards:
             if isinstance(card, Heritage):
+                result.append(card)
+
+        cards = self.get_card_from_group(PlayedCardGroup.ACQUISITIONS)
+        from .cards.acquisitions.objets_magiques.Amulette import Amulette
+        for card in cards:
+            if isinstance(card, Amulette):
                 result.append(card)
         return result
 

@@ -12,6 +12,7 @@ class Power(Enum):
     NO_BANDIT = "no_bandit" # ne peux pas avoir de bandit dans la partie
     NO_REDOUBLEMENT = "no_redoublement" # ne peux pas recevoir de redoublement
     NO_BURNOUT  = "no_burnout" # ne peux pas recevoir de carte burnout
+    CAN_BE_JAILED = "can_be_jailed" # peut se prendre la carte prison
     FIRST_HOUSE_FREE = "first_house_free" # la première maison posée est gratuite
     HAS_BEEN_BANDIT = "has_been_bandit" # ce joueur a été bandit dans la partie
     CAN_BE_PRICED = "can_be_priced" # peut recevoir un grand prix d'excellence
@@ -32,3 +33,14 @@ class Power(Enum):
     CAN_PLAY_CHILD = "can_play_child" # permet au joueur de poser des enfants sans autre condition
     DOUBLE_STUDY = "double_study" # double les etudes
     RISTOURNELLE = "ristournelle" # réduit le prix des acquisition de 1
+    CANT_PLACE_CARD = "cant_place_card" # ne peut plus jouer de carte
+    TRAVEL_DOUBLE = "travel_double" # double les smiles des voyages
+    BIS_REPETITAS = "bis_repetitas" # double la durée des effets des maladies, burnout, accident
+    CAN_BE_TAXED = "can_be_taxed" # peut recevoir l'impot sur le revenue sans condition
+    CAN_BE_BURN_OUT = "can_be_burn_out" # peut recevoir un burnout sans condition 
+    MANO_NEGRA = "mano_negra" # déduit les smiles en main du résultat final
+    NO_SALARY_4 = "no_salary_4" # ne peut pas poser de salaire 4
+    NO_SALARY_1 = "no_salary_1" # ne peut pas poser de salaire 1
+    NO_JOB_STATUS = "no_job_status" # ne recois aucune avantage a etre intérimaire ou fonctionnaire
+    AVEUGLEMENT = "aveuglement" # pose avant de piocher
+        

@@ -3,6 +3,7 @@ Registre des cartes : mappe les card_id du preset JSON vers les classes Card.
 Ajoute ici chaque nouvelle carte ; le reste du code n'a pas à changer.
 """
 from __future__ import annotations
+from re import L
 
 from backend.core.cards.professionnals.NoPowerJob import Designer, Jardinier, Pizzaiolo
 from backend.core.cards.professionnals.Policier import Policier
@@ -145,6 +146,30 @@ from .acquisitions.potions.RistournellePotion import RistournellePotion
 from .acquisitions.potions.SavoirPotion import SavoirPotion
 from .acquisitions.potions.VitalitePotion import VitalitePotion
 
+from .acquisitions.objets_magiques.Amulette import Amulette
+from .acquisitions.objets_magiques.AnneauDePouvoir import AnneauDePouvoir
+from .acquisitions.objets_magiques.BaguetteMagique import BaguetteMagique
+from .acquisitions.objets_magiques.Balai import Balai
+from .acquisitions.objets_magiques.BouleDeCristal import BouleDeCristal
+from .acquisitions.objets_magiques.Miroir import Miroir
+from .acquisitions.objets_magiques.LassoMagique import LassoMagique
+from .acquisitions.objets_magiques.LampeMagique import LampeMagique
+from .acquisitions.objets_magiques.Grimoire import Grimoire
+from .acquisitions.objets_magiques.FluteEnchantee import FluteEnchantee
+from .acquisitions.objets_magiques.Chaudron import Chaudron
+from .acquisitions.objets_magiques.CapeInvisible import CapeInvisible
+
+from .hardships.Malefices.Alcatras import Alcatras
+from .hardships.Malefices.Sacrapas import Sacrapas
+from .hardships.Malefices.Restataplas import Restataplas
+from .hardships.Malefices.MinusMiserablis import MinusMiserablis
+from .hardships.Malefices.MaxusMiserablis import MaxusMiserablis
+from .hardships.Malefices.ManoNegra import ManoNegra
+from .hardships.Malefices.Desenchantement import Desenchantement
+from .hardships.Malefices.CasBurnas import CasBurnas
+from .hardships.Malefices.BisRepetitas import BisRepetitas
+from .hardships.Malefices.Aveuglement import Aveuglement
+
 # ── Compteur d'ID unique ───────────────────────────────────────────────────────
 _next_id = 0
 
@@ -161,6 +186,31 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     #########################################################################################
     # ── Fantastique ──────────────────────────────────────────────────────────────
     #########################################################################################
+    "malefice__alcatras": lambda : Alcatras(_uid(), "img/hardship_cards/malefis/alcatras.png"),
+    "malefice__sacrapas": lambda: Sacrapas(_uid(), "img/hardship_cards/malefis/sacrapas.png"),
+    "malefice__restataplas": lambda: Restataplas(_uid(), "img/hardship_cards/malefis/restataplas.png"),
+    "malefice__minus_miserablis": lambda: MinusMiserablis(_uid(), "img/hardship_cards/malefis/minus_miserablis.png"),
+    "malefice__maxus_miserablis": lambda: MaxusMiserablis(_uid(), "img/hardship_cards/malefis/maxus_miserablis.png"),
+    "malefice__mano_negra": lambda: ManoNegra(_uid(), "img/hardship_cards/malefis/mano_negra.png"),
+    "malefice__desenchantement": lambda: Desenchantement(_uid(), "img/hardship_cards/malefis/desenchantement.png"),
+    "malefice__cas_burnas": lambda: CasBurnas(_uid(), "img/hardship_cards/malefis/cas_burnas.png"),
+    "malefice__bis_repetitas": lambda: BisRepetitas(_uid(), "img/hardship_cards/malefis/bis_repetitas.png"),
+    "malefice__aveuglement": lambda: Aveuglement(_uid(), "img/hardship_cards/malefis/aveuglement.png"),
+
+    "objet_magique__amulette": lambda: Amulette(_uid(), "img/acquisition_cards/objets_magiques/amulette.png", 1, 0),
+    "objet_magique__anneau_de_pouvoir": lambda: AnneauDePouvoir(_uid(), "img/acquisition_cards/objets_magiques/anneau_de_pouvoir.png", 3, 0),
+    "objet_magique__baguette_magique": lambda: BaguetteMagique(_uid(), "img/acquisition_cards/objets_magiques/baguette_magique.png", 1, 0),
+    "objet_magique__balai": lambda: Balai(_uid(), "img/acquisition_cards/objets_magiques/balai.png", 1, 0),
+    "objet_magique__boule_de_cristal": lambda: BouleDeCristal(_uid(), "img/acquisition_cards/objets_magiques/boule_de_cristal.png", 1, 0),
+    "objet_magique__miroir": lambda: Miroir(_uid(), "img/acquisition_cards/objets_magiques/miroir.png", 1, 0),
+    "objet_magique__lasso_magique": lambda: LassoMagique(_uid(), "img/acquisition_cards/objets_magiques/lasso_magique.png", 1, 0),
+    "objet_magique__lampe_magique": lambda: LampeMagique(_uid(), "img/acquisition_cards/objets_magiques/lampe_magique.png", 1, 0),
+    "objet_magique__grimoire": lambda: Grimoire(_uid(), "img/acquisition_cards/objets_magiques/grimoire.png", 1, 0),
+    "objet_magique__flute_enchantee": lambda: FluteEnchantee(_uid(), "img/acquisition_cards/objets_magiques/flute_enchantee.png", 1, 0),
+    "objet_magique__chaudron": lambda: Chaudron(_uid(), "img/acquisition_cards/objets_magiques/chaudron.png", 1, 0),
+    "objet_magique__cape_invisible": lambda: CapeInvisible(_uid(), "img/acquisition_cards/objets_magiques/cape_invisible.png", 1, 0),
+
+
     "potion__amour_eternel": lambda: AmourEternelPotion(_uid(), "img/acquisition_cards/potions/potion_amour_eternel.png", 1, 0),
     "potion__argent": lambda: ArgentPotion(_uid(), "img/acquisition_cards/potions/potion_argent.png", 1, 0),
     "potion__chance": lambda: ChancePotion(_uid(), "img/acquisition_cards/potions/potion_chance.png", 1, 0),

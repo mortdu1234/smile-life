@@ -12,17 +12,38 @@ registerHandler("card-picker", function render(pending) {
     return document.createDocumentFragment();
   }
 
-  const { options = [], prompt = "", onSubmit } = pending;
+  const { options = [], prompt = "", nb = null, onSubmit } = pending;
+  const isMulti = nb != null && nb > 1;
+  const requiredCount = nb ?? 1;
 
   const grid       = overlay.querySelector("#card-picker-grid");
   const promptText = overlay.querySelector("#card-picker-prompt");
+  const hintText   = overlay.querySelector(".card-picker-overlay__hint");
   let confirmBtn = overlay.querySelector("#card-picker-confirm-btn");
   const countEl    = overlay.querySelector("#card-picker-count");
 
   if (promptText) promptText.textContent = prompt;
   if (countEl)    countEl.textContent    = options.length;
+  if (hintText) {
+    hintText.textContent = isMulti
+      ? `Sélectionnez exactement ${requiredCount} carte${requiredCount > 1 ? "s" : ""}.`
+      : "Cliquez sur une carte pour la sélectionner.";
+  }
 
+  // ── État de sélection ───────────────────────────────────────────────
+  // Mode single : selectedIndex (nombre | null) — comportement historique.
+  // Mode multi  : selectedIndices (Set) — jusqu'à requiredCount éléments.
   let selectedIndex = null;
+  const selectedIndices = new Set();
+
+  function updateConfirmState() {
+    if (!confirmBtn) return;
+    const ready = isMulti
+      ? selectedIndices.size === requiredCount
+      : selectedIndex !== null;
+    confirmBtn.disabled = !ready;
+    confirmBtn.classList.toggle("card-picker-overlay__btn--ready", ready);
+  }
 
   // ── Rendu des cartes ──────────────────────────────────────────────────
   function renderCards() {
@@ -56,18 +77,33 @@ registerHandler("card-picker", function render(pending) {
 
   // ── Sélection ─────────────────────────────────────────────────────────
   function selectCard(idx) {
-    selectedIndex = idx;
+    if (isMulti) {
+      if (selectedIndices.has(idx)) {
+        selectedIndices.delete(idx);
+      } else if (selectedIndices.size < requiredCount) {
+        selectedIndices.add(idx);
+      }
+      // si le quota est déjà atteint et qu'on clique sur une carte non
+      // sélectionnée, on ignore le clic (il faut d'abord en déselectionner une)
 
-    grid?.querySelectorAll("game-card").forEach((el) => {
-      const isSelected = parseInt(el.dataset.index, 10) === idx;
-      el.toggleAttribute("selected", isSelected);
-      el.setAttribute("aria-selected", String(isSelected));
-    });
+      grid?.querySelectorAll("game-card").forEach((el) => {
+        const i = parseInt(el.dataset.index, 10);
+        const isSelected = selectedIndices.has(i);
+        el.toggleAttribute("selected", isSelected);
+        el.setAttribute("aria-selected", String(isSelected));
+      });
 
-    if (confirmBtn) {
-      confirmBtn.disabled = false;
-      confirmBtn.classList.add("card-picker-overlay__btn--ready");
+      if (countEl) countEl.textContent = `${selectedIndices.size}/${requiredCount}`;
+    } else {
+      selectedIndex = idx;
+      grid?.querySelectorAll("game-card").forEach((el) => {
+        const isSelected = parseInt(el.dataset.index, 10) === idx;
+        el.toggleAttribute("selected", isSelected);
+        el.setAttribute("aria-selected", String(isSelected));
+      });
     }
+
+    updateConfirmState();
   }
 
   // ── Ouvrir card-detail en lecture seule ───────────────────────────────
@@ -88,10 +124,17 @@ registerHandler("card-picker", function render(pending) {
 
   // ── Confirmation ──────────────────────────────────────────────────────
   function handleConfirm() {
-    if (selectedIndex === null) return;
-    const indexToSubmit = selectedIndex; // ← sauvegarder avant closeOverlay
-    closeOverlay();
-    if (typeof onSubmit === "function") onSubmit(indexToSubmit);
+    if (isMulti) {
+      if (selectedIndices.size !== requiredCount) return;
+      const indicesToSubmit = [...selectedIndices];
+      closeOverlay();
+      if (typeof onSubmit === "function") onSubmit(indicesToSubmit);
+    } else {
+      if (selectedIndex === null) return;
+      const indexToSubmit = selectedIndex;
+      closeOverlay();
+      if (typeof onSubmit === "function") onSubmit(indexToSubmit);
+    }
   }
 
   // ── Fermeture ─────────────────────────────────────────────────────────
@@ -104,6 +147,7 @@ registerHandler("card-picker", function render(pending) {
     );
     document.removeEventListener("keydown", handleKey);
     selectedIndex = null;
+    selectedIndices.clear();
     if (confirmBtn) confirmBtn.disabled = true;
   }
 
@@ -136,6 +180,7 @@ registerHandler("card-picker", function render(pending) {
   });
 
   renderCards();
+  if (isMulti && countEl) countEl.textContent = `0/${requiredCount}`;
 
   // Purge les anciens listeners sur le bouton confirm
   if (confirmBtn) {
@@ -143,7 +188,7 @@ registerHandler("card-picker", function render(pending) {
     confirmBtn.parentNode.replaceChild(freshBtn, confirmBtn);
     freshBtn.disabled = true;
     freshBtn.addEventListener("click", handleConfirm);
-    confirmBtn = freshBtn;  // ← ajouter cette ligne
+    confirmBtn = freshBtn;
   }
 
   document.removeEventListener("keydown", handleKey);

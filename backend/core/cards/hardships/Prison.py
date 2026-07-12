@@ -3,6 +3,7 @@ from backend.core.Player import Player
 from backend.core.cards.professionnals.Bandit import Bandit
 from .HardshipCard import Hardship
 import random
+from ...Power import Power
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from backend.core.Game import Game
@@ -12,9 +13,9 @@ if TYPE_CHECKING:
 
 class Prison(Hardship):
     def can_be_targeted(self, player: "Player", game: "Game") -> bool:
-        # Vérifie si le joueur possède le métier bandit
-        job = player.get_job() 
-        if not job or not isinstance(job, Bandit):
+        # Vérifie si lel joeuru peut se prendre la carte prison
+        powers = player.get_power()
+        if Power.CAN_BE_JAILED not in powers:
             return False
         
         return super().can_be_targeted(player, game)

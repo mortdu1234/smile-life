@@ -10,6 +10,7 @@ class Bandit(JobCard):
         super().__init__(id, image_path)
         self.jobPower.append(Power.NO_TAX)
         self.jobPower.append(Power.NO_FIRE)
+        self.jobPower.append(Power.CAN_BE_JAILED)
         self.study = 0
         self.salary = 4
     def can_be_played(self, player: Player, game: Game) -> tuple[bool, str]:

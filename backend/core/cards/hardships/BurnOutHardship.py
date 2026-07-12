@@ -10,6 +10,9 @@ if TYPE_CHECKING:
 class BurnOut(Hardship):
     def can_be_targeted(self, player: "Player", game: "Game") -> bool:
         # Vérifie si le joueur possède un métier
+        powers = player.get_power()
+        if Power.CAN_BE_BURN_OUT in powers:
+            return True
         if not player.get_job():
             return False
         
@@ -22,6 +25,9 @@ class BurnOut(Hardship):
 
     def hardship_effect(self, game: "Game", target: "Player") -> bool:
         """effectue simplement l'effet de la carte"""
+        powers = target.get_power()
+        if Power.BIS_REPETITAS in powers:
+            target.add_skip_turn(1)
         target.add_skip_turn(1)
         return super().hardship_effect(game, target)
 

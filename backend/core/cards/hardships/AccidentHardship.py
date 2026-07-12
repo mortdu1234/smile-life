@@ -18,6 +18,9 @@ class Accident(Hardship):
 
     def hardship_effect(self, game: "Game", target: "Player") -> bool:
         """effectue simplement l'effet de la carte"""
+        powers = target.get_power()
+        if Power.BIS_REPETITAS in powers:
+            target.add_skip_turn(1)
         target.add_skip_turn(1)
         return super().hardship_effect(game, target)
 

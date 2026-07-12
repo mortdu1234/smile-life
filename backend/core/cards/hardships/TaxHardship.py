@@ -12,6 +12,9 @@ if TYPE_CHECKING:
 class Tax(Hardship):
     def can_be_targeted(self, player: "Player", game: "Game") -> bool:
         # Vérifie si le joueur possède un métier
+        powers = player.get_power()
+        if Power.CAN_BE_TAXED in powers:
+            return True
         if not player.get_job():
             return False
 

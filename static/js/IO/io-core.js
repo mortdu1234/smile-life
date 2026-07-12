@@ -119,6 +119,7 @@ async function poll() {
         pending.ui_component === "card-browser"    ? submitDismiss :
         pending.ui_component === "show-hand"       ? submitDismiss :
         pending.ui_component === "error-labelling" ? submitErrorLabelling :
+        (pending.nb != null)                       ? submitIndices :
         submit;
       const el = render({ ...pending, onSubmit });
       if (el) {

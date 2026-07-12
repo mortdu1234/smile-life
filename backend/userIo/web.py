@@ -19,6 +19,21 @@ class WebIO(UserIO):
         self._queue: Queue = Queue()
         self.pending: dict | None = None
 
+    def ask_cards(self, prompt: str, cards: list["Card"], kind: IOType, nb: int) -> "list[Card]":
+        """Demande au joueur de sélectionner exactement nb cartes parmi une liste.
+        Bloque la greenlet jusqu'à ce que le joueur valide une sélection de nb cartes.
+        """
+        sleep(TEMPS_ATTENTES)
+        self.pending = {
+            "ui_component": kind.value,
+            "prompt": prompt,
+            "options": [c.to_dict() for c in cards],
+            "nb": nb,
+        }
+        indices: list[int] = self._queue.get()
+        self.pending = None
+        return [cards[i] for i in indices]
+
     def _ask(self, prompt: str, options: list, kind: IOType) -> "Card | Player | None":
         sleep(TEMPS_ATTENTES)
         self.pending = {

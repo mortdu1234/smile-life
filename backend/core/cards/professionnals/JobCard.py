@@ -24,9 +24,11 @@ class JobCard(Card):
         self.salary = 0
         self.old_salary = None
 
-    def get_power(self):
+    def get_power(self, owner: "Player"):
         """retourne les pouvoirs du métier"""
         res = self.jobPower
+        if Power.NO_JOB_STATUS in owner.power:
+            return res
         if self.status == JobStatus.FONCTIONNAIRE:
             res += [Power.NO_FIRE]
         if self.status == JobStatus.INTERIMERE:
