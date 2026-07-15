@@ -128,6 +128,9 @@ class Game:
             player.add_card_to_played(build_card("salary__4"))
             player.add_card_to_played(build_card("salary__4"))
             player.add_card_to_played(build_card("salary__4"))
+            player.add_card_to_played(build_card("study__2"))
+            player.add_card_to_played(build_card("study__2"))
+            player.add_card_to_played(build_card("study__2"))
 
     def add_card_to_cards_remove(self, card: "Card"):
         """ajoute une carte au carte supprimées"""

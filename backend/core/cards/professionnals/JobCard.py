@@ -26,13 +26,13 @@ class JobCard(Card):
 
     def get_power(self, owner: "Player"):
         """retourne les pouvoirs du métier"""
-        res = self.jobPower
+        res = self.jobPower.copy()
         if Power.NO_JOB_STATUS in owner.power:
             return res
         if self.status == JobStatus.FONCTIONNAIRE:
-            res += [Power.NO_FIRE]
+            res.append(Power.NO_FIRE)
         if self.status == JobStatus.INTERIMERE:
-            res += [Power.INSTANT_QUIT_JOB]
+            res.append(Power.INSTANT_QUIT_JOB)
         return res
 
     def discard_card(self, game: "Game", owner: "Player") -> None:
