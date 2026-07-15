@@ -13,7 +13,11 @@ if TYPE_CHECKING:
 class Amulette(ObjetMagique):
     value: int = 999
     def get_value(self)->int:
-        return self.value
+        return self.value 
+    def to_dict(self) -> dict:
+        data = super().to_dict()
+        data["value"] = self.get_value()
+        return data
     def apply_talisment_effect(self, game: Game, current_player: Player):
          # récupération de l'ensemble des maléfices recus
         cards = current_player.get_card_from_group(groupe.HARDSHIP)
@@ -33,6 +37,7 @@ class Amulette(ObjetMagique):
         assert selected_card is not None
 
         current_player.remove_card(selected_card, game)
+        current_player.add_card_to_hand(selected_card)
         selected_card.play_card(game, current_player)
 
 

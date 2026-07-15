@@ -64,7 +64,17 @@ class Acquisition(Card):
 
         for card in selected_salaries:
             from backend.core.PlayerCardGroup import PlayedCardGroup
-            success = current_player.move_placed_cards(card, PlayedCardGroup.VIE_PROFESSIONNELLE, PlayedCardGroup.CARTES_PROTEGEES)
+            from .objets_magiques.Amulette import Amulette
+            from ..specials.Heritage import Heritage
+            success = False
+            if isinstance(card, Amulette):
+                success = current_player.move_placed_cards(card, PlayedCardGroup.ACQUISITIONS, PlayedCardGroup.CARTES_PROTEGEES)
+            elif isinstance(card, Heritage):
+                success = current_player.move_placed_cards(card, PlayedCardGroup.CARTES_SPECIALES, PlayedCardGroup.CARTES_PROTEGEES)
+            else:    
+                success = current_player.move_placed_cards(card, PlayedCardGroup.VIE_PROFESSIONNELLE, PlayedCardGroup.CARTES_PROTEGEES)
+
+                            
             if not success:
                 print("[ERROR] déplace de carte échouée")
                 return False

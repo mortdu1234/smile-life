@@ -8,32 +8,23 @@
     "ephemeride__lune_bleu": 0,
     "ephemeride__equinoxe": 0,
     "ephemeride__eclipse": 0,
-    "bandit": 10,
-    "barman": 10,
+    "bandit": 0,
+    "barman": 0,
     "licenciement":0,
     "prof__maths":0,
     "salary__1": 0,
     "salary__4": 0,
-    "house__1":0,
+    "house__1":10,
     "tax":0,
-    "burnout":10,
+    "burnout":0,
     "marriage__corps_nuds": 0,
     "prison":0,
     
-    "malefice__alcatras": 0,
-    "malefice__sacrapas": 0,
-    "malefice__restataplas": 0,
-    "malefice__minus_miserablis": 0,
-    "malefice__maxus_miserablis": 0,
-    "malefice__mano_negra": 0,
-    "malefice__cas_burnas": 0,
-    
-    "malefice__bis_repetitas": 10,
-    
     "malefice__aveuglement": 0,
     "malefice__desenchantement": 0,
-
-    "objet_magique__amulette": 0,
+    
+    
+    "objet_magique__amulette": 20,
     "objet_magique__anneau_de_pouvoir": 0,
     "objet_magique__baguette_magique": 0,
     "objet_magique__balai": 0,
@@ -46,6 +37,9 @@
     "objet_magique__chaudron": 0,
     "objet_magique__cape_invisible": 0,
 
+    
+    
+    
     "potion__amour_eternel": 0,
     "potion__argent": 0,
     "potion__chance": 0,
@@ -56,6 +50,27 @@
     "potion__resurrection": 0,
     "potion__ristournelle": 0,
     "potion__savoir": 0,
-    "potion__vitalite": 0
+    "potion__vitalite": 0,
+    
+
+
+
+
+
+
+
+
+
+
+
+
+    "malefice__alcatras": 0,
+    "malefice__sacrapas": 0,
+    "malefice__restataplas": 0,
+    "malefice__minus_miserablis": 0,
+    "malefice__maxus_miserablis": 0,
+    "malefice__mano_negra": 0,
+    "malefice__cas_burnas": 0,
+    "malefice__bis_repetitas": 0
   }
 }

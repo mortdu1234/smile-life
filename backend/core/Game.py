@@ -131,7 +131,7 @@ class Game:
             player.add_card_to_played(build_card("study__2"))
             player.add_card_to_played(build_card("study__2"))
             player.add_card_to_played(build_card("study__2"))
-            player.add_card_to_played(build_card("barman"))
+            player.add_card_to_played(build_card("malefice__bis_repetitas"))
 
 
     def add_card_to_cards_remove(self, card: "Card"):
