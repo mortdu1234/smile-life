@@ -19,6 +19,8 @@ class Hardship(Card):
         """retourne la liste des cibles potentielles"""
         targetted_players: list[Player] = []
         for player in game.players:
+            if player == game.get_current_player():
+                continue
             if self.can_be_targeted(player, game):
                 targetted_players.append(player)
         return targetted_players
