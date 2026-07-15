@@ -13,10 +13,12 @@ class Sacrapas(MaleficeCard):
         success = super().apply_card_effect(game, current_player)
         if not success:
             return False
-
+        assert self.target_player is not None, "Aucun joueur selectionnée"
+        self.target_player.add_power(Power.SALRAPAS)
         return True
 
     def discard_card(self, game: "Game", owner: "Player") -> None:
+        owner.remove_power(Power.SALRAPAS)
         return super().discard_card(game, owner)
 
     

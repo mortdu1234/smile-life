@@ -23,7 +23,7 @@ CATALOG: list[dict] = [
     {"id": "malefice__cas_burnas", "label": "Cas Burnas", "category": ["Fantastique", "Maléfices"]},
     {"id": "malefice__bis_repetitas", "label": "Bis Repetitas", "category": ["Fantastique", "Maléfices"]},
     {"id": "malefice__aveuglement", "label": "Aveuglement", "category": ["Fantastique", "Maléfices"]},
-    # ── Objet Magique ──────────────────────────────────────────────────────────────
+    # ── Objet Magique ──────────────────────────────────────────────────────────────   
     {"id": "objet_magique__amulette", "label": "Amulette", "category": ["Fantastique", "Objets Magiques"]},
     {"id": "objet_magique__anneau_de_pouvoir", "label": "Anneau de Pouvoir", "category": ["Fantastique", "Objets Magiques"]},
     {"id": "objet_magique__baguette_magique", "label": "Baguette Magique", "category": ["Fantastique", "Objets Magiques"]},

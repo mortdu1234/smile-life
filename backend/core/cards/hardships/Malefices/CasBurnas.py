@@ -13,8 +13,9 @@ class CasBurnas(MaleficeCard):
         if not success:
             return False
 
-        current_player.add_power(Power.CAN_BE_BURN_OUT)
-        current_player.add_power(Power.CAN_BE_TAXED)
+        assert self.target_player is not None, "Aucun joueur selectionnée"
+        self.target_player.add_power(Power.CAN_BE_BURN_OUT)
+        self.target_player.add_power(Power.CAN_BE_TAXED)
         return True
 
     def discard_card(self, game: "Game", owner: "Player") -> None:

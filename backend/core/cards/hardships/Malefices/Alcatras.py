@@ -15,7 +15,8 @@ class Alcatras(MaleficeCard):
         if not success:
             return False
 
-        current_player.add_power(Power.CAN_BE_JAILED)
+        assert self.target_player is not None, "Aucun joueur selectionnée"
+        self.target_player.add_power(Power.CAN_BE_JAILED)
         return True
 
     def discard_card(self, game: "Game", owner: "Player") -> None:

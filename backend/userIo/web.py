@@ -96,6 +96,7 @@ class WebIO(UserIO):
         """Affiche l'overlay de sélection de salaires.
         Bloque la greenlet jusqu'à ce que le joueur valide une sélection dont la somme >= cost.
         """
+        print(f"APPEL DE ASK SALARIES + longeur de la queue = {len(self._queue)}")
         sleep(TEMPS_ATTENTES)
         self.pending = {
             "ui_component": IOType.SALARY_SELECTOR.value,
@@ -105,6 +106,8 @@ class WebIO(UserIO):
         }
         indices: list[int] = self._queue.get()
         self.pending = None
+
+        print(f"FIN DE ASK SALARIES + longeur de la queue = {len(self._queue)}")
         return [salaries[i] for i in indices]
 
     def show_cards(self, title: str, prompt: str, cards: Sequence["Card"]) -> None:
@@ -127,6 +130,7 @@ class WebIO(UserIO):
 
     def submit_indices(self, indices: list[int]) -> None:
         """Appelé par la route Flask quand l'utilisateur valide une sélection multiple."""
+        print("YOUSKKKKKKKKK")
         self._queue.put(indices)
 
     def submit_dismiss(self) -> None:

@@ -13,7 +13,8 @@ class ManoNegra(MaleficeCard):
         if not success:
             return False
 
-        current_player.add_power(Power.MANO_NEGRA)
+        assert self.target_player is not None, "Aucun joueur selectionnée"
+        self.target_player.add_power(Power.MANO_NEGRA)
         return True
 
     def discard_card(self, game: "Game", owner: "Player") -> None:

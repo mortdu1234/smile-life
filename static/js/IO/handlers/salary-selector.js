@@ -25,9 +25,30 @@ registerHandler("salary-selector", function render(pending) {
   const costEl      = overlay.querySelector("#salary-required-cost");
   const selectedTot = overlay.querySelector("#salary-selected-total");
   const neededTot   = overlay.querySelector("#salary-needed-total");
-  const confirmBtn  = overlay.querySelector("#salary-confirm-btn");
-  const cancelBtn   = overlay.querySelector("#salary-cancel-btn");
   const infoToggle  = overlay.querySelector("#salary-info-toggle");
+
+  // confirmBtn / cancelBtn sont RÉUTILISÉS d'un appel à l'autre : l'overlay
+  // n'est jamais recréé, juste caché/montré. Si on se contente de faire
+  // `addEventListener` sur ces noeuds à chaque render(), les listeners
+  // s'empilent à chaque nouvel appel (ex: retry Power.SALRAPAS côté
+  // Acquisition.py), et un seul clic finit par déclencher plusieurs
+  // handleConfirm() -> plusieurs onSubmit() -> plusieurs submit_indices()
+  // -> plusieurs queue.put() côté backend (queue polluée pour la suite).
+  //
+  // Fix : on clone ces boutons à chaque montage pour repartir sur des
+  // noeuds "vierges" de tout listener précédent, avec la closure courante.
+  let confirmBtn = overlay.querySelector("#salary-confirm-btn");
+  let cancelBtn  = overlay.querySelector("#salary-cancel-btn");
+  if (confirmBtn) {
+    const freshConfirm = confirmBtn.cloneNode(true);
+    confirmBtn.replaceWith(freshConfirm);
+    confirmBtn = freshConfirm;
+  }
+  if (cancelBtn) {
+    const freshCancel = cancelBtn.cloneNode(true);
+    cancelBtn.replaceWith(freshCancel);
+    cancelBtn = freshCancel;
+  }
 
   if (promptText) promptText.textContent = prompt;
   if (costEl)     costEl.textContent     = cost;
@@ -133,6 +154,8 @@ registerHandler("salary-selector", function render(pending) {
   }
 
   // ── Fermeture ─────────────────────────────────────────────────────────
+  let closed = false; // garde-fou supplémentaire : empêche toute double fermeture/soumission
+
   function closeOverlay() {
     overlay.classList.remove("salary-overlay--visible");
     overlay.addEventListener("transitionend", () => overlay.setAttribute("hidden", ""), { once: true });
@@ -141,9 +164,17 @@ registerHandler("salary-selector", function render(pending) {
   }
 
   function handleConfirm() {
+    if (closed) return;       // sécurité anti double-clic / double-listener
     if (!isEnough()) return;
+    closed = true;
     closeOverlay();
     if (typeof onSubmit === "function") onSubmit([...selected]);
+  }
+
+  function handleCancel() {
+    if (closed) return;
+    closed = true;
+    closeOverlay();
   }
 
   function trapFocus(e) {
@@ -165,8 +196,10 @@ registerHandler("salary-selector", function render(pending) {
   renderCards();
   refreshUI();
 
+  // confirmBtn/cancelBtn ont été clonés plus haut : ce sont des noeuds
+  // fraîchement montés, on peut attacher les listeners sans risque de doublon.
   if (confirmBtn) confirmBtn.addEventListener("click", handleConfirm);
-  if (cancelBtn)  cancelBtn.addEventListener("click", closeOverlay);
+  if (cancelBtn)  cancelBtn.addEventListener("click", handleCancel);
   document.addEventListener("keydown", trapFocus);
 
   overlay.removeAttribute("hidden");

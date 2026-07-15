@@ -3,15 +3,30 @@
   "label": "preset de test",
   "description": "Deck test — version de test pour les développeurs",
   "deck": {
-      "ephemeride__pleine_lune":0,
-      "ephemeride__lune_rouge":0,
-      "ephemeride__lune_bleu":0,
-      "ephemeride__equinoxe":0,
-      "ephemeride__eclipse":0,
-      "bandit": 0,
-      "salary__1": 0,
-      "marriage__corps_nuds": 0,
+    "ephemeride__pleine_lune": 0,
+    "ephemeride__lune_rouge": 0,
+    "ephemeride__lune_bleu": 0,
+    "ephemeride__equinoxe": 0,
+    "ephemeride__eclipse": 0,
+    "bandit": 0,
+    "salary__1": 0,
+    "salary__4": 0,
+    "house__1":20,
+    "marriage__corps_nuds": 0,
+    "prison":0,
     
+    "malefice__alcatras": 0,
+
+    "malefice__sacrapas": 20,
+    "malefice__restataplas": 0,
+    "malefice__minus_miserablis": 0,
+    "malefice__maxus_miserablis": 0,
+    "malefice__mano_negra": 0,
+    "malefice__desenchantement": 0,
+    "malefice__cas_burnas": 0,
+    "malefice__bis_repetitas": 0,
+    "malefice__aveuglement": 0,
+
     "objet_magique__amulette": 0,
     "objet_magique__anneau_de_pouvoir": 0,
     "objet_magique__baguette_magique": 0,
@@ -23,7 +38,18 @@
     "objet_magique__grimoire": 0,
     "objet_magique__flute_enchantee": 0,
     "objet_magique__chaudron": 0,
-    "objet_magique__cape_invisible": 0
+    "objet_magique__cape_invisible": 0,
 
+    "potion__amour_eternel": 0,
+    "potion__argent": 0,
+    "potion__chance": 0,
+    "potion__epousaille": 0,
+    "potion__excellence": 0,
+    "potion__fertilite": 0,
+    "potion__interim": 0,
+    "potion__resurrection": 0,
+    "potion__ristournelle": 0,
+    "potion__savoir": 0,
+    "potion__vitalite": 0
   }
 }

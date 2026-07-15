@@ -1,4 +1,14 @@
-"""Contient l'ensemble des données d'une partie en cours"""
+"""
+Game
+====
+Représente l'état complet d'une partie en cours : joueurs, pioche, défausse,
+cartes au centre de la table, historique, et machine à états du tour en cours.
+
+Le déroulement normal d'un tour est : PIOCHE -> POSE -> (tour suivant).
+Certains effets (Ephemerides, pouvoirs) peuvent modifier ce déroulement :
+- Power.AVEUGLEMENT inverse l'ordre du tour du joueur qui le possède : il POSE une
+  carte avant de PIOCHER (voir la section "Gestion des tours" plus bas).
+"""
 from datetime import datetime
 from enum import Enum
 import functools
@@ -16,15 +26,19 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .cards.specials.Casino import Casino
 
+
 class TurnState(Enum):
-    PIOCHE = "pioche"
-    POSE = "pose"
-    IN_DISCARDING = "in_discarding"
-    IN_PLACING = "in_placing"
+    """Phase courante du tour du joueur actif."""
+    PIOCHE = "pioche"              # le joueur doit piocher (ou poser s'il a Power.AVEUGLEMENT)
+    POSE = "pose"                  # le joueur doit poser/défausser (ou piocher s'il a Power.AVEUGLEMENT)
+    IN_DISCARDING = "in_discarding"  # défausses multiples en cours (ex: Lune Rouge)
+    IN_PLACING = "in_placing"        # poses multiples en cours (ex: Pleine Lune)
+
 
 class GameModes(Enum):
     CLASSIC = "classic"
     RIVER = "river"
+
 
 class GameStateKey(Enum):
     CHANCE = "chance"
@@ -32,10 +46,13 @@ class GameStateKey(Enum):
     NB_CARDS_DISCARD = "nb_cards_discard"
     NB_CARDS_PLACED = "nb_cards_placed"
 
+
 HISTORY_SIZE = 5
 NB_CARD_RIVER = 3
 
+
 def validate_player(method):
+    """Décorateur : bloque l'appel si ce n'est pas le tour du joueur ciblé."""
     @functools.wraps(method)
     def wrapper(self, player_id, *args, **kwargs):
         if self.player_turn != player_id:
@@ -43,7 +60,9 @@ def validate_player(method):
         return method(self, player_id, *args, **kwargs)
     return wrapper
 
+
 def validate_phase(*required_phases: TurnState):
+    """Décorateur : bloque l'appel si la partie n'est pas dans une des phases attendues."""
     def decorator(method):
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
@@ -57,24 +76,23 @@ def validate_phase(*required_phases: TurnState):
 
 
 class Game:
-    # PARAMETRES DE BASE DE LA PARTIE
-    id: str # Identifiant de la partie (code à 5 lettres)
-    players: list[Player] # Liste des joueurs dans la partie
-    deck: list[Card] # Cartes restantes dans la pioche
-    discard: list[Card] # Cartes dans la défausse
-    cards_removed: list[Card] # Cartes supprimer par violence
-    player_turn: int # Index du joueur dont c'est le tour
-    center_cards_played: list[Card] # Cartes jouées au centre de la table
-    historique: list[str] # historique de la partie
-    turn_state: TurnState # etat du jeu
-    game_state: dict[GameStateKey, int]
+    """Etat complet d'une partie et logique associée (tours, pioche, actions des joueurs)."""
+
+    # --- Attributs de base de la partie ---
+    id: str                                # Identifiant de la partie (code à 5 lettres)
+    players: list[Player]                  # Liste des joueurs dans la partie
+    deck: list[Card]                       # Cartes restantes dans la pioche
+    discard: list[Card]                    # Cartes dans la défausse
+    cards_removed: list[Card]              # Cartes supprimées par violence
+    player_turn: int                       # Index du joueur dont c'est le tour
+    center_cards_played: list[Card]        # Cartes jouées au centre de la table
+    historique: list[str]                  # Historique de la partie
+    turn_state: TurnState                  # Phase courante du tour
+    game_state: dict[GameStateKey, int]    # Compteurs d'effets en cours (chance, arc-en-ciel, ...)
     game_mode: GameModes
     river_deck: list[Card]
     updated_at: datetime
     ephemeride: Ephemeride | None
-
-
-    # PARAMETRE SUPPLEMENTAIRE POUR LE JEU
 
     def __init__(self, id: str, players: list[Player], deck: list[Card]):
         self.id = id
@@ -100,6 +118,16 @@ class Game:
                     if not result:
                         player.remove_card_from_hand(card)
                         deck.insert(len(deck)//2, card)
+
+        # testing map
+        from .cards.LoaderCard import build_card
+        for player in self.players:
+            player.add_card_to_played(build_card("salary__1"))
+            player.add_card_to_played(build_card("salary__1"))
+            player.add_card_to_played(build_card("salary__1"))
+            player.add_card_to_played(build_card("salary__4"))
+            player.add_card_to_played(build_card("salary__4"))
+            player.add_card_to_played(build_card("salary__4"))
 
     def add_card_to_cards_remove(self, card: "Card"):
         """ajoute une carte au carte supprimées"""
@@ -183,8 +211,39 @@ class Game:
     def end_game(self):
         pass
 
+    # ------------------------------------------------------------------ #
+    #  Gestion des tours                                                  #
+    # ------------------------------------------------------------------ #
+    def _has_power_aveuglement(self, player: Player) -> bool:
+        """Indique si `player` possède Power.AVEUGLEMENT (tour inversé : pose avant pioche)."""
+        return Power.AVEUGLEMENT in player.get_power()
+
+    def _advance_after_draw(self, player: Player):
+        """A appeler juste après qu'un joueur a pioché sa carte.
+
+        - Flux normal : la pioche est la 1ère étape du tour, on passe donc en phase POSE.
+        - Flux inversé (Power.AVEUGLEMENT) : la pioche est la dernière étape du tour, on termine
+          donc le tour du joueur.
+        """
+        if self._has_power_aveuglement(player):
+            self.next_turn()
+        else:
+            self.turn_state = TurnState.POSE
+
+    def _advance_after_place(self, player: Player):
+        """A appeler juste après qu'un joueur a posé/défaussé sa carte.
+
+        - Flux normal : la pose est la dernière étape du tour, on termine donc le tour.
+        - Flux inversé (Power.AVEUGLEMENT) : la pose est la 1ère étape du tour, le joueur doit
+          maintenant piocher.
+        """
+        if self._has_power_aveuglement(player):
+            self.turn_state = TurnState.PIOCHE
+        else:
+            self.next_turn()
+
     def next_turn(self):
-        """Passe au tour du joueur suivant."""
+        """Termine le tour du joueur courant et passe au tour du joueur suivant."""
         value = self.game_state.get(GameStateKey.CHANCE, 0)
         if value > 0:
             print(f"[INFO] le joueur ({self.get_current_player().name}) possède la chance et rejoue")
@@ -233,7 +292,13 @@ class Game:
         print("[INFO] "+f" DEBUT du tour du joueur {self.get_current_player().name}")
         print("[INFO] "+"="*60)
         print("[DEBUG] "+f"info du joueur qui viens de commencer son tour \n\tpower:{self.get_current_player().get_power()}")
-        self.turn_state = TurnState.PIOCHE
+
+        new_current_player = self.get_current_player()
+        if self._has_power_aveuglement(new_current_player):
+            print(f"[INFO] le joueur ({new_current_player.name}) possède Power.AVEUGLEMENT : son tour est inversé (pose avant pioche)")
+            self.turn_state = TurnState.POSE
+        else:
+            self.turn_state = TurnState.PIOCHE
 
 
     def _draw_card_from_deck(self) -> "Card":
@@ -351,7 +416,7 @@ class Game:
                     card = ephemeride.troc_cards(self, player, card)
         
         player.add_card_to_hand(card)
-        self.turn_state = TurnState.POSE
+        self._advance_after_draw(player)
         return True, ""
 
 
@@ -387,8 +452,8 @@ class Game:
             card.play_card(self, player)
             self.next_turn()
             return True, ""
-                
-        self.turn_state = TurnState.POSE
+
+        self._advance_after_draw(player)
         return True, ""
 
 
@@ -447,8 +512,8 @@ class Game:
                 self.turn_state = TurnState.IN_DISCARDING
                 self.game_state[GameStateKey.NB_CARDS_DISCARD] += 1
                 return True, ""
-                
-        self.next_turn()
+
+        self._advance_after_place(player)
 
         return True, ""
 
@@ -556,15 +621,24 @@ class Game:
                 self.turn_state = TurnState.IN_PLACING
                 self.game_state[GameStateKey.NB_CARDS_PLACED] += 1
                 return True, ""
-            
-        self.next_turn()
+
+        self._advance_after_place(player)
 
         return True, ""
-    
+
     @validate_player
     @validate_phase(TurnState.IN_DISCARDING, TurnState.IN_PLACING)
     def finish_turn(self, player_id: int) -> tuple[bool, str]:
-        self.next_turn()
+        """Termine une séquence de poses/défausses multiples (ex: Pleine Lune, Lune Rouge).
+
+        Si le joueur possède Power.AVEUGLEMENT et sort d'une séquence de poses (IN_PLACING),
+        son tour est inversé : il doit encore piocher avant que le tour ne se termine.
+        """
+        player = self.get_current_player()
+        if self.turn_state == TurnState.IN_PLACING and self._has_power_aveuglement(player):
+            self.turn_state = TurnState.PIOCHE
+        else:
+            self.next_turn()
         return True, ""
 
         
@@ -601,5 +675,5 @@ class Game:
                 self.game_state[GameStateKey.NB_CARDS_PLACED] += 1
                 return True, ""
 
-        self.next_turn()
+        self._advance_after_place(player)
         return True, ""

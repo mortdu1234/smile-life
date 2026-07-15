@@ -12,7 +12,8 @@ class MaxusMiserablis(MaleficeCard):
         success = super().apply_card_effect(game, current_player)
         if not success:
             return False
-        current_player.add_power(Power.NO_SALARY_4)
+        assert self.target_player is not None, "Aucun joueur selectionnée"
+        self.target_player.add_power(Power.NO_SALARY_4)
         return True
 
     def discard_card(self, game: "Game", owner: "Player") -> None:

@@ -23,12 +23,11 @@ class Prison(Hardship):
         return "Prison"
 
     def hardship_effect(self, game: Game, target: Player) -> bool:
-        job = target.get_job()
-        if not job:
-            print("[ERROR] métier non trouvé")
-            return False
         # retire le métier
-        target.remove_card(job, game)
+        job = target.get_job()
+        if job:
+            target.remove_card(job, game)
+            
 
         # retire 2 cartes aléatoire de la main du joueur
         nombre_de_carte_retiree = 2

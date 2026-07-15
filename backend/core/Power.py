@@ -43,4 +43,4 @@ class Power(Enum):
     NO_SALARY_1 = "no_salary_1" # ne peut pas poser de salaire 1
     NO_JOB_STATUS = "no_job_status" # ne recois aucune avantage a etre intérimaire ou fonctionnaire
     AVEUGLEMENT = "aveuglement" # pose avant de piocher
-        
+    SALRAPAS = "salrapas" # oblige de payer le prix exacte lors d'acquisition

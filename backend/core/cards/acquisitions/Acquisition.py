@@ -21,22 +21,47 @@ class Acquisition(Card):
             return self.original_price - 1
         return self.original_price
         
+    def _has_exact_salary_combination(self, salaries: list["SalaryCard"], cost: int) -> bool:
+        """Vérifie s'il existe une combinaison de `salaries` dont la somme vaut exactement `cost`."""
+        possible_sums = {0}
+        for salary in salaries:
+            possible_sums |= {total + salary.get_value() for total in possible_sums}
+        return cost in possible_sums
+
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         salaries = player.get_available_salary()
-        sum = 0
         cost = self.calcul_cost(player, game)
-        for salary in salaries:
-            sum += salary.get_value()
-        if sum < cost:
+        total = sum(salary.get_value() for salary in salaries)
+        if total < cost:
             return False, "pas assez de salaire"
+        if Power.SALRAPAS in player.get_power():
+            if not self._has_exact_salary_combination(salaries, cost):
+                return False, "impossible de payer exactement le prix de l'acquisition avec les salaires disponibles"
         return super().can_be_played(player, game)
 
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         """effectue la selection des salaires pour l'acquisition"""
+
         available_salaries = current_player.get_available_salary()
         interface = current_player.get_interface()
+        cost = self.calcul_cost(current_player, game)
+        must_pay_exact = Power.SALRAPAS in current_player.get_power()
 
-        selected_salaries: list[Card] = interface.ask_salaries(self, available_salaries, self.calcul_cost(current_player, game))
+        while True:
+            selected_salaries: list[Card] = interface.ask_salaries(self, available_salaries, cost)
+
+            if not must_pay_exact:
+                print("CHOIIIIIIIIXXXX  1")
+                break
+
+            selected_sum = sum(card.get_value() for card in selected_salaries)
+            if selected_sum == cost:
+                print("CHOIIIIIIIIXXXX  2")
+                break
+
+
+            print(f"[ERROR] Power.SALRAPAS : le joueur doit payer exactement {cost}, mais a sélectionné un total de {selected_sum}")
+
         for card in selected_salaries:
             from backend.core.PlayerCardGroup import PlayedCardGroup
             success = current_player.move_placed_cards(card, PlayedCardGroup.VIE_PROFESSIONNELLE, PlayedCardGroup.CARTES_PROTEGEES)

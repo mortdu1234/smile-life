@@ -12,7 +12,8 @@ class Aveuglement(MaleficeCard):
         success = super().apply_card_effect(game, current_player)
         if not success:
             return False
-        current_player.add_power(Power.AVEUGLEMENT)
+        assert self.target_player is not None, "Aucun joueur selectionnée"
+        self.target_player.add_power(Power.AVEUGLEMENT)
         return True
 
     def discard_card(self, game: "Game", owner: "Player") -> None:
