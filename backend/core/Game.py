@@ -131,6 +131,8 @@ class Game:
             player.add_card_to_played(build_card("study__2"))
             player.add_card_to_played(build_card("study__2"))
             player.add_card_to_played(build_card("study__2"))
+            player.add_card_to_played(build_card("barman"))
+
 
     def add_card_to_cards_remove(self, card: "Card"):
         """ajoute une carte au carte supprimées"""
@@ -461,11 +463,25 @@ class Game:
 
 
     @validate_player
-    @validate_phase(TurnState.PIOCHE)
     def draw_card_from_discard(self, player_id: int) -> tuple[bool, str]:
-        """pioche une carte depuis la défausse"""
+        """pioche une carte depuis la défausse
+
+        Autorisé en phase PIOCHE normalement. Un joueur possédant Power.AVEUGLEMENT
+        a son tour inversé (POSE avant PIOCHE) : cette action, qui pioche ET joue
+        immédiatement la carte de la défausse, reste néanmoins disponible dès le
+        début de son tour (phase POSE), avec exactement le même comportement que
+        pour un joueur sans le pouvoir.
+        """
         print("[INFO] action du joueur : poser la carte de la défausse")
         player = self.get_current_player()
+
+        allowed_phases = (TurnState.PIOCHE,)
+        if self._has_power_aveuglement(player):
+            allowed_phases = (TurnState.PIOCHE, TurnState.POSE)
+        if self.turn_state not in allowed_phases:
+            phases_str = ", ".join(str(p) for p in allowed_phases)
+            return None, f"Action impossible en phase '{self.turn_state}' (attendu : '{phases_str}')."
+
         if player.skip_turn > 0:
             print("[ERROR] essaye de piocher alors que je joueurs dois skip un tour")
             return False, ""
