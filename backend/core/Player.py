@@ -142,6 +142,7 @@ class Player:
         try:
             self.groupe[groupFrom].remove(card)
             self.groupe[groupTo].append(card)
+            print(f"[INFO] déplacement de la carte {card.get_name()} du groupe {groupFrom} vers {groupTo}")
             return True
         except ValueError:
             return False

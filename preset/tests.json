@@ -23,6 +23,7 @@
     
     "malefice__aveuglement": 0,
     "malefice__desenchantement": 0,
+    "objet_magique__chaudron": 0,
     
     "objet_magique__amulette": 0, "c'est la v1":0,
     "objet_magique__anneau_de_pouvoir": 0,
@@ -33,10 +34,9 @@
     "objet_magique__lasso_magique": 0,
     "objet_magique__lampe_magique": 0,
     "objet_magique__grimoire": 0,
-    
-    "objet_magique__flute_enchantee": 20,
-    "objet_magique__chaudron": 0,
+    "objet_magique__flute_enchantee": 0,
     "objet_magique__cape_invisible": 0,
+    
 
     
     
