@@ -7,16 +7,19 @@ if TYPE_CHECKING:
 from .PotionCard import Potion
 
 class ArgentPotion(Potion):
-    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+    def apply_potion_effect(self, game: "Game", current_player: "Player"):
         from ...professionnals.SalaryCard import SalaryCard
-        success = super().apply_card_effect(game, current_player)
-        if not success:
-            return success
         cartes_protegees = current_player.get_card_from_group(groupe.CARTES_PROTEGEES)
         for card in cartes_protegees:
             if isinstance(card, SalaryCard):
                 current_player.move_placed_cards(card, groupe.CARTES_PROTEGEES, groupe.VIE_PROFESSIONNELLE)
                 
+
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+        success = super().apply_card_effect(game, current_player)
+        if not success:
+            return success
+        self.apply_potion_effect(game, current_player)
         return True
     
     def get_card_rule(self) -> str:

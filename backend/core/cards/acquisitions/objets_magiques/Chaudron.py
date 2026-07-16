@@ -21,10 +21,11 @@ class Chaudron(ObjetMagique):
             if isinstance(card, Potion):
                 potions_cards.append(card)
 
-        if potions_cards == 0:
+        if len(potions_cards) == 0:
             return True
 
         interface = current_player.get_interface()
+    
         selected_card = interface.ask_card(
             prompt="selectionner la potion a rejouer",
             cards=potions_cards,
@@ -34,7 +35,7 @@ class Chaudron(ObjetMagique):
         assert isinstance(selected_card, Potion), "error la carte n'est pas une potion"
 
         selected_card.discard_card(game, current_player)
-        selected_card.apply_card_effect(game, current_player)
+        selected_card.apply_potion_effect(game, current_player)
         
         return True
 

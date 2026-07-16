@@ -7,11 +7,15 @@ if TYPE_CHECKING:
 from .PotionCard import Potion
 
 class AmourEternelPotion(Potion):
+    
+    def apply_potion_effect(self, game: "Game", current_player: "Player"):
+        current_player.add_power(Power.NO_DIVORCE)
+
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         success = super().apply_card_effect(game, current_player)
         if not success:
             return success
-        current_player.add_power(Power.NO_DIVORCE)
+        self.apply_potion_effect(game, current_player)
         return True
     
     def discard_card(self, game: "Game", owner: "Player") -> None:

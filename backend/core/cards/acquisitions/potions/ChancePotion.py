@@ -8,11 +8,8 @@ if TYPE_CHECKING:
 from .PotionCard import Potion
 
 class ChancePotion(Potion):
-    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
-        success = super().apply_card_effect(game, current_player)
-        if not success:
-            return success
 
+    def apply_potion_effect(self, game: "Game", current_player: "Player"):
         turn = min(10, len(game.deck))
         next_10_cards = [game.deck[i] for i in range(turn)]
         interface = current_player.get_interface()
@@ -28,6 +25,11 @@ class ChancePotion(Potion):
         from ....Game import GameStateKey
         game.game_state[GameStateKey.CHANCE] += 1
 
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+        success = super().apply_card_effect(game, current_player)
+        if not success:
+            return success
+        self.apply_potion_effect(game, current_player)
         return True
         
     def get_card_rule(self) -> str:

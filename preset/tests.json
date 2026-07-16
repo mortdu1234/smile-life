@@ -13,31 +13,36 @@
     "licenciement":0,
     "prof__maths":0,
     "salary__1": 0,
-    "salary__4": 0,
+    "salary__4": 20,
+    "casino":0,
     "house__1":0,
     "tax":0,
     "burnout":0,
-    "divorce":10,
+    "chercheur":0,
+    "divorce":0,
     "marriage__corps_nuds": 0,
+    "prix":0,
     "prison":0,
     "travel__le_caire":0,
+    "diana":0,
     
-    "malefice__aveuglement": 0,
-    "malefice__desenchantement": 0,
-    "objet_magique__chaudron": 0,
-        
+    
     "potion__chance": 0,
-
-    "potion__amour_eternel": 10,
-    "potion__argent": 10,
+    "potion__amour_eternel": 0,
+    "potion__argent": 0,
     "potion__epousaille": 0,
     "potion__excellence": 0,
     "potion__fertilite": 0,
     "potion__interim": 0,
-    "potion__resurrection": 0,
     "potion__ristournelle": 0,
-    "potion__savoir": 0,
     "potion__vitalite": 0,
+    "potion__resurrection": 0,
+    
+    "malefice__desenchantement": 0,
+    "potion__savoir": 0,
+    "objet_magique__chaudron": 0,
+
+    "malefice__aveuglement": 20,
     
 
 

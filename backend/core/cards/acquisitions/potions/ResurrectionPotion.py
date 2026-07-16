@@ -8,12 +8,9 @@ from .PotionCard import Potion
 
 
 class ResurrectionPotion(Potion):
-    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+    def apply_potion_effect(self, game: "Game", current_player: "Player"):
         from ...personnals.Children import ChildCard
         from ...animals.AnimalCard import AnimalCard
-        success = super().apply_card_effect(game, current_player)
-        if not success:
-            return success
 
         removed_cards = game.get_removed_cards()
         available_cards = []
@@ -32,6 +29,11 @@ class ResurrectionPotion(Potion):
         game.remove_cards_from_removed_cards(selected_card)
         current_player.add_card_to_played(selected_card)
 
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+        success = super().apply_card_effect(game, current_player)
+        if not success:
+            return success
+        self.apply_potion_effect(game, current_player)
         return True
    
     def get_card_rule(self) -> str:

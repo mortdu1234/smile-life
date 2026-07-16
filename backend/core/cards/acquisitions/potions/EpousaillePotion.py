@@ -9,6 +9,20 @@ from .PotionCard import Potion
 
 
 class EpousaillePotion(Potion):
+
+    def apply_potion_effect(self, game: "Game", current_player: "Player"):
+        discarded_weddings = self.discard_wedding(game)
+        interface = current_player.get_interface()
+        selected_card = interface.ask_card(
+            prompt="Selectionne le marriage que tu veux",
+            cards=discarded_weddings,
+            kind=IOType.CARD_PICKER
+        )
+        assert selected_card is not None, "error, aucune carte selectionnee"
+
+        game.remove_card_from_discard(selected_card)
+        current_player.add_card_to_played(selected_card)
+
     def discard_wedding(self, game: "Game")-> "list[Card]":
         from ...personnals.Wedding import Wedding
         discarded_cards = game.discard
@@ -30,18 +44,8 @@ class EpousaillePotion(Potion):
         success = super().apply_card_effect(game, current_player)
         if not success:
             return success
-        
-        discarded_weddings = self.discard_wedding(game)
-        interface = current_player.get_interface()
-        selected_card = interface.ask_card(
-            prompt="Selectionne le marriage que tu veux",
-            cards=discarded_weddings,
-            kind=IOType.CARD_PICKER
-        )
-        assert selected_card is not None, "error, aucune carte selectionnee"
 
-        game.remove_card_from_discard(selected_card)
-        current_player.add_card_to_played(selected_card)
+        self.apply_potion_effect(game, current_player)
 
         return True
 

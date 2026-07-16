@@ -28,9 +28,18 @@ if TYPE_CHECKING:
 
 
 class TurnState(Enum):
-    """Phase courante du tour du joueur actif."""
-    PIOCHE = "pioche"              # le joueur doit piocher (ou poser s'il a Power.AVEUGLEMENT)
-    POSE = "pose"                  # le joueur doit poser/défausser (ou piocher s'il a Power.AVEUGLEMENT)
+    """Phase courante du tour du joueur actif.
+
+    Chaque état désigne le TYPE d'action autorisée (piocher, ou poser/défausser),
+    quel que soit le joueur. Ce qui change avec Power.AVEUGLEMENT, ce n'est pas la
+    signification de l'état, mais l'ORDRE dans lequel le joueur les traverse :
+    - joueur normal      : PIOCHE -> POSE -> tour suivant
+    - joueur AVEUGLEMENT : POSE -> PIOCHE -> tour suivant
+    Cette inversion est gérée par next_turn() (état de départ du tour),
+    _advance_after_place() et _advance_after_draw() (transition entre les 2 états).
+    """
+    PIOCHE = "pioche"              # actions de pioche autorisées (draw_card_from_deck, draw_card_from_river)
+    POSE = "pose"                  # actions de pose/défausse autorisées (place_card, bet_on_casino, discard_card_from_hand)
     IN_DISCARDING = "in_discarding"  # défausses multiples en cours (ex: Lune Rouge)
     IN_PLACING = "in_placing"        # poses multiples en cours (ex: Pleine Lune)
 
@@ -134,11 +143,11 @@ class Game:
             player.add_card_to_played(build_card("poussin"))
             player.add_card_to_played(build_card("study__2"))
             player.add_card_to_played(build_card("study__2"))
-            player.add_card_to_played(build_card("study__2"))
             player.add_card_to_played(build_card("malefice__bis_repetitas"))
             player.add_card_to_played(build_card("chance"))
             player.add_card_to_played(build_card("chance"))
-            player.add_card_to_played(build_card("marriage__corps_nuds"))
+
+            player.add_card_to_hand(build_card("casino"))
 
         self.discard.append(build_card("study__2"))
         self.discard.append(build_card("barman"))
@@ -146,6 +155,10 @@ class Game:
         self.discard.append(build_card("study__2"))
         self.discard.append(build_card("study__2"))
         self.discard.append(build_card("salary__2"))
+
+        self.cards_removed.append(build_card("diana"))
+        self.cards_removed.append(build_card("diana"))
+        self.cards_removed.append(build_card("diana"))
 
 
     def add_card_to_cards_remove(self, card: "Card"):
@@ -580,7 +593,7 @@ class Game:
 
 
     @validate_player
-    @validate_phase(TurnState.PIOCHE)
+    @validate_phase(TurnState.PIOCHE, TurnState.POSE)
     def discard_wedding_card(self, player_id: int, card_id: int) -> tuple[bool, str]:
         """supprime son marriage volontairement"""
         print("[INFO] action du joueur : divorcer de son marriage")
@@ -664,11 +677,12 @@ class Game:
     def finish_turn(self, player_id: int) -> tuple[bool, str]:
         """Termine une séquence de poses/défausses multiples (ex: Pleine Lune, Lune Rouge).
 
-        Si le joueur possède Power.AVEUGLEMENT et sort d'une séquence de poses (IN_PLACING),
-        son tour est inversé : il doit encore piocher avant que le tour ne se termine.
+        Si le joueur possède Power.AVEUGLEMENT et sort d'une séquence de poses ou de
+        défausses (IN_PLACING ou IN_DISCARDING), son tour est inversé : il doit encore
+        piocher avant que le tour ne se termine.
         """
         player = self.get_current_player()
-        if self.turn_state == TurnState.IN_PLACING and self._has_power_aveuglement(player):
+        if self.turn_state in (TurnState.IN_PLACING, TurnState.IN_DISCARDING) and self._has_power_aveuglement(player):
             self.turn_state = TurnState.PIOCHE
         else:
             self.next_turn()
@@ -676,21 +690,25 @@ class Game:
 
         
     @validate_player
-    @validate_phase(TurnState.POSE, TurnState.IN_PLACING)
+    @validate_phase(TurnState.POSE, TurnState.IN_PLACING, TurnState.PIOCHE)
     def bet_on_casino(self, player_id: int, card_id: int) -> tuple[bool, str]:
         """pose une carte devant lui"""
         print("[INFO] action du joueur : miser au casino une carte")
         from .cards.professionnals.SalaryCard import SalaryCard
         player = self.get_current_player()
-
+        come_from_discard = False
         # vérifie le l'état du tour
         card = player.get_card_by_id_from_hand(card_id)
-        if not(card and self.turn_state == TurnState.POSE and isinstance(card, SalaryCard)):
+        # on essaye de récupérer la carte dans la main
+        if card is None:
             card = self.get_last_discard()
-            if not(card and self.turn_state == TurnState.PIOCHE and isinstance(card, SalaryCard)):
-                print("[ERROR] La phase de jeu n'est pas la bonne")
-                return False, "[ERROR] La phase de jeu n'est pas la bonne"
-                
+            assert card is not None, "la carte n'est pas trouvée"
+            player.add_card_to_hand(card)
+            come_from_discard = True
+            print("[DEBUG] la carte viens de la défausse")
+        assert card is not None, "la carte n'est pas trouvée"    
+        assert isinstance(card, SalaryCard), "la carte n'est pas un salaire"
+
         casinoCard = self.get_casino()
         if not casinoCard:
             return False, "Le casino n'est pas ouvert"
@@ -707,6 +725,8 @@ class Game:
                 self.turn_state = TurnState.IN_PLACING
                 self.game_state[GameStateKey.NB_CARDS_PLACED] += 1
                 return True, ""
-
-        self._advance_after_place(player)
-        return True, ""
+        if come_from_discard:
+            self.next_turn()
+        else:
+            self._advance_after_place(player)
+        return True, "" 
