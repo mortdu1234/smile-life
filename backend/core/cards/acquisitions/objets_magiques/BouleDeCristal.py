@@ -23,7 +23,7 @@ class BouleDeCristal(ObjetMagique):
         interface.show_cards(
             title=f"Les Cartes de la pioche",
             prompt="Pouvoir de Boule de Cristal",
-            cards=game.deck
+            cards=game.deck[::-1]
         )
 
     
