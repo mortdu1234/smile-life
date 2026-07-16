@@ -33,6 +33,7 @@ class Miroir(ObjetMagique):
         assert selected_card is not None
 
         current_player.remove_card(selected_card, game)
+        current_player.add_card_to_hand(selected_card)
         selected_card.play_card(game, current_player)
 
         return True
