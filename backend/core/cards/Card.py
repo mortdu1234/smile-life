@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+from ..Power import Power
 
 if TYPE_CHECKING:
     from ..Player import Player
@@ -65,6 +66,9 @@ class Card:
 
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         """Vérifie si la carte peut être jouée dans le contexte courant."""
+        powers = player.get_power()
+        if Power.CANT_PLACE_CARD in powers:
+            return False, "Vous ne pouvez plus poser de cartes"
         return True, ""
     
 class InstantPlayedCard(Card):
