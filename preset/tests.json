@@ -14,9 +14,10 @@
     "prof__maths":0,
     "salary__1": 0,
     "salary__4": 0,
-    "house__1":10,
+    "house__1":0,
     "tax":0,
     "burnout":0,
+    "divorce":10,
     "marriage__corps_nuds": 0,
     "prison":0,
     "travel__le_caire":0,
@@ -24,26 +25,11 @@
     "malefice__aveuglement": 0,
     "malefice__desenchantement": 0,
     "objet_magique__chaudron": 0,
-    
-    "objet_magique__amulette": 0, "c'est la v1":0,
-    "objet_magique__anneau_de_pouvoir": 0,
-    "objet_magique__baguette_magique": 0,
-    "objet_magique__balai": 0,
-    "objet_magique__boule_de_cristal": 0,
-    "objet_magique__miroir": 0,
-    "objet_magique__lasso_magique": 0,
-    "objet_magique__lampe_magique": 0,
-    "objet_magique__grimoire": 0,
-    "objet_magique__flute_enchantee": 0,
-    "objet_magique__cape_invisible": 0,
-    
-
-    
-    
-    
-    "potion__amour_eternel": 0,
-    "potion__argent": 0,
+        
     "potion__chance": 0,
+
+    "potion__amour_eternel": 10,
+    "potion__argent": 10,
     "potion__epousaille": 0,
     "potion__excellence": 0,
     "potion__fertilite": 0,
@@ -61,7 +47,17 @@
 
 
 
-
+    "objet_magique__amulette": 0, "c'est la v1":0,
+    "objet_magique__anneau_de_pouvoir": 0,
+    "objet_magique__baguette_magique": 0,
+    "objet_magique__balai": 0,
+    "objet_magique__boule_de_cristal": 0,
+    "objet_magique__miroir": 0,
+    "objet_magique__lasso_magique": 0,
+    "objet_magique__lampe_magique": 0,
+    "objet_magique__grimoire": 0,
+    "objet_magique__flute_enchantee": 0,
+    "objet_magique__cape_invisible": 0,
 
 
 

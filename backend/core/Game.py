@@ -138,6 +138,7 @@ class Game:
             player.add_card_to_played(build_card("malefice__bis_repetitas"))
             player.add_card_to_played(build_card("chance"))
             player.add_card_to_played(build_card("chance"))
+            player.add_card_to_played(build_card("marriage__corps_nuds"))
 
         self.discard.append(build_card("study__2"))
         self.discard.append(build_card("barman"))

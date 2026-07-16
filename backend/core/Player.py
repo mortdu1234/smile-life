@@ -244,7 +244,7 @@ class Player:
         return False
 
     def get_card_from_group(self, group1: PlayedCardGroup) -> list[Card]:
-        return self.groupe.get(group1, [])
+        return self.groupe.get(group1, []).copy()
 
     def add_card_to_hand(self, card: Card) -> bool:
         """ajoute une nouvelle carte a la main et vérifie si c'est une carte qui dois etre jouée directement"""
