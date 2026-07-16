@@ -135,6 +135,10 @@ class Game:
             player.add_card_to_played(build_card("chance"))
             player.add_card_to_played(build_card("chance"))
 
+        self.discard.append(build_card("study__2"))
+        self.discard.append(build_card("study__2"))
+        self.discard.append(build_card("salary__2"))
+
 
     def add_card_to_cards_remove(self, card: "Card"):
         """ajoute une carte au carte supprimées"""

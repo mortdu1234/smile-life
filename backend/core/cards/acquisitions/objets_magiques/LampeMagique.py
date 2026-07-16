@@ -10,19 +10,23 @@ if TYPE_CHECKING:
     from backend.core.Player import Player
 
 class LampeMagique(ObjetMagique):
-    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
-        success = super().apply_card_effect(game, current_player)
-        if not success:
-            return success
-
+    def get_available_cards(self, game:"Game", current_player:"Player"):
         cards = game.discard
         available_cards = []
         for card in cards:
             success, reason = card.can_be_played(current_player, game)
             if success:
                 available_cards.append(card)
+        return available_cards
 
-        nb_cards = 3
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+        success = super().apply_card_effect(game, current_player)
+        if not success:
+            return success
+
+        
+        available_cards = self.get_available_cards(game, current_player)
+        nb_cards = min(3, len(available_cards))
         interface = current_player.get_interface()
 
         while nb_cards != 0:
@@ -35,6 +39,8 @@ class LampeMagique(ObjetMagique):
             for card in selected_cards:
                 success, reason = card.can_be_played(current_player, game)
                 if success:
+                    game.remove_card_from_discard(card)
+                    current_player.add_card_to_hand(card)
                     card.play_card(game, current_player)
                     nb_cards -= 1
                 else:
