@@ -31,9 +31,9 @@
     "objet_magique__boule_de_cristal": 0,
     "objet_magique__miroir": 0,
     "objet_magique__lasso_magique": 0,
+    "objet_magique__lampe_magique": 0,
     
-    "objet_magique__lampe_magique": 20,
-    "objet_magique__grimoire": 0,
+    "objet_magique__grimoire": 20,
     "objet_magique__flute_enchantee": 0,
     "objet_magique__chaudron": 0,
     "objet_magique__cape_invisible": 0,

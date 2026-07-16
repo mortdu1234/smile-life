@@ -1,5 +1,3 @@
-from matplotlib.style import available
-
 from .ObjetMagique import ObjetMagique
 from typing import TYPE_CHECKING
 from ....Power import Power
