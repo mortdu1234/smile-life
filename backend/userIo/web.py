@@ -20,8 +20,9 @@ class WebIO(UserIO):
         self.pending: dict | None = None
 
     def ask_cards(self, prompt: str, cards: list["Card"], kind: IOType, nb: int) -> "list[Card]":
-        """Demande au joueur de sélectionner exactement nb cartes parmi une liste.
-        Bloque la greenlet jusqu'à ce que le joueur valide une sélection de nb cartes.
+        """Demande au joueur de sélectionner jusqu'à nb cartes parmi une liste
+        (au moins 1, au maximum nb).
+        Bloque la greenlet jusqu'à ce que le joueur valide une sélection.
         """
         sleep(TEMPS_ATTENTES)
         self.pending = {

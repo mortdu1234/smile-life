@@ -136,6 +136,9 @@ class Game:
             player.add_card_to_played(build_card("chance"))
 
         self.discard.append(build_card("study__2"))
+        self.discard.append(build_card("barman"))
+        self.discard.append(build_card("barman"))
+        self.discard.append(build_card("study__2"))
         self.discard.append(build_card("study__2"))
         self.discard.append(build_card("salary__2"))
 

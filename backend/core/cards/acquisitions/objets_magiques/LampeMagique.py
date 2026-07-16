@@ -30,6 +30,10 @@ class LampeMagique(ObjetMagique):
         interface = current_player.get_interface()
 
         while nb_cards != 0:
+            available_cards = self.get_available_cards(game, current_player)
+            nb_cards = min(nb_cards, len(available_cards))
+            if nb_cards == 0:
+                continue
             selected_cards = interface.ask_cards(
                 prompt="selectionner les cartes a poser",
                 cards=available_cards,

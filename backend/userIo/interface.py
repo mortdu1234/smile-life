@@ -21,8 +21,8 @@ class IOType(Enum):
 class UserIO(ABC):
     @abstractmethod
     def ask_cards(self, prompt: str, cards: list["Card"], kind: IOType, nb: int) -> list["Card"]:
-        """Demande au joueur de sélectionner exactement nb cartes parmi la liste.
-        Retourne la liste des nb cartes selectionnées."""
+        """Demande au joueur de sélectionner jusqu'à nb cartes parmi la liste
+        (au moins 1, au maximum nb). Retourne la liste des cartes sélectionnées."""
         pass
     
     @abstractmethod

@@ -26,7 +26,7 @@ registerHandler("card-picker", function render(pending) {
   if (countEl)    countEl.textContent    = options.length;
   if (hintText) {
     hintText.textContent = isMulti
-      ? `Sélectionnez exactement ${requiredCount} carte${requiredCount > 1 ? "s" : ""}.`
+      ? `Sélectionnez jusqu'à ${requiredCount} carte${requiredCount > 1 ? "s" : ""} (au moins 1).`
       : "Cliquez sur une carte pour la sélectionner.";
   }
 
@@ -38,8 +38,10 @@ registerHandler("card-picker", function render(pending) {
 
   function updateConfirmState() {
     if (!confirmBtn) return;
+    // Mode multi : on peut valider dès qu'au moins 1 carte est sélectionnée,
+    // sans être obligé d'atteindre requiredCount (sélection "jusqu'à N").
     const ready = isMulti
-      ? selectedIndices.size === requiredCount
+      ? selectedIndices.size > 0
       : selectedIndex !== null;
     confirmBtn.disabled = !ready;
     confirmBtn.classList.toggle("card-picker-overlay__btn--ready", ready);
@@ -125,7 +127,7 @@ registerHandler("card-picker", function render(pending) {
   // ── Confirmation ──────────────────────────────────────────────────────
   function handleConfirm() {
     if (isMulti) {
-      if (selectedIndices.size !== requiredCount) return;
+      if (selectedIndices.size === 0) return;
       const indicesToSubmit = [...selectedIndices];
       closeOverlay();
       if (typeof onSubmit === "function") onSubmit(indicesToSubmit);
