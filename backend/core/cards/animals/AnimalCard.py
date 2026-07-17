@@ -1,3 +1,5 @@
+from backend.core.Power import Power
+
 from ..Card import Card
 from typing import Dict, Any
 from typing import TYPE_CHECKING
@@ -11,6 +13,12 @@ class AnimalCard(Card):
 
     def __init__(self, id: int, image_path: str, smiles: int):
         super().__init__(id, image_path=image_path, smiles=smiles)
+
+    def get_smiles(self, owner: "Player") -> int:
+        powers = owner.get_power()
+        if Power.DOUBLE_ANIMAL in powers:
+            return 2*super().get_smiles(owner)
+        return super().get_smiles(owner)
 
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()

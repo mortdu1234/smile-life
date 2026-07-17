@@ -10,6 +10,14 @@ if TYPE_CHECKING:
     from backend.core.Player import Player
 
 class LassoMagique(ObjetMagique):
+    def calcul_cost(self, player: "Player", game: "Game") -> int:
+        from backend.core.cards.personnals.Children import DianaChild
+        zone = player.get_card_from_group(groupe.VIE_PERSONNELLE) + player.get_card_from_group(groupe.CARTES_PROTEGEES) 
+        for card in zone:
+            if isinstance(card, DianaChild):
+                return 0
+        return super().calcul_cost(player, game)
+    
     def get_available_cards(self, player: "Player", game: "Game", current_player: "Player"):
         cards = player.get_card_from_group(groupe.ACQUISITIONS)
         cards += player.get_card_from_group(groupe.CARTES_SPECIALES)

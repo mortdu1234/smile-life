@@ -13,6 +13,18 @@ CATALOG: list[dict] = [
     #########################################################################################
     # ── Fantastique ──────────────────────────────────────────────────────────────
     #########################################################################################
+    {"id": "roles_ange", "label": "Ange", "category": ["Fantastique", "Roles"]},
+    {"id": "roles_vampire", "label": "Vampire", "category": ["Fantastique", "Roles"]},
+    {"id": "roles_sorciere", "label": "Sorcière", "category": ["Fantastique", "Roles"]},
+    {"id": "roles_sirene", "label": "Sirène", "category": ["Fantastique", "Roles"]},
+    {"id": "roles_mutant", "label": "Mutant", "category": ["Fantastique", "Roles"]},
+    {"id": "roles_magicien", "label": "Magicien", "category": ["Fantastique", "Roles"]},
+    {"id": "roles_loupgarou", "label": "Loup-Garou", "category": ["Fantastique", "Roles"]},
+    {"id": "roles_fee", "label": "Fée", "category": ["Fantastique", "Roles"]},
+    {"id": "roles_demon", "label": "Démon", "category": ["Fantastique", "Roles"]},
+    {"id": "roles_chasseur", "label": "Chasseur", "category": ["Fantastique", "Roles"]},
+        
+
     {"id": "malefice__alcatras", "label": "Alcatras", "category": ["Fantastique", "Maléfices"]},
     {"id": "malefice__sacrapas", "label": "Sacrapas", "category": ["Fantastique", "Maléfices"]},
     {"id": "malefice__restataplas", "label": "Restataplas", "category": ["Fantastique", "Maléfices"]},

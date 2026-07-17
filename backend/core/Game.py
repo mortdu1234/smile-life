@@ -12,6 +12,7 @@ Certains effets (Ephemerides, pouvoirs) peuvent modifier ce déroulement :
 from datetime import datetime
 from enum import Enum
 import functools
+import random
 
 from backend.core.JobStatus import JobStatus
 from .cards.ephemerides.Ephemeride import Ephemeride
@@ -25,6 +26,7 @@ from .Power import Power
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .cards.specials.Casino import Casino
+    from .roles.PlayerRole import PlayerRole
 
 
 class TurnState(Enum):
@@ -103,7 +105,43 @@ class Game:
     updated_at: datetime
     ephemeride: Ephemeride | None
 
-    def __init__(self, id: str, players: list[Player], deck: list[Card]):
+    def first_round(self):
+        """effectue un premier tour de table afin d'effectuer les actions d'initialisation de la partie"""
+        print("[DEBUG] first round")
+        # vérification validations des roles
+        for player in self.players:
+            role = player.get_role()
+            assert role is not None, "aucun role"
+            role.do_receive_action(self, player)
+
+
+
+    def _attribute_roles(self, availables_roles:"list[PlayerRole]"):
+        """attribue les roles pour chaques joueurs"""
+        # vérifie si il y a ce qu'il faut pour attribuer un roles par joueur
+        # supprime tous les roles qui ne peuvent pas etre attribué dans la partie
+        for role in availables_roles:
+            success, reason = role.can_be_attribute(self)
+            if not success:
+                availables_roles.remove(role)
+
+        # vérifie qu'il y ai la possibilité d'attribuer un role pour chaque joueur
+        nb_player = len(self.players)
+        if len(availables_roles) < nb_player:
+            return
+
+        # attribution des roles
+        random.shuffle(availables_roles)
+        for idx, player in enumerate(self.players):
+            player.set_role(availables_roles[idx])
+            print(f"[DEBUG] role attribué : {availables_roles[idx]}")
+
+
+
+
+        
+
+    def __init__(self, id: str, players: list[Player], deck: list[Card], availables_roles: "list[PlayerRole]"):
         self.id = id
         self.players = players
         self.deck = deck
@@ -117,48 +155,52 @@ class Game:
         self.river_deck = []
         self.cards_removed = []
         self.ephemeride = None
+
+        # attribution des roles
+        self._attribute_roles(availables_roles)
+
         # Donne les mains des joueurs
         for _ in range(5):
             for player in self.players:
-                result = False
-                while not result:
+                is_instant_played = False
+                while not is_instant_played:
                     card = deck.pop()
-                    result = player.add_card_to_hand(card)
-                    if not result:
+                    is_instant_played = player.add_card_to_hand(card)
+                    if not is_instant_played:
                         player.remove_card_from_hand(card)
                         deck.insert(len(deck)//2, card)
 
+
         # testing map
-        from .cards.LoaderCard import build_card
-        for player in self.players:
-            player.add_card_to_played(build_card("salary__1"))
-            player.add_card_to_played(build_card("salary__1"))
-            player.add_card_to_played(build_card("salary__1"))
-            player.add_card_to_played(build_card("salary__4"))
-            player.add_card_to_played(build_card("salary__4"))
-            player.add_card_to_played(build_card("salary__4"))
-            player.add_card_to_played(build_card("chien"))
-            player.add_card_to_played(build_card("chat"))
-            player.add_card_to_played(build_card("lapin"))
-            player.add_card_to_played(build_card("poussin"))
-            player.add_card_to_played(build_card("study__2"))
-            player.add_card_to_played(build_card("study__2"))
-            player.add_card_to_played(build_card("malefice__bis_repetitas"))
-            player.add_card_to_played(build_card("chance"))
-            player.add_card_to_played(build_card("chance"))
+        # from .cards.LoaderCard import build_card
+        # for player in self.players:
+        #     player.add_card_to_played(build_card("salary__1"))
+        #     player.add_card_to_played(build_card("salary__1"))
+        #     player.add_card_to_played(build_card("salary__1"))
+        #     player.add_card_to_played(build_card("salary__4"))
+        #     player.add_card_to_played(build_card("salary__4"))
+        #     player.add_card_to_played(build_card("salary__4"))
+        #     player.add_card_to_played(build_card("chien"))
+        #     player.add_card_to_played(build_card("chat"))
+        #     player.add_card_to_played(build_card("lapin"))
+        #     player.add_card_to_played(build_card("poussin"))
+        #     player.add_card_to_played(build_card("study__2"))
+        #     player.add_card_to_played(build_card("study__2"))
+        #     player.add_card_to_played(build_card("malefice__bis_repetitas"))
+        #     player.add_card_to_played(build_card("chance"))
+        #     player.add_card_to_played(build_card("chance"))
 
-            player.add_card_to_hand(build_card("casino"))
 
-        self.discard.append(build_card("study__2"))
-        self.discard.append(build_card("barman"))
-        self.discard.append(build_card("barman"))
-        self.discard.append(build_card("study__2"))
-        self.discard.append(build_card("study__2"))
-        self.discard.append(build_card("salary__2"))
+        # self.discard.append(build_card("study__2"))
+        # self.discard.append(build_card("barman"))
+        # self.discard.append(build_card("barman"))
+        # self.discard.append(build_card("study__2"))
+        # self.discard.append(build_card("study__2"))
+        # self.discard.append(build_card("salary__2"))
 
-        self.cards_removed.append(build_card("diana"))
-        self.cards_removed.append(build_card("diana"))
-        self.cards_removed.append(build_card("diana"))
+        # self.cards_removed.append(build_card("diana"))
+        # self.cards_removed.append(build_card("diana"))
+        # self.cards_removed.append(build_card("diana"))
 
 
     def add_card_to_cards_remove(self, card: "Card"):
@@ -378,11 +420,12 @@ class Game:
                 return card
         return None
 
-    def set_ephemeride(self, new: "Ephemeride"):
+    def set_ephemeride(self, new: "Ephemeride | None"):
         card = self.get_ephemeride()
         if card:
             self.center_cards_played.remove(card)
-        self.center_cards_played.append(new)
+        if new:
+            self.center_cards_played.append(new)
 
     # ------------------------------------------------------------------ #
     #  Actions du tour - Actions                                         #
@@ -507,7 +550,7 @@ class Game:
             allowed_phases = (TurnState.PIOCHE, TurnState.POSE)
         if self.turn_state not in allowed_phases:
             phases_str = ", ".join(str(p) for p in allowed_phases)
-            return None, f"Action impossible en phase '{self.turn_state}' (attendu : '{phases_str}')."
+            return False, f"Action impossible en phase '{self.turn_state}' (attendu : '{phases_str}')."
 
         if player.skip_turn > 0:
             print("[ERROR] essaye de piocher alors que je joueurs dois skip un tour")
@@ -730,3 +773,19 @@ class Game:
         else:
             self._advance_after_place(player)
         return True, "" 
+
+    @validate_player
+    @validate_phase(TurnState.PIOCHE)
+    def use_role_power(self, player_id: int) ->tuple[bool, str]:
+        print("[INFO] action du joueur : utiliser le pouvoir du role")
+        player = self.get_current_player()
+        role = player.get_role()
+        assert role is not None, "le joueur n'as pas de role"
+        success, reason = role.can_use_instant_power(self, player)
+        if not success:
+            return False, reason
+        
+        role.apply_instant_power(self, player)
+
+        self.next_turn()
+        return True, ""

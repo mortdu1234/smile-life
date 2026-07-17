@@ -36,6 +36,7 @@ const EP = {
   drawRiver:       (game_id, card_id) => ({ url: `${window.BASE_URL}/game/${game_id}/draw-river`,       body: { card_id } }),
   drawDiscard:     (game_id)          => ({ url: `${window.BASE_URL}/game/${game_id}/draw-discard`,     body: {} }),
   betOnCasino:     (game_id, card_id) => ({ url: `${window.BASE_URL}/game/${game_id}/bet-on-casino`,    body: { card_id } }),
+  useRolePower:    (game_id)          => ({ url: `${window.BASE_URL}/game/${game_id}/use-role-power`,   body: {} }),
 };
 
 // ── Action rivière ─────────────────────────────────────────────────────────────
@@ -46,6 +47,16 @@ const RIVER_ACTION = {
   variant: "primary",
   context: ["river"],
   endpoint: (card, game_id) => EP.drawRiver(game_id, card.id),
+};
+
+// ── Action rôle ─────────────────────────────────────────────────────────────
+// Cliquer sur sa propre carte de rôle propose une action unique : déclencher
+// le pouvoir éphémère du rôle (Game.use_role_power), quel que soit le rôle.
+const ROLE_ACTION = {
+  label: "✦ Pouvoir éphémère",
+  variant: "primary",
+  context: ["role"],
+  endpoint: (card, game_id) => EP.useRolePower(game_id),
 };
 
 // ── Catalogue des actions par type de carte ───────────────────────────────────
@@ -228,6 +239,13 @@ export function getActionsForCard(card, context, is_my_turn, { onSuccess, onErro
   // de carte — piocher (comme un clic sur la pioche).
   if (context === "river") {
     return [{ ...RIVER_ACTION, onSuccess, onError }];
+  }
+
+  // Contexte rôle : uniquement sur sa propre carte de rôle (le serveur/template
+  // n'attribue le contexte "role" qu'à la carte du joueur courant — voir board.js
+  // et board.html, qui utilisent "other" pour les rôles adverses, non actionnables).
+  if (context === "role") {
+    return [{ ...ROLE_ACTION, onSuccess, onError }];
   }
 
   const category = resolveCategory(card);

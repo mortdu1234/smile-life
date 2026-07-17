@@ -24,8 +24,6 @@ class Power(Enum):
     CHILDREN_PROTECTED = "children_protected" # les enfants du joueur sont protégés de tous les malus
     EGALITE_SALAIRE = "egalite_salaire" # permet de poser des salaires par rapport au métier le mieux payé
     GIRL_POWER = "girl_power" # permet de rejouer des cartes spéciales déja jouée lorsqu'on pose une fille
-    MAX_HAND_CARD_6 = "max_hand_card_6" # peut avoir jusqu'a 6 cartes en main
-    MAX_HAND_CARD_5 = "max_hand_card_5" # peut avoir jusqu'a 5 cartes en main
     JOB_MAX_STUDY_5 = "job_max_study_5" # le joueur peut avoir un job avec un niveau d'étude maximum de 5
     JOB_MAX_STUDY_4 = "job_max_study_4" # le joueur peut avoir un job avec un niveau d'étude maximum de 4
     INSTANT_QUIT_JOB = "instant_quit_job" # le joueur peut quitter n'importe quel métier sans avoir a passer son tour
@@ -44,3 +42,13 @@ class Power(Enum):
     NO_JOB_STATUS = "no_job_status" # ne recois aucune avantage a etre intérimaire ou fonctionnaire
     AVEUGLEMENT = "aveuglement" # pose avant de piocher
     SALRAPAS = "salrapas" # oblige de payer le prix exacte lors d'acquisition
+    NO_MALEFICES_EFFECT = "no_malefices_effect" # peut recevoir des malefices mais ne peux pas en avoir les effets
+    FREE_OBJET_MAGIQUE = "free_objet_magique" # permet d'avoir les objets magiques gratuitement
+    VALUE_SPECIAL_CARDS_2 = "value_special_cards_2" # donne 2 smiles pour chaques cartes spéciales 
+    DOUBLE_ANIMAL = "double_animal" # double les smiles des animaux
+    STUDY_VALUE_DOUBLE = "study_value_double" # double les smiles des etudes
+    CAN_FLIRT_WITH_WEDDING = "can_flirt_with_wedding" # permet de flirter pendant un marriage
+    FREE_POTION = "free_potion" # permet de poser des potions gratuitement
+    DOUBLE_FLIRT = "double_flirt" # double les smiles des flirts
+    ADD_1_HAND_CARD = "add_1_hand_card" # ajoute une carte max dans la main
+    SUB_1_HAND_CARD = "sub_1_hand_card" # retire une carte max dans la main

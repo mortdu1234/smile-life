@@ -7,14 +7,20 @@ if TYPE_CHECKING:
 
 class AnneauDePouvoir(ObjetMagique):
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+        from backend.core.roles.Demon import Demon
         success = super().apply_card_effect(game, current_player)
         if not success:
             return success
-        current_player.add_power(Power.CANT_PLACE_CARD)
+        role = current_player.get_role()
+        if not isinstance(role, Demon):
+            current_player.add_power(Power.CANT_PLACE_CARD)
         return True
     
     def discard_card(self, game: "Game", owner: "Player") -> None:
-        owner.remove_player_power(Power.CANT_PLACE_CARD)
+        from backend.core.roles.Demon import Demon
+        role = owner.get_role()
+        if not isinstance(role, Demon):
+            owner.remove_player_power(Power.CANT_PLACE_CARD)
         return super().discard_card(game, owner)
     
     def get_card_rule(self) -> str:

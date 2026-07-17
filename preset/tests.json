@@ -8,23 +8,24 @@
     "ephemeride__lune_bleu": 0,
     "ephemeride__equinoxe": 0,
     "ephemeride__eclipse": 0,
-    "bandit": 0,
-    "barman": 0,
+    
+    "bandit": 2,
+    "barman": 2,
     "licenciement":0,
-    "prof__maths":0,
-    "salary__1": 0,
-    "salary__4": 20,
+    "prof__maths":2,
+    "salary__1": 2,
+    "salary__4": 0,
     "casino":0,
-    "house__1":0,
+    "house__1":2,
     "tax":0,
     "burnout":0,
     "chercheur":0,
     "divorce":0,
     "marriage__corps_nuds": 0,
     "prix":0,
-    "prison":0,
-    "travel__le_caire":0,
-    "diana":0,
+    "prison":2,
+    "travel__le_caire":2,
+    "diana":2,
     
     
     "potion__chance": 0,
@@ -34,19 +35,31 @@
     "potion__excellence": 0,
     "potion__fertilite": 0,
     "potion__interim": 0,
-    "potion__ristournelle": 0,
-    "potion__vitalite": 0,
-    "potion__resurrection": 0,
+    "potion__ristournelle": 2,
+    "potion__vitalite": 3,
+    "potion__resurrection": 2,
     
     "malefice__desenchantement": 0,
     "potion__savoir": 0,
     "objet_magique__chaudron": 0,
 
-    "malefice__aveuglement": 20,
+    "malefice__aveuglement": 0,
     
+    "roles__mutant": 0,
+    "roles__ange": 0,
+    "roles__chasseur": 0,
+    "roles__sirene": 0,
+    "roles__vampire": 0,
+    "roles__sorciere": 0,
+    "roles__magicien": 0,
+    "roles__loupgarou": 0,
+    "roles__fee": 0,
+    "roles__demon": 0,
 
 
 
+
+    
 
 
 

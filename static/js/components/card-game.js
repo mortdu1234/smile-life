@@ -72,6 +72,12 @@ function injectStyles() {
     game-card:not([size])    { width: 72px;  height: 100px; }
     game-card[size="lg"]     { width: 68px;  height: 96px;  }
     game-card[size="salary"] { width: 110px; height: 154px; }
+    game-card[size="role"]   { width: 56px;  height: 78px;  }
+
+    /* La carte de rôle n'a ni type ni smiles/valeur : on garde juste
+       l'image + le nom en footer, sur un format compact. */
+    game-card[size="role"] .gc-footer { padding: 3px 4px; }
+    game-card[size="role"] .gc-name   { font-size: 0.56rem; }
 
     /* ── Image ── */
     game-card .gc-image {

@@ -12,6 +12,13 @@ class ChauveSourie(AnimalCard):
 
     def get_name(self) -> str:
         return "Chauve Sourie"
+    
+    def get_smiles(self, owner: Player) -> int:
+        from backend.core.roles.Vampire import Vampire
+        role = owner.get_role()
+        if isinstance(role, Vampire):
+            return 2*super().get_smiles(owner)
+        return super().get_smiles(owner)
 
     def get_card_rule(self) -> str:
         return """"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

@@ -8,6 +8,14 @@ if TYPE_CHECKING:
     from backend.core.Player import Player
 
 class BouleDeCristal(ObjetMagique):
+    def calcul_cost(self, player: "Player", game: "Game") -> int:
+        from backend.core.cards.professionnals.Medium import Medium
+        job = player.get_job()
+        if isinstance(job, Medium):
+            return 0
+        return super().calcul_cost(player, game)
+
+        
     def cristalEffect(self, game: "Game", current_player: "Player"):
         interface = current_player.get_interface()
         for player in game.players:

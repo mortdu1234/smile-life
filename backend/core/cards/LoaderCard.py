@@ -170,6 +170,17 @@ from .hardships.Malefices.CasBurnas import CasBurnas
 from .hardships.Malefices.BisRepetitas import BisRepetitas
 from .hardships.Malefices.Aveuglement import Aveuglement
 
+from ..roles.Ange import Ange
+from ..roles.Vampire import Vampire
+from ..roles.Sorciere import Sorciere
+from ..roles.Sirene import Sirene
+from ..roles.Mutant import Mutant
+from ..roles.Magicien import Magicien
+from ..roles.LoupGarou import LoupGarou
+from ..roles.Fee import Fee
+from ..roles.Demon import Demon
+from ..roles.Chasseur import Chasseur
+
 # ── Compteur d'ID unique ───────────────────────────────────────────────────────
 _next_id = 0
 
@@ -183,9 +194,21 @@ def _uid() -> int:
 # Signature de chaque lambda : () -> Card
 _REGISTRY: dict[str, callable] = { # type: ignore
     
+    
     #########################################################################################
     # ── Fantastique ──────────────────────────────────────────────────────────────
     #########################################################################################
+    "roles__ange": lambda : Ange("img/roles/ange.png"),
+    "roles__vampire": lambda : Vampire("img/roles/vampire.png"),
+    "roles__sorciere": lambda : Sorciere("img/roles/sorciere.png"),
+    "roles__sirene": lambda : Sirene("img/roles/sirene.png"),
+    "roles__mutant": lambda : Mutant("img/roles/mutant.png"),
+    "roles__magicien": lambda : Magicien("img/roles/magicien.png"),
+    "roles__loupgarou": lambda : LoupGarou("img/roles/loup_garou.png"),
+    "roles__fee": lambda : Fee("img/roles/fee.png"),
+    "roles__demon": lambda : Demon("img/roles/demon.png"),
+    "roles__chasseur": lambda : Chasseur("img/roles/chasseur.png"),
+
     "malefice__alcatras": lambda : Alcatras(_uid(), "img/hardship_cards/malefis/alcatras.png"),
     "malefice__sacrapas": lambda: Sacrapas(_uid(), "img/hardship_cards/malefis/sacrapas.png"),
     "malefice__restataplas": lambda: Restataplas(_uid(), "img/hardship_cards/malefis/restataplas.png"),
@@ -197,31 +220,31 @@ _REGISTRY: dict[str, callable] = { # type: ignore
     "malefice__bis_repetitas": lambda: BisRepetitas(_uid(), "img/hardship_cards/malefis/bis_repetitas.png"),
     "malefice__aveuglement": lambda: Aveuglement(_uid(), "img/hardship_cards/malefis/aveuglement.png"),
 
-    "objet_magique__amulette": lambda: Amulette(_uid(), "img/acquisition_cards/objets_magiques/amulette.png", 1, 0),
+    "objet_magique__amulette": lambda: Amulette(_uid(), "img/acquisition_cards/objets_magiques/amulette.png", 1, 1),
     "objet_magique__anneau_de_pouvoir": lambda: AnneauDePouvoir(_uid(), "img/acquisition_cards/objets_magiques/anneau_de_pouvoir.png", 3, 0),
-    "objet_magique__baguette_magique": lambda: BaguetteMagique(_uid(), "img/acquisition_cards/objets_magiques/baguette_magique.png", 1, 0),
-    "objet_magique__balai": lambda: Balai(_uid(), "img/acquisition_cards/objets_magiques/balai.png", 1, 0),
-    "objet_magique__boule_de_cristal": lambda: BouleDeCristal(_uid(), "img/acquisition_cards/objets_magiques/boule_de_cristal.png", 1, 0),
-    "objet_magique__miroir": lambda: Miroir(_uid(), "img/acquisition_cards/objets_magiques/miroir.png", 1, 0),
-    "objet_magique__lasso_magique": lambda: LassoMagique(_uid(), "img/acquisition_cards/objets_magiques/lasso_magique.png", 1, 0),
-    "objet_magique__lampe_magique": lambda: LampeMagique(_uid(), "img/acquisition_cards/objets_magiques/lampe_magique.png", 1, 0),
-    "objet_magique__grimoire": lambda: Grimoire(_uid(), "img/acquisition_cards/objets_magiques/grimoire.png", 1, 0),
-    "objet_magique__flute_enchantee": lambda: FluteEnchantee(_uid(), "img/acquisition_cards/objets_magiques/flute_enchantee.png", 1, 0),
-    "objet_magique__chaudron": lambda: Chaudron(_uid(), "img/acquisition_cards/objets_magiques/chaudron.png", 1, 0),
-    "objet_magique__cape_invisible": lambda: CapeInvisible(_uid(), "img/acquisition_cards/objets_magiques/cape_invisible.png", 1, 0),
+    "objet_magique__baguette_magique": lambda: BaguetteMagique(_uid(), "img/acquisition_cards/objets_magiques/baguette_magique.png", 1, 2),
+    "objet_magique__balai": lambda: Balai(_uid(), "img/acquisition_cards/objets_magiques/balai.png", 1, 3),
+    "objet_magique__boule_de_cristal": lambda: BouleDeCristal(_uid(), "img/acquisition_cards/objets_magiques/boule_de_cristal.png", 1, 2),
+    "objet_magique__miroir": lambda: Miroir(_uid(), "img/acquisition_cards/objets_magiques/miroir.png", 1, 5),
+    "objet_magique__lasso_magique": lambda: LassoMagique(_uid(), "img/acquisition_cards/objets_magiques/lasso_magique.png", 1, 5),
+    "objet_magique__lampe_magique": lambda: LampeMagique(_uid(), "img/acquisition_cards/objets_magiques/lampe_magique.png", 1, 6),
+    "objet_magique__grimoire": lambda: Grimoire(_uid(), "img/acquisition_cards/objets_magiques/grimoire.png", 1, 1),
+    "objet_magique__flute_enchantee": lambda: FluteEnchantee(_uid(), "img/acquisition_cards/objets_magiques/flute_enchantee.png", 1, 2),
+    "objet_magique__chaudron": lambda: Chaudron(_uid(), "img/acquisition_cards/objets_magiques/chaudron.png", 1, 3),
+    "objet_magique__cape_invisible": lambda: CapeInvisible(_uid(), "img/acquisition_cards/objets_magiques/cape_invisible.png", 1, 5),
 
 
-    "potion__amour_eternel": lambda: AmourEternelPotion(_uid(), "img/acquisition_cards/potions/potion_amour_eternel.png", 1, 0),
-    "potion__argent": lambda: ArgentPotion(_uid(), "img/acquisition_cards/potions/potion_argent.png", 1, 0),
-    "potion__chance": lambda: ChancePotion(_uid(), "img/acquisition_cards/potions/potion_chance.png", 1, 0),
-    "potion__epousaille": lambda: EpousaillePotion(_uid(), "img/acquisition_cards/potions/potion_epousaille.png", 1, 0),
-    "potion__excellence": lambda: ExcellencePotion(_uid(), "img/acquisition_cards/potions/potion_excellence.png", 1, 0),
-    "potion__fertilite": lambda: FertilitePotion(_uid(), "img/acquisition_cards/potions/potion_fertilite.png", 1, 0),
-    "potion__interim": lambda: InterimPotion(_uid(), "img/acquisition_cards/potions/potion_interim.png", 1, 0),
-    "potion__resurrection": lambda: ResurrectionPotion(_uid(), "img/acquisition_cards/potions/potion_resurrection.png", 1, 0),
-    "potion__ristournelle": lambda: RistournellePotion(_uid(), "img/acquisition_cards/potions/potion_ristournelle.png", 1, 0),
-    "potion__savoir": lambda: SavoirPotion(_uid(), "img/acquisition_cards/potions/potion_savoir.png", 1, 0),
-    "potion__vitalite": lambda: VitalitePotion(_uid(), "img/acquisition_cards/potions/potion_vitalite.png", 1, 0),
+    "potion__amour_eternel": lambda: AmourEternelPotion(_uid(), "img/acquisition_cards/potions/potion_amour_eternel.png", 1, 5),
+    "potion__argent": lambda: ArgentPotion(_uid(), "img/acquisition_cards/potions/potion_argent.png", 1, 5),
+    "potion__chance": lambda: ChancePotion(_uid(), "img/acquisition_cards/potions/potion_chance.png", 1, 2),
+    "potion__epousaille": lambda: EpousaillePotion(_uid(), "img/acquisition_cards/potions/potion_epousaille.png", 1, 2),
+    "potion__excellence": lambda: ExcellencePotion(_uid(), "img/acquisition_cards/potions/potion_excellence.png", 1, 4),
+    "potion__fertilite": lambda: FertilitePotion(_uid(), "img/acquisition_cards/potions/potion_fertilite.png", 1, 3),
+    "potion__interim": lambda: InterimPotion(_uid(), "img/acquisition_cards/potions/potion_interim.png", 1, 3),
+    "potion__resurrection": lambda: ResurrectionPotion(_uid(), "img/acquisition_cards/potions/potion_resurrection.png", 1, 2),
+    "potion__ristournelle": lambda: RistournellePotion(_uid(), "img/acquisition_cards/potions/potion_ristournelle.png", 1, 4),
+    "potion__savoir": lambda: SavoirPotion(_uid(), "img/acquisition_cards/potions/potion_savoir.png", 1, 3),
+    "potion__vitalite": lambda: VitalitePotion(_uid(), "img/acquisition_cards/potions/potion_vitalite.png", 1, 2),
 
     "ephemeride__eclipse": lambda : Eclipse(_uid(), "img/ephemerides/eclipse.png"),
     "ephemeride__equinoxe": lambda : Equinoxe(_uid(), "img/ephemerides/equinoxe.png"),

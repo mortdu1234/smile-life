@@ -13,6 +13,12 @@ class StudyCard(Card):
     def get_value(self) -> int:
         return self.value
 
+    def get_smiles(self, owner: Player) -> int:
+        powers = owner.get_power()
+        if Power.STUDY_VALUE_DOUBLE in powers:
+            return 2*super().get_smiles(owner) 
+        return super().get_smiles(owner)
+
     def get_name(self) -> str:
         return f"Etude {self.value}"
 

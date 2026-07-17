@@ -13,5 +13,12 @@ class Hibou(AnimalCard):
     def get_name(self) -> str:
         return "Hibou"
 
+    def get_smiles(self, owner: Player) -> int:
+        from backend.core.roles.Magicien import Magicien
+        role = owner.get_role()
+        if isinstance(role, Magicien):
+            return 2*super().get_smiles(owner)
+        return super().get_smiles(owner)
+
     def get_card_rule(self) -> str:
         return """"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

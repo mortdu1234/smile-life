@@ -1,0 +1,87 @@
+/* ── CHOICE OVERLAY (choix texte générique) ───────────────────────────── */
+
+.choice-overlay {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 500;
+}
+.choice-overlay[hidden] { display: none; }
+
+.choice-overlay__backdrop {
+    position: absolute; inset: 0;
+    background: rgba(26,23,20,0.55);
+    backdrop-filter: blur(3px);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+.choice-overlay--visible .choice-overlay__backdrop { opacity: 1; }
+
+.choice-overlay__panel {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 24px 64px rgba(59,48,40,0.2);
+    width: 100%; max-width: 420px;
+    max-height: 80vh;
+    display: flex; flex-direction: column;
+    padding: 26px 26px 20px;
+    opacity: 0; transform: translateY(12px) scale(0.97);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.choice-overlay--visible .choice-overlay__panel {
+    opacity: 1; transform: translateY(0) scale(1);
+}
+
+/* Header */
+.choice-overlay__header { margin-bottom: 18px; }
+.choice-overlay__tag {
+    display: inline-block;
+    font-size: 0.65rem; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--gold);
+    background: rgba(184,154,106,0.15);
+    padding: 3px 8px; border-radius: 20px;
+    margin-bottom: 10px;
+}
+.choice-overlay__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.35rem; font-weight: 600; color: var(--accent);
+    margin-bottom: 6px;
+}
+.choice-overlay__prompt {
+    font-size: 0.85rem; color: var(--muted); line-height: 1.5;
+}
+
+/* Liste des options */
+.choice-overlay__list {
+    display: flex; flex-direction: column; gap: 8px;
+    overflow-y: auto; padding-right: 2px;
+}
+
+.choice-overlay__option {
+    width: 100%; text-align: left;
+    padding: 12px 16px; border-radius: var(--radius);
+    font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 500;
+    color: var(--text); background: var(--bg);
+    border: 1px solid var(--line); cursor: pointer;
+    transition: background 0.16s, border-color 0.16s, color 0.16s,
+                transform 0.16s, opacity 0.16s;
+}
+.choice-overlay__option:hover:not(:disabled) {
+    background: rgba(184,154,106,0.1);
+    border-color: var(--gold); color: var(--accent);
+    transform: translateY(-1px);
+}
+.choice-overlay__option:focus-visible {
+    outline: 2px solid var(--gold); outline-offset: 1px;
+}
+.choice-overlay__option--selected {
+    background: rgba(184,154,106,0.18);
+    border-color: var(--gold); color: var(--accent);
+}
+.choice-overlay__option:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+.choice-overlay__empty {
+    font-size: 0.78rem; color: var(--muted); font-style: italic;
+    text-align: center; padding: 8px 0;
+}

@@ -8,10 +8,11 @@ from ....Power import Power
 from ....PlayerCardGroup import PlayedCardGroup as groupe
 from .....userIo.interface import IOType
 class Desenchantement(MaleficeCard):
-    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
-        success = super().apply_card_effect(game, current_player)
+    def apply_malefice_effect(self, player: "Player", game: "Game") -> bool:
+        success = super().apply_malefice_effect(player, game)
         if not success:
             return False
+
 
         # selection de la carte
         assert self.target_player is not None, "aucune cible n'est choisi"
@@ -28,7 +29,7 @@ class Desenchantement(MaleficeCard):
         if len(availables_cards) == 0:
             return True
 
-        interface = current_player.get_interface()
+        interface = player.get_interface()
         selected_card = interface.ask_card(
             prompt="Choisir une carte pour retirer son effet",
             cards=availables_cards,
@@ -38,9 +39,14 @@ class Desenchantement(MaleficeCard):
 
         # retire l'effet de cette carte
         selected_card.discard_card(game, self.target_player)
-        
-
         return True
+        
+    
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
+        success = super().apply_card_effect(game, current_player)
+        if not success:
+            return False
+        return self.apply_malefice_effect(current_player, game)
 
     def discard_card(self, game: "Game", owner: "Player") -> None:
         return super().discard_card(game, owner)

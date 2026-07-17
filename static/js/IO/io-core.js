@@ -10,6 +10,8 @@ import "./handlers/card-picker.js";
 import "./handlers/player-picker.js";
 import "./handlers/error-labelling.js";
 import "./handlers/troc-choice.js";
+import "./handlers/hand-reorder.js";
+import "./handlers/choice.js";
 
 // ── Expose openCard globalement pour board.html ───────────────────────────────
 window.openCard = function(card, context) {
@@ -70,6 +72,18 @@ async function submitDismiss() {
   schedulePoll(0);
 }
 
+async function submitHands(hands) {
+  // `hands` : liste (par joueur) de références {player, card} vers les
+  // positions d'origine des cartes, dans leur nouvel ordre.
+  pollGeneration++;
+  await fetch(`${window.BASE_URL}/game/${window.GAME_ID}/submit-hands`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ hands }),
+  });
+  schedulePoll(0);
+}
+
 async function submitErrorLabelling(selection) {
   // Le backend (WebIO.erreur_detiquetage_interface) attend une liste
   // [owner_index, other_player_index, other_card_index] via la route
@@ -119,6 +133,7 @@ async function poll() {
         pending.ui_component === "card-browser"    ? submitDismiss :
         pending.ui_component === "show-hand"       ? submitDismiss :
         pending.ui_component === "error-labelling" ? submitErrorLabelling :
+        pending.ui_component === "hand-reorder"    ? submitHands :
         (pending.nb != null)                       ? submitIndices :
         submit;
       const el = render({ ...pending, onSubmit });

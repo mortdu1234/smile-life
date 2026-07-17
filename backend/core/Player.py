@@ -2,7 +2,9 @@
 from typing import TYPE_CHECKING
 
 
+
 if TYPE_CHECKING:
+    from backend.core.roles.PlayerRole import PlayerRole
     from ..userIo.interface import UserIO
     from .cards.professionnals.SalaryCard import SalaryCard
     from .cards.professionnals.StudyCard import StudyCard
@@ -35,7 +37,7 @@ class Player:
         self.name = name
         self.id = id
         self.hand = []
-        self.power = [Power.MAX_HAND_CARD_5]
+        self.power = []
         self.job = None
         self.skip_turn = 0
         self.interface = interface
@@ -48,6 +50,14 @@ class Player:
             PlayedCardGroup.HARDSHIP: []
         }
         self.cards = {}
+        self.role: "PlayerRole|None" = None
+
+    def set_role(self, role: "PlayerRole"):
+        self.role = role
+
+    def get_role(self) -> "PlayerRole|None":
+        return self.role
+
 
     def to_dict(self, reveal_hand: bool = False) -> dict:
         base ={
@@ -61,6 +71,9 @@ class Player:
             "skip_turn": self.skip_turn, 
             "smiles": self.get_smiles(),
         }
+        role = self.get_role()
+        if role:
+            base["role"] = role.to_dict()
         if reveal_hand:
             base["hand"] = [c.to_dict() for c in self.hand]
         return base
@@ -79,11 +92,12 @@ class Player:
         return score
     
     def get_max_hand_card(self):
-        maxCard = 0
+        maxCard = 5 # valeur par défaut
         for power in self.get_power():
-            if power.value.startswith("max_hand_card_"): 
-                value = int(power.value.split("_")[-1])  
-                maxCard = max(maxCard, value)
+            if power == Power.ADD_1_HAND_CARD:
+                maxCard += 1
+            if power == Power.SUB_1_HAND_CARD:
+                maxCard -= 1
         return maxCard
     
     @property
@@ -169,10 +183,15 @@ class Player:
         return self.id
 
     def get_power(self) -> list[Power]:
+        powers = self.power.copy()
+        if self.get_adultery() is not None:
+            powers += [Power.CAN_FLIRT_WITH_WEDDING]
         if self.job:
-            return self.power + self.job.get_power(self)
-        
-        return self.power
+            powers += self.job.get_power(self).copy()
+        if self.role is not None:
+            powers += self.role.get_power().copy()
+        return powers
+    
     def add_power(self, power: Power):
         """ajoute un pouvoir dans la liste"""
         if power not in self.power:
@@ -286,7 +305,7 @@ class Player:
         return last_study
 
     def get_hand(self) -> list["Card"]:
-        return self.hand
+        return self.hand.copy()
 
     def get_wedding(self) -> "Wedding | None":
         """retourne le marriage posé"""

@@ -26,13 +26,38 @@ class Trip(Acquisition):
         return """Un voyage n'a rien de particulier""" + "\n"+ "="*10+ "\n" + super().get_card_rule()
 
 class Atlandide(Trip):
-    pass
+    def calcul_cost(self, player: Player, game: Game) -> int:
+        from backend.core.roles.Sirene import Sirene
+        role = player.get_role()
+        if isinstance(role, Sirene):
+            return 0
+        return super().calcul_cost(player, game)
 
 class Ecosse(Trip):
-    pass
+    def calcul_cost(self, player: Player, game: Game) -> int:
+        from backend.core.roles.Chasseur import Chasseur
+        role = player.get_role()
+        if isinstance(role, Chasseur):
+            return 0
+        return super().calcul_cost(player, game)
+
 
 class Salem(Trip):
-    pass
+    
+    def calcul_cost(self, player: Player, game: Game) -> int:
+        from backend.core.roles.Sorciere import Sorciere
+        role = player.get_role()
+        if isinstance(role, Sorciere):
+            return 0
+        return super().calcul_cost(player, game)
+
 
 class Transylvanie(Trip):
-    pass
+    
+    def calcul_cost(self, player: Player, game: Game) -> int:
+        from backend.core.roles.Vampire import Vampire
+        role = player.get_role()
+        if isinstance(role, Vampire):
+            return 0
+        return super().calcul_cost(player, game)
+

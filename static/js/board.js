@@ -331,6 +331,23 @@ window.updateBoard = function(state) {
         // Tag tour
         const tagEl = infoEl.querySelector('.current-turn-tag');
         if (tagEl) tagEl.style.display = isCurrent && !isMe ? '' : 'none';
+
+        // Carte de rôle : recréée à chaque update (rôle assigné en cours de
+        // partie, ou simplement pour rester synchro avec l'état serveur).
+        let roleEl = document.getElementById(`role-${player.name}`);
+        if (player.role) {
+          const context = isMe ? "role" : "other";
+          const newRoleEl = GameCard.create(player.role, { context, size: "role", clickable: true });
+          newRoleEl.id = `role-${player.name}`;
+          newRoleEl.classList.add("role-card-mini");
+          if (roleEl) {
+            roleEl.replaceWith(newRoleEl);
+          } else {
+            infoEl.appendChild(newRoleEl);
+          }
+        } else if (roleEl) {
+          roleEl.remove();
+        }
       }
 
       // Cellules de catégories

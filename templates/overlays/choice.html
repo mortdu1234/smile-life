@@ -1,0 +1,32 @@
+{# templates/overlays/choice.html #}
+{# Inclure via {% include 'overlays/choice.html' %} dans board.html #}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/light-mode/overlays/choice.css') }}">
+
+<div id="choice-overlay"
+     class="choice-overlay"
+     aria-modal="true"
+     role="dialog"
+     aria-labelledby="choice-title"
+     hidden>
+
+  <div class="choice-overlay__backdrop"></div>
+
+  <div class="choice-overlay__panel">
+
+    <!-- Header -->
+    <div class="choice-overlay__header">
+      <span class="choice-overlay__tag">CHOIX</span>
+      <h2 class="choice-overlay__title" id="choice-title">Faites votre choix</h2>
+      <p class="choice-overlay__prompt" id="choice-prompt"></p>
+    </div>
+
+    <!-- Liste des options -->
+    <div class="choice-overlay__list"
+         id="choice-list"
+         role="listbox"
+         aria-label="Choix disponibles">
+      {# Options injectées dynamiquement via JS #}
+    </div>
+
+  </div>
+</div>

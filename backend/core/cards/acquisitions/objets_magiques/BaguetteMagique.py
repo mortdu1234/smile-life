@@ -1,3 +1,6 @@
+from backend.core.Game import Game
+from backend.core.Player import Player
+
 from .ObjetMagique import ObjetMagique
 from typing import TYPE_CHECKING
 from ....Power import Power
@@ -8,6 +11,13 @@ if TYPE_CHECKING:
     from backend.core.Player import Player
 
 class BaguetteMagique(ObjetMagique):
+    def calcul_cost(self, player: Player, game: Game) -> int:
+        from backend.core.roles.Fee import Fee
+        role = player.get_role()
+        if isinstance(role, Fee):
+            return 0
+        return super().calcul_cost(player, game)
+    
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         from ...specials.SpecialCard import SpecialCard
         success = super().apply_card_effect(game, current_player)

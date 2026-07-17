@@ -180,13 +180,39 @@ class DaenerysChild(GirlPowerChild):
 class PeterChild(FantastiqueChild):
     def get_name(self) -> str:
         return super().get_name() + "Peter"
+    def get_smiles(self, owner: Player) -> int:
+        from backend.core.roles.Fee import Fee
+        role = owner.get_role()
+        if isinstance(role, Fee):
+            return 2*super().get_smiles(owner)
+        return super().get_smiles(owner)
 
 
 class MerlinChild(FantastiqueChild):
     def get_name(self) -> str:
         return super().get_name() + "Merlin"
+    def get_smiles(self, owner: Player) -> int:
+        from backend.core.roles.Magicien import Magicien
+        role = owner.get_role()
+        if isinstance(role, Magicien):
+            return 2*super().get_smiles(owner)
+        return super().get_smiles(owner)
 
 
 class BuffyChild(FantastiqueChild):
     def get_name(self) -> str:
         return super().get_name() + "Buffy"
+
+    def get_smiles(self, owner: Player) -> int:
+        from backend.core.roles.Chasseur import Chasseur
+        role = owner.get_role()
+        if isinstance(role, Chasseur):
+            return 2*super().get_smiles(owner)
+        return super().get_smiles(owner)
+
+    def can_be_played(self, player: Player, game: Game) -> tuple[bool, str]:
+        from backend.core.roles.Vampire import Vampire
+        role = player.get_role()
+        if isinstance(role, Vampire):
+            return False, "Vous ne pouvez pas le poser en tant que Vampire"
+        return super().can_be_played(player, game)

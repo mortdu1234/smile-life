@@ -1,0 +1,113 @@
+{
+  "id": "fantastique",
+  "label": "Fantastique",
+  "description": "Possède le jeu de base + l'extention Fantastique",
+  "deck": {
+    "study__1": 22, "study__2": 3,
+
+    "salary__1": 10, "salary__2": 10, "salary__3": 10, "salary__4": 10,
+
+    "architecte": 1, "astronaute": 1, "avocat": 1, "bandit": 1, "barman": 1,
+    "chef_des_achats": 1, "chef_des_ventes": 1, "chercheur": 1, "chirurgien": 1,
+    "designer": 1, "ecrivain": 1, "garagiste": 1, "gourou": 1, "grand_prof": 1,
+    "jardinier": 1, "journaliste": 1, "medecin": 1, "medium": 1, "militaire": 1,
+    "pharmacien": 1, "pilote": 1, "pizzaiolo": 1, "plombier": 1, "policier": 1,
+    "prof__maths": 1, "prof__francais": 1, "prof__anglais": 1, "prof__histoire": 1,
+    "serveur": 1, "stripteaser": 1,
+
+    "flirt__bar": 2, "flirt__parc": 2, "flirt__theatre": 2, "flirt__cinema": 2,
+    "flirt__boite_de_nuit": 2, "flirt_with_child__camping": 2, "flirt_with_child__hotel": 2,
+    "flirt__restaurant": 2, "flirt__zoo": 2, "flirt__internet": 2,
+
+    "marriage__corps_nuds": 2, "marriage__fourqueux": 1, "marriage__montcuq": 1,
+    "marriage__monteton": 1, "marriage__sainte_vierge": 1, "marriage__bourg_la_reine": 1,
+
+    "adultery": 3,
+
+    "leia": 1, "hermione": 1, "lara": 1, "luke": 1, "diana": 1,
+    "mario": 1, "zelda": 1, "luigi": 1, "rocky": 1, "harry": 1,
+
+    "accident": 5, "burnout": 5, "divorce": 5, "tax": 5, "licenciement": 5,
+    "maladie": 5, "redoublement": 5, "prison": 1, "attentat": 1,
+
+    "anniversaire": 1, "arc_en_ciel": 1, "casino": 1, "chance": 1,
+    "etoile_filante": 1, "heritage": 1, "piston": 1, "troc": 1,
+    "tsunami": 1, "vengeance": 1,
+
+    "house__1": 2, "house__2": 2, "house__3": 1,
+
+    "travel__le_caire": 1, "travel__londre": 1, "travel__new_york": 1,
+    "travel__rio": 1, "travel__sydney": 1,
+
+    "licorne": 1, "poussin": 1, "lapin": 1, "chien": 1, "chat": 1,
+
+    "prix": 2, "legion": 1,
+
+    "roles__ange": 1,
+    "roles__vampire": 1,
+    "roles__sorciere": 1,
+    "roles__sirene": 1,
+    "roles__mutant": 1,
+    "roles__magicien": 1,
+    "roles__loupgarou": 1,
+    "roles__fee": 1,
+    "roles__demon": 1,
+    "roles__chasseur": 1,
+
+    "malefice__alcatras": 1,
+    "malefice__sacrapas": 1,
+    "malefice__restataplas": 1,
+    "malefice__minus_miserablis": 1,
+    "malefice__maxus_miserablis": 1,
+    "malefice__mano_negra": 1,
+    "malefice__desenchantement": 1,
+    "malefice__cas_burnas": 1,
+    "malefice__bis_repetitas": 1,
+    "malefice__aveuglement": 1,
+
+    "objet_magique__amulette": 2,
+    "objet_magique__anneau_de_pouvoir": 1,
+    "objet_magique__baguette_magique": 1,
+    "objet_magique__balai": 1,
+    "objet_magique__boule_de_cristal": 1,
+    "objet_magique__miroir": 1,
+    "objet_magique__lasso_magique": 1,
+    "objet_magique__lampe_magique": 1,
+    "objet_magique__grimoire": 1,
+    "objet_magique__flute_enchantee": 1,
+    "objet_magique__chaudron": 1,
+    "objet_magique__cape_invisible": 1,
+
+    "potion__amour_eternel": 1,
+    "potion__argent": 1,
+    "potion__chance": 1,
+    "potion__epousaille": 1,
+    "potion__excellence": 1,
+    "potion__fertilite": 1,
+    "potion__interim": 1,
+    "potion__resurrection": 1,
+    "potion__ristournelle": 1,
+    "potion__savoir": 1,
+    "potion__vitalite": 1,
+
+    "ephemeride__eclipse": 1,
+    "ephemeride__equinoxe": 1,
+    "ephemeride__lune_bleu": 1,
+    "ephemeride__lune_rouge": 1,
+    "ephemeride__pleine_lune": 1,
+
+    "travel__transylvanie": 1,
+    "travel__ecosse": 1,
+    "travel__atlantide": 1,
+    "travel__salem": 1,
+
+    "peter": 1,
+    "buffy": 1,
+    "merlin": 1,
+
+    "phoenix": 1,
+    "rat": 1,
+    "hibou": 1,
+    "chauve_sourie": 1
+  }
+}

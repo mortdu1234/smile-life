@@ -1,3 +1,5 @@
+from click import group
+
 from backend.core.Game import Game
 from backend.core.Player import Player
 
@@ -13,5 +15,13 @@ class Phoenix(AnimalCard):
     def get_name(self) -> str:
         return "Phoenix"
 
+    def get_smiles(self, owner: Player) -> int:
+        from backend.core.cards.acquisitions.potions.ResurrectionPotion import ResurrectionPotion
+        zone = owner.get_card_from_group(groupe.ACQUISITIONS) + owner.get_card_from_group(groupe.CARTES_PROTEGEES)
+        for card in zone:
+            if isinstance(card, ResurrectionPotion):
+                return 2*super().get_smiles(owner)
+        return super().get_smiles(owner)
+    
     def get_card_rule(self) -> str:
         return """"""+ "\n"+ "="*10+ "\n" + super().get_card_rule()

@@ -368,6 +368,21 @@ def submit(game_id):
     return jsonify({"ok": True})
 
 
+@game_bp.route("/<game_id>/submit-hands", methods=["POST"])
+def submit_hands(game_id):
+    game = get_game(game_id)
+    if not game:
+        return jsonify({"ok": False, "error": "Partie introuvable."}), 404
+    pseudo = session.get("pseudo")
+    player = next((p for p in game.players if p.name == pseudo), None)
+    if not player:
+        return jsonify({"ok": False, "error": "Joueur introuvable."}), 404
+    new_hands = (request.get_json() or {}).get("hands")
+    if not isinstance(new_hands, list):
+        return jsonify({"ok": False, "error": "indices manquants."}), 400
+    player.get_interface().submit_hands(new_hands)
+    return jsonify({"ok": True})
+
 # ── CARTES SPECIALES ───────────────────────────────────────────────────────────────────────
 
 
@@ -394,4 +409,16 @@ def bet_on_casino(game_id):
         print(reason)
         return _action_response(False, reason, game_id)
     success, reason = game.bet_on_casino(player_id, card_id)
+    return _action_response(success, reason, game_id)
+
+
+@game_bp.route("/<game_id>/use-role-power", methods=["POST"])
+def use_role_power(game_id):
+    """Permet d'utiliser le pouvoir du role"""
+    game = get_game(game_id)
+    if not game:
+        print("[ERROR] Game non trouvée")
+        return _action_response(False, "[ERROR] Game non trouvée", game_id)    
+    player_id = game.get_current_player().get_id()
+    success, reason = game.use_role_power(player_id)
     return _action_response(success, reason, game_id)

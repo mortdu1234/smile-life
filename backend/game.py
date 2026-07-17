@@ -15,6 +15,7 @@ import random
 from pathlib import Path
 
 from backend.core.BotPlayer import BotPlayer
+from backend.core.roles.PlayerRole import PlayerRole
 
 from .webSocket import broadcast_game
 from .userIo.web import WebIO
@@ -76,8 +77,9 @@ def load_preset(preset_id: str) -> dict | None:
 
 # ── Construction du deck ───────────────────────────────────────────────────────
 
-def _build_cards(preset: dict) -> list[Card]:
+def _build_cards(preset: dict) -> tuple[list[Card], list[PlayerRole]]:
     cards: list[Card] = []
+    availables_roles: list[PlayerRole] = []
     skipped: list[str] = []
 
     for card_id, count in preset.get("deck", {}).items():
@@ -86,9 +88,14 @@ def _build_cards(preset: dict) -> list[Card]:
             continue
         for _ in range(count):
             card = build_card(card_id)
+                
             if card is not None:
-                cards.append(card)
+                if isinstance(card, PlayerRole):
+                    availables_roles.append(card)
+                else:
+                    cards.append(card)
             else:
+
                 if card_id not in skipped:
                     skipped.append(card_id)
 
@@ -96,7 +103,7 @@ def _build_cards(preset: dict) -> list[Card]:
         print(f"[card_registry] card_id inconnus ignorés : {skipped}")
 
     random.shuffle(cards)
-    return cards
+    return cards, availables_roles
 
 
 # ── Cycle de vie de la partie ──────────────────────────────────────────────────
@@ -112,7 +119,7 @@ def start_game(game_id: str, host_pseudo: str) -> tuple[Game | None, str | None]
 
     # ── Résolution du deck : custom_deck > preset_id ───────────────────────────
     if room.get("custom_deck"):
-        deck = _build_cards({"deck": room["custom_deck"]})
+        deck, availables_roles = _build_cards({"deck": room["custom_deck"]})
         if not deck:
             return None, "Le deck personnalisé ne contient aucune carte valide."
 
@@ -120,7 +127,7 @@ def start_game(game_id: str, host_pseudo: str) -> tuple[Game | None, str | None]
         preset = load_preset(room["preset_id"])
         if not preset:
             return None, f"Preset « {room['preset_id']} » introuvable."
-        deck = _build_cards(preset)
+        deck, availables_roles = _build_cards(preset)
 
     else:
         return None, "Aucun deck sélectionné."
@@ -133,9 +140,10 @@ def start_game(game_id: str, host_pseudo: str) -> tuple[Game | None, str | None]
             name = entry if isinstance(entry, str) else entry["name"]
             players.append(Player(name, idx, WebIO()))
 
-    game = Game(id=game_id, players=players, deck=deck)
+    game = Game(id=game_id, players=players, deck=deck, availables_roles=availables_roles)
     game_save(game)
     mark_playing(game_id)
+    game.first_round()
 
     return game, None
 

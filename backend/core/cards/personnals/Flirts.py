@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from ...Game import Game
     from ...Player import Player
@@ -18,7 +19,12 @@ class Flirt(Card):
         self.place = place
     def get_name(self) -> str:
         return f"Flirt - {self.place}"
-    
+
+    def get_smiles(self, owner: "Player") -> int:
+        powers = owner.get_power()
+        if Power.DOUBLE_FLIRT in powers:
+            return 2*super().get_smiles(owner) 
+        return super().get_smiles(owner)
     def count_number_flirt(self, player: 'Player'):
         number = 0
         cards = player.get_card_from_group(PlayedCardGroup.VIE_PERSONNELLE)
@@ -28,7 +34,7 @@ class Flirt(Card):
         return number
 
     def can_be_played(self, player: 'Player', game: 'Game') -> tuple[bool, str]:
-        if player.is_wedding() and not player.is_adultery():
+        if player.is_wedding() and Power.CAN_FLIRT_WITH_WEDDING not in player.get_power():
             return False, "on ne peut pas flirter en couple"
         if self.count_number_flirt(player) == NOMBRE_MAX_FLIRT_PAR_JOUEUR and Power.INFINITE_FLIRT not in player.get_power():
             return False, "tu as déja ateint la limite"

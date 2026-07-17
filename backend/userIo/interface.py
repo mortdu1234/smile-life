@@ -1,12 +1,15 @@
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, Sequence, TypeVar
+
+T = TypeVar("T")
 
 if TYPE_CHECKING:
     from ..core.Player import Player
     from ..core.cards.Card import Card
     from ..core.cards.acquisitions.Acquisition import Acquisition
     from ..core.cards.personnals.Children import ChildCard
+    from ..core.roles.PlayerRole import PlayerRole
 
 class IOType(Enum):
     HARDSHIP_TARGET = "hardship-target"
@@ -17,8 +20,28 @@ class IOType(Enum):
     PLAYER_PICKER   = "player-picker"
     ERROR_LABELLING = "error-labelling"
     TROC_CHOICE     = "troc-choice"
+    HAND_REORDER    = "hand-reorder"
+    CHOICE          = "choice"
+
 
 class UserIO(ABC):
+    @abstractmethod
+    def choice(self, prompt: str, choices: list[T]) -> T:
+        """Affiche un message et une liste de choix (texte simple, pas de cartes).
+        Bloque jusqu'à ce que le joueur sélectionne une des possibilités.
+        Retourne l'élément choisi (pas un index)."""
+        pass 
+
+    @abstractmethod
+    def reorder_hands(self, players: list["Player"], hands: "list[list[Card]]") -> "list[list[Card]]":
+        """retourne la nouvelle liste des cartes en main dans l'ordre des players"""
+        pass
+
+    @abstractmethod
+    def ask_role(self, prompt: str, cards: list["PlayerRole"], kind: IOType) -> "PlayerRole | None":
+        """retourne l'id de la carte selectionnée"""
+        pass
+    
     @abstractmethod
     def ask_cards(self, prompt: str, cards: list["Card"], kind: IOType, nb: int) -> list["Card"]:
         """Demande au joueur de sélectionner jusqu'à nb cartes parmi la liste
@@ -76,4 +99,13 @@ class UserIO(ABC):
     @abstractmethod
     def submit_dismiss(self) -> None:
         """Appelé par la route Flask quand l'utilisateur ferme un overlay de consultation."""
+        pass
+
+    @abstractmethod
+    def submit_hands(self, hands: "list[list[dict]]") -> None:
+        """Appelé par la route Flask quand l'utilisateur valide la réorganisation des mains.
+
+        `hands` est une liste, dans l'ordre des joueurs, de listes de références
+        vers les cartes d'origine sous la forme {"player": int, "card": int}
+        (indices dans la structure `hands` passée à `reorder_hands`)."""
         pass

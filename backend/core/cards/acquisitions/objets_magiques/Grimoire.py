@@ -8,6 +8,13 @@ if TYPE_CHECKING:
     from backend.core.Player import Player
 
 class Grimoire(ObjetMagique):
+    def calcul_cost(self, player: "Player", game: "Game") -> int:
+        from backend.core.roles.Magicien import Magicien
+        role = player.get_role()
+        if isinstance(role, Magicien):
+            return 0
+        return super().calcul_cost(player, game)
+    
     def get_player_available_card(self, player: "Player"):
         from ...professionnals.StudyCard import StudyCard
         cards=player.get_card_from_group(groupe.VIE_PROFESSIONNELLE)

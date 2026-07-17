@@ -3,8 +3,10 @@ from time import sleep
 from typing import Sequence, TYPE_CHECKING
 
 
+
 from .interface import UserIO, IOType
 if TYPE_CHECKING:
+    from backend.core.roles.PlayerRole import PlayerRole
     from ..core.Player import Player
     from ..core.cards.Card import Card
     from ..core.cards.acquisitions.Acquisition import Acquisition
@@ -18,6 +20,55 @@ class WebIO(UserIO):
     def __init__(self):
         self._queue: Queue = Queue()
         self.pending: dict | None = None
+
+    def choice(self, prompt: str, choices: list) -> "Card | Player | PlayerRole | str":
+        """Affiche l'overlay générique de choix (liste de boutons texte,
+        pas de cartes). Bloque la greenlet jusqu'à ce que le joueur
+        sélectionne une des possibilités. Retourne l'élément choisi
+        (et non son index), pour coller à la signature de l'interface.
+        """
+        sleep(TEMPS_ATTENTES)
+        self.pending = {
+            "ui_component": IOType.CHOICE.value,
+            "prompt": prompt,
+            # Le frontend n'a besoin que d'un libellé par choix ; on garde
+            # les objets d'origine côté serveur pour retrouver l'élément
+            # sélectionné à partir de son index.
+            "choices": [str(c) for c in choices],
+        }
+        index: int = self._queue.get()
+        self.pending = None
+        return choices[index]
+
+    def reorder_hands(self, players: list["Player"], hands: "list[list[Card]]") -> "list[list[Card]]":
+        """Affiche l'overlay de réorganisation des mains (drag and drop entre joueurs).
+        Bloque la greenlet jusqu'à ce que le joueur valide la nouvelle répartition.
+
+        Chaque carte envoyée au frontend embarque sa position d'origine
+        (`_origin: {player, card}`) afin que le frontend n'ait qu'à renvoyer
+        des références plutôt que des cartes sérialisées, et que l'on puisse
+        reconstituer les vrais objets `Card` (et non des copies) côté serveur.
+        """
+        sleep(TEMPS_ATTENTES)
+        self.pending = {
+            "ui_component": IOType.HAND_REORDER.value,
+            "prompt": "Réorganisez les cartes entre les mains des joueurs, puis validez.",
+            "players_names": [p.name for p in players],
+            "hands": [
+                [
+                    {**c.to_dict(), "_origin": {"player": p_idx, "card": c_idx}}
+                    for c_idx, c in enumerate(hand)
+                ]
+                for p_idx, hand in enumerate(hands)
+            ],
+        }
+        new_hands_origins: list[list[dict]] = self._queue.get()
+        self.pending = None
+        print(f"yousk {new_hands_origins}")
+        return [
+            [hands[origin["player"]][origin["card"]] for origin in new_hand]
+            for new_hand in new_hands_origins
+        ]
 
     def ask_cards(self, prompt: str, cards: list["Card"], kind: IOType, nb: int) -> "list[Card]":
         """Demande au joueur de sélectionner jusqu'à nb cartes parmi une liste
@@ -35,7 +86,7 @@ class WebIO(UserIO):
         self.pending = None
         return [cards[i] for i in indices]
 
-    def _ask(self, prompt: str, options: list, kind: IOType) -> "Card | Player | None":
+    def _ask(self, prompt: str, options: list, kind: IOType) -> "Card | Player | PlayerRole | None":
         sleep(TEMPS_ATTENTES)
         self.pending = {
             "ui_component": kind.value,
@@ -52,6 +103,9 @@ class WebIO(UserIO):
 
     def ask_card(self, prompt: str, cards: list["Card"], kind: IOType) -> "Card | None":
         """retourne l'id de la carte selectionnée"""
+        return self._ask(prompt, cards, kind) # type: ignore
+
+    def ask_role(self, prompt: str, cards: "list[PlayerRole]", kind: IOType) -> "PlayerRole | None":
         return self._ask(prompt, cards, kind) # type: ignore
 
     def erreur_detiquetage_interface(self, owner: "Player", others: "list[Player]", children_owner: "list[ChildCard]", children_others: "list[list[ChildCard]]") -> "tuple[ChildCard, ChildCard, Player]":
@@ -137,6 +191,12 @@ class WebIO(UserIO):
     def submit_dismiss(self) -> None:
         """Appelé par la route Flask quand l'utilisateur ferme un overlay de consultation."""
         self._queue.put(None)
+
+    def submit_hands(self, hands: "list[list[dict]]") -> None:
+        """Appelé par la route Flask quand l'utilisateur valide la réorganisation des mains.
+        `hands` : liste (par joueur) de listes de références {"player": int, "card": int}
+        vers les positions d'origine des cartes."""
+        self._queue.put(hands)
 
     def show_players_hand(self, players_names: Sequence[str], players_hands: "Sequence[Sequence[Card]]"):
         sleep(TEMPS_ATTENTES)

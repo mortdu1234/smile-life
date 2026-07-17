@@ -1,0 +1,39 @@
+{# templates/overlays/hand_reorder.html #}
+{# Inclure via {% include 'overlays/hand_reorder.html' %} dans board.html #}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/light-mode/overlays/hand-reorder.css') }}">
+
+<div id="hand-reorder-overlay"
+     class="hand-reorder-overlay"
+     aria-modal="true"
+     role="dialog"
+     aria-labelledby="hand-reorder-title"
+     hidden>
+
+  <div class="hand-reorder-overlay__backdrop"></div>
+
+  <div class="hand-reorder-overlay__panel">
+
+    <!-- Header -->
+    <div class="hand-reorder-overlay__header">
+      <span class="hand-reorder-overlay__tag">RÉORGANISATION</span>
+      <h2 class="hand-reorder-overlay__title" id="hand-reorder-title">Réorganisez les mains</h2>
+      <p class="hand-reorder-overlay__prompt" id="hand-reorder-prompt"></p>
+      <p class="hand-reorder-overlay__hint">Glissez-déposez une carte vers la main d'un autre joueur.</p>
+    </div>
+
+    <!-- Colonnes des joueurs -->
+    <div class="hand-reorder-overlay__columns" id="hand-reorder-columns">
+      {# Colonnes (une par joueur) injectées dynamiquement via JS #}
+    </div>
+
+    <!-- Footer -->
+    <div class="hand-reorder-overlay__footer">
+      <button
+        class="hand-reorder-overlay__btn hand-reorder-overlay__btn--confirm"
+        id="hand-reorder-confirm-btn"
+        type="button"
+      >Valider la répartition</button>
+    </div>
+
+  </div>
+</div>

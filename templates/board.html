@@ -116,6 +116,22 @@
           </div>
           <div class="player-stats">😊 {{ player.get_smiles() }} smiles · {{ player.hand|length }} carte{{ 's' if player.hand|length != 1 }}</div>
 
+          {% if player.get_role() %}
+          {% set role = player.get_role().to_dict() %}
+          <!-- Carte de rôle : contexte "role" (actionnable, bouton Pouvoir Éphémère)
+               uniquement pour le joueur courant ; "other" pour les rôles adverses
+               (consultable mais sans action). -->
+          <div class="game-card clickable-card role-card-mini"
+               id="role-{{ player.name }}"
+               data-card='{{ role|tojson }}'
+               data-context="{{ 'role' if player.name == pseudo else 'other' }}">
+            <img src="{{ url_for('static', filename=player.get_role().img_path) }}" alt="{{ role.name }}" onerror="this.style.display='none'">
+            <div class="card-footer">
+              <span class="card-name">{{ role.name }}</span>
+            </div>
+          </div>
+          {% endif %}
+
           {% if player.name == pseudo %}
             <span class="me-tag">Moi</span>
           {% elif player.name == current_player.name %}
@@ -376,6 +392,8 @@
   {% include 'overlays/player-picker.html' %}
   {% include 'overlays/card-detail.html' %}
   {% include 'overlays/error-labelling.html' %}
+  {% include 'overlays/hand-reorder.html' %}
+  {% include 'overlays/choice.html' %}
 
   {% block scripts %}
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>

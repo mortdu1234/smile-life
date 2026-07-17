@@ -6,6 +6,13 @@ if TYPE_CHECKING:
     from backend.core.Player import Player
 
 class Balai(ObjetMagique):
+    def calcul_cost(self, player: "Player", game: "Game") -> int:
+        from backend.core.roles.Sorciere import Sorciere
+        role = player.get_role()
+        if isinstance(role, Sorciere):
+            return 0
+        return super().calcul_cost(player, game)
+    
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         success = super().apply_card_effect(game, current_player)
         if not success:
