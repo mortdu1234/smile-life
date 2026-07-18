@@ -14,6 +14,7 @@ NOMBRE_MAX_FLIRT_PAR_JOUEUR = 5
 
 class Flirt(Card):
     place: FlirtPlaces
+    count: bool = True
     def __init__(self, id: int, image_path: str, smiles: int, place: FlirtPlaces):
         super().__init__(id, image_path, smiles)
         self.place = place
@@ -25,11 +26,13 @@ class Flirt(Card):
         if Power.DOUBLE_FLIRT in powers:
             return 2*super().get_smiles(owner) 
         return super().get_smiles(owner)
+    
     def count_number_flirt(self, player: 'Player'):
+        """compte le nombre de flirts posé par le joueur"""
         number = 0
         cards = player.get_card_from_group(PlayedCardGroup.VIE_PERSONNELLE)
         for card in cards:
-            if isinstance(card, Flirt):
+            if isinstance(card, Flirt) and card.count:
                 number += 1
         return number
 

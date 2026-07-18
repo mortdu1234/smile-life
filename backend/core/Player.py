@@ -10,11 +10,10 @@ if TYPE_CHECKING:
     from .cards.professionnals.StudyCard import StudyCard
     from .Game import Game
     from .cards.CardAttributes import CanBeUseOnAcquisition
-from ..userIo.web import WebIO
+
 from .cards.personnals.Wedding import Adultery, Wedding
 from .cards.professionnals.JobCard import JobCard
 from .cards.personnals.Flirts import Flirt
-from .cards.specials.Heritage import Heritage
 
 from .cards.Card import Card, InstantPlayedCard
 
@@ -149,15 +148,18 @@ class Player:
         # ====================
         # Selection du groupe
         # ====================
-
         from .cards.professionnals.JobCard import JobCard
         if isinstance(card, JobCard):
             self.job = card
 
         from .cards.personnals.Flirts import Flirt
         if isinstance(card, Flirt) and self.get_adultery():
-            card.set_protected()
-        
+            card.count = False
+
+        from .cards.professionnals.StudyCard import StudyCard
+        if isinstance(card, StudyCard) and Power.INFINITE_STUDY in self.get_power():
+            card.count = False
+                    
         self.groupe[PlayedCardGroup.get_card_on_play_group(card)].append(card)
 
 
@@ -207,6 +209,7 @@ class Player:
             if isinstance(card, StudyCard):
                 total += card.get_value() * (1+double_study)
         return total
+
 
     def get_id(self) ->int:
         return self.id
@@ -301,7 +304,7 @@ class Player:
         last_salary = None
         for card in self.get_card_from_group(PlayedCardGroup.SALARIES):
             from .cards.professionnals.SalaryCard import SalaryCard 
-            if isinstance(card, SalaryCard):
+            if isinstance(card, SalaryCard) and not card.is_protected:
                 last_salary = card
         return last_salary
 
@@ -310,7 +313,7 @@ class Player:
         last_study = None
         for card in self.get_card_from_group(PlayedCardGroup.VIE_PROFESSIONNELLE):
             from .cards.professionnals.StudyCard import StudyCard
-            if isinstance(card, StudyCard):
+            if isinstance(card, StudyCard) and not card.is_protected:
                 last_study = card
         return last_study
 

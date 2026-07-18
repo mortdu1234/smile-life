@@ -21,7 +21,7 @@ class Power(Enum):
     INFINITE_FLIRT = "infinite_flirt" # peut flirter a l'infini
     GYNOCRATIE = "gynocratie" # les smiles des enfants garçons sont divisés par 2
     PHALOCRATIE = "phalocratie" # les smiles des enfants filles sont divisés par 2
-    CHILDREN_PROTECTED = "children_protected" # les enfants du joueur sont protégés de tous les malus
+    CHILDREN_PROTECTED = "children_protected" # tous les enfants du joueur sont protégés de tous les malus
     EGALITE_SALAIRE = "egalite_salaire" # permet de poser des salaires par rapport au métier le mieux payé
     GIRL_POWER = "girl_power" # permet de rejouer des cartes spéciales déja jouée lorsqu'on pose une fille
     JOB_MAX_STUDY_5 = "job_max_study_5" # le joueur peut avoir un job avec un niveau d'étude maximum de 5

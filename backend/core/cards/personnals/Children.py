@@ -51,7 +51,7 @@ class ChildCard(Card):
 class FemaleChild(ChildCard):
     """Mixin — enfant féminin."""
     def get_smiles(self, owner: "Player") -> int:
-        if Power.CHILDREN_PROTECTED in owner.get_power():
+        if Power.CHILDREN_PROTECTED in owner.get_power() or self.is_protected:
             return self.smiles
         if Power.GYNOCRATIE in owner.get_power():
             return self.smiles // 2
@@ -70,7 +70,7 @@ class FemaleChild(ChildCard):
 class MaleChild(ChildCard):
     """Mixin — enfant masculin."""
     def get_smiles(self, owner: "Player") -> int:
-        if Power.CHILDREN_PROTECTED in owner.get_power():
+        if Power.CHILDREN_PROTECTED in owner.get_power() or self.is_protected:
             return self.smiles
         if Power.PHALOCRATIE in owner.get_power():
             return self.smiles // 2
