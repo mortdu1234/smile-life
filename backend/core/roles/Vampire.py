@@ -36,7 +36,7 @@ class Vampire(PlayerRole):
                 continue
             cards = player.get_card_from_group(groupe.VIE_PERSONNELLE)
             for card in cards:
-                if isinstance(card, Flirt) and card.get_place() in flirts_played:
+                if isinstance(card, Flirt) and card.get_place() in flirts_played and not card.is_protected:
                     player.remove_card(card, game)
                     owner.add_card_to_played(card)
                     player.move_placed_cards(card, groupe.VIE_PERSONNELLE, groupe.CARTES_PROTEGEES)

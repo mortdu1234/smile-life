@@ -16,7 +16,7 @@ class ErreurEtiquetage(SpecialCard):
         children = []
         card_played = player.get_card_from_group(groupe.VIE_PERSONNELLE)
         for card in card_played:
-            if isinstance(card, ChildCard):
+            if isinstance(card, ChildCard) and not card.is_protected:
                 children.append(card)
         return children
 

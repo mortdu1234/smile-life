@@ -28,7 +28,7 @@ class LoupGarou(PlayerRole):
         available_cards = []
         zone = target.get_card_from_group(groupe.VIE_PERSONNELLE)
         for card in zone:
-            if isinstance(card, (AnimalCard, ChildCard)):
+            if isinstance(card, (AnimalCard, ChildCard)) and not card.is_protected:
                 available_cards.append(card)
         return available_cards
      

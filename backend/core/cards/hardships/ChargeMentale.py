@@ -14,7 +14,7 @@ class ChargeMentale(Hardship):
         children = 0
         from ..personnals.Children import ChildCard
         for card in player.get_card_from_group(groupe.VIE_PERSONNELLE):
-            if isinstance(card, ChildCard):
+            if isinstance(card, ChildCard) and not card.is_protected:
                 children += 1
         return children > 0 and super().can_be_targeted(player, game)
 
@@ -22,7 +22,8 @@ class ChargeMentale(Hardship):
         """effectue simplement l'effet de la carte"""
         from ..personnals.Children import ChildCard
         from ....userIo.interface import IOType
-        list_children = [card for card in target.get_card_from_group(groupe.VIE_PERSONNELLE) if isinstance(card, ChildCard)]
+        # récupération de la liste des enfants
+        list_children = [card for card in target.get_card_from_group(groupe.VIE_PERSONNELLE) if isinstance(card, ChildCard) and not card.is_protected]
         selected_child = target.get_interface().ask_card("Charge Mentale: Choisissez un enfant à défausser", cards=list_children, kind=IOType.CARD_PICKER) # pyright: ignore[reportArgumentType]
         if not selected_child:
             return False

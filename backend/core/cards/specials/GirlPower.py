@@ -22,12 +22,14 @@ class GrilPower(SpecialCard):
         return "Girl Power"
 
     def girl_power_effect(self, game: "Game", current_player: "Player"):
+        # récupère la liste des cartes spéciales
         available_card = []
         speciales_cards = current_player.get_card_from_group(groupe.CARTES_SPECIALES)
         for card in speciales_cards:
             if card.can_be_played(current_player, game)[0] and card not in self.card_played:
                 available_card.append(card)
 
+        
         interface = current_player.get_interface()
         if len(available_card) == 0:
             print("[DEBUG] aucune cartes spéciales n'est jouables")

@@ -12,6 +12,7 @@ class ArgentPotion(Potion):
         cartes_protegees = current_player.get_card_from_group(groupe.CARTES_PROTEGEES)
         for card in cartes_protegees:
             if isinstance(card, SalaryCard):
+                card.set_not_protected()
                 current_player.move_placed_cards(card, groupe.CARTES_PROTEGEES, groupe.VIE_PROFESSIONNELLE)
                 
 

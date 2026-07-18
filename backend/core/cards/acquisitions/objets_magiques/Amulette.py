@@ -51,11 +51,13 @@ class Amulette(ObjetMagique):
         talisment = False
         for card in cards:
             if isinstance(card, Amulette):
+                card.set_protected()
                 current_player.move_placed_cards(card, groupe.ACQUISITIONS, groupe.CARTES_PROTEGEES)
                 talisment = True
                 self.apply_talisment_effect(game, current_player)
 
         if talisment:
+            self.set_protected()
             current_player.remove_card_from_hand(self)
             current_player.add_card_to_played(self)
             current_player.move_placed_cards(self, groupe.ACQUISITIONS, groupe.CARTES_PROTEGEES)

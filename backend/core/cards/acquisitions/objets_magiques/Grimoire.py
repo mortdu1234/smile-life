@@ -20,7 +20,7 @@ class Grimoire(ObjetMagique):
         cards=player.get_card_from_group(groupe.VIE_PROFESSIONNELLE)
         res = []
         for card in cards:
-            if isinstance(card, StudyCard):
+            if isinstance(card, StudyCard) and not card.is_protected:
                 res.append(card)
         return res
     

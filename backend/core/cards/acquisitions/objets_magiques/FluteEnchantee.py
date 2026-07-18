@@ -14,7 +14,7 @@ class FluteEnchantee(ObjetMagique):
         cards=player.get_card_from_group(groupe.VIE_PERSONNELLE)
         res = []
         for card in cards:
-            if isinstance(card, AnimalCard):
+            if isinstance(card, AnimalCard) and not card.is_protected:
                 res.append(card)
         return res
     

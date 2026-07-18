@@ -19,15 +19,21 @@ class Dragon(AnimalCard):
             if target_player == current_player:
                 continue
             # selection des cartes disponibles
-            cards_available = target_player.get_card_from_group(groupe.ACQUISITIONS)
-            cards_available += target_player.get_card_from_group(groupe.VIE_PROFESSIONNELLE)
+            cards_available = []
+            cards = target_player.get_card_from_group(groupe.ACQUISITIONS)
+            cards += target_player.get_card_from_group(groupe.VIE_PROFESSIONNELLE)
+            for card in cards:
+                if not card.is_protected:
+                    cards_available.append(card)
 
             vie_perso = target_player.get_card_from_group(groupe.VIE_PERSONNELLE)
             for card in vie_perso:
-                if not(Power.CHILDREN_PROTECTED in target_player.get_power() and isinstance(card, ChildCard)):
+                if not(Power.CHILDREN_PROTECTED in target_player.get_power() and isinstance(card, ChildCard)) and not card.is_protected:
                     cards_available.append(card)
+
             if len(cards_available) == 0:
                 continue
+
             
             # affichage de la selection de la carte
             selected_card = current_player.get_interface().ask_card(

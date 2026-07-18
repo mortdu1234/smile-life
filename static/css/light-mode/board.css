@@ -455,3 +455,96 @@ game-card.river-card {
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+
+/* Cartes protégées */
+.game-card[data-protected="true"] {
+    border-color: rgba(200, 150, 30, 0.8) !important;
+    box-shadow: inset 0 0 0 1px rgba(200, 150, 30, 0.5),
+                0 0 12px rgba(200, 150, 30, 0.3);
+    background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.5) 0%, 
+                rgba(255, 253, 250, 0.8) 100%);
+}
+
+.game-card[data-protected="true"]::before {
+    content: '🔒';
+    position: absolute; top: 3px; right: 3px;
+    font-size: 0.9rem; z-index: 10;
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+    filter: drop-shadow(0 1px 2px rgba(59, 48, 40, 0.3));
+}
+
+.game-card[data-protected="true"]:hover {
+    box-shadow: inset 0 0 0 1px rgba(200, 150, 30, 0.8),
+                0 0 16px rgba(200, 150, 30, 0.5) !important;
+    border-color: rgba(200, 150, 30, 1) !important;
+}
+
+.game-card[data-protected="true"]::after {
+    content: 'Protégée';
+    position: absolute; bottom: -22px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(200, 150, 30, 0.95);
+    color: #ffffff;
+    padding: 2px 7px; border-radius: 3px;
+    font-size: 0.6rem; font-weight: 500;
+    letter-spacing: 0.06em; white-space: nowrap;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s; z-index: 20;
+    font-family: 'Outfit', sans-serif;
+    text-transform: uppercase;
+}
+
+.game-card[data-protected="true"]:hover::after {
+    opacity: 1;
+}
+
+/* Face down protégée */
+.game-card.face-down[data-protected="true"] {
+    border-color: rgba(200, 150, 30, 0.7) !important;
+    box-shadow: inset 0 0 0 1px rgba(200, 150, 30, 0.5),
+                0 0 10px rgba(200, 150, 30, 0.25) !important;
+}
+
+/* Web Components <game-card> */
+game-card[protected] .gc-root {
+    border-color: rgba(200, 150, 30, 0.8) !important;
+    box-shadow: inset 0 0 0 1px rgba(200, 150, 30, 0.5),
+                0 0 12px rgba(200, 150, 30, 0.3) !important;
+    background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.5) 0%, 
+                rgba(255, 253, 250, 0.8) 100%) !important;
+}
+
+game-card[protected]::before {
+    content: '🔒';
+    position: absolute; top: 3px; right: 3px;
+    font-size: 0.9rem; z-index: 10;
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+    filter: drop-shadow(0 1px 2px rgba(59, 48, 40, 0.3));
+}
+
+game-card[protected]:hover .gc-root {
+    box-shadow: inset 0 0 0 1px rgba(200, 150, 30, 0.8),
+                0 0 16px rgba(200, 150, 30, 0.5) !important;
+    border-color: rgba(200, 150, 30, 1) !important;
+}
+
+game-card[protected]::after {
+    content: 'Protégée';
+    position: absolute; bottom: -22px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(200, 150, 30, 0.95);
+    color: #ffffff;
+    padding: 2px 7px; border-radius: 3px;
+    font-size: 0.6rem; font-weight: 500;
+    letter-spacing: 0.06em; white-space: nowrap;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s; z-index: 20;
+    font-family: 'Outfit', sans-serif;
+    text-transform: uppercase;
+}
+
+game-card[protected]:hover::after {
+    opacity: 1;
+}

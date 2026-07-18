@@ -111,8 +111,8 @@ class Game:
         # vérification validations des roles
         for player in self.players:
             role = player.get_role()
-            assert role is not None, "aucun role"
-            role.do_receive_action(self, player)
+            if role:
+                role.do_receive_action(self, player)
 
 
 

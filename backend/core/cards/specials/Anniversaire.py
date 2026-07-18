@@ -23,7 +23,7 @@ class Anniversaire(SpecialCard):
                 # récupération de l'ensemble des cartes salaires posés par le joueur
                 available_cards = []
                 for card in player.get_card_from_group(PlayedCardGroup.VIE_PROFESSIONNELLE):
-                    if isinstance(card, SalaryCard):
+                    if isinstance(card, SalaryCard) and not card.is_protected:
                         available_cards.append(card)
                 if len(available_cards) > 0:
                     # Demande au joueur de selectionner une carte

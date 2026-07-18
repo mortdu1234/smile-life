@@ -27,7 +27,7 @@ class Sorciere(PlayerRole):
         zone = target.get_card_from_group(groupe.VIE_PERSONNELLE)
         children = []
         for card in zone:
-            if isinstance(card, ChildCard):
+            if isinstance(card, ChildCard) and not card.is_protected:
                 children.append(card)
         random.shuffle(children)
         return children

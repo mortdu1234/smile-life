@@ -11,6 +11,12 @@ class Card:
     id: int
     image_path: str
     smiles: int
+    is_protected: bool = False
+    def set_protected(self):
+        self.is_protected = True
+    def set_not_protected(self):
+        self.is_protected = False
+
     def to_dict(self) -> dict:
         # MRO du plus spécifique au plus général,
         # sans `object` et sans `Card` (trop générique pour le routing JS)
@@ -26,6 +32,7 @@ class Card:
             'image_path': self.image_path,
             'smiles': self.smiles,
             'description': self.get_card_rule(),
+            "is_protected": self.is_protected
         }
     def __init__(self, id: int, image_path: str, smiles: int):
         self.id = id

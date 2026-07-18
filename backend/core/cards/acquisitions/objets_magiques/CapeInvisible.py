@@ -14,11 +14,15 @@ class CapeInvisible(ObjetMagique):
         if not success:
             return success
 
-              
-        cards_availables = current_player.get_card_from_group(groupe.ACQUISITIONS).copy()
-        cards_availables += current_player.get_card_from_group(groupe.CARTES_SPECIALES)
-        cards_availables += current_player.get_card_from_group(groupe.VIE_PERSONNELLE)
-        cards_availables += current_player.get_card_from_group(groupe.VIE_PROFESSIONNELLE)
+        cards_availables = []  
+        cards = current_player.get_card_from_group(groupe.ACQUISITIONS).copy()
+        cards += current_player.get_card_from_group(groupe.CARTES_SPECIALES)
+        cards += current_player.get_card_from_group(groupe.VIE_PERSONNELLE)
+        cards += current_player.get_card_from_group(groupe.VIE_PROFESSIONNELLE)
+        for card in cards:
+            if not card.is_protected:
+                cards_availables.append(card)
+                
         if len(cards_availables) == 0:
             return True
         
@@ -33,6 +37,7 @@ class CapeInvisible(ObjetMagique):
         assert selected_card is not None, "error la carte n'est pas selectionnées"
         origin_group = current_player.get_group(selected_card)
         assert origin_group is not None, "error le groupe d'origine n'est pas trouvé"
+        selected_card.set_protected()
         current_player.move_placed_cards(selected_card, origin_group, groupe.CARTES_PROTEGEES)
 
         return True

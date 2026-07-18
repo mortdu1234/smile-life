@@ -86,6 +86,7 @@ class Demon(PlayerRole):
                 from backend.core.cards.acquisitions.objets_magiques.Amulette import Amulette
                 from backend.core.cards.specials.Heritage import Heritage
                 success = False
+                card.set_protected()
                 if isinstance(card, Amulette):
                     success = owner.move_placed_cards(card, PlayedCardGroup.ACQUISITIONS, PlayedCardGroup.CARTES_PROTEGEES)
                 elif isinstance(card, Heritage):

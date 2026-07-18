@@ -124,6 +124,7 @@ class Player:
         if isinstance(card, Flirt):
             is_adultery = self.get_adultery()
             if is_adultery:
+                card.set_protected()
                 self.groupe[PlayedCardGroup.CARTES_PROTEGEES].append(card)
             else:
                 self.groupe[PlayedCardGroup.VIE_PERSONNELLE].append(card)

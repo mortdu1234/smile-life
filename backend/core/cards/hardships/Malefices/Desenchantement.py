@@ -23,7 +23,7 @@ class Desenchantement(MaleficeCard):
         availables_cards = []
         cards = self.target_player.get_card_from_group(groupe.ACQUISITIONS)
         for card in cards:
-            if isinstance(card, (Potion, ObjetMagique)):
+            if isinstance(card, (Potion, ObjetMagique)) and not card.is_protected:
                 availables_cards.append(card)
 
         if len(availables_cards) == 0:

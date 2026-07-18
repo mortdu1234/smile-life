@@ -67,6 +67,7 @@ class Acquisition(Card):
             from .objets_magiques.Amulette import Amulette
             from ..specials.Heritage import Heritage
             success = False
+            card.set_protected()
             if isinstance(card, Amulette):
                 success = current_player.move_placed_cards(card, PlayedCardGroup.ACQUISITIONS, PlayedCardGroup.CARTES_PROTEGEES)
             elif isinstance(card, Heritage):

@@ -26,7 +26,7 @@ class LassoMagique(ObjetMagique):
         available = []
         for card in cards:
             success, reason = card.can_be_played(current_player, game)
-            if success:
+            if success and not card.is_protected:
                 available.append(card)
         return available
 
