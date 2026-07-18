@@ -4,14 +4,18 @@ if TYPE_CHECKING:
     from ....userIo.interface import UserIO
     from ...Game import Game
     from ...Player import Player
-class Heritage(SpecialCard):
-    value: int
+
+from backend.core.cards.CardAttributes import CanBeUseOnAcquisition
+class Heritage(SpecialCard, CanBeUseOnAcquisition):
     def __init__(self, id: int, image_path: str, smiles: int, value: int):
         super().__init__(id, image_path, smiles)
-        self.value = value
-    def get_value(self)->int:
-        return self.value
-    
+        self.set_value(value)
+    def to_dict(self) -> dict:
+        data = super().to_dict()
+        for key, value in CanBeUseOnAcquisition.to_dict(self).items():
+            data[key] = value
+        return data
+
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         return super().can_be_played(player, game)
 

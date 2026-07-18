@@ -105,6 +105,42 @@ class Game:
     updated_at: datetime
     ephemeride: Ephemeride | None
 
+    def test_compo(self):
+        """Permet de poser des cartes par défaut"""
+        from .cards.LoaderCard import build_card
+        for player in self.players:
+            player.add_card_to_played(build_card("salary__1"))
+            player.add_card_to_played(build_card("salary__1"))
+            player.add_card_to_played(build_card("salary__1"))
+            player.add_card_to_played(build_card("salary__4"))
+            player.add_card_to_played(build_card("salary__4"))
+            player.add_card_to_played(build_card("salary__4"))
+            player.add_card_to_played(build_card("chien"))
+            player.add_card_to_played(build_card("chat"))
+            player.add_card_to_played(build_card("lapin"))
+            player.add_card_to_played(build_card("poussin"))
+            player.add_card_to_played(build_card("study__2"))
+            player.add_card_to_played(build_card("study__2"))
+            player.add_card_to_played(build_card("malefice__bis_repetitas"))
+            player.add_card_to_played(build_card("chance"))
+            player.add_card_to_played(build_card("objet_magique__amulette"))
+            player.add_card_to_played(build_card("heritage"))
+            player.add_card_to_played(build_card("heritage"))
+
+            player.add_card_to_hand(build_card("house__1"))
+
+
+        self.discard.append(build_card("study__2"))
+        self.discard.append(build_card("barman"))
+        self.discard.append(build_card("barman"))
+        self.discard.append(build_card("study__2"))
+        self.discard.append(build_card("study__2"))
+        self.discard.append(build_card("salary__2"))
+
+        self.cards_removed.append(build_card("diana"))
+        self.cards_removed.append(build_card("diana"))
+        self.cards_removed.append(build_card("diana"))
+
     def first_round(self):
         """effectue un premier tour de table afin d'effectuer les actions d'initialisation de la partie"""
         print("[DEBUG] first round")
@@ -171,36 +207,8 @@ class Game:
                         deck.insert(len(deck)//2, card)
 
 
-        # testing map
-        # from .cards.LoaderCard import build_card
-        # for player in self.players:
-        #     player.add_card_to_played(build_card("salary__1"))
-        #     player.add_card_to_played(build_card("salary__1"))
-        #     player.add_card_to_played(build_card("salary__1"))
-        #     player.add_card_to_played(build_card("salary__4"))
-        #     player.add_card_to_played(build_card("salary__4"))
-        #     player.add_card_to_played(build_card("salary__4"))
-        #     player.add_card_to_played(build_card("chien"))
-        #     player.add_card_to_played(build_card("chat"))
-        #     player.add_card_to_played(build_card("lapin"))
-        #     player.add_card_to_played(build_card("poussin"))
-        #     player.add_card_to_played(build_card("study__2"))
-        #     player.add_card_to_played(build_card("study__2"))
-        #     player.add_card_to_played(build_card("malefice__bis_repetitas"))
-        #     player.add_card_to_played(build_card("chance"))
-        #     player.add_card_to_played(build_card("chance"))
-
-
-        # self.discard.append(build_card("study__2"))
-        # self.discard.append(build_card("barman"))
-        # self.discard.append(build_card("barman"))
-        # self.discard.append(build_card("study__2"))
-        # self.discard.append(build_card("study__2"))
-        # self.discard.append(build_card("salary__2"))
-
-        # self.cards_removed.append(build_card("diana"))
-        # self.cards_removed.append(build_card("diana"))
-        # self.cards_removed.append(build_card("diana"))
+        self.test_compo()
+     
 
 
     def add_card_to_cards_remove(self, card: "Card"):

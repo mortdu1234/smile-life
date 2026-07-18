@@ -5,8 +5,7 @@ if TYPE_CHECKING:
     from ...Game import Game
     from ...Player import Player
     from ....userIo.interface import UserIO
-    from ..professionnals.SalaryCard import SalaryCard
-    from ..specials.Heritage import Heritage
+    from ..CardAttributes import CanBeUseOnAcquisition
 from ..Card import Card
 
 class Acquisition(Card):
@@ -21,7 +20,7 @@ class Acquisition(Card):
             return self.original_price - 1
         return self.original_price
         
-    def _has_exact_salary_combination(self, salaries: list["SalaryCard"], cost: int) -> bool:
+    def _has_exact_salary_combination(self, salaries: "list[CanBeUseOnAcquisition]", cost: int) -> bool:
         """Vérifie s'il existe une combinaison de `salaries` dont la somme vaut exactement `cost`."""
         possible_sums = {0}
         for salary in salaries:
@@ -29,7 +28,7 @@ class Acquisition(Card):
         return cost in possible_sums
 
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
-        salaries = player.get_available_salary()
+        salaries = player.get_available_salaries()
         cost = self.calcul_cost(player, game)
         total = sum(salary.get_value() for salary in salaries)
         if total < cost:
@@ -41,40 +40,27 @@ class Acquisition(Card):
 
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         """effectue la selection des salaires pour l'acquisition"""
-
-        available_salaries = current_player.get_available_salary()
+        available_salaries = current_player.get_available_salaries()
         interface = current_player.get_interface()
         cost = self.calcul_cost(current_player, game)
         must_pay_exact = Power.SALRAPAS in current_player.get_power()
 
         while True:
-            selected_salaries: list[Card] = interface.ask_salaries(self, available_salaries, cost)
-
+            selected_salaries: list[CanBeUseOnAcquisition] = interface.ask_salaries(self, available_salaries, cost)
             if not must_pay_exact:
-                print("CHOIIIIIIIIXXXX  1")
+                print("Le joueur n'as pas la necessité de payer le prix exacte")
                 break
-
             selected_sum = sum(card.get_value() for card in selected_salaries)
             if selected_sum == cost:
-                print("CHOIIIIIIIIXXXX  2")
+                print("Le joueur dois payer le prix exacte")
                 break
-
-
             print(f"[ERROR] Power.SALRAPAS : le joueur doit payer exactement {cost}, mais a sélectionné un total de {selected_sum}")
 
+        # gestion de la dépense des salaires
         for card in selected_salaries:
-            from backend.core.PlayerCardGroup import PlayedCardGroup
-            from .objets_magiques.Amulette import Amulette
-            from ..specials.Heritage import Heritage
-            success = False
+            assert isinstance(card, Card)
             card.set_protected()
-            if isinstance(card, Amulette):
-                success = current_player.move_placed_cards(card, PlayedCardGroup.ACQUISITIONS, PlayedCardGroup.CARTES_PROTEGEES)
-            elif isinstance(card, Heritage):
-                success = current_player.move_placed_cards(card, PlayedCardGroup.CARTES_SPECIALES, PlayedCardGroup.CARTES_PROTEGEES)
-            else:    
-                success = current_player.move_placed_cards(card, PlayedCardGroup.VIE_PROFESSIONNELLE, PlayedCardGroup.CARTES_PROTEGEES)
-
+            success = card.on_use_card(game, current_player)
                             
             if not success:
                 print("[ERROR] déplace de carte échouée")

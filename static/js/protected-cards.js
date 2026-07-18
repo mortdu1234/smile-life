@@ -17,8 +17,14 @@ function initProtectedCards() {
   document.querySelectorAll('game-card[data-card]').forEach((el) => {
     try {
       const cardData = JSON.parse(el.getAttribute('data-card') || '{}');
-      if (cardData.is_protected) {
+      const shouldBeProtected = !!cardData.is_protected;
+      const isCurrentlyProtected = el.hasAttribute('protected');
+      // On n'écrit l'attribut que si sa valeur doit réellement changer,
+      // sinon on redéclenche inutilement le MutationObserver.
+      if (shouldBeProtected && !isCurrentlyProtected) {
         el.setAttribute('protected', '');
+      } else if (!shouldBeProtected && isCurrentlyProtected) {
+        el.removeAttribute('protected');
       }
     } catch (err) {
       console.warn('Failed to parse card data:', err);
@@ -29,9 +35,11 @@ function initProtectedCards() {
   document.querySelectorAll('.game-card[data-card]').forEach((el) => {
     try {
       const cardData = JSON.parse(el.getAttribute('data-card') || '{}');
-      if (cardData.is_protected) {
+      const shouldBeProtected = !!cardData.is_protected;
+      const isCurrentlyProtected = el.getAttribute('data-protected') === 'true';
+      if (shouldBeProtected && !isCurrentlyProtected) {
         el.setAttribute('data-protected', 'true');
-      } else {
+      } else if (!shouldBeProtected && isCurrentlyProtected) {
         el.removeAttribute('data-protected');
       }
     } catch (err) {
@@ -47,19 +55,18 @@ function initProtectedCards() {
 function observeCardUpdates() {
   const observer = new MutationObserver((mutations) => {
     let needsUpdate = false;
-    mutations.forEach((mutation) => {
-      if (
-        mutation.type === 'childList' ||
-        (mutation.type === 'attributes' &&
-          (mutation.attributeName === 'data-card' ||
-           mutation.attributeName === 'data-protected' ||
-           mutation.attributeName === 'protected'))
-      ) {
+    for (const mutation of mutations) {
+      if (mutation.type === 'childList') {
         needsUpdate = true;
+        break;
       }
-    });
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-card') {
+        needsUpdate = true;
+        break;
+      }
+    }
     if (needsUpdate) {
-      initProtectedCards();
+      scheduleUpdate();
     }
   });
 
@@ -67,10 +74,29 @@ function observeCardUpdates() {
     childList: true,
     subtree: true,
     attributes: true,
-    attributeFilter: ['data-card', 'data-protected', 'protected'],
+    // On ne surveille QUE 'data-card' : c'est la source de vérité.
+    // 'protected' / 'data-protected' sont des attributs qu'on écrit
+    // nous-mêmes ; les observer créerait une boucle de rétroaction
+    // (mutation -> initProtectedCards -> setAttribute -> mutation -> ...).
+    attributeFilter: ['data-card'],
   });
 
   return observer;
+}
+
+/**
+ * Regroupe les mises à jour rafales (ex: plusieurs cartes ajoutées d'un coup)
+ * en un seul passage, plutôt que de relancer initProtectedCards pour
+ * chaque mutation individuelle.
+ */
+let updateScheduled = false;
+function scheduleUpdate() {
+  if (updateScheduled) return;
+  updateScheduled = true;
+  requestAnimationFrame(() => {
+    updateScheduled = false;
+    initProtectedCards();
+  });
 }
 
 /**
@@ -80,9 +106,10 @@ function observeCardUpdates() {
 window.updateProtectedCard = function (cardId, isProtected) {
   // Web Components
   document.querySelectorAll(`game-card[card-id="${cardId}"]`).forEach((el) => {
-    if (isProtected) {
+    const isCurrentlyProtected = el.hasAttribute('protected');
+    if (isProtected && !isCurrentlyProtected) {
       el.setAttribute('protected', '');
-    } else {
+    } else if (!isProtected && isCurrentlyProtected) {
       el.removeAttribute('protected');
     }
   });
@@ -92,9 +119,10 @@ window.updateProtectedCard = function (cardId, isProtected) {
     try {
       const cardData = JSON.parse(el.getAttribute('data-card') || '{}');
       if (cardData.id == cardId) {
-        if (isProtected) {
+        const isCurrentlyProtected = el.getAttribute('data-protected') === 'true';
+        if (isProtected && !isCurrentlyProtected) {
           el.setAttribute('data-protected', 'true');
-        } else {
+        } else if (!isProtected && isCurrentlyProtected) {
           el.removeAttribute('data-protected');
         }
       }

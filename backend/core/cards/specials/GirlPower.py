@@ -24,7 +24,7 @@ class GrilPower(SpecialCard):
     def girl_power_effect(self, game: "Game", current_player: "Player"):
         # récupère la liste des cartes spéciales
         available_card = []
-        speciales_cards = current_player.get_card_from_group(groupe.CARTES_SPECIALES)
+        speciales_cards = current_player.get_card_from_group(groupe.SPECIAL)
         for card in speciales_cards:
             if card.can_be_played(current_player, game)[0] and card not in self.card_played:
                 available_card.append(card)
@@ -48,7 +48,7 @@ class GrilPower(SpecialCard):
         from ..personnals.Children import FemaleChild
         current_player.add_power(Power.GIRL_POWER)
         # appliquer l'effet pour chaque fille déja posé
-        played = current_player.get_card_from_group(groupe.VIE_PERSONNELLE)
+        played = current_player.get_card_from_group(groupe.CHILDREN)
         for card in played:
             if isinstance(card, FemaleChild):
                 self.girl_power_effect(game, current_player)

@@ -22,7 +22,7 @@ class Anniversaire(SpecialCard):
             if player != current_player:
                 # récupération de l'ensemble des cartes salaires posés par le joueur
                 available_cards = []
-                for card in player.get_card_from_group(PlayedCardGroup.VIE_PROFESSIONNELLE):
+                for card in player.get_card_from_group(PlayedCardGroup.SALARIES):
                     if isinstance(card, SalaryCard) and not card.is_protected:
                         available_cards.append(card)
                 if len(available_cards) > 0:
@@ -33,7 +33,7 @@ class Anniversaire(SpecialCard):
                         print("Aucunes cartes n'a été selectionnée")
                         return False
                     # Ajoute la carte donnée au joueur courrant
-                    player.remove_card(selected_card)
+                    player.remove_card(selected_card, game)
                     current_player.add_card_to_played(selected_card)        
         return super().apply_card_effect(game, current_player)
 

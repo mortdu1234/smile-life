@@ -40,8 +40,13 @@ class Demon(PlayerRole):
             available_cards = []
             card_value = {i : [] for i in range(0, 10)}
             played_cards = player.get_card_from_group(groupe.ACQUISITIONS)
+            played_cards += player.get_card_from_group(groupe.ANIMALS)
+            played_cards += player.get_card_from_group(groupe.CHILDREN)
+            played_cards += player.get_card_from_group(groupe.OTHER)
+            played_cards += player.get_card_from_group(groupe.SALARIES)
             played_cards += player.get_card_from_group(groupe.VIE_PERSONNELLE)
             played_cards += player.get_card_from_group(groupe.VIE_PROFESSIONNELLE)
+            played_cards += player.get_card_from_group(groupe.SPECIAL)
             for card in played_cards:
                 if isinstance(card, Acquisition):
                     card.original_price += card.smiles
@@ -88,11 +93,11 @@ class Demon(PlayerRole):
                 success = False
                 card.set_protected()
                 if isinstance(card, Amulette):
-                    success = owner.move_placed_cards(card, PlayedCardGroup.ACQUISITIONS, PlayedCardGroup.CARTES_PROTEGEES)
+                    success = owner.move_placed_cards(card, PlayedCardGroup.ACQUISITIONS, PlayedCardGroup.OTHER)
                 elif isinstance(card, Heritage):
-                    success = owner.move_placed_cards(card, PlayedCardGroup.CARTES_SPECIALES, PlayedCardGroup.CARTES_PROTEGEES)
+                    success = owner.move_placed_cards(card, PlayedCardGroup.SPECIAL, PlayedCardGroup.OTHER)
                 else:    
-                    success = owner.move_placed_cards(card, PlayedCardGroup.VIE_PROFESSIONNELLE, PlayedCardGroup.CARTES_PROTEGEES) 
+                    success = owner.move_placed_cards(card, PlayedCardGroup.SALARIES, PlayedCardGroup.SALARIES_USED) 
                 if not success:
                     print("[ERROR] déplace de carte échouée")
                     return 

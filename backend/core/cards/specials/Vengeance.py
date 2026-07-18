@@ -1,5 +1,6 @@
-from backend.core.PlayerCardGroup import PlayedCardGroup
 from backend.core.cards.hardships.HardshipCard import Hardship
+from backend.core.PlayerCardGroup import PlayedCardGroup
+from backend.core.cards.hardships import HardshipCard
 from ....userIo.interface import IOType
 from .SpecialCard import SpecialCard
 from typing import TYPE_CHECKING
@@ -26,7 +27,7 @@ class Vengeance(SpecialCard):
         cards_availables = []
         for card in hardships_cards:
             success, reason = card.can_be_played(current_player, game)
-            if success:
+            if success and isinstance(card, HardshipCard):
                 cards_availables.append(card) 
         return cards_availables
 

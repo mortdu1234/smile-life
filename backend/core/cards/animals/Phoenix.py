@@ -17,7 +17,7 @@ class Phoenix(AnimalCard):
 
     def get_smiles(self, owner: Player) -> int:
         from backend.core.cards.acquisitions.potions.ResurrectionPotion import ResurrectionPotion
-        zone = owner.get_card_from_group(groupe.ACQUISITIONS) + owner.get_card_from_group(groupe.CARTES_PROTEGEES)
+        zone = owner.get_card_from_group(groupe.ACQUISITIONS)
         for card in zone:
             if isinstance(card, ResurrectionPotion):
                 return 2*super().get_smiles(owner)

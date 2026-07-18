@@ -26,7 +26,7 @@ class LoupGarou(PlayerRole):
         from ..cards.personnals.Children import ChildCard
         from ..cards.animals.AnimalCard import AnimalCard
         available_cards = []
-        zone = target.get_card_from_group(groupe.VIE_PERSONNELLE)
+        zone = target.get_card_from_group(groupe.ANIMALS) + target.get_card_from_group(groupe.CHILDREN) 
         for card in zone:
             if isinstance(card, (AnimalCard, ChildCard)) and not card.is_protected:
                 available_cards.append(card)

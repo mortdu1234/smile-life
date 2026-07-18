@@ -297,14 +297,14 @@ window.updateBoard = function(state) {
   }
 
   // ── Mise à jour du plateau (cartes posées) ──────────────────────────
-  const CATEGORIES = [
-    'vie_professionnelle',
-    'vie_personnelle',
-    'acquisitions',
-    'cartes_protegees',
-    'cartes_speciales',
-    'hardship',
-  ];
+  // Chaque colonne du plateau regroupe plusieurs groupes de PlayedCardGroup.
+  const CATEGORY_GROUPS = {
+    'vie-perso': ['vie_personnelle', 'children', 'animals'],
+    'vie-pro': ['vie_professionnelle', 'salaries'],
+    'acquisitions': ['acquisitions'],
+    'malus': ['hardship'],
+    'cartes-utilisees': ['salaries_used', 'special', 'other'],
+  };
 
   if (state.players) {
     state.players.forEach(player => {
@@ -351,10 +351,10 @@ window.updateBoard = function(state) {
       }
 
       // Cellules de catégories
-      CATEGORIES.forEach(cat => {
+      Object.entries(CATEGORY_GROUPS).forEach(([cat, groupKeys]) => {
         const cell = document.getElementById(`cell-${player.name}-${cat}`);
         if (!cell) return;
-        const cards = player.groupe?.[cat] ?? [];
+        const cards = groupKeys.flatMap(key => player.groupe?.[key] ?? []);
         if (cards.length === 0) {
           cell.innerHTML = '<span class="cell-empty">—</span>';
         } else {

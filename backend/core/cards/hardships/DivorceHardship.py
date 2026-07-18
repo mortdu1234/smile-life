@@ -44,7 +44,7 @@ class Divorce(Hardship):
             else:
                 from ...PlayerCardGroup import PlayedCardGroup
                 from ..personnals.Children import ChildCard
-                for card in target.get_card_from_group(PlayedCardGroup.VIE_PERSONNELLE):
+                for card in target.get_card_from_group(PlayedCardGroup.CHILDREN):
                     if isinstance(card, ChildCard) and not card.is_protected:
                         target.remove_card(card, game)
                         game.add_card_to_discard(card)            

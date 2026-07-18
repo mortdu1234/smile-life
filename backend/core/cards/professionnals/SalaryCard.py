@@ -1,22 +1,28 @@
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from ...Game import Game
     from ...Player import Player
 
+from ...PlayerCardGroup import PlayedCardGroup as groupe
 from ..Card import Card
 from ...Power import Power
-class SalaryCard(Card):
-    value: int
+
+from backend.core.cards.CardAttributes import CanBeUseOnAcquisition
+class SalaryCard(Card, CanBeUseOnAcquisition):
     def __init__(self, id: int, image_path: str, smiles: int, value: int):
         super().__init__(id, image_path, smiles)
-        self.value = value
+        self.set_value(value)
+
     def to_dict(self) -> dict:
         data = super().to_dict()
-        data["value"] = self.value
+        for key, value in CanBeUseOnAcquisition.to_dict(self).items():
+            data[key] = value
         return data
 
-    def get_value(self):
-        return self.value
+    def on_use_card(self, game: "Game", owner: "Player") -> bool:
+        owner.move_placed_cards(self, groupe.SALARIES, groupe.SALARIES_USED)
+        return super().on_use_card(game, owner)
 
     def get_name(self) -> str:
         return f"Salaire {self.value}"

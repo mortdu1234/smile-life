@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 class FluteEnchantee(ObjetMagique):
     def get_player_available_card(self, player: "Player"):
         from ...animals.AnimalCard import AnimalCard
-        cards=player.get_card_from_group(groupe.VIE_PERSONNELLE)
+        cards=player.get_card_from_group(groupe.ANIMALS)
         res = []
         for card in cards:
             if isinstance(card, AnimalCard) and not card.is_protected:

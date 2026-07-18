@@ -39,7 +39,6 @@ class Vampire(PlayerRole):
                 if isinstance(card, Flirt) and card.get_place() in flirts_played and not card.is_protected:
                     player.remove_card(card, game)
                     owner.add_card_to_played(card)
-                    player.move_placed_cards(card, groupe.VIE_PERSONNELLE, groupe.CARTES_PROTEGEES)
 
 
         return super().apply_instant_power(game, owner)

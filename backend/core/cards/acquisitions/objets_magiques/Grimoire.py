@@ -63,7 +63,6 @@ class Grimoire(ObjetMagique):
         # récupération
         target_player.remove_card(selected_card, game)
         current_player.add_card_to_played(selected_card)
-        current_player.move_placed_cards(selected_card, groupe.VIE_PROFESSIONNELLE, groupe.CARTES_PROTEGEES)
 
         return True
     

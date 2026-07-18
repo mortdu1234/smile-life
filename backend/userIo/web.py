@@ -7,6 +7,7 @@ from typing import Sequence, TYPE_CHECKING
 from .interface import UserIO, IOType
 if TYPE_CHECKING:
     from backend.core.roles.PlayerRole import PlayerRole
+    from ..core.cards.CardAttributes import CanBeUseOnAcquisition
     from ..core.Player import Player
     from ..core.cards.Card import Card
     from ..core.cards.acquisitions.Acquisition import Acquisition
@@ -147,7 +148,7 @@ class WebIO(UserIO):
         self.pending = None
         return index == 0
 
-    def ask_salaries(self, acquisition: "Acquisition", salaries: Sequence["Card"], cost: int) -> list["Card"]:
+    def ask_salaries(self, acquisition: "Acquisition", salaries: "list[CanBeUseOnAcquisition]", cost: int) -> "list[CanBeUseOnAcquisition]":
         """Affiche l'overlay de sélection de salaires.
         Bloque la greenlet jusqu'à ce que le joueur valide une sélection dont la somme >= cost.
         """

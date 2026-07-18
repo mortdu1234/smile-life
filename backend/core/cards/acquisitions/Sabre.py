@@ -48,7 +48,7 @@ class Sabre(Acquisition):
         # vérifie si le joueur possède déja la carte béatrix
         from ..personnals.Children import BeatrixChild
         from ...PlayerCardGroup import PlayedCardGroup as groupe
-        for card in current_player.get_card_from_group(groupe.VIE_PERSONNELLE):
+        for card in current_player.get_card_from_group(groupe.CHILDREN):
             if isinstance(card, BeatrixChild):
                 self.sabre_effect(game, current_player)
 

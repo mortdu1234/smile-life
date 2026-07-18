@@ -2,6 +2,7 @@ from backend.core.Game import Game
 from backend.core.Player import Player
 
 from .ObjetMagique import ObjetMagique
+from backend.core.cards.CardAttributes import CanBeUseOnAcquisition
 from typing import TYPE_CHECKING
 from ....Power import Power
 from ....PlayerCardGroup import PlayedCardGroup as groupe
@@ -10,13 +11,14 @@ if TYPE_CHECKING:
     from backend.core.Game import Game
     from backend.core.Player import Player
 
-class Amulette(ObjetMagique):
-    value: int = 999
-    def get_value(self)->int:
-        return self.value 
+class Amulette(ObjetMagique, CanBeUseOnAcquisition):
+    def __init__(self, id: int, image_path: str, smiles: int, cost: int):
+        super().__init__(id, image_path, smiles, cost)
+        self.set_value(999)
     def to_dict(self) -> dict:
         data = super().to_dict()
-        data["value"] = self.get_value()
+        for key, value in CanBeUseOnAcquisition.to_dict(self).items():
+            data[key] = value
         return data
     def apply_talisment_effect(self, game: Game, current_player: Player):
          # récupération de l'ensemble des maléfices recus
@@ -52,7 +54,7 @@ class Amulette(ObjetMagique):
         for card in cards:
             if isinstance(card, Amulette):
                 card.set_protected()
-                current_player.move_placed_cards(card, groupe.ACQUISITIONS, groupe.CARTES_PROTEGEES)
+                current_player.move_placed_cards(card, groupe.ACQUISITIONS, groupe.OTHER)
                 talisment = True
                 self.apply_talisment_effect(game, current_player)
 
@@ -60,7 +62,7 @@ class Amulette(ObjetMagique):
             self.set_protected()
             current_player.remove_card_from_hand(self)
             current_player.add_card_to_played(self)
-            current_player.move_placed_cards(self, groupe.ACQUISITIONS, groupe.CARTES_PROTEGEES)
+            current_player.move_placed_cards(self, groupe.ACQUISITIONS, groupe.OTHER)
             return False
 
         return True

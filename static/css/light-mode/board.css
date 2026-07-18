@@ -172,7 +172,7 @@ nav {
 
 .col-headers {
     display: grid;
-    grid-template-columns: 160px repeat(6, 1fr);
+    grid-template-columns: 160px repeat(5, 1fr);
     gap: 0;
     position: sticky; top: 0;
     background: var(--bg);
@@ -196,7 +196,7 @@ nav {
 
 .player-row {
     display: grid;
-    grid-template-columns: 160px repeat(6, 1fr);
+    grid-template-columns: 160px repeat(5, 1fr);
     gap: 0;
     border-bottom: 1px solid var(--line);
     min-height: 130px;
@@ -276,6 +276,19 @@ nav {
 .malus-cell .game-card:hover {
     border-color: #b23a3a;
     box-shadow: 0 6px 18px rgba(178,58,58,0.2);
+}
+
+/* ── COLONNE CARTES UTILISÉES ── */
+.used-cell {
+    background: rgba(120,120,120,0.06);
+}
+.used-cell .game-card {
+    opacity: 0.75;
+    filter: grayscale(30%);
+}
+.used-cell .game-card:hover {
+    opacity: 1;
+    filter: none;
 }
 
 /* ── SIDEBAR ── */

@@ -60,7 +60,7 @@ class FemaleChild(ChildCard):
         from ..specials.GirlPower import GrilPower
         powers = current_player.get_power()
         if Power.GIRL_POWER in powers:
-            played = current_player.get_card_from_group(groupe.CARTES_SPECIALES)
+            played = current_player.get_card_from_group(groupe.SPECIAL)
             for card in played:
                 if isinstance(card, GrilPower):
                     card.girl_power_effect(game, current_player)
@@ -161,7 +161,7 @@ class BeatrixChild(GirlPowerChild):
     def apply_card_effect(self, game: Game, current_player: Player) -> bool:
         # recherche du sabre dans les cartes jouées
         from ..acquisitions.Sabre import Sabre
-        for card in current_player.get_card_from_group(groupe.ACQUISITIONS):
+        for card in current_player.get_card_from_group(groupe.SPECIAL):
             if isinstance(card, Sabre):
                 card.sabre_effect(game, current_player)
         return super().apply_card_effect(game, current_player)
@@ -172,7 +172,7 @@ class DaenerysChild(GirlPowerChild):
     def apply_card_effect(self, game: Game, current_player: Player) -> bool:
         # recherche du dragon dans les cartes jouées
         from ..animals.Dragon import Dragon
-        for card in current_player.get_card_from_group(groupe.VIE_PERSONNELLE):
+        for card in current_player.get_card_from_group(groupe.ANIMALS):
             if isinstance(card, Dragon):
                 card.dragon_effect(game, current_player)
         return super().apply_card_effect(game, current_player)

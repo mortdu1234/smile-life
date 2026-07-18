@@ -24,7 +24,7 @@ class Sorciere(PlayerRole):
 
     def get_all_children(self, target: "Player") -> "list[ChildCard]":
         from backend.core.cards.personnals.Children import ChildCard
-        zone = target.get_card_from_group(groupe.VIE_PERSONNELLE)
+        zone = target.get_card_from_group(groupe.CHILDREN)
         children = []
         for card in zone:
             if isinstance(card, ChildCard) and not card.is_protected:

@@ -21,13 +21,18 @@ class Dragon(AnimalCard):
             # selection des cartes disponibles
             cards_available = []
             cards = target_player.get_card_from_group(groupe.ACQUISITIONS)
+            cards += target_player.get_card_from_group(groupe.ANIMALS)
+            cards += target_player.get_card_from_group(groupe.OTHER)
+            cards += target_player.get_card_from_group(groupe.SALARIES)
+            cards += target_player.get_card_from_group(groupe.VIE_PERSONNELLE)
             cards += target_player.get_card_from_group(groupe.VIE_PROFESSIONNELLE)
+            cards += target_player.get_card_from_group(groupe.SPECIAL)
             for card in cards:
                 if not card.is_protected:
                     cards_available.append(card)
 
-            vie_perso = target_player.get_card_from_group(groupe.VIE_PERSONNELLE)
-            for card in vie_perso:
+            enfants = target_player.get_card_from_group(groupe.CHILDREN)
+            for card in enfants:
                 if not(Power.CHILDREN_PROTECTED in target_player.get_power() and isinstance(card, ChildCard)) and not card.is_protected:
                     cards_available.append(card)
 
@@ -49,7 +54,7 @@ class Dragon(AnimalCard):
         return True
 
     def apply_card_effect(self, game: Game, current_player: Player) -> bool:
-        played = current_player.get_card_from_group(groupe.VIE_PERSONNELLE)
+        played = current_player.get_card_from_group(groupe.CHILDREN)
         from ..personnals.Children import DaenerysChild
         for card in played:
             if isinstance(card, DaenerysChild):

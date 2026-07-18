@@ -25,7 +25,7 @@ class BaguetteMagique(ObjetMagique):
             return success
 
         interface = current_player.get_interface()
-        specials_cards = current_player.get_card_from_group(groupe.CARTES_SPECIALES)
+        specials_cards = current_player.get_card_from_group(groupe.SPECIAL)
         available_cards = []
         for card in specials_cards:
             success, reason = card.can_be_played(current_player, game)

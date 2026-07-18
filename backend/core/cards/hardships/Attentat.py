@@ -27,7 +27,7 @@ class Attentat(Hardship):
             if Power.CHILDREN_PROTECTED in power:
                 print("[DEBUG] Le joueur {} est protégé de l'attentat".format(player.name))
                 continue
-            for card in player.get_card_from_group(PlayedCardGroup.VIE_PERSONNELLE):
+            for card in player.get_card_from_group(PlayedCardGroup.CHILDREN):
                 if isinstance(card, ChildCard) and not card.is_protected:
                     player.remove_card(card, game)
                     game.add_card_to_cards_remove(card)

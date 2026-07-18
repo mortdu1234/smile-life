@@ -9,11 +9,10 @@ from .PotionCard import Potion
 class ArgentPotion(Potion):
     def apply_potion_effect(self, game: "Game", current_player: "Player"):
         from ...professionnals.SalaryCard import SalaryCard
-        cartes_protegees = current_player.get_card_from_group(groupe.CARTES_PROTEGEES)
-        for card in cartes_protegees:
-            if isinstance(card, SalaryCard):
-                card.set_not_protected()
-                current_player.move_placed_cards(card, groupe.CARTES_PROTEGEES, groupe.VIE_PROFESSIONNELLE)
+        salaires_depensee = current_player.get_card_from_group(groupe.SALARIES_USED)
+        for card in salaires_depensee:
+            card.set_not_protected()
+            current_player.move_placed_cards(card, groupe.SALARIES_USED, groupe.SALARIES)
                 
 
     def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:

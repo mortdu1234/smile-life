@@ -7,6 +7,7 @@ T = TypeVar("T")
 if TYPE_CHECKING:
     from ..core.Player import Player
     from ..core.cards.Card import Card
+    from ..core.cards.CardAttributes import CanBeUseOnAcquisition
     from ..core.cards.acquisitions.Acquisition import Acquisition
     from ..core.cards.personnals.Children import ChildCard
     from ..core.roles.PlayerRole import PlayerRole
@@ -70,7 +71,7 @@ class UserIO(ABC):
         pass
 
     @abstractmethod
-    def ask_salaries(self, acquisition: "Acquisition", salaries: Sequence["Card"], cost: int) -> list["Card"]:
+    def ask_salaries(self, acquisition: "Acquisition", salaries: "list[CanBeUseOnAcquisition]", cost: int) -> "list[CanBeUseOnAcquisition]":
         """Demande au joueur de sélectionner des salaires pour payer une acquisition.
         Retourne la liste des cartes salaire choisies (somme >= cost garanti côté frontend)."""
         pass
