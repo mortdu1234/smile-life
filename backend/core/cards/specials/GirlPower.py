@@ -8,11 +8,12 @@ if TYPE_CHECKING:
     from ...Game import Game
     from ...Player import Player
     from ..Card import Card
+    from backend.core.cards.CardAttributes import Extention
 
 class GrilPower(SpecialCard):    
     card_played: list[SpecialCard]
-    def __init__(self, id: int, image_path: str, smiles: int):
-        super().__init__(id, image_path, smiles)
+    def __init__(self, id: int, image_path: str, smiles: int, extention: "Extention"):
+        super().__init__(id, image_path, smiles, extention)
         self.card_played = []
 
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:

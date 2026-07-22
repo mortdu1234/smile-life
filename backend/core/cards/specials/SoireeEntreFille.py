@@ -1,11 +1,16 @@
 from .SpecialCard import SpecialCard
+
+from backend.core.PlayerCardGroup import PlayedCardGroup as groupe
+from backend.userIo.interface import IOType
 from typing import TYPE_CHECKING
-from ...Power import Power
+import random
+
 if TYPE_CHECKING:
-    from ....userIo.interface import UserIO
-    from ...Game import Game
-    from ...Player import Player
-    from ..Card import Card
+    from backend.userIo.interface import UserIO
+    from backend.core.Game import Game
+    from backend.core.Player import Player
+    from backend.core.cards.Card import Card
+    from backend.core.cards.CardAttributes import Extention
 
 class SoireeEntreFille(SpecialCard):    
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:

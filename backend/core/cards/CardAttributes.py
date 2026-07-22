@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..Player import Player
@@ -19,3 +20,13 @@ class CanBeUseOnAcquisition:
         """applique l'effet quand on utilise cette carte"""
         self.is_used = True
         return True
+    def makes_acquisition_free(self) -> bool:
+        """Si True, le fait de sélectionner cette carte pour payer rend l'acquisition
+        gratuite : le prix normal (et son éventuelle contrainte de paiement exact)
+        n'est plus exigé. Par défaut, une carte n'a pas ce pouvoir."""
+        return False
+
+class Extention(Enum):
+    BASE = "base"
+    GIRL_POWER = "girl_power"
+    FANTASTIQUE = "fantastique"

@@ -1,33 +1,36 @@
-from backend.core.cards.hardships.HardshipCard import Hardship
-from backend.core.PlayerCardGroup import PlayedCardGroup
-from backend.core.cards.hardships import HardshipCard
-from ....userIo.interface import IOType
 from .SpecialCard import SpecialCard
+
+from backend.core.PlayerCardGroup import PlayedCardGroup as groupe
+from backend.userIo.interface import IOType
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
-    from ....userIo.interface import UserIO
-    from ...Game import Game
-    from ...Player import Player
-    from ..Card import Card
+    from backend.userIo.interface import UserIO
+    from backend.core.Game import Game
+    from backend.core.Player import Player
+    from backend.core.cards.Card import Card
+    from backend.core.cards.CardAttributes import Extention
+    from backend.core.cards.hardships.HardshipCard import Hardship
         
     
 class Vengeance(SpecialCard):
-    hardship_card: Hardship | None
+    hardship_card: "Hardship | None"
 
-    def __init__(self, id: int, image_path: str):
-        super().__init__(id, image_path, 0)
+    def __init__(self, id: int, image_path: str, extention: "Extention"):
+        super().__init__(id, image_path, 0, extention)
         self.hardship_card = None
 
     def get_name(self) -> str:
         return "Vengeance"
 
     def get_available_hardships(self, game: "Game") -> "list[Card]":
+        from backend.core.cards.hardships.HardshipCard import Hardship
         current_player = game.get_current_player()
-        hardships_cards = current_player.get_card_from_group(PlayedCardGroup.HARDSHIP)
+        hardships_cards = current_player.get_card_from_group(groupe.HARDSHIP)
         cards_availables = []
         for card in hardships_cards:
             success, reason = card.can_be_played(current_player, game)
-            if success and isinstance(card, HardshipCard):
+            if success and isinstance(card, Hardship):
                 cards_availables.append(card) 
         return cards_availables
 

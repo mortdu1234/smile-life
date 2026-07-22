@@ -109,37 +109,38 @@ class Game:
         """Permet de poser des cartes par défaut"""
         from .cards.LoaderCard import build_card
         for player in self.players:
-            player.add_card_to_played(build_card("salary__1"))
-            player.add_card_to_played(build_card("salary__1"))
-            player.add_card_to_played(build_card("salary__1"))
-            player.add_card_to_played(build_card("salary__4"))
-            player.add_card_to_played(build_card("salary__4"))
-            player.add_card_to_played(build_card("salary__4"))
-            player.add_card_to_played(build_card("chien"))
-            player.add_card_to_played(build_card("chat"))
-            player.add_card_to_played(build_card("lapin"))
-            player.add_card_to_played(build_card("poussin"))
-            player.add_card_to_played(build_card("study__2"))
-            player.add_card_to_played(build_card("study__2"))
-            player.add_card_to_played(build_card("malefice__bis_repetitas"))
-            player.add_card_to_played(build_card("chance"))
-            player.add_card_to_played(build_card("objet_magique__amulette"))
-            player.add_card_to_played(build_card("heritage"))
-            player.add_card_to_played(build_card("heritage"))
+            player.add_card_to_played(build_card("salary__1")) # type: ignore
+            player.add_card_to_played(build_card("salary__1")) # type: ignore
+            player.add_card_to_played(build_card("salary__1")) # type: ignore
+            player.add_card_to_played(build_card("salary__4")) # type: ignore
+            player.add_card_to_played(build_card("salary__4")) # type: ignore
+            player.add_card_to_played(build_card("salary__4")) # type: ignore
+            player.add_card_to_played(build_card("chien")) # type: ignore
+            player.add_card_to_played(build_card("chat")) # type: ignore
+            player.add_card_to_played(build_card("lapin")) # type: ignore
+            player.add_card_to_played(build_card("poussin")) # type: ignore
+            player.add_card_to_played(build_card("study__2")) # type: ignore
+            player.add_card_to_played(build_card("study__2")) # type: ignore
+            player.add_card_to_played(build_card("malefice__bis_repetitas")) # type: ignore
+            player.add_card_to_played(build_card("chance")) # type: ignore
+            player.add_card_to_played(build_card("objet_magique__amulette")) # type: ignore
+            player.add_card_to_played(build_card("heritage")) # type: ignore
+            player.add_card_to_played(build_card("heritage")) # type: ignore
 
-            player.add_card_to_hand(build_card("house__1"))
+            player.add_card_to_hand(build_card("house__1")) # type: ignore
+            player.add_card_to_hand(build_card("objet_magique__amulette")) # type: ignore
 
 
-        self.discard.append(build_card("study__2"))
-        self.discard.append(build_card("barman"))
-        self.discard.append(build_card("barman"))
-        self.discard.append(build_card("study__2"))
-        self.discard.append(build_card("study__2"))
-        self.discard.append(build_card("salary__2"))
+        self.discard.append(build_card("study__2")) # type: ignore
+        self.discard.append(build_card("barman")) # type: ignore
+        self.discard.append(build_card("barman")) # type: ignore
+        self.discard.append(build_card("study__2")) # type: ignore
+        self.discard.append(build_card("study__2")) # type: ignore
+        self.discard.append(build_card("salary__2")) # type: ignore
 
-        self.cards_removed.append(build_card("diana"))
-        self.cards_removed.append(build_card("diana"))
-        self.cards_removed.append(build_card("diana"))
+        self.cards_removed.append(build_card("diana")) # type: ignore
+        self.cards_removed.append(build_card("diana")) # type: ignore
+        self.cards_removed.append(build_card("diana")) # type: ignore
 
     def first_round(self):
         """effectue un premier tour de table afin d'effectuer les actions d'initialisation de la partie"""

@@ -4,13 +4,17 @@ from ...Power import Power
 from ...PlayerCardGroup import PlayedCardGroup as groupe
 from ..Card import Card
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
+
 MAX_STUDY_CARDS = 6
 
 class StudyCard(Card):
     value: int
     count: bool = True # compte pour le maximum de cartes études d'un joueur
-    def __init__(self, id: int, image_path: str, smiles: int, value: int):
-        super().__init__(id, image_path, smiles)
+    def __init__(self, id: int, image_path: str, smiles: int, value: int, extention: "Extention"):
+        super().__init__(id, image_path, smiles, extention)
         self.value = value
 
     def get_value(self) -> int:

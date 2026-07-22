@@ -3,6 +3,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ...Game import Game
     from ...Player import Player
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
+
 
 from ...PlayerCardGroup import PlayedCardGroup as groupe
 from ..Card import Card
@@ -10,8 +14,8 @@ from ...Power import Power
 
 from backend.core.cards.CardAttributes import CanBeUseOnAcquisition
 class SalaryCard(Card, CanBeUseOnAcquisition):
-    def __init__(self, id: int, image_path: str, smiles: int, value: int):
-        super().__init__(id, image_path, smiles)
+    def __init__(self, id: int, image_path: str, smiles: int, value: int, extention: "Extention"):
+        super().__init__(id, image_path, smiles, extention)
         self.set_value(value)
 
     def to_dict(self) -> dict:

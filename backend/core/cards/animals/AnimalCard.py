@@ -7,12 +7,15 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ...Player import Player
     from ...Game import Game
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
 
 class AnimalCard(Card):
     """Carte animal de base."""
 
-    def __init__(self, id: int, image_path: str, smiles: int):
-        super().__init__(id, image_path=image_path, smiles=smiles)
+    def __init__(self, id: int, image_path: str, smiles: int, extention: "Extention"):
+        super().__init__(id, image_path=image_path, smiles=smiles, extention=extention)
 
     def get_smiles(self, owner: "Player") -> int:
         powers = owner.get_power()

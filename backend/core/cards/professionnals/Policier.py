@@ -6,9 +6,13 @@ if TYPE_CHECKING:
     from ....userIo.interface import UserIO
     from ...Game import Game
     from ...Player import Player
+    from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
+
 class Policier(JobCard):
-    def __init__(self, id: int, image_path: str):
-        super().__init__(id, image_path)
+    def __init__(self, id: int, image_path: str, extention: "Extention"):
+        super().__init__(id, image_path, extention)
         self.jobPower.append(Power.NO_BANDIT)
         self.jobPower.append(Power.NO_GOUROU)
         self.status = JobStatus.FONCTIONNAIRE

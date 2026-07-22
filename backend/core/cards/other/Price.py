@@ -5,10 +5,14 @@ from ...Power import Power
 from ..professionnals.JobCard import JobCard
 
 from .OtherCard import OtherCard
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
+
 
 class Price(OtherCard):
-    def __init__(self, id: int, image_path: str, smiles: int):
-        super().__init__(id, image_path, smiles)
+    def __init__(self, id: int, image_path: str, smiles: int, extention: "Extention"):
+        super().__init__(id, image_path, smiles, extention)
 
     def can_be_played(self, player: Player, game: Game) -> tuple[bool, str]:
         job = player.get_job()

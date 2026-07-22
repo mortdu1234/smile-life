@@ -11,11 +11,13 @@ if TYPE_CHECKING:
     from ...Game import Game
     from ..Card import Card
     from ...Player import Player
+    from backend.core.cards.CardAttributes import Extention
+    
 class Casino(SpecialCard):
     first_bet : "SalaryCard | None"
     first_player : "Player | None"
-    def __init__(self, id: int, image_path: str):
-        super().__init__(id, image_path, 0)
+    def __init__(self, id: int, image_path: str, extention: "Extention"):
+        super().__init__(id, image_path, 0, extention)
         self.first_bet = None
         self.first_player = None
     def get_name(self) -> str:

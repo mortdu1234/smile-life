@@ -1,10 +1,10 @@
 from typing import TYPE_CHECKING
-from ..Power import Power
+from backend.core.Power import Power
 
 if TYPE_CHECKING:
-    from ..Player import Player
-    from ..Game import Game
-    from ...userIo.interface import UserIO
+    from backend.core.Player import Player
+    from backend.core.Game import Game
+    from backend.core.cards.CardAttributes import Extention
 
 
 class Card:
@@ -12,6 +12,7 @@ class Card:
     image_path: str
     smiles: int
     is_protected: bool = False
+    extention: "Extention"
     def set_protected(self):
         self.is_protected = True
     def set_not_protected(self):
@@ -34,10 +35,11 @@ class Card:
             'description': self.get_card_rule(),
             "is_protected": self.is_protected
         }
-    def __init__(self, id: int, image_path: str, smiles: int):
+    def __init__(self, id: int, image_path: str, smiles: int, extention: "Extention"):
         self.id = id
         self.image_path = image_path
         self.smiles = smiles
+        self.extention = extention
 
     def get_id(self) -> int:
         return self.id

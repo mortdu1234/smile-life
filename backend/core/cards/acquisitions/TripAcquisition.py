@@ -3,11 +3,14 @@ from ...Player import Player
 from ...Power import Power
 
 from .Acquisition import Acquisition
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
 
 class Trip(Acquisition):
     place: str
-    def __init__(self, id: int, image_path: str, smiles: int, cost: int, place: str):
-        super().__init__(id, image_path, smiles, cost)
+    def __init__(self, id: int, image_path: str, smiles: int, cost: int, place: str, extention: "Extention"):
+        super().__init__(id, image_path, smiles, cost, extention)
         self.place = place
     def calcul_cost(self, player: Player, game: Game) -> int:
         if Power.TRAVEL_FREE in player.get_power():

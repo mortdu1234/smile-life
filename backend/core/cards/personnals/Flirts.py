@@ -7,6 +7,9 @@ if TYPE_CHECKING:
 from ...FlirtPlaces import FlirtPlaces
 from ...PlayerCardGroup import PlayedCardGroup
 from ...Power import Power
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
 
 from ..Card import Card
 
@@ -15,8 +18,8 @@ NOMBRE_MAX_FLIRT_PAR_JOUEUR = 5
 class Flirt(Card):
     place: FlirtPlaces
     count: bool = True
-    def __init__(self, id: int, image_path: str, smiles: int, place: FlirtPlaces):
-        super().__init__(id, image_path, smiles)
+    def __init__(self, id: int, image_path: str, smiles: int, place: FlirtPlaces, extention: "Extention"):
+        super().__init__(id, image_path, smiles, extention)
         self.place = place
     def get_name(self) -> str:
         return f"Flirt - {self.place}"

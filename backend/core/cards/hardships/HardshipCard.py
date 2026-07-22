@@ -1,23 +1,24 @@
-from backend.core.Game import Game
-from backend.core.Player import Player
-from backend.userIo.interface import UserIO
-
 from ..Card import Card
-from ....userIo.interface import IOType
+
+from backend.core.PlayerCardGroup import PlayedCardGroup as groupe
+from backend.userIo.interface import IOType
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
-    from ....userIo.interface import UserIO
-    from ...Game import Game
-    from ...Player import Player
+    from backend.userIo.interface import UserIO
+    from backend.core.Game import Game
+    from backend.core.Player import Player
+    from backend.core.cards.Card import Card
+    from backend.core.cards.CardAttributes import Extention
 
 class Hardship(Card):
-    target_player: Player | None
-    def __init__(self, id: int, image_path: str):
-        super().__init__(id, image_path, 0)
+    target_player: "Player | None"
+    def __init__(self, id: int, image_path: str, extention: "Extention"):
+        super().__init__(id, image_path, 0, extention)
         self.target_player = None
-    def _selection_cibles(self, game: Game) -> list[Player]:
+    def _selection_cibles(self, game: "Game") -> "list[Player]":
         """retourne la liste des cibles potentielles"""
-        targetted_players: list[Player] = []
+        targetted_players: "list[Player]" = []
         for player in game.players:
             if player == game.get_current_player():
                 continue
@@ -25,15 +26,15 @@ class Hardship(Card):
                 targetted_players.append(player)
         return targetted_players
 
-    def can_be_played(self, player: Player, game: Game) -> tuple[bool, str]:
+    def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         if len(self._selection_cibles(game)) == 0:
             return False, "aucune cibles possible"
         return super().can_be_played(player, game)
 
     def select_target(self, game: "Game", interface: "UserIO") -> bool:
         """Selectionne la cible et la met dans self.target_player"""
-        targetted_players: list[Player] = self._selection_cibles(game)
-        target: Player | None = interface.ask_player("Selection d'une cible", targetted_players, IOType.PLAYER_PICKER)
+        targetted_players: "list[Player]" = self._selection_cibles(game)
+        target: "Player | None" = interface.ask_player("Selection d'une cible", targetted_players, IOType.PLAYER_PICKER)
         if not target:
             print("[ERROR] aucune cible n'a été choisie")
             return False
@@ -59,7 +60,7 @@ class Hardship(Card):
         else:
             print("[ERROR] : il y a une erreur lors du pouvoir")
 
-    def apply_card_effect(self, game: Game, current_player: Player) -> bool:
+    def apply_card_effect(self, game: "Game", current_player: "Player") -> bool:
         interface = current_player.get_interface()
         have_target = self.select_target(game, interface)
         if not have_target:

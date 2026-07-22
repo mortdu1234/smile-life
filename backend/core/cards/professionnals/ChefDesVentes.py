@@ -3,12 +3,16 @@ from ...Player import Player
 from ...Power import Power
 from .JobCard import JobCard
 from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
+
 if TYPE_CHECKING:
     from ....userIo.interface import UserIO
     from ..Card import Card
 class ChefDesVentes(JobCard):
-    def __init__(self, id: int, image_path: str):
-        super().__init__(id, image_path)
+    def __init__(self, id: int, image_path: str, extention: "Extention"):
+        super().__init__(id, image_path, extention)
         self.study = 3
         self.salary = 3
     def get_name(self) -> str:

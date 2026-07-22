@@ -4,10 +4,11 @@ from ...cards.Card import InstantPlayedCard
 if TYPE_CHECKING:
     from ...Game import Game
     from ...Player import Player
+    from backend.core.cards.CardAttributes import Extention
 
 class Ephemeride(InstantPlayedCard):
-    def __init__(self, id: int, image_path: str):
-        super().__init__(id, image_path, 0)
+    def __init__(self, id: int, image_path: str, extention: "Extention"):
+        super().__init__(id, image_path, 0, extention)
     
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         return super().can_be_played(player, game)

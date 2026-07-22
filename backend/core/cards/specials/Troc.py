@@ -1,15 +1,21 @@
 from .SpecialCard import SpecialCard
-from ....userIo.interface import IOType
+
+from backend.core.PlayerCardGroup import PlayedCardGroup as groupe
+from backend.userIo.interface import IOType
 from typing import TYPE_CHECKING
 import random
+
 if TYPE_CHECKING:
-    from ....userIo.interface import UserIO
-    from ...Game import Game
-    from ...Player import Player
+    from backend.userIo.interface import UserIO
+    from backend.core.Game import Game
+    from backend.core.Player import Player
+    from backend.core.cards.Card import Card
+    from backend.core.cards.CardAttributes import Extention
+    
 class Troc(SpecialCard):    
     target_player: "Player | None"
-    def __init__(self, id: int, image_path: str):
-        super().__init__(id, image_path, 0)
+    def __init__(self, id: int, image_path: str, extention: "Extention"):
+        super().__init__(id, image_path, 0, extention)
         self.target_player = None
 
     def _selection_cibles(self, game: "Game") -> "list[Player]":

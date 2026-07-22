@@ -5,10 +5,13 @@ from ....userIo.interface import IOType
 from .Acquisition import Acquisition
 from ..hardships.HardshipCard import Hardship
 from ...PlayerCardGroup import PlayedCardGroup as groupe
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
 
 class Sabre(Acquisition):
-    def __init__(self, id: int, image_path: str, original_price: int, cost: int):
-        super().__init__(id, image_path, original_price, cost)
+    def __init__(self, id: int, image_path: str, original_price: int, cost: int, extention: "Extention"):
+        super().__init__(id, image_path, original_price, cost, extention)
 
     def calcul_cost(self, player: Player, game: Game) -> int:
         return self.original_price

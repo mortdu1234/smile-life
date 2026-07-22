@@ -2,10 +2,13 @@ from ...Game import Game
 from ...Player import Player
 from ...Power import Power
 from .JobCard import JobCard
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
 
 class Gourou(JobCard):
-    def __init__(self, id: int, image_path: str):
-        super().__init__(id, image_path)
+    def __init__(self, id: int, image_path: str, extention: "Extention"):
+        super().__init__(id, image_path, extention)
         self.study = 0
         self.salary = 3
     def get_name(self) -> str:

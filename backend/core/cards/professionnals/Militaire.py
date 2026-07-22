@@ -1,9 +1,12 @@
 from ...Power import Power
 from .JobCard import JobCard
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
 
 class Militaire(JobCard):
-    def __init__(self, id: int, image_path: str):
-        super().__init__(id, image_path)
+    def __init__(self, id: int, image_path: str, extention: "Extention"):
+        super().__init__(id, image_path, extention)
         self.jobPower.append(Power.NO_ATTENTAT)
         self.study = 0
         self.salary = 1

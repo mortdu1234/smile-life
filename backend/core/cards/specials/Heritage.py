@@ -4,11 +4,12 @@ if TYPE_CHECKING:
     from ....userIo.interface import UserIO
     from ...Game import Game
     from ...Player import Player
+    from backend.core.cards.CardAttributes import Extention
 
 from backend.core.cards.CardAttributes import CanBeUseOnAcquisition
 class Heritage(SpecialCard, CanBeUseOnAcquisition):
-    def __init__(self, id: int, image_path: str, smiles: int, value: int):
-        super().__init__(id, image_path, smiles)
+    def __init__(self, id: int, image_path: str, smiles: int, value: int, extention: "Extention"):
+        super().__init__(id, image_path, smiles, extention)
         self.set_value(value)
     def to_dict(self) -> dict:
         data = super().to_dict()

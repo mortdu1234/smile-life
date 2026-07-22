@@ -7,6 +7,9 @@ if TYPE_CHECKING:
 from ..Card import Card
 from ...Power import Power
 from ...JobStatus import JobStatus
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
 
   
 class JobCard(Card):
@@ -16,8 +19,8 @@ class JobCard(Card):
     salary: int
     status: JobStatus
     old_salary: int | None
-    def __init__(self, id: int, image_path: str):
-        super().__init__(id, image_path, 2)
+    def __init__(self, id: int, image_path: str, extention: "Extention"):
+        super().__init__(id, image_path, 2, extention)
         self.jobPower = []
         self.status = JobStatus.RIEN
         self.study = 0

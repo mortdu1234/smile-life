@@ -11,6 +11,9 @@ if TYPE_CHECKING:
     from ...Player import Player
     from ....userIo.interface import UserIO
 from ..Card import Card
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
 
 
 # ------------------------------------------------------------------ #
@@ -19,8 +22,8 @@ from ..Card import Card
 
 class ChildCard(Card):
     """Carte enfant de base."""
-    def __init__(self, id: int, image_path: str):
-        super().__init__(id, image_path, 2)
+    def __init__(self, id: int, image_path: str, extention: "Extention"):
+        super().__init__(id, image_path, 2, extention)
 
     def can_be_played(self, player: 'Player', game: 'Game') -> tuple[bool, str]:
         from .Flirts import FlirtWithChild

@@ -5,9 +5,13 @@ from .JobCard import JobCard
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ....userIo.interface import UserIO
+    from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
+
 class Journaliste(JobCard):
-    def __init__(self, id: int, image_path: str):
-        super().__init__(id, image_path)
+    def __init__(self, id: int, image_path: str, extention: "Extention"):
+        super().__init__(id, image_path, extention)
         self.jobPower.append(Power.CAN_BE_PRICED)
         self.study = 3
         self.salary = 2

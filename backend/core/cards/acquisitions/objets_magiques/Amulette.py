@@ -10,11 +10,18 @@ from .....userIo.interface import IOType
 if TYPE_CHECKING:
     from backend.core.Game import Game
     from backend.core.Player import Player
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
 
 class Amulette(ObjetMagique, CanBeUseOnAcquisition):
-    def __init__(self, id: int, image_path: str, smiles: int, cost: int):
-        super().__init__(id, image_path, smiles, cost)
+    def __init__(self, id: int, image_path: str, smiles: int, cost: int, extention: "Extention"):
+        super().__init__(id, image_path, smiles, cost, extention)
         self.set_value(999)
+
+    def makes_acquisition_free(self) -> bool:
+        """L'Amulette rend l'acquisition gratuite lorsqu'elle est utilisée pour payer."""
+        return True
     def to_dict(self) -> dict:
         data = super().to_dict()
         for key, value in CanBeUseOnAcquisition.to_dict(self).items():
@@ -70,5 +77,3 @@ class Amulette(ObjetMagique, CanBeUseOnAcquisition):
     
     def get_card_rule(self) -> str:
         return """permet de poser une acquisition sans avoir a payer. Si un joueur possède 2 amulettes non utilisées alors elles se transforment en talissement qui permet d'annuler un maléfice ou de rejouer son pouvoir d'éphéméride""" + "\n"+ "="*10+ "\n" + super().get_card_rule()
-
-    

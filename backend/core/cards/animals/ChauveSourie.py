@@ -5,10 +5,13 @@ from .AnimalCard import AnimalCard
 from ...PlayerCardGroup import PlayedCardGroup as groupe
 from ...Power import Power
 from ....userIo.interface import IOType
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
 
 class ChauveSourie(AnimalCard):
-    def __init__(self, id: int, image_path: str):
-        super().__init__(id, image_path=image_path, smiles=1)
+    def __init__(self, id: int, image_path: str, extention: "Extention"):
+        super().__init__(id, image_path=image_path, smiles=1, extention=extention)
 
     def get_name(self) -> str:
         return "Chauve Sourie"

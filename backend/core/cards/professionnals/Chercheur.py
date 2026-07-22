@@ -7,10 +7,13 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ....userIo.interface import UserIO
 import random
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
 
 class Chercheur(JobCard):
-    def __init__(self, id: int, image_path: str):
-        super().__init__(id, image_path)
+    def __init__(self, id: int, image_path: str, extention: "Extention"):
+        super().__init__(id, image_path, extention)
         self.jobPower.append(Power.CAN_BE_PRICED)
         self.jobPower.append(Power.ADD_1_HAND_CARD)
         self.study = 6

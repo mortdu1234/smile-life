@@ -7,11 +7,14 @@ if TYPE_CHECKING:
     from ....userIo.interface import UserIO
     from ..CardAttributes import CanBeUseOnAcquisition
 from ..Card import Card
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
 
 class Acquisition(Card):
     original_price: int
-    def __init__(self, id: int, image_path: str, smiles: int, cost: int):
-        super().__init__(id, image_path, smiles)
+    def __init__(self, id: int, image_path: str, smiles: int, cost: int, extention: "Extention"):
+        super().__init__(id, image_path, smiles, extention)
         self.original_price = cost
 
     def calcul_cost(self, player: "Player", game: "Game") -> int:
@@ -30,6 +33,10 @@ class Acquisition(Card):
     def can_be_played(self, player: "Player", game: "Game") -> tuple[bool, str]:
         salaries = player.get_available_salaries()
         cost = self.calcul_cost(player, game)
+        if any(salary.makes_acquisition_free() for salary in salaries):
+            # le joueur dispose d'une carte (ex: Amulette) qui rend l'acquisition
+            # gratuite : ni le total des salaires, ni le paiement exact ne sont exigés
+            return super().can_be_played(player, game)
         total = sum(salary.get_value() for salary in salaries)
         if total < cost:
             return False, "pas assez de salaire"
@@ -47,6 +54,9 @@ class Acquisition(Card):
 
         while True:
             selected_salaries: list[CanBeUseOnAcquisition] = interface.ask_salaries(self, available_salaries, cost)
+            if any(card.makes_acquisition_free() for card in selected_salaries):
+                print("Une carte sélectionnée (ex: Amulette) rend l'acquisition gratuite")
+                break
             if not must_pay_exact:
                 print("Le joueur n'as pas la necessité de payer le prix exacte")
                 break

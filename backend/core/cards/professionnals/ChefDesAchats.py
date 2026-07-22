@@ -6,9 +6,13 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ....userIo.interface import UserIO
     from ..Card import Card
+    from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from backend.core.cards.CardAttributes import Extention
+
 class ChefDesAchats(JobCard):
-    def __init__(self, id: int, image_path: str):
-        super().__init__(id, image_path)
+    def __init__(self, id: int, image_path: str, extention: "Extention"):
+        super().__init__(id, image_path, extention)
         self.study = 3
         self.salary = 3
     def apply_card_effect(self, game: Game, current_player: Player) -> bool:
